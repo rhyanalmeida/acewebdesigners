@@ -6,7 +6,7 @@ import Work from './Work';
 import Services from './Services';
 import Landing from './Landing';
 import Refer from './Refer';
-import GoogleReviews from './GoogleReviews';
+import GoogleReviewsNew from './GoogleReviewsNew';
 
 import Reviews from './Reviews';
 
@@ -576,6 +576,8 @@ function App() {
 
 
 
+
+
         {/* Google Reviews Widget Section */}
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4">
@@ -590,7 +592,7 @@ function App() {
               </p>
             </div>
             <div className="flex justify-center">
-              <GoogleReviews className="w-full max-w-4xl" />
+              <GoogleReviewsNew className="w-full max-w-4xl" />
             </div>
           </div>
         </section>

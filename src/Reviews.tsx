@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Star, Quote, Users, TrendingUp, Award, CheckCircle2, ArrowRight } from 'lucide-react';
-import GoogleReviews from './GoogleReviews';
+import GoogleReviewsNew from './GoogleReviewsNew';
+
 
 
 function Reviews() {
@@ -149,24 +150,7 @@ function Reviews() {
 
 
 
-      {/* Google Reviews Widget */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full mb-4">
-              <Star className="w-4 h-4 text-green-600" />
-              <span className="text-green-800 font-medium">Google Reviews</span>
-            </div>
-            <h2 className="text-4xl font-bold mb-4">Live Google Reviews</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              See real-time reviews from our satisfied clients on Google. These are authentic reviews from real customers.
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <GoogleReviews className="w-full max-w-5xl" />
-          </div>
-        </div>
-      </section>
+
 
       {/* Why Clients Choose Us */}
       <section className="py-20 bg-white">
@@ -197,6 +181,25 @@ function Reviews() {
               <h3 className="text-xl font-bold mb-2">Quality Guarantee</h3>
               <p className="text-gray-600">We're so confident in our work that we offer a money-back guarantee if you're not 100% satisfied.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Google Reviews Widget */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full mb-4">
+              <Star className="w-4 h-4 text-green-600" />
+              <span className="text-green-800 font-medium">Google Reviews</span>
+            </div>
+            <h2 className="text-4xl font-bold mb-4">Live Google Reviews</h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              See real-time reviews from our satisfied clients on Google. These are authentic reviews from real customers.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <GoogleReviewsNew className="w-full max-w-5xl" />
           </div>
         </div>
       </section>
