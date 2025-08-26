@@ -102,7 +102,7 @@ function Landing() {
   const benefits = [
     "A free homepage mockup/design before paying a penny",
     "Professional hosting packages available",
-    "Websites delivered within 1-3 weeks guaranteed",
+    "Websites delivered within 1-3 weeks",
     "Basic SEO implemented in every website",
     "Ongoing SEO and local rankings available",
     "Ongoing support and website updates available"

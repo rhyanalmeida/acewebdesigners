@@ -271,11 +271,6 @@ function App() {
 
   const guarantees = [
     {
-      title: "30-Day Money-Back Guarantee",
-      description: "Not happy with your website? We'll refund your money within 30 days of launch.",
-      icon: <Shield className="w-8 h-8 text-green-600" />
-    },
-    {
       title: "Free Revisions",
       description: "We'll make unlimited revisions during the design phase until you're 100% satisfied.",
       icon: <Star className="w-8 h-8 text-green-600" />

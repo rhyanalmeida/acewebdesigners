@@ -159,10 +159,7 @@ function Refer() {
                   <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                   <p className="text-gray-700">Professional website starting at $200</p>
                 </div>
-                <div className="flex items-start gap-3 bg-white p-4 rounded-lg shadow-sm">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <p className="text-gray-700">30-day money-back guarantee</p>
-                </div>
+
               </div>
             </div>
           </div>
