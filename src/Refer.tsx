@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm, ValidationError } from '@formspree/react';
 import { Gift, Users, DollarSign, CheckCircle2, Star, ArrowRight } from 'lucide-react';
-import GoogleReviews from './GoogleReviews';
+
 
 function Refer() {
   const [state, handleSubmit] = useForm("xvgbobpv");
@@ -19,26 +19,7 @@ function Refer() {
     }
   }, []);
 
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      business: "Local Restaurant Owner",
-      content: "I referred my neighbor's construction business and earned $200. It was so easy!",
-      rating: 5
-    },
-    {
-      name: "Mike Chen",
-      business: "Retail Store Owner",
-      content: "Helped a friend get a professional website and got rewarded. Win-win!",
-      rating: 5
-    },
-    {
-      name: "Lisa Rodriguez",
-      business: "Salon Owner",
-      content: "Referred 3 clients already. The referral program is fantastic!",
-      rating: 5
-    }
-  ];
+
 
   const benefits = [
     "$200 cash reward when your referral completes their website",
@@ -167,31 +148,7 @@ function Refer() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">What Our Referrers Say</h2>
-            <p className="text-gray-600 text-lg">Real experiences from people who've earned through our referral program</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-2">
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
-                <div className="border-t pt-4">
-                  <div className="font-semibold">{testimonial.name}</div>
-                  <div className="text-sm text-gray-600">{testimonial.business}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* Google Reviews Widget */}
       <section className="py-16 bg-gray-50">
@@ -207,7 +164,7 @@ function Refer() {
             </p>
           </div>
           <div className="flex justify-center">
-            <GoogleReviews className="w-full max-w-4xl" />
+            <div locationId="10311921268967440718" className="review-widget-carousel"></div>
           </div>
         </div>
       </section>

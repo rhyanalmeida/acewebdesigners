@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Star, Quote, Users, TrendingUp, Award, CheckCircle2, ArrowRight } from 'lucide-react';
-import GoogleReviews from './GoogleReviews';
+
 
 function Reviews() {
   useEffect(() => {
@@ -16,62 +16,7 @@ function Reviews() {
     }
   }, []);
 
-  const featuredTestimonials = [
-    {
-      name: "Mike Chen",
-      business: "Hot Pot One",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Ace Web Designers created an amazing website for our restaurant. The ordering system works flawlessly and we've seen a 40% increase in online orders since launch. The team was professional, responsive, and delivered exactly what we needed.",
-      rating: 5,
-      result: "40% increase in online orders",
-      category: "Restaurant"
-    },
-    {
-      name: "Maria Rodriguez",
-      business: "Conuco Takeout",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b647?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "The team understood exactly what we needed for our Dominican cuisine restaurant. Our website beautifully showcases our food and customers love ordering online. We've seen a 35% increase in takeout orders since going live.",
-      rating: 5,
-      result: "35% increase in takeout orders",
-      category: "Restaurant"
-    },
-    {
-      name: "John Dunn",
-      business: "Dunn Construction",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Within days, we had a professional website that perfectly represented our construction business. We're already getting 3x more leads than before! The project gallery showcases our work beautifully and the contact forms work perfectly.",
-      rating: 5,
-      result: "3x more qualified leads",
-      category: "Construction"
-    },
-    {
-      name: "Sarah Thompson",
-      business: "Thompson Fitness",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Professional, fast, and exactly what we needed. Our new website has helped us book 50% more personal training sessions. The booking system is intuitive and the design perfectly represents our brand.",
-      rating: 5,
-      result: "50% more bookings",
-      category: "Fitness"
-    },
-    {
-      name: "David Kim",
-      business: "Kim Dental Care",
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec0?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Our dental practice website looks professional and trustworthy. Patients can easily book appointments online and we've seen a significant increase in new patient inquiries. Highly recommend!",
-      rating: 5,
-      result: "60% more appointment bookings",
-      category: "Healthcare"
-    },
-    {
-      name: "Lisa Martinez",
-      business: "Martinez Salon",
-      image: "https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Beautiful website that captures the essence of our salon. Clients love being able to book appointments online and see our services. We've increased our client base by 45% since launch.",
-      rating: 5,
-      result: "45% increase in client base",
-      category: "Beauty"
-    }
-  ];
+
 
   const reviewStats = [
     {
@@ -201,52 +146,7 @@ function Reviews() {
         </div>
       </section>
 
-      {/* Featured Testimonials */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Featured Client Stories</h2>
-            <p className="text-gray-600 text-lg">Real businesses, real results, real testimonials</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredTestimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-2 group">
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <div className="mb-4">
-                  <Quote className="w-8 h-8 text-blue-200 mb-2" />
-                  <p className="text-gray-600 italic">"{testimonial.content}"</p>
-                </div>
-                <div className="border-t pt-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <img 
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      className="w-12 h-12 rounded-full object-cover group-hover:scale-110 transition-transform"
-                    />
-                    <div>
-                      <div className="font-semibold">{testimonial.name}</div>
-                      <div className="text-sm text-gray-600">{testimonial.business}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 bg-blue-100 px-2 py-1 rounded-full text-xs text-blue-700">
-                      {testimonial.category}
-                    </span>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-green-700">Result:</div>
-                      <div className="text-xs text-gray-600">{testimonial.result}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       {/* Google Reviews Widget */}
       <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -262,7 +162,7 @@ function Reviews() {
             </p>
           </div>
           <div className="flex justify-center">
-            <GoogleReviews className="w-full max-w-5xl" />
+            <div locationId="10311921268967440718" className="review-widget-carousel"></div>
           </div>
         </div>
       </section>

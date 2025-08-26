@@ -6,7 +6,7 @@ import Work from './Work';
 import Services from './Services';
 import Landing from './Landing';
 import Refer from './Refer';
-import GoogleReviews from './GoogleReviews';
+
 import Reviews from './Reviews';
 
 function App() {
@@ -81,40 +81,7 @@ function App() {
     }
   };
 
-  const testimonials = [
-    {
-      name: "Mike Chen",
-      business: "Hot Pot One",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Ace Web Designers created an amazing website for our restaurant. The ordering system works flawlessly and we've seen a 40% increase in online orders since launch.",
-      rating: 5,
-      result: "40% increase in online orders"
-    },
-    {
-      name: "Maria Rodriguez",
-      business: "Conuco Takeout",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b647?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "The team understood exactly what we needed for our Dominican cuisine restaurant. Our website beautifully showcases our food and customers love ordering online.",
-      rating: 5,
-      result: "35% increase in takeout orders"
-    },
-    {
-      name: "John Dunn",
-      business: "Dunn Construction",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Within days, we had a professional website that perfectly represented our construction business. We're already getting 3x more leads than before!",
-      rating: 5,
-      result: "3x more qualified leads"
-    },
-    {
-      name: "Sarah Thompson",
-      business: "Thompson Fitness",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Professional, fast, and exactly what we needed. Our new website has helped us book 50% more personal training sessions. Highly recommend!",
-      rating: 5,
-      result: "50% more bookings"
-    }
-  ];
+
 
   const processSteps = [
     {
@@ -606,49 +573,7 @@ function App() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full mb-4">
-                <Star className="w-4 h-4 text-blue-600" />
-                <span className="text-blue-800 font-medium">Client Success</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">What Our Clients Say</h2>
-              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                Real results from real businesses who trusted us with their web presence
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <div key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 group">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
-                  <div className="border-t pt-4">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        className="w-12 h-12 rounded-full object-cover group-hover:scale-110 transition-transform"
-                      />
-                      <div>
-                        <div className="font-semibold">{testimonial.name}</div>
-                        <div className="text-sm text-gray-600">{testimonial.business}</div>
-                      </div>
-                    </div>
-                    <div className="mt-3 bg-green-50 px-3 py-2 rounded-lg">
-                      <div className="text-sm font-medium text-green-700">Result: {testimonial.result}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+
 
         {/* Google Reviews Widget Section */}
         <section className="py-20 bg-white">
@@ -664,7 +589,7 @@ function App() {
               </p>
             </div>
             <div className="flex justify-center">
-              <GoogleReviews className="w-full max-w-4xl" />
+              <div locationId="10311921268967440718" className="review-widget-carousel"></div>
             </div>
           </div>
         </section>
