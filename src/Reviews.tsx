@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Star, Quote, Users, TrendingUp, Award, CheckCircle2, ArrowRight } from 'lucide-react';
+import GoogleReviews from './GoogleReviews';
 
 
 function Reviews() {
@@ -162,7 +163,7 @@ function Reviews() {
             </p>
           </div>
           <div className="flex justify-center">
-            <div locationId="10311921268967440718" className="review-widget-carousel"></div>
+            <GoogleReviews className="w-full max-w-5xl" />
           </div>
         </div>
       </section>

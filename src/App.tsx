@@ -6,6 +6,7 @@ import Work from './Work';
 import Services from './Services';
 import Landing from './Landing';
 import Refer from './Refer';
+import GoogleReviews from './GoogleReviews';
 
 import Reviews from './Reviews';
 
@@ -589,7 +590,7 @@ function App() {
               </p>
             </div>
             <div className="flex justify-center">
-              <div locationId="10311921268967440718" className="review-widget-carousel"></div>
+              <GoogleReviews className="w-full max-w-4xl" />
             </div>
           </div>
         </section>
