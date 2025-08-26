@@ -146,8 +146,8 @@ function AboutUs() {
                   <div className="bg-blue-50 p-3 rounded-xl">
                     <Phone className="w-6 h-6 text-blue-600" />
                   </div>
-                  <a href="tel:+17743293117" className="hover:text-blue-600 transition-colors text-lg">
-                    (774) 329-3117
+                  <a href="tel:+17743151951" className="hover:text-blue-600 transition-colors text-lg">
+                    (774) 315-1951
                   </a>
                 </div>
                 <div className="flex items-center gap-4 text-gray-700">

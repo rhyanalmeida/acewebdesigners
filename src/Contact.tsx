@@ -116,8 +116,8 @@ function Contact({ initialData }: ContactProps) {
                     </div>
                     <div>
                       <p className="text-white/60 text-sm">Phone</p>
-                      <a href="tel:+17743293117" className="text-white hover:text-blue-200 transition-colors">
-                        (774) 329-3117
+                      <a href="tel:+17743151951" className="text-white hover:text-blue-200 transition-colors">
+                        (774) 315-1951
                       </a>
                     </div>
                   </div>
