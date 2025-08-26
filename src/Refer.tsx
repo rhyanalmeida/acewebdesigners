@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useForm, ValidationError } from '@formspree/react';
 import { Gift, Users, DollarSign, CheckCircle2, Star, ArrowRight } from 'lucide-react';
-import GoogleReviewsNew from './GoogleReviewsNew';
 
 
 
@@ -164,7 +163,7 @@ function Refer() {
             </p>
           </div>
           <div className="flex justify-center">
-            <GoogleReviewsNew className="w-full max-w-4xl" />
+            <div locationId="10311921268967440718" className="review-widget-carousel"></div>
           </div>
         </div>
       </section>
