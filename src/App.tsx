@@ -6,6 +6,8 @@ import Work from './Work';
 import Services from './Services';
 import Landing from './Landing';
 import Refer from './Refer';
+import GoogleReviews from './GoogleReviews';
+import Reviews from './Reviews';
 
 function App() {
   const [currentPage, setCurrentPage] = React.useState('home');
@@ -311,6 +313,9 @@ function App() {
     }
     if (currentPage === 'refer') {
       return <Refer />;
+    }
+    if (currentPage === 'reviews') {
+      return <Reviews />;
     }
 
     return (
@@ -645,6 +650,25 @@ function App() {
           </div>
         </section>
 
+        {/* Google Reviews Widget Section */}
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full mb-4">
+                <Star className="w-4 h-4 text-green-600" />
+                <span className="text-green-800 font-medium">Google Reviews</span>
+              </div>
+              <h2 className="text-4xl font-bold mb-4">What Our Clients Say on Google</h2>
+              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                See real reviews from our satisfied clients on Google
+              </p>
+            </div>
+            <div className="flex justify-center">
+              <GoogleReviews className="w-full max-w-4xl" />
+            </div>
+          </div>
+        </section>
+
         {/* Why Choose Us Section */}
         <section className="py-20 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800"></div>
@@ -940,6 +964,12 @@ function App() {
                       Our Work
                     </button>
                     <button
+                      onClick={() => handleNavigation('reviews')}
+                      className="text-gray-700 hover:text-black"
+                    >
+                      Reviews
+                    </button>
+                    <button
                       onClick={() => handleNavigation('contact')}
                       className="text-gray-700 hover:text-black"
                     >
@@ -1028,6 +1058,12 @@ function App() {
                       className="text-xl py-2 text-gray-700 hover:text-black text-left"
                     >
                       Our Work
+                    </button>
+                    <button
+                      onClick={() => handleNavigation('reviews')}
+                      className="text-xl py-2 text-gray-700 hover:text-black text-left"
+                    >
+                      Reviews
                     </button>
                     <button
                       onClick={() => handleNavigation('contact')}

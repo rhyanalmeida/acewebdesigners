@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm, ValidationError } from '@formspree/react';
 import { Gift, Users, DollarSign, CheckCircle2, Star, ArrowRight } from 'lucide-react';
+import GoogleReviews from './GoogleReviews';
 
 function Refer() {
   const [state, handleSubmit] = useForm("xvgbobpv");
@@ -188,6 +189,25 @@ function Refer() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Google Reviews Widget */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full mb-4">
+              <Star className="w-4 h-4 text-green-600" />
+              <span className="text-green-800 font-medium">Google Reviews</span>
+            </div>
+            <h2 className="text-4xl font-bold mb-4">See Our Google Reviews</h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Check out what our clients are saying about us on Google
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <GoogleReviews className="w-full max-w-4xl" />
           </div>
         </div>
       </section>
