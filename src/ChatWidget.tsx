@@ -6,29 +6,31 @@ interface ChatWidgetProps {
 
 const ChatWidget: React.FC<ChatWidgetProps> = ({ isVisible }) => {
   useEffect(() => {
-    if (!isVisible) return;
-
-    // Create and append the chat widget script
-    const script = document.createElement('script');
-    script.src = 'https://widgets.leadconnectorhq.com/loader.js';
-    script.setAttribute('data-resources-url', 'https://widgets.leadconnectorhq.com/chat-widget/loader.js');
-    script.setAttribute('data-widget-id', '68b05184b832cc81a974be46');
+    const chatWidgetScript = document.getElementById('chat-widget-script');
     
-    // Append to head
-    document.head.appendChild(script);
-
-    // Cleanup function to remove the script when component unmounts or becomes invisible
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
+    if (chatWidgetScript) {
+      if (isVisible) {
+        // Show the chat widget script
+        chatWidgetScript.style.display = 'block';
+        // Re-execute the script if it was previously hidden
+        if (chatWidgetScript.src) {
+          const newScript = document.createElement('script');
+          newScript.src = chatWidgetScript.src;
+          newScript.setAttribute('data-resources-url', 'https://widgets.leadconnectorhq.com/chat-widget/loader.js');
+          newScript.setAttribute('data-widget-id', '68b05184b832cc81a974be46');
+          document.head.appendChild(newScript);
+        }
+      } else {
+        // Hide the chat widget script
+        chatWidgetScript.style.display = 'none';
+        // Remove any chat widget elements that might have been created
+        const chatWidgets = document.querySelectorAll('[data-widget-id="68b05184b832cc81a974be46"]');
+        chatWidgets.forEach(widget => widget.remove());
       }
-      // Also remove any chat widget elements that might have been created
-      const chatWidgets = document.querySelectorAll('[data-widget-id="68b05184b832cc81a974be46"]');
-      chatWidgets.forEach(widget => widget.remove());
-    };
+    }
   }, [isVisible]);
 
-  // This component doesn't render anything visible - it just manages the script
+  // This component doesn't render anything visible - it just manages the script visibility
   return null;
 };
 
