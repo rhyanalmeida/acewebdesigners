@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://fast.wistia.com https://link.msgsndr.com https://player.vimeo.com https://connect.facebook.net https://assets.calendly.com https://embeddable-app-widgets.s3.us-east-1.amazonaws.com https://widgets.leadconnectorhq.com; style-src 'self' 'unsafe-inline' https://embeddable-app-widgets.s3.us-east-1.amazonaws.com; img-src 'self' https://i.ibb.co https://i.postimg.cc https://images.unsplash.com https://fast.wistia.com https://www.facebook.com data:; media-src 'self' https://fast.wistia.com blob: https://player.vimeo.com; connect-src 'self' ws://localhost:* wss://localhost:* https://fast.wistia.com https://*.wistia.com https://*.vimeo.com https://vimeo.com https://formspree.io https://www.facebook.com https://*.calendly.com https://embeddable-app-widgets.s3.us-east-1.amazonaws.com https://widgets.leadconnectorhq.com; font-src 'self'; frame-src 'self' https://fast.wistia.com https://player.vimeo.com https://www.facebook.com https://calendly.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: https://fast.wistia.com https://link.msgsndr.com https://player.vimeo.com https://connect.facebook.net https://assets.calendly.com https://embeddable-app-widgets.s3.us-east-1.amazonaws.com https://widgets.leadconnectorhq.com; style-src 'self' 'unsafe-inline' https://embeddable-app-widgets.s3.us-east-1.amazonaws.com; img-src 'self' https://i.ibb.co https://i.postimg.cc https://images.unsplash.com https://fast.wistia.com https://www.facebook.com https://widgets.leadconnectorhq.com https://services.leadconnectorhq.com https://app.leadconnectorhq.com data:; media-src 'self' https://fast.wistia.com blob: https://player.vimeo.com; connect-src 'self' ws://localhost:* wss://localhost:* https://fast.wistia.com https://*.wistia.com https://*.vimeo.com https://vimeo.com https://formspree.io https://www.facebook.com https://*.calendly.com https://embeddable-app-widgets.s3.us-east-1.amazonaws.com https://widgets.leadconnectorhq.com https://services.leadconnectorhq.com; font-src 'self'; frame-src 'self' https://fast.wistia.com https://player.vimeo.com https://www.facebook.com https://calendly.com;">
     
     <!-- Primary Meta Tags -->
     <title>Expert Web Design & Development Services in Leominster | Custom Solutions</title>
@@ -133,6 +133,8 @@
     <!-- Google Reviews Widget Carousel -->
     <script type="module" crossorigin src="https://embeddable-app-widgets.s3.us-east-1.amazonaws.com/review-widget-carousel-v1.js"></script>
     <link rel="stylesheet" crossorigin href="https://embeddable-app-widgets.s3.us-east-1.amazonaws.com/review-widget-carousel-v1.css">
+    
+
   </head>
   <body>
     <!-- Meta Pixel Code noscript (moved from head) -->
@@ -141,7 +143,84 @@
       src="https://www.facebook.com/tr?id=1221868892650094&ev=PageView&noscript=1"/>
     </noscript>
     <div id="root"></div>
-    <div id="chat-widget-container"></div>
+
+    <!-- LeadConnector Chat Widget -->
+    <script
+      src="https://widgets.leadconnectorhq.com/loader.js"
+      data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
+      data-widget-id="68b05184b832cc81a974be46"
+      async>
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Debug script to check if LeadConnector is loading -->
+    <script>
+      console.log('Page loading...');
+
+      // Check for widget loading multiple times
+      function checkWidgetLoading() {
+        console.log('Checking for LeadConnector widget...');
+
+        // Check for LeadConnector global
+        if (window.LeadConnector) {
+          console.log('✓ LeadConnector global found!');
+          return true;
+        }
+
+        // Check for widget elements
+        const widgetElements = document.querySelectorAll('[data-leadconnector], [data-widget-id]');
+        if (widgetElements.length > 0) {
+          console.log('✓ Found widget elements:', widgetElements.length);
+
+          // Check for images within the widget
+          const images = document.querySelectorAll('img');
+          console.log('Total images on page:', images.length);
+
+          // Check for LeadConnector-related images
+          const leadImages = document.querySelectorAll('img[src*="leadconnector"]');
+          if (leadImages.length > 0) {
+            console.log('✓ Found LeadConnector images:', leadImages.length);
+            leadImages.forEach((img, index) => {
+              console.log(`Image ${index + 1} src:`, img.src);
+              console.log(`Image ${index + 1} loaded:`, img.complete && img.naturalHeight !== 0);
+            });
+          }
+
+          return true;
+        }
+
+        // Check for iframe or chat widget
+        const iframes = document.querySelectorAll('iframe');
+        const chatElements = document.querySelectorAll('[class*="chat"], [id*="chat"]');
+        if (iframes.length > 0 || chatElements.length > 0) {
+          console.log('✓ Found potential chat elements:', iframes.length + chatElements.length);
+          return true;
+        }
+
+        return false;
+      }
+
+      // Check immediately and then at intervals
+      setTimeout(checkWidgetLoading, 1000);
+      setTimeout(checkWidgetLoading, 3000);
+      setTimeout(checkWidgetLoading, 5000);
+
+      window.addEventListener('load', function() {
+        console.log('Page fully loaded');
+        setTimeout(checkWidgetLoading, 1000);
+
+        // Additional check for avatar images after load
+        setTimeout(function() {
+          const allImages = document.querySelectorAll('img');
+          console.log('Final image count:', allImages.length);
+          allImages.forEach((img, index) => {
+            if (img.src.includes('leadconnector') || img.src.includes('avatar')) {
+              console.log(`Avatar candidate ${index}:`, img.src, 'loaded:', img.complete && img.naturalHeight !== 0);
+            }
+          });
+        }, 3000);
+      });
+    </script>
   </body>
 </html>
