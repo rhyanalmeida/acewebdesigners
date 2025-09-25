@@ -8,6 +8,61 @@ import Landing from './Landing';
 import Refer from './Refer';
 import ChatWidget from './ChatWidget';
 
+// Optimized Lazy Image Component
+const LazyImage: React.FC<{
+  src: string;
+  alt: string;
+  className?: string;
+  width?: number;
+  height?: number;
+}> = ({ src, alt, className = '', width, height }) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isInView, setIsInView] = React.useState(false);
+  const [imageSrc, setImageSrc] = React.useState('');
+  const imgRef = React.useRef<HTMLImageElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    if (isInView) {
+      const img = new Image();
+      img.onload = () => {
+        setImageSrc(src);
+        setIsLoaded(true);
+      };
+      img.src = src;
+    }
+  }, [isInView, src]);
+
+  return (
+    <img
+      ref={imgRef}
+      src={isLoaded ? imageSrc : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PC9zdmc+'}
+      alt={alt}
+      className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+      width={width}
+      height={height}
+      loading="lazy"
+    />
+  );
+};
+
 function App() {
   const [currentPage, setCurrentPage] = React.useState('home');
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -626,10 +681,12 @@ function App() {
                   <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
                   <div className="border-t pt-4">
                     <div className="flex items-center gap-3">
-                      <img 
+                      <LazyImage
                         src={testimonial.image}
                         alt={testimonial.name}
                         className="w-12 h-12 rounded-full object-cover group-hover:scale-110 transition-transform"
+                        width={48}
+                        height={48}
                       />
                       <div>
                         <div className="font-semibold">{testimonial.name}</div>
@@ -657,10 +714,12 @@ function App() {
             <div className="grid md:grid-cols-2 gap-8">
               {/* Quick Turnaround */}
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-white/5 rounded-xl p-6 backdrop-blur-sm hover:bg-white/10 transition-all hover:-translate-y-1 duration-300">
-                <img 
+                <LazyImage
                   src="https://i.ibb.co/B55R3m9L/green-clock-quick-web-design.png"
                   alt="Quick Turnaround"
                   className="w-32 h-32 object-contain"
+                  width={128}
+                  height={128}
                 />
                 <div className="text-center sm:text-left">
                   <h3 className="text-2xl font-bold text-white mb-2">Quick Turnaround</h3>
@@ -670,10 +729,12 @@ function App() {
 
               {/* Amazingly Responsive */}
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-white/5 rounded-xl p-6 backdrop-blur-sm hover:bg-white/10 transition-all hover:-translate-y-1 duration-300">
-                <img 
+                <LazyImage
                   src="https://i.ibb.co/yBhM31z8/iphone-mobile-desktop-responsive-web-design-in-leominster-ma.png"
                   alt="Responsive Design"
                   className="w-32 h-32 object-contain"
+                  width={128}
+                  height={128}
                 />
                 <div className="text-center sm:text-left">
                   <h3 className="text-2xl font-bold text-white mb-2">Amazingly Responsive</h3>
@@ -683,10 +744,12 @@ function App() {
 
               {/* SEO Optimized */}
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-white/5 rounded-xl p-6 backdrop-blur-sm hover:bg-white/10 transition-all hover:-translate-y-1 duration-300">
-                <img 
+                <LazyImage
                   src="https://i.ibb.co/mpQkN0s/google-g-icon.png"
                   alt="SEO Optimization"
                   className="w-32 h-32 object-contain"
+                  width={128}
+                  height={128}
                 />
                 <div className="text-center sm:text-left">
                   <h3 className="text-2xl font-bold text-white mb-2">SEO Optimized</h3>
@@ -696,10 +759,12 @@ function App() {
 
               {/* Affordable */}
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-white/5 rounded-xl p-6 backdrop-blur-sm hover:bg-white/10 transition-all hover:-translate-y-1 duration-300">
-                <img 
+                <LazyImage
                   src="https://i.ibb.co/ZRFpJwVh/gold-coin-icon-referencing-affordable-web-design.png"
                   alt="Affordable"
                   className="w-32 h-32 object-contain"
+                  width={128}
+                  height={128}
                 />
                 <div className="text-center sm:text-left">
                   <h3 className="text-2xl font-bold text-white mb-2">Affordable</h3>
@@ -709,10 +774,12 @@ function App() {
 
               {/* E-Commerce Functions */}
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-white/5 rounded-xl p-6 backdrop-blur-sm hover:bg-white/10 transition-all hover:-translate-y-1 duration-300">
-                <img 
+                <LazyImage
                   src="https://i.ibb.co/rGPJ8CbN/green-e-commerce-shopping-cart-icon-in-leominster-ma.png"
                   alt="E-Commerce"
                   className="w-32 h-32 object-contain"
+                  width={128}
+                  height={128}
                 />
                 <div className="text-center sm:text-left">
                   <h3 className="text-2xl font-bold text-white mb-2">E-Commerce Functions</h3>
@@ -722,10 +789,12 @@ function App() {
 
               {/* Modern, Beautiful Sites */}
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start bg-white/5 rounded-xl p-6 backdrop-blur-sm hover:bg-white/10 transition-all hover:-translate-y-1 duration-300">
-                <img 
+                <LazyImage
                   src="https://i.ibb.co/Z6HDV3Sx/coffee-cup-with-hearts.png"
                   alt="Beautiful Design"
                   className="w-32 h-32 object-contain"
+                  width={128}
+                  height={128}
                 />
                 <div className="text-center sm:text-left">
                   <h3 className="text-2xl font-bold text-white mb-2">Modern, Beautiful Sites</h3>
@@ -839,10 +908,12 @@ function App() {
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 mb-8 hover:bg-white/15 transition-all duration-300 transform hover:-translate-y-1">
                 <div className="grid md:grid-cols-3 gap-6 text-left mb-8">
                   <div className="flex items-start gap-3">
-                    <img 
+                    <LazyImage
                       src="https://i.ibb.co/B55R3m9L/green-clock-quick-web-design.png"
                       alt="Quick Chat"
                       className="w-12 h-12"
+                      width={48}
+                      height={48}
                     />
                     <div>
                       <h3 className="text-white font-semibold">15-Min Chat</h3>
@@ -850,10 +921,12 @@ function App() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <img 
+                    <LazyImage
                       src="https://i.ibb.co/ZRFpJwVh/gold-coin-icon-referencing-affordable-web-design.png"
                       alt="Free Quote"
                       className="w-12 h-12"
+                      width={48}
+                      height={48}
                     />
                     <div>
                       <h3 className="text-white font-semibold">Free Design</h3>
