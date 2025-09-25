@@ -138,33 +138,33 @@ function App() {
   const testimonials = [
     {
       name: "Mike Chen",
-      business: "Hot Pot One",
+      business: "Hot Pot One (Small Restaurant)",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Ace Web Designers created an amazing website for our restaurant. The ordering system works flawlessly and we've seen a 40% increase in online orders since launch.",
+      content: "Ace Web Designers created an amazing website for our small restaurant. The ordering system works flawlessly and we've seen a 40% increase in online orders since launch.",
       rating: 5,
       result: "40% increase in online orders"
     },
     {
       name: "Maria Rodriguez",
-      business: "Conuco Takeout",
+      business: "Conuco Takeout (Small Family Restaurant)",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b647?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "The team understood exactly what we needed for our Dominican cuisine restaurant. Our website beautifully showcases our food and customers love ordering online.",
+      content: "The team understood exactly what we needed for our small Dominican cuisine restaurant. Our website beautifully showcases our food and customers love ordering online.",
       rating: 5,
       result: "35% increase in takeout orders"
     },
     {
       name: "John Dunn",
-      business: "Dunn Construction",
+      business: "Dunn Construction (Small Contractor)",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Within days, we had a professional website that perfectly represented our construction business. We're already getting 3x more leads than before!",
+      content: "Within days, we had a professional website that perfectly represented our small construction business. We're already getting 3x more leads than before!",
       rating: 5,
       result: "3x more qualified leads"
     },
     {
       name: "Sarah Thompson",
-      business: "Thompson Fitness",
+      business: "Thompson Fitness (Small Personal Training)",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80",
-      content: "Professional, fast, and exactly what we needed. Our new website has helped us book 50% more personal training sessions. Highly recommend!",
+      content: "Professional, fast, and exactly what we needed for our small fitness business. Our new website has helped us book 50% more personal training sessions. Highly recommend!",
       rating: 5,
       result: "50% more bookings"
     }
@@ -220,15 +220,15 @@ function App() {
     },
     {
       question: "Can you help with SEO and getting found on Google?",
-      answer: "Yes! We include basic SEO setup with every website and offer advanced SEO services to help you rank higher on Google. We'll optimize your site for your target keywords and location."
+      answer: "Yes! We include basic SEO setup with every small business website and offer advanced SEO services to help you rank higher on Google. We'll optimize your site for your target keywords and help small business owners get found nationwide."
     },
     {
       question: "What if I don't like the design?",
       answer: "That's why we create a free mockup first! You can see exactly what your website will look like before paying. If you don't love it, there's no obligation to proceed. We want you to be 100% happy."
     },
     {
-      question: "Do you work with businesses outside your local area?",
-      answer: "Yes! We work with businesses nationwide. Most of our communication is done remotely through video calls, email, and phone. Location doesn't limit our ability to create an amazing website for you."
+      question: "Do you work with small businesses outside your local area?",
+      answer: "Yes! We specialize in helping small businesses nationwide. Most of our communication is done remotely through video calls, email, and phone. Location doesn't limit our ability to create an amazing website for your small business."
     },
     {
       question: "Can you add e-commerce/online ordering to my website?",
@@ -240,12 +240,12 @@ function App() {
     {
       icon: <Users className="w-6 h-6 text-blue-600" />,
       stat: "100+",
-      label: "Websites Built"
+      label: "Small Business Websites"
     },
     {
       icon: <Star className="w-6 h-6 text-blue-600" />,
       stat: "5.0",
-      label: "Average Rating"
+      label: "Client Rating"
     },
     {
       icon: <Clock className="w-6 h-6 text-blue-600" />,
@@ -255,46 +255,46 @@ function App() {
     {
       icon: <Shield className="w-6 h-6 text-blue-600" />,
       stat: "100%",
-      label: "Satisfaction Rate"
+      label: "Small Business Focus"
     }
   ];
 
   const industries = [
     {
-      name: "Restaurants & Food",
+      name: "Small Restaurants & Food Service",
       icon: "🍽️",
-      description: "Online ordering, menu management, and table reservations",
-      projects: "15+ projects"
+      description: "Online ordering systems, menu displays, and reservation booking for small restaurants and food businesses",
+      projects: "15+ small business projects"
     },
     {
-      name: "Construction & Contractors",
+      name: "Small Construction Companies",
       icon: "🏗️",
-      description: "Project galleries, service listings, and lead generation",
-      projects: "20+ projects"
+      description: "Project portfolio galleries, service listings, and lead generation for independent contractors",
+      projects: "20+ small business projects"
     },
     {
-      name: "Healthcare & Wellness",
+      name: "Small Healthcare Practices",
       icon: "⚕️",
-      description: "Appointment booking, service information, and patient portals",
-      projects: "12+ projects"
+      description: "Appointment scheduling, service information, and patient portals for small medical practices",
+      projects: "12+ small business projects"
     },
     {
-      name: "Professional Services",
+      name: "Small Professional Services",
       icon: "💼",
-      description: "Service showcases, client portals, and consultation booking",
-      projects: "25+ projects"
+      description: "Service showcases, client testimonials, and consultation booking for small service providers",
+      projects: "25+ small business projects"
     },
     {
-      name: "Retail & E-commerce",
+      name: "Small Retail & E-commerce",
       icon: "🛍️",
-      description: "Online stores, inventory management, and payment processing",
-      projects: "18+ projects"
+      description: "Online stores, inventory management, and secure payment processing for small retailers",
+      projects: "18+ small business projects"
     },
     {
-      name: "Fitness & Sports",
+      name: "Small Fitness Studios",
       icon: "💪",
-      description: "Class scheduling, membership management, and training programs",
-      projects: "10+ projects"
+      description: "Class scheduling, membership management, and training program booking for small gyms and studios",
+      projects: "10+ small business projects"
     }
   ];
 
@@ -448,9 +448,9 @@ function App() {
                 <Globe className="w-4 h-4 text-blue-600" />
                 <span className="text-blue-800 font-medium">Industries We Serve</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">We Build Websites for Every Industry</h2>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">We Build Websites for Small Businesses in Every Industry</h2>
               <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-                From restaurants to construction companies, we understand the unique needs of different businesses
+                From local restaurants to construction companies, we specialize in helping small business owners across America establish their online presence and grow their customer base
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
@@ -1149,7 +1149,7 @@ function App() {
                     <span className="text-sm text-gray-400" style={{ marginTop: '-4px' }}>Web Designers</span>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    Professional web design and development services for businesses nationwide.
+                    Professional web design and development services for small businesses nationwide. Helping small business owners across America build their online presence.
                   </p>
                 </div>
 
@@ -1173,7 +1173,7 @@ function App() {
                       </a>
                     </li>
                     <li className="text-gray-400">
-                      Serving Businesses Nationwide
+                      Serving Small Businesses Nationwide
                     </li>
                   </ul>
                 </div>
