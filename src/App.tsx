@@ -1092,11 +1092,11 @@ function App() {
                       </a>
                     </li>
                     <li>
-                      <a 
-                        href="tel:+17743293117"
+                      <a
+                        href="tel:+17743151951"
                         className="text-gray-400 hover:text-white transition-colors"
                       >
-                        (774) 329-3117
+                        (774) 315-1951
                       </a>
                     </li>
                     <li className="text-gray-400">
@@ -1175,7 +1175,7 @@ function App() {
                 <h3>5. Contact Us</h3>
                 <p>For privacy-related questions, please contact us at:</p>
                 <p>Email: rhyan@acewebdesigners.com</p>
-                <p>Phone: (774) 329-3117</p>
+                <p>Phone: (774) 315-1951</p>
               </div>
               <button 
                 onClick={() => {
