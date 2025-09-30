@@ -20,14 +20,8 @@ export default defineConfig({
     // Enable compression
     reportCompressedSize: false,
     chunkSizeWarningLimit: 1000,
-    // Minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
+    // Minification (use esbuild to avoid optional terser dependency in CI)
+    minify: 'esbuild',
   },
   // Enable gzip compression in preview
   preview: {
