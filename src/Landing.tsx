@@ -327,7 +327,7 @@ function Landing() {
           {/* Respectful meeting reminder */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-              💙 <strong>Please show up!</strong> We're real people who block time for you. Thanks!
+              <strong>Please show up!</strong> We're real people who block time for you. Thanks!
             </p>
           </div>
         </div>
