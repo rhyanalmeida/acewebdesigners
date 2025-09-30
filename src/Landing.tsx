@@ -122,7 +122,7 @@ function Landing() {
               <p className="text-xl md:text-2xl mb-8 text-gray-700">
                 We'll design your website for FREE. If you like it, you can buy it. If not, no harm done!
               </p>
-              <p className="text-xl font-semibold mb-4 text-red-600">Just 10 free designs available...</p>
+              <p className="text-xl font-semibold mb-4 text-red-600">Free design mockup — no payment until you love it</p>
               <button 
                 onClick={handleGetStarted}
                 className="group bg-gradient-to-r from-blue-500 to-blue-700 text-white text-xl font-bold py-4 px-8 rounded-full hover:shadow-lg transition-all transform hover:scale-105 flex items-center mx-auto md:mx-0 relative overflow-hidden animate-pulse-glow"
@@ -264,7 +264,7 @@ function Landing() {
                 Simply book in a quick phone call below, let us know what you want and we'll have your design ready within 48 hours.
               </p>
               <div className="text-center">
-                <p className="text-xl font-semibold mb-4 text-red-600">Just 10 free designs available...</p>
+                <p className="text-xl font-semibold mb-4 text-red-600">Free design mockup — no payment until you love it</p>
                 <button 
                   onClick={handleGetStarted}
                   className="bg-gradient-to-r from-blue-500 to-blue-700 text-white text-xl font-bold py-4 px-8 rounded-full hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center mx-auto relative overflow-hidden animate-pulse-glow"
@@ -297,7 +297,7 @@ function Landing() {
             ))}
           </div>
           <div className="text-center mt-12">
-            <p className="text-xl font-semibold mb-4 text-red-600">Just 10 free designs available...</p>
+            <p className="text-xl font-semibold mb-4 text-red-600">Free design mockup — no payment until you love it</p>
             <button 
               onClick={handleGetStarted}
               className="bg-gradient-to-r from-blue-500 to-blue-700 text-white text-xl font-bold py-4 px-8 rounded-full hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center mx-auto relative overflow-hidden animate-pulse-glow"
