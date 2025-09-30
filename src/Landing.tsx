@@ -323,6 +323,14 @@ function Landing() {
               style={{minWidth:"320px", height:"700px"}}
             />
           </div>
+          
+          {/* Respectful meeting reminder */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+              💙 <strong>A friendly reminder:</strong> We're real people who set aside time for each consultation. 
+              If you book a meeting, please show up or let us know if you need to reschedule. Thank you!
+            </p>
+          </div>
         </div>
       </section>
 
