@@ -16,20 +16,17 @@
     <link rel="dns-prefetch" href="//www.google.com">
     <link rel="dns-prefetch" href="//www.gstatic.com">
     <link rel="dns-prefetch" href="//connect.facebook.net">
-    <link rel="dns-prefetch" href="//widgets.leadconnectorhq.com">
-    <link rel="dns-prefetch" href="//stcdn.leadconnectorhq.com">
     <link rel="dns-prefetch" href="//reputationhub.site">
 
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://i.ibb.co" crossorigin>
-    <link rel="preconnect" href="https://widgets.leadconnectorhq.com" crossorigin>
 
     <!-- Preload Critical Resources -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://widgets.leadconnectorhq.com https://stcdn.leadconnectorhq.com https://services.leadconnectorhq.com https://www.google.com https://www.gstatic.com https://reputationhub.site; script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://widgets.leadconnectorhq.com https://stcdn.leadconnectorhq.com https://services.leadconnectorhq.com https://www.google.com https://www.gstatic.com https://reputationhub.site; style-src 'self' 'unsafe-inline' https://stcdn.leadconnectorhq.com https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://stcdn.leadconnectorhq.com https://fonts.googleapis.com; img-src 'self' data: blob: https://i.ibb.co https://i.postimg.cc https://images.unsplash.com https://fast.wistia.com https://www.facebook.com https://widgets.leadconnectorhq.com https://services.leadconnectorhq.com https://app.leadconnectorhq.com https://stcdn.leadconnectorhq.com; connect-src 'self' ws://localhost:* wss://localhost:* https://fast.wistia.com https://*.wistia.com https://*.vimeo.com https://vimeo.com https://formspree.io https://www.facebook.com https://*.calendly.com https://widgets.leadconnectorhq.com https://services.leadconnectorhq.com https://stcdn.leadconnectorhq.com https://www.google.com https://www.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; frame-src 'self' https://www.google.com https://www.recaptcha.net https://fast.wistia.com https://player.vimeo.com https://www.facebook.com https://calendly.com https://reputationhub.site;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://reputationhub.site https://assets.calendly.com; script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://reputationhub.site https://assets.calendly.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://assets.calendly.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://assets.calendly.com; img-src 'self' data: blob: https://i.ibb.co https://i.postimg.cc https://images.unsplash.com https://fast.wistia.com https://www.facebook.com; connect-src 'self' ws://localhost:* wss://localhost:* https://fast.wistia.com https://*.wistia.com https://*.vimeo.com https://vimeo.com https://formspree.io https://www.facebook.com https://*.calendly.com https://www.google.com https://www.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; frame-src 'self' https://www.google.com https://www.recaptcha.net https://fast.wistia.com https://player.vimeo.com https://www.facebook.com https://calendly.com https://reputationhub.site;">
     
     <!-- Primary Meta Tags - Enhanced SEO -->
     <title>Professional Web Design Company USA | Custom Website Development Nationwide | Ace Web Designers</title>
@@ -497,91 +494,10 @@
       <iframe class='lc_reviews_widget' src='https://reputationhub.site/reputation/widgets/review_widget/A2zlaOOL5JLn883XGWWl' frameborder='0' scrolling='no' style='min-width: 100%; width: 100%; height: 400px; border-radius: 8px;'></iframe>
     </div>
 
-    <!-- LeadConnector Chat Widget Container -->
-    <div 
-      data-chat-widget 
-      data-widget-id="68b05184b832cc81a974be46" 
-      data-location-id="A2zlaOOL5JLn883XGWWl">
-    </div>
-
-    <!-- LeadConnector Chat Widget -->
-    <script
-      src="https://widgets.leadconnectorhq.com/loader.js"
-      data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
-      data-widget-id="68b05184b832cc81a974be46"
-      data-location-id="A2zlaOOL5JLn883XGWWl"
-      async>
-    </script>
+    
 
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Debug script to check if LeadConnector is loading -->
-    <script>
-      console.log('Page loading...');
-
-      // Check for widget loading multiple times
-      function checkWidgetLoading() {
-        console.log('Checking for LeadConnector widget...');
-
-        // Check for LeadConnector global
-        if (window.LeadConnector) {
-          console.log('✓ LeadConnector global found!');
-          return true;
-        }
-
-        // Check for widget elements
-        const widgetElements = document.querySelectorAll('[data-leadconnector], [data-widget-id]');
-        if (widgetElements.length > 0) {
-          console.log('✓ Found widget elements:', widgetElements.length);
-
-          // Check for images within the widget
-          const images = document.querySelectorAll('img');
-          console.log('Total images on page:', images.length);
-
-          // Check for LeadConnector-related images
-          const leadImages = document.querySelectorAll('img[src*="leadconnector"]');
-          if (leadImages.length > 0) {
-            console.log('✓ Found LeadConnector images:', leadImages.length);
-            leadImages.forEach((img, index) => {
-              console.log(`Image ${index + 1} src:`, img.src);
-              console.log(`Image ${index + 1} loaded:`, img.complete && img.naturalHeight !== 0);
-            });
-          }
-
-          return true;
-        }
-
-        // Check for iframe or chat widget
-        const iframes = document.querySelectorAll('iframe');
-        const chatElements = document.querySelectorAll('[class*="chat"], [id*="chat"]');
-        if (iframes.length > 0 || chatElements.length > 0) {
-          console.log('✓ Found potential chat elements:', iframes.length + chatElements.length);
-          return true;
-        }
-
-        return false;
-      }
-
-      // Check immediately and then at intervals
-      setTimeout(checkWidgetLoading, 1000);
-      setTimeout(checkWidgetLoading, 3000);
-      setTimeout(checkWidgetLoading, 5000);
-
-      window.addEventListener('load', function() {
-        console.log('Page fully loaded');
-        setTimeout(checkWidgetLoading, 1000);
-
-        // Additional check for avatar images after load
-        setTimeout(function() {
-          const allImages = document.querySelectorAll('img');
-          console.log('Final image count:', allImages.length);
-          allImages.forEach((img, index) => {
-            if (img.src.includes('leadconnector') || img.src.includes('avatar')) {
-              console.log(`Avatar candidate ${index}:`, img.src, 'loaded:', img.complete && img.naturalHeight !== 0);
-            }
-          });
-        }, 3000);
-      });
-    </script>
+    
   </body>
 </html>

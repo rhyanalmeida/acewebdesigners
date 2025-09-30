@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { CALENDLY_URL } from './config';
 import { CheckCircle2, Star, ArrowRight, MousePointer2, Calendar, Clock } from 'lucide-react';
 
 function Landing() {
@@ -318,7 +319,7 @@ function Landing() {
             {/* Calendly inline widget */}
             <div 
               className="calendly-inline-widget" 
-              data-url="https://calendly.com/rhyan-acewebdesigners/30min" 
+              data-url={CALENDLY_URL} 
               style={{minWidth:"320px", height:"700px"}}
             />
           </div>

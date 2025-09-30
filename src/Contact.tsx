@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { CALENDLY_URL } from './config';
 import { Mail, Phone, Calendar, MapPin } from 'lucide-react';
 
 interface ContactProps {
@@ -84,7 +85,7 @@ function Contact({ initialData }: ContactProps) {
             {/* Calendly inline widget */}
             <div 
               className="calendly-inline-widget" 
-              data-url="https://calendly.com/rhyan-acewebdesigners/30min" 
+              data-url={CALENDLY_URL} 
               style={{minWidth:"320px", height:"700px"}}
             />
           </div>

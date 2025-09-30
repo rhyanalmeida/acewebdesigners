@@ -6,7 +6,7 @@ import Work from './Work';
 import Services from './Services';
 import Landing from './Landing';
 import Refer from './Refer';
-import ChatWidget from './ChatWidget';
+ 
 
 // Optimized Lazy Image Component
 const LazyImage: React.FC<{
@@ -1126,8 +1126,7 @@ function App() {
       {/* Main Content */}
       {renderContent()}
 
-      {/* Chat Widget - Show on all pages except landing */}
-      <ChatWidget isVisible={currentPage !== 'landing'} />
+      
 
       {currentPage !== 'landing' && currentPage !== 'refer' && (
         <>
