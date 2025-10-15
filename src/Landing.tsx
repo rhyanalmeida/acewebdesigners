@@ -135,7 +135,7 @@ function Landing() {
                   <Star key={index} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                 ))}
               </div>
-              <p className="text-gray-600 mt-2">Rated 5.0 / 5 on Trustpilot!</p>
+              <p className="text-gray-600 mt-2">Rated 5.0 / 5 on Google!</p>
             </div>
             <div className="video-container relative rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-500">
               <div style={{padding:'56.25% 0 0 0', position:'relative'}}>
@@ -277,9 +277,28 @@ function Landing() {
                     <Star key={index} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-600 mt-2">Rated 5.0 / 5 on Trustpilot!</p>
+                <p className="text-gray-600 mt-2">Rated 5.0 / 5 on Google!</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Google Reviews Widget */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full mb-4">
+              <Star className="w-4 h-4 text-green-600" />
+              <span className="text-green-800 font-medium">Google Reviews</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Clients Say on Google</h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+              Real, verified reviews pulled in live from our Google Business Profile.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <div locationId="10311921268967440718" className="review-widget-carousel"></div>
           </div>
         </div>
       </section>
