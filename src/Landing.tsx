@@ -64,6 +64,43 @@ function Landing() {
 
     console.log('💡 To test tracking, run: testFacebookPixel() in the console');
 
+    // Add a test button to the page for easy testing
+    setTimeout(() => {
+      if (window.fbq && !document.getElementById('pixel-test-button')) {
+        const testButton = document.createElement('div');
+        testButton.id = 'pixel-test-button';
+        testButton.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: #1877f2;
+          color: white;
+          padding: 10px 15px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 12px;
+          z-index: 9999;
+          display: none; /* Hidden by default - uncomment for testing */
+        `;
+        testButton.textContent = 'Test Pixel';
+        testButton.onclick = () => {
+          console.log('🧪 Manual pixel test triggered');
+          if (window.fbq) {
+            window.fbq('track', 'CompleteRegistration', {
+              content_name: 'Manual Test Booking',
+              content_category: 'Test Consultation',
+              value: 0,
+              currency: 'USD'
+            });
+            console.log('✅ Manual test event sent to Facebook Pixel');
+          } else {
+            console.error('❌ Facebook Pixel not loaded');
+          }
+        };
+        document.body.appendChild(testButton);
+      }
+    }, 2000);
+
     // Cleanup function - no cleanup needed since tracking is in HTML
   }, []);
 

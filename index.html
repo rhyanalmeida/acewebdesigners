@@ -392,6 +392,13 @@
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '1703925480259996');
       fbq('track', 'PageView');
+
+      // Test event for debugging - remove after testing
+      setTimeout(function() {
+        if (window.fbq) {
+          console.log('🧪 Facebook Pixel loaded successfully - ID: 1703925480259996');
+        }
+      }, 1000);
     </script>
     <!-- End Meta Pixel Code -->
 
