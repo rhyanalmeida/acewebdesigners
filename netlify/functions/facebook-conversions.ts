@@ -1,4 +1,5 @@
 import { Handler } from '@netlify/functions';
+import crypto from 'crypto';
 
 // Facebook Conversions API configuration
 const FACEBOOK_PIXEL_ID = '1703925480259996';
@@ -6,12 +7,31 @@ const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN || '';
 const FB_API_VERSION = 'v21.0';
 
 /**
- * Hash email for privacy (SHA-256)
+ * Hash email for privacy (SHA-256) - REQUIRED by Facebook
  */
 function hashEmail(email: string): string {
-  // Note: In production, use a proper crypto library for SHA-256 hashing
-  // This is a simplified version - in real production, use node's crypto module
-  return email.toLowerCase().trim();
+  // Normalize email: lowercase and trim whitespace
+  const normalized = email.toLowerCase().trim();
+  
+  // Hash using SHA-256
+  return crypto
+    .createHash('sha256')
+    .update(normalized)
+    .digest('hex');
+}
+
+/**
+ * Hash phone number for privacy (SHA-256) - REQUIRED by Facebook
+ */
+function hashPhone(phone: string): string {
+  // Remove all non-digit characters
+  const digitsOnly = phone.replace(/\D/g, '');
+  
+  // Hash using SHA-256
+  return crypto
+    .createHash('sha256')
+    .update(digitsOnly)
+    .digest('hex');
 }
 
 /**
@@ -24,19 +44,28 @@ async function sendCompleteRegistrationEvent(eventData: {
   eventTime: number;
   actionSource: string;
   eventSourceUrl?: string;
+  clientUserAgent?: string;
+  clientIpAddress?: string;
 }) {
   const userData: any = {};
 
-  // Add user data if provided
+  // Add user data if provided (Facebook REQUIRES hashing)
   if (eventData.email) {
     userData.em = [hashEmail(eventData.email)];
   }
   if (eventData.phone) {
-    userData.ph = [eventData.phone];
+    userData.ph = [hashPhone(eventData.phone)];
   }
 
-  // Get client IP and user agent from the request
-  const clientIpAddress = eventData.eventSourceUrl || '0.0.0.0';
+  // REQUIRED for website events: client_user_agent
+  if (eventData.clientUserAgent) {
+    userData.client_user_agent = eventData.clientUserAgent;
+  }
+
+  // REQUIRED for website events: client_ip_address  
+  if (eventData.clientIpAddress) {
+    userData.client_ip_address = eventData.clientIpAddress;
+  }
 
   const payload = {
     data: [
@@ -107,6 +136,14 @@ export const handler: Handler = async (event, context) => {
       };
     }
 
+    // Extract client information from headers (REQUIRED for Facebook Conversions API)
+    const clientIpAddress = event.headers['x-forwarded-for']?.split(',')[0] 
+      || event.headers['x-nf-client-connection-ip'] 
+      || event.clientContext?.ip 
+      || '0.0.0.0';
+    
+    const clientUserAgent = event.headers['user-agent'] || '';
+
     // Send event to Facebook Conversions API
     const result = await sendCompleteRegistrationEvent({
       email: body.email,
@@ -114,7 +151,9 @@ export const handler: Handler = async (event, context) => {
       eventName: body.eventName,
       eventTime: body.eventTime || Math.floor(Date.now() / 1000),
       actionSource: body.actionSource || 'website',
-      eventSourceUrl: body.eventSourceUrl || event.headers.referer
+      eventSourceUrl: body.eventSourceUrl || event.headers.referer || event.headers.referrer,
+      clientUserAgent: clientUserAgent,
+      clientIpAddress: clientIpAddress
     });
 
     if (result.success) {
