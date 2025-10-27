@@ -21,13 +21,30 @@ function Landing() {
     }
 
     // Facebook Pixel is loaded in index.html - check if it's available
-    console.log('Facebook Pixel loaded in HTML with ID: 1703925480259996');
+    console.log('📊 Landing page loaded - Facebook Pixel ID: 1703925480259996');
 
-    // Calendly tracking is handled in index.html - check if pixel is available
+    // Track landing page view specifically
     if (window.fbq) {
-      console.log('✅ Facebook Pixel is loaded and ready for tracking');
+      window.fbq('trackCustom', 'LandingPageView', {
+        page_path: '/landing',
+        page_source: 'ad_click',
+        content_name: 'Landing Page'
+      });
+      console.log('✅ Landing page custom event tracked');
     } else {
       console.log('⏳ Facebook Pixel is loading...');
+      
+      // Retry after pixel loads
+      setTimeout(() => {
+        if (window.fbq) {
+          window.fbq('trackCustom', 'LandingPageView', {
+            page_path: '/landing',
+            page_source: 'ad_click',
+            content_name: 'Landing Page'
+          });
+          console.log('✅ Landing page custom event tracked (retry)');
+        }
+      }, 2000);
     }
 
     // Expose test function for debugging
@@ -86,13 +103,27 @@ function Landing() {
         testButton.onclick = () => {
           console.log('🧪 Manual pixel test triggered');
           if (window.fbq) {
+            // Test CompleteRegistration
             window.fbq('track', 'CompleteRegistration', {
               content_name: 'Manual Test Booking',
               content_category: 'Test Consultation',
               value: 0,
               currency: 'USD'
             });
-            console.log('✅ Manual test event sent to Facebook Pixel');
+            
+            // Test Lead event
+            window.fbq('track', 'Lead', {
+              content_name: 'Manual Test Lead',
+              content_category: 'Test'
+            });
+            
+            // Test custom event
+            window.fbq('trackCustom', 'LandingPageTest', {
+              test_type: 'manual',
+              page_path: '/landing'
+            });
+            
+            console.log('✅ Manual test events sent to Facebook Pixel');
           } else {
             console.error('❌ Facebook Pixel not loaded');
           }
