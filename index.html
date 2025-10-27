@@ -390,13 +390,13 @@
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '1703925480259996');
+      fbq('init', '670701952528812');
       fbq('track', 'PageView');
 
-      // Test event for debugging - remove after testing
+      // Test event for debugging
       setTimeout(function() {
         if (window.fbq) {
-          console.log('🧪 Facebook Pixel loaded successfully - ID: 1703925480259996');
+          console.log('🧪 Facebook Pixel loaded successfully - ID: 670701952528812');
         }
       }, 1000);
     </script>
@@ -421,7 +421,10 @@
               content_category: 'Free Design Consultation'
             });
 
-            console.log('✅ Calendly booking completed! CompleteRegistration & Lead events sent to Facebook Pixel.');
+            // Track as Contact event
+            fbq('track', 'Contact');
+
+            console.log('✅ Calendly booking completed! CompleteRegistration, Lead & Contact events sent to Facebook Pixel.');
           }
         }
       });
@@ -504,7 +507,7 @@
   </head>
   <body>
     <!-- Meta Pixel Code noscript -->
-    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1703925480259996&ev=PageView&noscript=1" /></noscript>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=670701952528812&ev=PageView&noscript=1" /></noscript>
     <!-- End Meta Pixel Code noscript -->
     <div id="root"></div>
 
