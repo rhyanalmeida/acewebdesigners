@@ -32,6 +32,51 @@ function Contact({ initialData }: ContactProps) {
         budget: initialData?.budget || 'unknown'
       });
     }
+    
+    // Add Calendly booking completion tracking
+    const handleCalendlyEvent = (event: MessageEvent) => {
+      console.log('Received message from Calendly (Contact page):', event.data);
+      
+      // Check if this is a Calendly event
+      if (event.data.event) {
+        console.log('Calendly event detected:', event.data.event);
+        
+        if (event.data.event === "calendly.event_scheduled") {
+          console.log('Event scheduled - tracking CompleteRegistration');
+          
+          // Track CompleteRegistration when a booking is actually completed
+          if (window.fbq) {
+            window.fbq('track', 'CompleteRegistration', {
+              content_name: 'Calendly Booking',
+              content_category: 'Website Consultation',
+              value: 0,
+              currency: 'USD'
+            });
+            
+            // Also track as Lead event
+            window.fbq('track', 'Lead', {
+              content_name: 'Contact Page Booking',
+              content_category: 'Free Design Consultation'
+            });
+            
+            console.log('✅ CompleteRegistration & Lead events sent to Facebook Pixel successfully!');
+            console.log('Facebook Pixel ID: 1703925480259996');
+          } else {
+            console.error('❌ Facebook Pixel (fbq) not found');
+          }
+        } else if (event.data.event === "calendly.event_type_viewed") {
+          console.log('User viewed Calendly booking page');
+        }
+      }
+    };
+
+    window.addEventListener("message", handleCalendlyEvent);
+    console.log('Calendly event listener attached for tracking (Contact page)');
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener("message", handleCalendlyEvent);
+    };
   }, [initialData]);
 
   useEffect(() => {
@@ -41,12 +86,20 @@ function Contact({ initialData }: ContactProps) {
     script.src = 'https://assets.calendly.com/assets/external/widget.js';
     script.async = true;
     script.onload = () => {
+      console.log('Calendly script loaded successfully on Contact page');
+      if (window.Calendly) {
+        console.log('Calendly object is available');
+      }
       if (window.fbq) {
         window.fbq('trackCustom', 'CalendlyWidgetLoaded', {
           page: 'contact',
           location: 'contact_page'
         });
       }
+    };
+    
+    script.onerror = () => {
+      console.error('Failed to load Calendly script on Contact page');
     };
     
     head?.appendChild(script);
@@ -88,6 +141,18 @@ function Contact({ initialData }: ContactProps) {
               data-url={CALENDLY_URL} 
               style={{minWidth:"320px", height:"700px"}}
             />
+            
+            {/* Fallback link in case widget doesn't load */}
+            <div className="mt-4 text-center">
+              <a 
+                href={CALENDLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline text-sm"
+              >
+                Having trouble viewing the calendar? Click here to book directly on Calendly.
+              </a>
+            </div>
             
             {/* Respectful meeting reminder */}
             <div className="mt-6 text-center">

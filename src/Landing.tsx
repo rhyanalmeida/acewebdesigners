@@ -31,28 +31,55 @@ function Landing() {
       t.src=v;s=b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t,s)}(window, document,'script',
       'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '670701952528812');
+      fbq('init', '1703925480259996');
       fbq('track', 'PageView');
     `;
     document.head.appendChild(pixelScript);
 
     // Add noscript fallback
     const noscriptTag = document.createElement('noscript');
-    noscriptTag.innerHTML = '<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=670701952528812&ev=PageView&noscript=1" />';
+    noscriptTag.innerHTML = '<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1703925480259996&ev=PageView&noscript=1" />';
     document.body.appendChild(noscriptTag);
 
     // Add Calendly booking completion tracking
     const handleCalendlyEvent = (event: MessageEvent) => {
-      if (event.data.event && event.data.event === "calendly.event_scheduled") {
-        // Track CompleteRegistration when a booking is actually completed
-        if (window.fbq) {
-          window.fbq('track', 'CompleteRegistration');
-          console.log('Calendly booking completed! CompleteRegistration event sent to Facebook Pixel.');
+      console.log('Received message from Calendly:', event.data);
+      
+      // Check if this is a Calendly event
+      if (event.data.event) {
+        console.log('Calendly event detected:', event.data.event);
+        
+        if (event.data.event === "calendly.event_scheduled") {
+          console.log('Event scheduled - tracking CompleteRegistration');
+          
+          // Track CompleteRegistration when a booking is actually completed
+          if (window.fbq) {
+            window.fbq('track', 'CompleteRegistration', {
+              content_name: 'Calendly Booking',
+              content_category: 'Website Consultation',
+              value: 0,
+              currency: 'USD'
+            });
+            
+            // Also track as Lead event
+            window.fbq('track', 'Lead', {
+              content_name: 'Landing Page Booking',
+              content_category: 'Free Design Consultation'
+            });
+            
+            console.log('✅ CompleteRegistration & Lead events sent to Facebook Pixel successfully!');
+            console.log('Facebook Pixel ID: 1703925480259996');
+          } else {
+            console.error('❌ Facebook Pixel (fbq) not found');
+          }
+        } else if (event.data.event === "calendly.event_type_viewed") {
+          console.log('User viewed Calendly booking page');
         }
       }
     };
 
     window.addEventListener("message", handleCalendlyEvent);
+    console.log('Calendly event listener attached for tracking');
 
     // Cleanup function
     return () => {
@@ -69,18 +96,31 @@ function Landing() {
   useEffect(() => {
     // Load the Calendly script
     const head = document.querySelector('head');
-    const script = document.createElement('script');
-    script.src = 'https://assets.calendly.com/assets/external/widget.js';
-    script.async = true;
+    const existingScript = head?.querySelector('script[src*="calendly.com"]');
     
-    head?.appendChild(script);
-
-    return () => {
-      // Clean up script if component unmounts
-      if (head?.contains(script)) {
-        head.removeChild(script);
-      }
-    };
+    // Only add script if it doesn't already exist
+    if (!existingScript) {
+      const script = document.createElement('script');
+      script.src = 'https://assets.calendly.com/assets/external/widget.js';
+      script.async = true;
+      
+      script.onload = () => {
+        console.log('Calendly script loaded successfully');
+        if (window.Calendly) {
+          console.log('Calendly object is available');
+        } else {
+          console.error('Calendly object not found after script load');
+        }
+      };
+      
+      script.onerror = () => {
+        console.error('Failed to load Calendly script');
+      };
+      
+      head?.appendChild(script);
+    } else {
+      console.log('Calendly script already exists');
+    }
   }, []);
 
   const handleGetStarted = () => {
@@ -341,6 +381,18 @@ function Landing() {
               data-url={CALENDLY_URL} 
               style={{minWidth:"320px", height:"700px"}}
             />
+            
+            {/* Fallback link in case widget doesn't load */}
+            <div className="mt-4 text-center">
+              <a 
+                href={CALENDLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline text-sm"
+              >
+                Having trouble viewing the calendar? Click here to book directly on Calendly.
+              </a>
+            </div>
           </div>
           
           {/* Respectful meeting reminder */}
