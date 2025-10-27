@@ -1,11 +1,12 @@
 [build]
-  base = "Ace Web Designers Website/Ace Web Designers Website"
-  publish = "Ace Web Designers Website/Ace Web Designers Website/dist"
+  publish = "dist"
   command = "npm ci && npm run build"
-  functions = "Ace Web Designers Website/Ace Web Designers Website/netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
+
+[functions]
+  directory = "netlify/functions"
 
 [[redirects]]
   from = "/*"
