@@ -4,6 +4,8 @@
 declare global {
   interface Window {
     Elfsight?: any;
+    fbq?: (...args: any[]) => void;
+    Calendly?: any;
   }
 }
 

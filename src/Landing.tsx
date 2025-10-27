@@ -33,6 +33,7 @@ function Landing() {
       'https://connect.facebook.net/en_US/fbevents.js');
       fbq('init', '1703925480259996');
       fbq('track', 'PageView');
+      console.log('Facebook Pixel initialized: 1703925480259996');
     `;
     document.head.appendChild(pixelScript);
 
@@ -43,14 +44,15 @@ function Landing() {
 
     // Add Calendly booking completion tracking
     const handleCalendlyEvent = async (event: MessageEvent) => {
-      console.log('Received message from Calendly:', event.data);
+      console.log('🔍 Received message from Calendly:', event.data);
+      console.log('🔍 Event origin:', event.origin);
       
       // Check if this is a Calendly event
       if (event.data.event) {
-        console.log('Calendly event detected:', event.data.event);
+        console.log('📅 Calendly event detected:', event.data.event);
         
         if (event.data.event === "calendly.event_scheduled") {
-          console.log('Event scheduled - tracking CompleteRegistration');
+          console.log('✅ Event scheduled - tracking CompleteRegistration');
           
           // Track CompleteRegistration when a booking is actually completed
           if (window.fbq) {
@@ -107,7 +109,41 @@ function Landing() {
     };
 
     window.addEventListener("message", handleCalendlyEvent);
-    console.log('Calendly event listener attached for tracking');
+    console.log('✅ Calendly event listener attached for tracking');
+    
+    // Expose test function for debugging
+    (window as any).testFacebookPixel = () => {
+      console.log('🧪 Testing Facebook Pixel...');
+      if (window.fbq) {
+        console.log('✅ Facebook Pixel (fbq) is loaded');
+        
+        // Test PageView
+        window.fbq('track', 'PageView');
+        console.log('✅ PageView event sent');
+        
+        // Test CompleteRegistration
+        window.fbq('track', 'CompleteRegistration', {
+          content_name: 'Test Booking',
+          content_category: 'Test Consultation',
+          value: 0,
+          currency: 'USD'
+        });
+        console.log('✅ CompleteRegistration event sent');
+        
+        // Test Lead
+        window.fbq('track', 'Lead', {
+          content_name: 'Test Lead',
+          content_category: 'Test'
+        });
+        console.log('✅ Lead event sent');
+        
+        console.log('🎉 All test events sent to Facebook Pixel!');
+      } else {
+        console.error('❌ Facebook Pixel (fbq) not loaded yet. Wait a moment and try again.');
+      }
+    };
+    
+    console.log('💡 To test tracking, run: testFacebookPixel() in the console');
 
     // Cleanup function
     return () => {
