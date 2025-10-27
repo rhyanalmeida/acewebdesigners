@@ -404,10 +404,17 @@
 
     <!-- Calendly Event Tracking -->
     <script>
+      console.log('🎯 Calendly event listener installed');
+      
       window.addEventListener("message", function(e) {
+        console.log('📨 Received message:', e.data);
+        
         if (e.data.event && e.data.event === "calendly.event_scheduled") {
+          console.log('✅ Calendly event_scheduled detected!');
+          
           // Track CompleteRegistration when a booking is actually completed
           if (window.fbq) {
+            console.log('📤 Sending CompleteRegistration event...');
             fbq('track', 'CompleteRegistration', {
               content_name: 'Calendly Booking',
               content_category: 'Website Consultation',
@@ -415,17 +422,28 @@
               currency: 'USD'
             });
 
+            console.log('📤 Sending Lead event...');
             // Also track as Lead event
             fbq('track', 'Lead', {
               content_name: 'Website Consultation Booking',
               content_category: 'Free Design Consultation'
             });
 
+            console.log('📤 Sending Contact event...');
             // Track as Contact event
             fbq('track', 'Contact');
 
             console.log('✅ Calendly booking completed! CompleteRegistration, Lead & Contact events sent to Facebook Pixel.');
+          } else {
+            console.error('❌ window.fbq is not available');
           }
+        }
+      });
+      
+      // Listen for all Calendly events for debugging
+      window.addEventListener("message", function(e) {
+        if (e.data.event && e.data.event.startsWith('calendly.')) {
+          console.log('📅 Calendly event:', e.data.event);
         }
       });
     </script>
