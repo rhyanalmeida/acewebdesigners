@@ -46,14 +46,14 @@ function Landing() {
     const handleCalendlyEvent = async (event: MessageEvent) => {
       console.log('🔍 Received message from Calendly:', event.data);
       console.log('🔍 Event origin:', event.origin);
-      
+
       // Check if this is a Calendly event
       if (event.data.event) {
         console.log('📅 Calendly event detected:', event.data.event);
-        
+
         if (event.data.event === "calendly.event_scheduled") {
           console.log('✅ Event scheduled - tracking CompleteRegistration');
-          
+
           // Track CompleteRegistration when a booking is actually completed
           if (window.fbq) {
             window.fbq('track', 'CompleteRegistration', {
@@ -62,19 +62,19 @@ function Landing() {
               value: 0,
               currency: 'USD'
             });
-            
+
             // Also track as Lead event
             window.fbq('track', 'Lead', {
               content_name: 'Landing Page Booking',
               content_category: 'Free Design Consultation'
             });
-            
+
             console.log('✅ CompleteRegistration & Lead events sent to Facebook Pixel successfully!');
             console.log('Facebook Pixel ID: 1703925480259996');
           } else {
             console.error('❌ Facebook Pixel (fbq) not found');
           }
-          
+
           // ALSO send to server-side Conversions API
           try {
             const response = await fetch('/.netlify/functions/facebook-conversions', {
@@ -92,7 +92,7 @@ function Landing() {
                 phone: event.data.payload?.invitee?.phone_number
               })
             });
-            
+
             const result = await response.json();
             if (result.success) {
               console.log('✅ Server-side CompleteRegistration sent to Facebook Conversions API!');
@@ -110,17 +110,17 @@ function Landing() {
 
     window.addEventListener("message", handleCalendlyEvent);
     console.log('✅ Calendly event listener attached for tracking');
-    
+
     // Expose test function for debugging
     (window as any).testFacebookPixel = () => {
       console.log('🧪 Testing Facebook Pixel...');
       if (window.fbq) {
         console.log('✅ Facebook Pixel (fbq) is loaded');
-        
+
         // Test PageView
         window.fbq('track', 'PageView');
         console.log('✅ PageView event sent');
-        
+
         // Test CompleteRegistration
         window.fbq('track', 'CompleteRegistration', {
           content_name: 'Test Booking',
@@ -129,20 +129,20 @@ function Landing() {
           currency: 'USD'
         });
         console.log('✅ CompleteRegistration event sent');
-        
+
         // Test Lead
         window.fbq('track', 'Lead', {
           content_name: 'Test Lead',
           content_category: 'Test'
         });
         console.log('✅ Lead event sent');
-        
+
         console.log('🎉 All test events sent to Facebook Pixel!');
       } else {
         console.error('❌ Facebook Pixel (fbq) not loaded yet. Wait a moment and try again.');
       }
     };
-    
+
     console.log('💡 To test tracking, run: testFacebookPixel() in the console');
 
     // Cleanup function
@@ -160,31 +160,18 @@ function Landing() {
   useEffect(() => {
     // Load the Calendly script
     const head = document.querySelector('head');
-    const existingScript = head?.querySelector('script[src*="calendly.com"]');
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
     
-    // Only add script if it doesn't already exist
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.src = 'https://assets.calendly.com/assets/external/widget.js';
-      script.async = true;
-      
-      script.onload = () => {
-        console.log('Calendly script loaded successfully');
-        if (window.Calendly) {
-          console.log('Calendly object is available');
-        } else {
-          console.error('Calendly object not found after script load');
-        }
-      };
-      
-      script.onerror = () => {
-        console.error('Failed to load Calendly script');
-      };
-      
-      head?.appendChild(script);
-    } else {
-      console.log('Calendly script already exists');
-    }
+    head?.appendChild(script);
+
+    return () => {
+      // Clean up script if component unmounts
+      if (head?.contains(script)) {
+        head.removeChild(script);
+      }
+    };
   }, []);
 
   const handleGetStarted = () => {
@@ -445,18 +432,6 @@ function Landing() {
               data-url={CALENDLY_URL} 
               style={{minWidth:"320px", height:"700px"}}
             />
-            
-            {/* Fallback link in case widget doesn't load */}
-            <div className="mt-4 text-center">
-              <a 
-                href={CALENDLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline text-sm"
-              >
-                Having trouble viewing the calendar? Click here to book directly on Calendly.
-              </a>
-            </div>
           </div>
           
           {/* Respectful meeting reminder */}
