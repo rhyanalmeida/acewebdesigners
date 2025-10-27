@@ -25,103 +25,21 @@ function Contact({ initialData }: ContactProps) {
       metaDescription.setAttribute('content', 'Schedule a free consultation with our web design team. Book a time to discuss your project needs and learn how we can help grow your online presence.');
     }
 
-    // Add Meta Pixel Code
-    const pixelScript = document.createElement('script');
-    pixelScript.innerHTML = `
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '1703925480259996');
-      fbq('track', 'PageView');
-      console.log('Facebook Pixel initialized: 1703925480259996');
-    `;
-    document.head.appendChild(pixelScript);
-
-    // Add noscript fallback
-    const noscriptTag = document.createElement('noscript');
-    noscriptTag.innerHTML = '<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1703925480259996&ev=PageView&noscript=1" />';
-    document.body.appendChild(noscriptTag);
-
-    // Track with Facebook Pixel
+    // Facebook Pixel is loaded in index.html - track page view
     if (window.fbq) {
       window.fbq('trackCustom', 'CalendlyContactView', {
         page: 'contact',
         budget: initialData?.budget || 'unknown'
       });
+      console.log('Facebook Pixel loaded in HTML with ID: 1703925480259996');
     }
     
-    // Add Calendly booking completion tracking
-    const handleCalendlyEvent = async (event: MessageEvent) => {
-      console.log('🔍 Received message from Calendly (Contact page):', event.data);
-      console.log('🔍 Event origin:', event.origin);
-
-      // Check if this is a Calendly event
-      if (event.data.event) {
-        console.log('📅 Calendly event detected:', event.data.event);
-
-        if (event.data.event === "calendly.event_scheduled") {
-          console.log('✅ Event scheduled - tracking CompleteRegistration');
-
-          // Track CompleteRegistration when a booking is actually completed
-          if (window.fbq) {
-            window.fbq('track', 'CompleteRegistration', {
-              content_name: 'Calendly Booking',
-              content_category: 'Website Consultation',
-              value: 0,
-              currency: 'USD'
-            });
-
-            // Also track as Lead event
-            window.fbq('track', 'Lead', {
-              content_name: 'Contact Page Booking',
-              content_category: 'Free Design Consultation'
-            });
-
-            console.log('✅ CompleteRegistration & Lead events sent to Facebook Pixel successfully!');
-            console.log('Facebook Pixel ID: 1703925480259996');
-          } else {
-            console.error('❌ Facebook Pixel (fbq) not found');
-          }
-
-          // ALSO send to server-side Conversions API
-          try {
-            const response = await fetch('/.netlify/functions/facebook-conversions', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                eventName: 'CompleteRegistration',
-                eventTime: Math.floor(Date.now() / 1000),
-                actionSource: 'website',
-                eventSourceUrl: window.location.href,
-                email: event.data.payload?.invitee?.email,
-                phone: event.data.payload?.invitee?.phone_number
-              })
-            });
-
-            const result = await response.json();
-            if (result.success) {
-              console.log('✅ Server-side CompleteRegistration sent to Facebook Conversions API!');
-            } else {
-              console.error('❌ Server-side tracking failed:', result.error);
-            }
-          } catch (error) {
-            console.error('❌ Error sending to server-side Conversions API:', error);
-          }
-        } else if (event.data.event === "calendly.event_type_viewed") {
-          console.log('User viewed Calendly booking page');
-        }
-      }
-    };
-
-    window.addEventListener("message", handleCalendlyEvent);
-    console.log('✅ Calendly event listener attached for tracking (Contact page)');
+    // Calendly tracking is handled in index.html - check if pixel is available
+    if (window.fbq) {
+      console.log('✅ Facebook Pixel is loaded and ready for tracking (Contact page)');
+    } else {
+      console.log('⏳ Facebook Pixel is loading... (Contact page)');
+    }
 
     // Expose test function for debugging
     (window as any).testFacebookPixel = () => {
@@ -157,16 +75,7 @@ function Contact({ initialData }: ContactProps) {
 
     console.log('💡 To test tracking, run: testFacebookPixel() in the console');
     
-    // Cleanup
-    return () => {
-      if (document.head.contains(pixelScript)) {
-        document.head.removeChild(pixelScript);
-      }
-      if (document.body.contains(noscriptTag)) {
-        document.body.removeChild(noscriptTag);
-      }
-      window.removeEventListener("message", handleCalendlyEvent);
-    };
+    // Cleanup - no cleanup needed since tracking is in HTML
   }, [initialData]);
 
   useEffect(() => {

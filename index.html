@@ -380,11 +380,46 @@
     <meta name="twitter:image" content="https://i.ibb.co/fG4M9PP/Ace-Web-Logo-White-Logo.png">
     <meta name="twitter:image:alt" content="Ace Web Designers - Professional Web Design Company">
 
-    <!-- Meta Pixel Code - Handled by React components for better tracking -->
-    <!-- React components (Landing.tsx, Contact.tsx) will load the pixel with ID: 1703925480259996 -->
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1703925480259996');
+      fbq('track', 'PageView');
+    </script>
+    <!-- End Meta Pixel Code -->
 
-    <!-- Calendly Event Tracking - Handled by React components for better tracking -->
-    <!-- React components (Landing.tsx, Contact.tsx) will handle Calendly events with enhanced logging -->
+    <!-- Calendly Event Tracking -->
+    <script>
+      window.addEventListener("message", function(e) {
+        if (e.data.event && e.data.event === "calendly.event_scheduled") {
+          // Track CompleteRegistration when a booking is actually completed
+          if (window.fbq) {
+            fbq('track', 'CompleteRegistration', {
+              content_name: 'Calendly Booking',
+              content_category: 'Website Consultation',
+              value: 0,
+              currency: 'USD'
+            });
+
+            // Also track as Lead event
+            fbq('track', 'Lead', {
+              content_name: 'Website Consultation Booking',
+              content_category: 'Free Design Consultation'
+            });
+
+            console.log('✅ Calendly booking completed! CompleteRegistration & Lead events sent to Facebook Pixel.');
+          }
+        }
+      });
+    </script>
+    <!-- End Calendly Event Tracking -->
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -461,8 +496,9 @@
 
   </head>
   <body>
-    <!-- Meta Pixel Code noscript - Handled by React components -->
-    <!-- React components will add the correct noscript tag -->
+    <!-- Meta Pixel Code noscript -->
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1703925480259996&ev=PageView&noscript=1" /></noscript>
+    <!-- End Meta Pixel Code noscript -->
     <div id="root"></div>
 
     <!-- ReputationHub Review Widget -->
