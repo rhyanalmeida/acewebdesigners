@@ -415,19 +415,11 @@
           // Track CompleteRegistration when a booking is actually completed
           if (window.fbq) {
             console.log('📤 Sending CompleteRegistration event...');
-            fbq('track', 'CompleteRegistration', {
-              content_name: 'Calendly Booking',
-              content_category: 'Website Consultation',
-              value: 0,
-              currency: 'USD'
-            });
+            fbq('track', 'CompleteRegistration');
 
             console.log('📤 Sending Lead event...');
             // Also track as Lead event
-            fbq('track', 'Lead', {
-              content_name: 'Website Consultation Booking',
-              content_category: 'Free Design Consultation'
-            });
+            fbq('track', 'Lead');
 
             console.log('📤 Sending Contact event...');
             // Track as Contact event
