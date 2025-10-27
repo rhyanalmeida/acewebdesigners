@@ -34,7 +34,7 @@ function Contact({ initialData }: ContactProps) {
     }
     
     // Add Calendly booking completion tracking
-    const handleCalendlyEvent = (event: MessageEvent) => {
+    const handleCalendlyEvent = async (event: MessageEvent) => {
       console.log('Received message from Calendly (Contact page):', event.data);
       
       // Check if this is a Calendly event

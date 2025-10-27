@@ -42,7 +42,7 @@ function Landing() {
     document.body.appendChild(noscriptTag);
 
     // Add Calendly booking completion tracking
-    const handleCalendlyEvent = (event: MessageEvent) => {
+    const handleCalendlyEvent = async (event: MessageEvent) => {
       console.log('Received message from Calendly:', event.data);
       
       // Check if this is a Calendly event
@@ -71,6 +71,34 @@ function Landing() {
             console.log('Facebook Pixel ID: 1703925480259996');
           } else {
             console.error('❌ Facebook Pixel (fbq) not found');
+          }
+          
+          // ALSO send to server-side Conversions API
+          try {
+            const response = await fetch('/.netlify/functions/facebook-conversions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                eventName: 'CompleteRegistration',
+                eventTime: Math.floor(Date.now() / 1000),
+                actionSource: 'website',
+                eventSourceUrl: window.location.href,
+                // Add user data from Calendly if available
+                email: event.data.payload?.invitee?.email,
+                phone: event.data.payload?.invitee?.phone_number
+              })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+              console.log('✅ Server-side CompleteRegistration sent to Facebook Conversions API!');
+            } else {
+              console.error('❌ Server-side tracking failed:', result.error);
+            }
+          } catch (error) {
+            console.error('❌ Error sending to server-side Conversions API:', error);
           }
         } else if (event.data.event === "calendly.event_type_viewed") {
           console.log('User viewed Calendly booking page');
