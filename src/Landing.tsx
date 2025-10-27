@@ -73,6 +73,10 @@ function Landing() {
         });
         console.log('✅ Lead event sent');
 
+        // Test Contact
+        window.fbq('track', 'Contact');
+        console.log('✅ Contact event sent');
+
         console.log('🎉 All test events sent to Facebook Pixel!');
       } else {
         console.error('❌ Facebook Pixel (fbq) not loaded yet. Wait a moment and try again.');
@@ -116,6 +120,9 @@ function Landing() {
               content_name: 'Manual Test Lead',
               content_category: 'Test'
             });
+            
+            // Test Contact event
+            window.fbq('track', 'Contact');
             
             // Test custom event
             window.fbq('trackCustom', 'LandingPageTest', {
