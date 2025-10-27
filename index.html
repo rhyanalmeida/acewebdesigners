@@ -438,6 +438,27 @@
           console.log('📅 Calendly event:', e.data.event);
         }
       });
+      
+      // Manual test function - expose globally for testing
+      window.testFacebookEvents = function() {
+        console.log('🧪 Manual test: Sending Facebook events...');
+        if (window.fbq) {
+          fbq('track', 'CompleteRegistration');
+          console.log('✅ Sent CompleteRegistration');
+          
+          fbq('track', 'Lead');
+          console.log('✅ Sent Lead');
+          
+          fbq('track', 'Contact');
+          console.log('✅ Sent Contact');
+          
+          console.log('🎉 All events sent! Check Facebook Events Manager.');
+        } else {
+          console.error('❌ window.fbq not available');
+        }
+      };
+      
+      console.log('💡 Run window.testFacebookEvents() in console to test events manually');
     </script>
     <!-- End Calendly Event Tracking -->
 
