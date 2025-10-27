@@ -88,6 +88,7 @@
         if (e.data.event && e.data.event === "calendly.event_scheduled") {
           // Track CompleteRegistration when a booking is actually completed
           if (window.fbq) {
+            // Track as CompleteRegistration
             fbq('track', 'CompleteRegistration', {
               content_name: 'Calendly Booking',
               content_category: 'Website Consultation',
@@ -95,13 +96,16 @@
               currency: 'USD'
             });
 
-            // Also track as Lead event
+            // Track as Lead event
             fbq('track', 'Lead', {
               content_name: 'Website Consultation Booking',
               content_category: 'Free Design Consultation'
             });
 
-            console.log('✅ Calendly booking completed! CompleteRegistration & Lead events sent to Facebook Pixel.');
+            // Track as Contact event
+            fbq('track', 'Contact');
+
+            console.log('✅ Calendly booking completed! CompleteRegistration, Lead & Contact events sent to Facebook Pixel.');
           }
         }
       });
