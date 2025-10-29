@@ -472,52 +472,120 @@
     <script>
       console.log('📅 Calendly event listener installed - waiting for booking events...');
       
+      // Function to send CompleteRegistration event
+      function sendCompleteRegistration() {
+        if (window.fbq) {
+          console.log('📤 Sending CompleteRegistration event to Facebook Pixel...');
+          
+          // Send with additional parameters for better tracking
+          fbq('track', 'CompleteRegistration', {
+            content_name: 'Calendly Booking',
+            content_category: 'Website Consultation',
+            currency: 'USD',
+            value: 0
+          });
+          
+          console.log('✅ CompleteRegistration event sent successfully!');
+          return true;
+        } else {
+          console.error('❌ Facebook Pixel (fbq) not available');
+          return false;
+        }
+      }
+      
+      // Listen for Calendly postMessage events
       window.addEventListener("message", function(e) {
-        // Log all Calendly events for debugging
-        if (e.data.event && e.data.event.startsWith('calendly.')) {
-          console.log('📨 Calendly event received:', e.data.event);
+        // Log all messages for debugging (filtered)
+        if (e.data && (e.data.event || e.data.type)) {
+          console.log('📨 Message event received:', {
+            event: e.data.event || e.data.type,
+            origin: e.origin,
+            data: e.data
+          });
+        }
+        
+        // Handle different Calendly event formats
+        var calendlyEvent = null;
+        
+        // Format 1: e.data.event = "calendly.event_scheduled"
+        if (e.data.event && e.data.event === "calendly.event_scheduled") {
+          calendlyEvent = e.data.event;
+        }
+        // Format 2: e.data.event.event = "scheduled"
+        else if (e.data.event && typeof e.data.event === 'object' && e.data.event.event === 'scheduled') {
+          calendlyEvent = "calendly.event_scheduled";
+        }
+        // Format 3: e.data.type = "calendly:event_scheduled"
+        else if (e.data.type && e.data.type.includes('calendly') && e.data.type.includes('scheduled')) {
+          calendlyEvent = "calendly.event_scheduled";
         }
         
         // Track CompleteRegistration when a booking is completed
-        if (e.data.event && e.data.event === "calendly.event_scheduled") {
-          console.log('✅ Calendly booking completed! Event: calendly.event_scheduled');
+        if (calendlyEvent) {
+          console.log('✅ Calendly booking completed! Event detected:', calendlyEvent);
           
-          if (window.fbq) {
-            console.log('📤 Sending CompleteRegistration event to Facebook Pixel...');
-            fbq('track', 'CompleteRegistration');
-            console.log('✅ CompleteRegistration event sent successfully!');
+          if (sendCompleteRegistration()) {
+            // Success - event sent
           } else {
-            console.error('❌ Facebook Pixel (fbq) not loaded yet. Retrying...');
-            
-            // Retry after a short delay if fbq isn't ready
+            // Retry after a delay if fbq isn't ready
+            console.log('⏳ Retrying in 1 second...');
             setTimeout(function() {
-              if (window.fbq) {
-                console.log('📤 Retry: Sending CompleteRegistration event to Facebook Pixel...');
-                fbq('track', 'CompleteRegistration');
-                console.log('✅ CompleteRegistration event sent (retry successful)!');
+              if (sendCompleteRegistration()) {
+                console.log('✅ Retry successful!');
               } else {
-                console.error('❌ Facebook Pixel still not available after retry');
+                console.error('❌ Failed after retry. Facebook Pixel may not be loaded.');
               }
             }, 1000);
           }
         }
       });
       
-      // Helper function for manual testing (can be called from browser console)
+      // Also listen for Calendly's custom events (if they use addEventListener)
+      if (window.addEventListener) {
+        // Try to hook into Calendly's event system if available
+        setTimeout(function() {
+          if (window.Calendly && window.Calendly.initInlineWidget) {
+            console.log('📅 Calendly widget detected');
+          }
+        }, 2000);
+      }
+      
+      // Helper function for manual testing
       window.testCalendlyTracking = function() {
         console.log('🧪 Manual test: Simulating Calendly booking completion...');
-        window.postMessage({
-          event: 'calendly.event_scheduled',
-          payload: {
-            event: {
-              uri: 'test-event',
-              name: 'Test Booking'
-            }
-          }
-        }, '*');
+        
+        // Test if pixel works
+        if (!window.fbq) {
+          console.error('❌ Facebook Pixel not loaded. Cannot test.');
+          return;
+        }
+        
+        // Send test event
+        console.log('📤 Sending test CompleteRegistration event...');
+        fbq('track', 'CompleteRegistration', {
+          content_name: 'Test Booking',
+          content_category: 'Test Consultation',
+          currency: 'USD',
+          value: 0
+        });
+        console.log('✅ Test event sent! Check Facebook Events Manager.');
       };
       
-      console.log('💡 To test tracking manually, run: testCalendlyTracking() in the console');
+      // Helper to check pixel status
+      window.checkPixelStatus = function() {
+        console.log('🔍 Checking Pixel Status:');
+        console.log('- Pixel loaded:', !!window.fbq);
+        console.log('- Pixel type:', typeof window.fbq);
+        console.log('- Calendly loaded:', !!window.Calendly);
+        return {
+          pixel: !!window.fbq,
+          calendly: !!window.Calendly
+        };
+      };
+      
+      console.log('💡 Testing commands:');
+      console.log('  - testCalendlyTracking() - Test the CompleteRegistration event');
+      console.log('  - checkPixelStatus() - Check if pixel and Calendly are loaded');
     </script>
     <!-- End Calendly Event Tracking -->
 
