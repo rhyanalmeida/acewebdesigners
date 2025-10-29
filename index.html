@@ -470,14 +470,54 @@
 
     <!-- Calendly Event Tracking -->
     <script>
+      console.log('📅 Calendly event listener installed - waiting for booking events...');
+      
       window.addEventListener("message", function(e) {
+        // Log all Calendly events for debugging
+        if (e.data.event && e.data.event.startsWith('calendly.')) {
+          console.log('📨 Calendly event received:', e.data.event);
+        }
+        
+        // Track CompleteRegistration when a booking is completed
         if (e.data.event && e.data.event === "calendly.event_scheduled") {
-          // Track CompleteRegistration when a booking is completed
+          console.log('✅ Calendly booking completed! Event: calendly.event_scheduled');
+          
           if (window.fbq) {
+            console.log('📤 Sending CompleteRegistration event to Facebook Pixel...');
             fbq('track', 'CompleteRegistration');
+            console.log('✅ CompleteRegistration event sent successfully!');
+          } else {
+            console.error('❌ Facebook Pixel (fbq) not loaded yet. Retrying...');
+            
+            // Retry after a short delay if fbq isn't ready
+            setTimeout(function() {
+              if (window.fbq) {
+                console.log('📤 Retry: Sending CompleteRegistration event to Facebook Pixel...');
+                fbq('track', 'CompleteRegistration');
+                console.log('✅ CompleteRegistration event sent (retry successful)!');
+              } else {
+                console.error('❌ Facebook Pixel still not available after retry');
+              }
+            }, 1000);
           }
         }
       });
+      
+      // Helper function for manual testing (can be called from browser console)
+      window.testCalendlyTracking = function() {
+        console.log('🧪 Manual test: Simulating Calendly booking completion...');
+        window.postMessage({
+          event: 'calendly.event_scheduled',
+          payload: {
+            event: {
+              uri: 'test-event',
+              name: 'Test Booking'
+            }
+          }
+        }, '*');
+      };
+      
+      console.log('💡 To test tracking manually, run: testCalendlyTracking() in the console');
     </script>
     <!-- End Calendly Event Tracking -->
 
