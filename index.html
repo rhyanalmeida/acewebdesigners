@@ -597,15 +597,93 @@
         console.log('- Pixel loaded:', !!window.fbq);
         console.log('- Pixel type:', typeof window.fbq);
         console.log('- Calendly loaded:', !!window.Calendly);
+        console.log('- Pixel ID in code: 1703925480259996');
+        
+        // Try to get actual pixel ID
+        if (window.fbq) {
+          try {
+            var pixelId = fbq('getParameter', 'pixelId');
+            console.log('- Active Pixel ID:', pixelId || 'Could not retrieve');
+          } catch(e) {
+            console.log('- Could not retrieve Pixel ID (might need event first)');
+          }
+        }
+        
         return {
           pixel: !!window.fbq,
           calendly: !!window.Calendly
         };
       };
       
+      // Direct test function that forces events immediately
+      window.testFacebookDirectly = function() {
+        console.log('🧪 Direct Facebook Pixel Test');
+        
+        if (!window.fbq) {
+          console.error('❌ Pixel not loaded! Check for ad blockers or CSP errors.');
+          return false;
+        }
+        
+        console.log('✅ Pixel is loaded, sending test events...');
+        
+        // Test PageView first
+        try {
+          fbq('track', 'PageView');
+          console.log('✅ PageView sent');
+        } catch(e) {
+          console.error('❌ Error sending PageView:', e);
+        }
+        
+        // Test CompleteRegistration
+        try {
+          fbq('track', 'CompleteRegistration', {
+            content_name: 'Direct Test',
+            content_category: 'Test',
+            currency: 'USD',
+            value: 0
+          });
+          console.log('✅ CompleteRegistration sent');
+        } catch(e) {
+          console.error('❌ Error sending CompleteRegistration:', e);
+        }
+        
+        // Test CalendlyBookingComplete
+        try {
+          fbq('trackCustom', 'CalendlyBookingComplete', {
+            content_name: 'Direct Test',
+            content_category: 'Test',
+            currency: 'USD',
+            value: 0
+          });
+          console.log('✅ CalendlyBookingComplete sent');
+        } catch(e) {
+          console.error('❌ Error sending CalendlyBookingComplete:', e);
+        }
+        
+        console.log('💡 Check Facebook Events Manager → Test Events tab NOW');
+        console.log('💡 Events should appear within 10-30 seconds');
+        
+        return true;
+      };
+      
       console.log('💡 Testing commands:');
-      console.log('  - testCalendlyTracking() - Test both CompleteRegistration and CalendlyBookingComplete events');
-      console.log('  - checkPixelStatus() - Check if pixel and Calendly are loaded');
+      console.log('  - checkPixelStatus() - Check if pixel is loaded');
+      console.log('  - testFacebookDirectly() - FORCE send events to Facebook (best test)');
+      console.log('  - testCalendlyTracking() - Test booking simulation');
+      
+      // Auto-check pixel on load
+      setTimeout(function() {
+        if (!window.fbq) {
+          console.error('⚠️ WARNING: Facebook Pixel not detected after 2 seconds!');
+          console.error('⚠️ Possible causes:');
+          console.error('   - Ad blocker enabled');
+          console.error('   - CSP blocking Facebook');
+          console.error('   - Network issues');
+          console.error('💡 Try: testFacebookDirectly() to force test');
+        } else {
+          console.log('✅ Facebook Pixel confirmed loaded');
+        }
+      }, 2000);
     </script>
     <!-- End Calendly Event Tracking -->
 
