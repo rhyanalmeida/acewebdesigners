@@ -9,10 +9,9 @@ interface ContactProps {
   };
 }
 
-// Define global fbq for TypeScript
+// Define global Calendly for TypeScript
 declare global {
   interface Window {
-    fbq: any;
     Calendly: any;
   }
 }
@@ -24,58 +23,6 @@ function Contact({ initialData }: ContactProps) {
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Schedule a free consultation with our web design team. Book a time to discuss your project needs and learn how we can help grow your online presence.');
     }
-
-    // Facebook Pixel is loaded in index.html - track page view
-    if (window.fbq) {
-      window.fbq('trackCustom', 'CalendlyContactView', {
-        page: 'contact',
-        budget: initialData?.budget || 'unknown'
-      });
-      console.log('Facebook Pixel loaded in HTML with ID: 1703925480259996');
-    }
-    
-    // Calendly tracking is handled in index.html - check if pixel is available
-    if (window.fbq) {
-      console.log('✅ Facebook Pixel is loaded and ready for tracking (Contact page)');
-    } else {
-      console.log('⏳ Facebook Pixel is loading... (Contact page)');
-    }
-
-    // Expose test function for debugging
-    (window as any).testFacebookPixel = () => {
-      console.log('🧪 Testing Facebook Pixel (Contact page)...');
-      if (window.fbq) {
-        console.log('✅ Facebook Pixel (fbq) is loaded');
-
-        // Test PageView
-        window.fbq('track', 'PageView');
-        console.log('✅ PageView event sent');
-
-        // Test CompleteRegistration
-        window.fbq('track', 'CompleteRegistration', {
-          content_name: 'Test Booking',
-          content_category: 'Test Consultation',
-          value: 0,
-          currency: 'USD'
-        });
-        console.log('✅ CompleteRegistration event sent');
-
-        // Test Lead
-        window.fbq('track', 'Lead', {
-          content_name: 'Test Lead',
-          content_category: 'Test'
-        });
-        console.log('✅ Lead event sent');
-
-        console.log('🎉 All test events sent to Facebook Pixel!');
-      } else {
-        console.error('❌ Facebook Pixel (fbq) not loaded yet. Wait a moment and try again.');
-      }
-    };
-
-    console.log('💡 To test tracking, run: testFacebookPixel() in the console');
-    
-    // Cleanup - no cleanup needed since tracking is in HTML
   }, [initialData]);
 
   useEffect(() => {
@@ -84,22 +31,6 @@ function Contact({ initialData }: ContactProps) {
     const script = document.createElement('script');
     script.src = 'https://assets.calendly.com/assets/external/widget.js';
     script.async = true;
-    script.onload = () => {
-      console.log('Calendly script loaded successfully on Contact page');
-      if (window.Calendly) {
-        console.log('Calendly object is available');
-      }
-      if (window.fbq) {
-        window.fbq('trackCustom', 'CalendlyWidgetLoaded', {
-          page: 'contact',
-          location: 'contact_page'
-        });
-      }
-    };
-    
-    script.onerror = () => {
-      console.error('Failed to load Calendly script on Contact page');
-    };
     
     head?.appendChild(script);
 
@@ -140,18 +71,6 @@ function Contact({ initialData }: ContactProps) {
               data-url={CALENDLY_URL} 
               style={{minWidth:"320px", height:"700px"}}
             />
-            
-            {/* Fallback link in case widget doesn't load */}
-            <div className="mt-4 text-center">
-              <a 
-                href={CALENDLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 underline text-sm"
-              >
-                Having trouble viewing the calendar? Click here to book directly on Calendly.
-              </a>
-            </div>
             
             {/* Respectful meeting reminder */}
             <div className="mt-6 text-center">

@@ -380,87 +380,6 @@
     <meta name="twitter:image" content="https://i.ibb.co/fG4M9PP/Ace-Web-Logo-White-Logo.png">
     <meta name="twitter:image:alt" content="Ace Web Designers - Professional Web Design Company">
 
-    <!-- Meta Pixel Code -->
-    <script>
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '670701952528812');
-      fbq('track', 'PageView');
-
-      // Test event for debugging
-      setTimeout(function() {
-        if (window.fbq) {
-          console.log('🧪 Facebook Pixel loaded successfully - ID: 670701952528812');
-        }
-      }, 1000);
-    </script>
-    <!-- End Meta Pixel Code -->
-
-    <!-- Calendly Event Tracking -->
-    <script>
-      console.log('🎯 Calendly event listener installed');
-      
-      window.addEventListener("message", function(e) {
-        console.log('📨 Received message:', e.data);
-        
-        if (e.data.event && e.data.event === "calendly.event_scheduled") {
-          console.log('✅ Calendly event_scheduled detected!');
-          
-          // Track CompleteRegistration when a booking is actually completed
-          if (window.fbq) {
-            console.log('📤 Sending CompleteRegistration event...');
-            fbq('track', 'CompleteRegistration');
-
-            console.log('📤 Sending Lead event...');
-            // Also track as Lead event
-            fbq('track', 'Lead');
-
-            console.log('📤 Sending Contact event...');
-            // Track as Contact event
-            fbq('track', 'Contact');
-
-            console.log('✅ Calendly booking completed! CompleteRegistration, Lead & Contact events sent to Facebook Pixel.');
-          } else {
-            console.error('❌ window.fbq is not available');
-          }
-        }
-      });
-      
-      // Listen for all Calendly events for debugging
-      window.addEventListener("message", function(e) {
-        if (e.data.event && e.data.event.startsWith('calendly.')) {
-          console.log('📅 Calendly event:', e.data.event);
-        }
-      });
-      
-      // Manual test function - expose globally for testing
-      window.testFacebookEvents = function() {
-        console.log('🧪 Manual test: Sending Facebook events...');
-        if (window.fbq) {
-          fbq('track', 'CompleteRegistration');
-          console.log('✅ Sent CompleteRegistration');
-          
-          fbq('track', 'Lead');
-          console.log('✅ Sent Lead');
-          
-          fbq('track', 'Contact');
-          console.log('✅ Sent Contact');
-          
-          console.log('🎉 All events sent! Check Facebook Events Manager.');
-        } else {
-          console.error('❌ window.fbq not available');
-        }
-      };
-      
-      console.log('💡 Run window.testFacebookEvents() in console to test events manually');
-    </script>
-    <!-- End Calendly Event Tracking -->
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -534,11 +453,27 @@
     <!-- ReputationHub Review Widget -->
     <script type='text/javascript' src='https://reputationhub.site/reputation/assets/review-widget.js'></script>
     
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1703925480259996');
+    fbq('track', 'PageView');
+    </script>
+    <!-- End Meta Pixel Code -->
 
   </head>
   <body>
     <!-- Meta Pixel Code noscript -->
-    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=670701952528812&ev=PageView&noscript=1" /></noscript>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1703925480259996&ev=PageView&noscript=1"
+    /></noscript>
     <!-- End Meta Pixel Code noscript -->
     <div id="root"></div>
 

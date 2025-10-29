@@ -10,11 +10,6 @@ function Reviews() {
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Read real client reviews and testimonials from businesses who trusted Ace Web Designers with their website projects. See the results we deliver!');
     }
-
-    // Track with Facebook Pixel
-    if (window.fbq) {
-      window.fbq('trackCustom', 'ReviewsPageView');
-    }
   }, []);
 
 

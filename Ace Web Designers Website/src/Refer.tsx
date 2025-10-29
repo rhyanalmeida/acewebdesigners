@@ -11,11 +11,6 @@ function Refer() {
     if (metaDescription) {
       metaDescription.setAttribute('content', 'Refer a client to Ace Web Designers and earn $200 when they complete their website project. Help grow businesses while earning rewards!');
     }
-
-    // Track with Facebook Pixel
-    if (window.fbq) {
-      window.fbq('trackCustom', 'ReferralPageView');
-    }
   }, []);
 
   const testimonials = [

@@ -12,134 +12,13 @@ function Landing() {
       metaDescription.setAttribute('content', 'Get a free website design for your business. No obligation, no hidden fees. Limited time offer - only 10 spots available!');
     }
     
-    // Set a URL parameter that can be tracked by Facebook custom conversions
+    // Set a URL parameter that can be tracked
     const urlParams = new URLSearchParams(window.location.search);
     if (!urlParams.has('source')) {
       urlParams.append('source', 'landing');
       const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
       window.history.replaceState({}, '', newUrl);
     }
-
-    // Facebook Pixel is loaded in index.html - check if it's available
-    console.log('📊 Landing page loaded - Facebook Pixel ID: 1703925480259996');
-
-    // Track landing page view specifically
-    if (window.fbq) {
-      window.fbq('trackCustom', 'LandingPageView', {
-        page_path: '/landing',
-        page_source: 'ad_click',
-        content_name: 'Landing Page'
-      });
-      console.log('✅ Landing page custom event tracked');
-    } else {
-      console.log('⏳ Facebook Pixel is loading...');
-      
-      // Retry after pixel loads
-      setTimeout(() => {
-        if (window.fbq) {
-          window.fbq('trackCustom', 'LandingPageView', {
-            page_path: '/landing',
-            page_source: 'ad_click',
-            content_name: 'Landing Page'
-          });
-          console.log('✅ Landing page custom event tracked (retry)');
-        }
-      }, 2000);
-    }
-
-    // Expose test function for debugging
-    (window as any).testFacebookPixel = () => {
-      console.log('🧪 Testing Facebook Pixel...');
-      if (window.fbq) {
-        console.log('✅ Facebook Pixel (fbq) is loaded');
-
-        // Test PageView
-        window.fbq('track', 'PageView');
-        console.log('✅ PageView event sent');
-
-        // Test CompleteRegistration
-        window.fbq('track', 'CompleteRegistration', {
-          content_name: 'Test Booking',
-          content_category: 'Test Consultation',
-          value: 0,
-          currency: 'USD'
-        });
-        console.log('✅ CompleteRegistration event sent');
-
-        // Test Lead
-        window.fbq('track', 'Lead', {
-          content_name: 'Test Lead',
-          content_category: 'Test'
-        });
-        console.log('✅ Lead event sent');
-
-        // Test Contact
-        window.fbq('track', 'Contact');
-        console.log('✅ Contact event sent');
-
-        console.log('🎉 All test events sent to Facebook Pixel!');
-      } else {
-        console.error('❌ Facebook Pixel (fbq) not loaded yet. Wait a moment and try again.');
-      }
-    };
-
-    console.log('💡 To test tracking, run: testFacebookPixel() in the console');
-
-    // Add a test button to the page for easy testing
-    setTimeout(() => {
-      if (window.fbq && !document.getElementById('pixel-test-button')) {
-        const testButton = document.createElement('div');
-        testButton.id = 'pixel-test-button';
-        testButton.style.cssText = `
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          background: #1877f2;
-          color: white;
-          padding: 10px 15px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 12px;
-          z-index: 9999;
-          display: none; /* Hidden by default - uncomment for testing */
-        `;
-        testButton.textContent = 'Test Pixel';
-        testButton.onclick = () => {
-          console.log('🧪 Manual pixel test triggered');
-          if (window.fbq) {
-            // Test CompleteRegistration
-            window.fbq('track', 'CompleteRegistration', {
-              content_name: 'Manual Test Booking',
-              content_category: 'Test Consultation',
-              value: 0,
-              currency: 'USD'
-            });
-            
-            // Test Lead event
-            window.fbq('track', 'Lead', {
-              content_name: 'Manual Test Lead',
-              content_category: 'Test'
-            });
-            
-            // Test Contact event
-            window.fbq('track', 'Contact');
-            
-            // Test custom event
-            window.fbq('trackCustom', 'LandingPageTest', {
-              test_type: 'manual',
-              page_path: '/landing'
-            });
-            
-            console.log('✅ Manual test events sent to Facebook Pixel');
-          } else {
-            console.error('❌ Facebook Pixel not loaded');
-          }
-        };
-        document.body.appendChild(testButton);
-      }
-    }, 2000);
-
-    // Cleanup function - no cleanup needed since tracking is in HTML
   }, []);
 
   useEffect(() => {
