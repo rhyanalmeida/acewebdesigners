@@ -468,6 +468,19 @@
     </script>
     <!-- End Meta Pixel Code -->
 
+    <!-- Calendly Event Tracking -->
+    <script>
+      window.addEventListener("message", function(e) {
+        if (e.data.event && e.data.event === "calendly.event_scheduled") {
+          // Track CompleteRegistration when a booking is completed
+          if (window.fbq) {
+            fbq('track', 'CompleteRegistration');
+          }
+        }
+      });
+    </script>
+    <!-- End Calendly Event Tracking -->
+
   </head>
   <body>
     <!-- Meta Pixel Code noscript -->
