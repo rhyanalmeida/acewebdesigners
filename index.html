@@ -472,12 +472,12 @@
     <script>
       console.log('📅 Calendly event listener installed - waiting for booking events...');
       
-      // Function to send CompleteRegistration event
-      function sendCompleteRegistration() {
+      // Function to send booking events
+      function sendBookingEvents() {
         if (window.fbq) {
-          console.log('📤 Sending CompleteRegistration event to Facebook Pixel...');
+          console.log('📤 Sending booking events to Facebook Pixel...');
           
-          // Send with additional parameters for better tracking
+          // Send CompleteRegistration (standard Facebook event for ads)
           fbq('track', 'CompleteRegistration', {
             content_name: 'Calendly Booking',
             content_category: 'Website Consultation',
@@ -485,7 +485,15 @@
             value: 0
           });
           
-          console.log('✅ CompleteRegistration event sent successfully!');
+          // Send CalendlyBookingComplete (custom event that Events Manager expects)
+          fbq('trackCustom', 'CalendlyBookingComplete', {
+            content_name: 'Calendly Booking',
+            content_category: 'Website Consultation',
+            currency: 'USD',
+            value: 0
+          });
+          
+          console.log('✅ Booking events sent successfully! (CompleteRegistration + CalendlyBookingComplete)');
           return true;
         } else {
           console.error('❌ Facebook Pixel (fbq) not available');
@@ -520,17 +528,17 @@
           calendlyEvent = "calendly.event_scheduled";
         }
         
-        // Track CompleteRegistration when a booking is completed
+        // Track booking when a booking is completed
         if (calendlyEvent) {
           console.log('✅ Calendly booking completed! Event detected:', calendlyEvent);
           
-          if (sendCompleteRegistration()) {
-            // Success - event sent
+          if (sendBookingEvents()) {
+            // Success - events sent
           } else {
             // Retry after a delay if fbq isn't ready
             console.log('⏳ Retrying in 1 second...');
             setTimeout(function() {
-              if (sendCompleteRegistration()) {
+              if (sendBookingEvents()) {
                 console.log('✅ Retry successful!');
               } else {
                 console.error('❌ Failed after retry. Facebook Pixel may not be loaded.');
@@ -560,15 +568,27 @@
           return;
         }
         
-        // Send test event
-        console.log('📤 Sending test CompleteRegistration event...');
+        // Send test events
+        console.log('📤 Sending test booking events...');
+        
+        // Standard event for ads
         fbq('track', 'CompleteRegistration', {
           content_name: 'Test Booking',
           content_category: 'Test Consultation',
           currency: 'USD',
           value: 0
         });
-        console.log('✅ Test event sent! Check Facebook Events Manager.');
+        
+        // Custom event that Events Manager shows
+        fbq('trackCustom', 'CalendlyBookingComplete', {
+          content_name: 'Test Booking',
+          content_category: 'Test Consultation',
+          currency: 'USD',
+          value: 0
+        });
+        
+        console.log('✅ Test events sent! (CompleteRegistration + CalendlyBookingComplete)');
+        console.log('💡 Check Facebook Events Manager - CalendlyBookingComplete should now show as Active');
       };
       
       // Helper to check pixel status
@@ -584,7 +604,7 @@
       };
       
       console.log('💡 Testing commands:');
-      console.log('  - testCalendlyTracking() - Test the CompleteRegistration event');
+      console.log('  - testCalendlyTracking() - Test both CompleteRegistration and CalendlyBookingComplete events');
       console.log('  - checkPixelStatus() - Check if pixel and Calendly are loaded');
     </script>
     <!-- End Calendly Event Tracking -->
