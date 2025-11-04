@@ -1,4 +1,6 @@
 User-agent: *
+Disallow: /search
+Disallow: /*?*
 Allow: /
 
-Sitemap: https://acewebdesigners.com/sitemap.xml
+Sitemap: https://www.acewebdesigners.com/sitemap.xml

@@ -93,8 +93,8 @@ function Contact({ initialData }: ContactProps) {
                     </div>
                     <div>
                       <p className="text-white/60 text-sm">Email</p>
-                      <a href="mailto:rhyan@acewebdesigners.com" className="text-white hover:text-blue-200 transition-colors">
-                        rhyan@acewebdesigners.com
+                      <a href="mailto:support@acewebdesigners.com" className="text-white hover:text-blue-200 transition-colors">
+                        support@acewebdesigners.com
                       </a>
                     </div>
                   </div>
@@ -133,7 +133,7 @@ function Contact({ initialData }: ContactProps) {
                     </div>
                     <div>
                       <p className="text-white/60 text-sm">Service Area</p>
-                      <span className="text-white">Nationwide Service</span>
+                      <span className="text-white">Based in Leominster, MA • Serving Nationwide</span>
                     </div>
                   </div>
                 </div>

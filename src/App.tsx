@@ -391,7 +391,7 @@ function App() {
                   Turn Visitors Into Customers
                 </h1>
                 <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                  Get a professional website that actually grows your business. We create stunning, high-converting websites for businesses nationwide that turn clicks into customers and browsers into buyers.
+                  Get a professional website that actually grows your business. Based in Leominster, MA, we create stunning, high-converting websites for businesses nationwide that turn clicks into customers and browsers into buyers.
                 </p>
                 <div className="flex flex-wrap gap-4 relative z-30">
                   <button 
@@ -1148,7 +1148,7 @@ function App() {
                     <span className="text-sm text-gray-400" style={{ marginTop: '-4px' }}>Web Designers</span>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    Professional web design and development services for small businesses nationwide. Helping small business owners across America build their online presence.
+                    Based in Leominster, MA, serving small businesses nationwide. Professional web design and development services helping small business owners across America build their online presence.
                   </p>
                 </div>
 
@@ -1157,10 +1157,10 @@ function App() {
                   <ul className="space-y-2">
                     <li>
                       <a 
-                        href="mailto:rhyan@acewebdesigners.com"
+                        href="mailto:support@acewebdesigners.com"
                         className="text-gray-400 hover:text-white transition-colors"
                       >
-                        rhyan@acewebdesigners.com
+                        support@acewebdesigners.com
                       </a>
                     </li>
                     <li>
@@ -1172,7 +1172,7 @@ function App() {
                       </a>
                     </li>
                     <li className="text-gray-400">
-                      Serving Small Businesses Nationwide
+                      Based in Leominster, MA • Serving Nationwide
                     </li>
                   </ul>
                 </div>
@@ -1246,7 +1246,7 @@ function App() {
 
                 <h3>5. Contact Us</h3>
                 <p>For privacy-related questions, please contact us at:</p>
-                <p>Email: rhyan@acewebdesigners.com</p>
+                <p>Email: support@acewebdesigners.com</p>
                 <p>Phone: (774) 315-1951</p>
               </div>
               <button 

@@ -134,11 +134,8 @@ function AboutUs() {
                     <Mail className="w-6 h-6 text-blue-600" />
                   </div>
                   <div className="space-y-2">
-                    <a href="mailto:rhyan@acewebdesigners.com" className="hover:text-blue-600 transition-colors block text-lg">
-                      rhyan@acewebdesigners.com
-                    </a>
-                    <a href="mailto:valerie@acewebdesigners.com" className="hover:text-blue-600 transition-colors block text-lg">
-                      valerie@acewebdesigners.com
+                    <a href="mailto:support@acewebdesigners.com" className="hover:text-blue-600 transition-colors block text-lg">
+                      support@acewebdesigners.com
                     </a>
                   </div>
                 </div>
@@ -154,7 +151,7 @@ function AboutUs() {
                   <div className="bg-blue-50 p-3 rounded-xl">
                     <MapPin className="w-6 h-6 text-blue-600" />
                   </div>
-                  <span className="text-lg">Serving Businesses Nationwide</span>
+                  <span className="text-lg">Based in Leominster, MA • Serving Businesses Nationwide</span>
                 </div>
               </div>
             </div>
