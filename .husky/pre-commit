@@ -7,5 +7,5 @@ npx lint-staged
 # Run type checking
 npm run type-check
 
-# Run tests related to staged files
-npm run test -- --passWithNoTests --findRelatedTests --bail
+# Run tests
+npm run test -- --passWithNoTests --bail
