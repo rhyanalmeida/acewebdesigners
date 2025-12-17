@@ -184,13 +184,26 @@ function App() {
   }, [currentPage])
 
   React.useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:path_check',message:'Checking URL path for routing',data:{currentPath:window.location.pathname},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    
     // Check if the URL path is /landing, /landingcontractors, or /refer and set the page accordingly
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '') // Remove trailing slash and normalize
     if (path === '/landingcontractors' || path.includes('/landingcontractors')) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:set_landingcontractors',message:'Setting currentPage to landingcontractors',data:{path:path},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       setCurrentPage('landingcontractors')
     } else if (path === '/landing' || path.includes('/landing')) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:set_landing_page',message:'Setting currentPage to landing',data:{path:path},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       setCurrentPage('landing')
     } else if (path === '/refer' || path.includes('/refer')) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:set_refer_page',message:'Setting currentPage to refer',data:{path:path},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
       setCurrentPage('refer')
     }
 
@@ -477,7 +490,17 @@ function App() {
     {
       title: 'Quality Promise',
       description: 'Professional design, every time. We deliver excellence you can count on.',
-      icon: <Award className="w-8 h-8 text-green-600" />,
+      icon: (() => {
+        // #region agent log
+        try {
+          fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:quality_icon_access',message:'Accessing quality promise icon',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'D'})}).catch(()=>{});
+          return <Trophy className="w-8 h-8 text-green-600" />;
+        } catch (error) {
+          fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:quality_icon_error',message:'Quality promise icon access failed',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'D'})}).catch(()=>{});
+          return <Shield className="w-8 h-8 text-green-600" />;
+        }
+        // #endregion
+      })(),
     },
   ]
 
@@ -493,6 +516,10 @@ function App() {
   }
 
   const renderContent = () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:renderContent_called',message:'renderContent called',data:{currentPage:currentPage},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    
     if (currentPage === 'contact') {
       return <Contact initialData={formData} />
     }
