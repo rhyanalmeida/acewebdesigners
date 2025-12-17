@@ -1,89 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { CALENDLY_URL } from './config'
-import { CheckCircle2, Star, ArrowRight, MousePointer2, Calendar, Clock } from 'lucide-react'
-
-// Simple Lazy Image Component
-const LazyImage = ({ src, alt, className, ...props }: any) => {
-  const [loaded, setLoaded] = useState(false);
-  const [inView, setInView] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={imgRef} className={className}>
-      {inView && (
-        <img
-          src={src}
-          alt={alt}
-          onLoad={() => setLoaded(true)}
-          className={`transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'} ${className}`}
-          loading="lazy"
-          {...props}
-        />
-      )}
-    </div>
-  );
-};
+import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
 
 function Landing() {
   const bookingFormRef = useRef(null)
-
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'Landing.tsx:component_mounted',
-        message: 'Landing component mounted',
-        data: { CalendlyURL: CALENDLY_URL },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        hypothesisId: 'E',
-      }),
-    }).catch(() => {})
-
-    // Check for JavaScript errors
-    const errorHandler = event => {
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'Landing.tsx:js_error',
-          message: 'JavaScript error detected',
-          data: {
-            error: event.error?.message || event.message,
-            filename: event.filename,
-            lineno: event.lineno,
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          hypothesisId: 'E',
-        }),
-      }).catch(() => {})
-    }
-
-    window.addEventListener('error', errorHandler)
-    return () => window.removeEventListener('error', errorHandler)
-  }, [])
-  // #endregion
 
   useEffect(() => {
     document.title = 'Free Website Design for Your Business | Limited Time Offer'
@@ -105,62 +25,12 @@ function Landing() {
   }, [])
 
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'Landing.tsx:calendly_script_setup',
-        message: 'Loading Calendly script',
-        data: { scriptUrl: 'https://assets.calendly.com/assets/external/widget.js' },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        hypothesisId: 'C',
-      }),
-    }).catch(() => {})
-    // #endregion
-
-    // Load the Calendly script with performance optimization
+    // Load the Calendly script
     const head = document.querySelector('head')
     const script = document.createElement('script')
     script.src = 'https://assets.calendly.com/assets/external/widget.js'
     script.async = true
     script.defer = true
-
-    script.onload = () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'Landing.tsx:calendly_script_loaded',
-          message: 'Calendly script loaded successfully',
-          data: { CalendlyExists: !!window.Calendly },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          hypothesisId: 'C',
-        }),
-      }).catch(() => {})
-      // #endregion
-    }
-
-    script.onerror = () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'Landing.tsx:calendly_script_error',
-          message: 'Calendly script failed to load',
-          data: { error: 'Script load error' },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          hypothesisId: 'C',
-        }),
-      }).catch(() => {})
-      // #endregion
-    }
-
     head?.appendChild(script)
 
     // Preload critical resources
@@ -259,38 +129,6 @@ function Landing() {
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
                   title="Free Preview Rhyan 1 - 526"
-                  onLoad={() => {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        location: 'Landing.tsx:vimeo_iframe_loaded',
-                        message: 'Vimeo iframe loaded successfully',
-                        data: { videoId: '1088261551' },
-                        timestamp: Date.now(),
-                        sessionId: 'debug-session',
-                        hypothesisId: 'D',
-                      }),
-                    }).catch(() => {})
-                    // #endregion
-                  }}
-                  onError={() => {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        location: 'Landing.tsx:vimeo_iframe_error',
-                        message: 'Vimeo iframe failed to load',
-                        data: { videoId: '1088261551', error: 'iframe load error' },
-                        timestamp: Date.now(),
-                        sessionId: 'debug-session',
-                        hypothesisId: 'D',
-                      }),
-                    }).catch(() => {})
-                    // #endregion
-                  }}
                 ></iframe>
               </div>
             </div>
@@ -312,41 +150,6 @@ function Landing() {
                 src="https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif"
                 alt="Hot Pot One Website Example"
                 className="w-full h-56 object-cover hover:scale-110 transition-smooth duration-500"
-                onLoad={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:hotpot_img_loaded',
-                      message: 'Hot Pot image loaded',
-                      data: { src: 'https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif' },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
-                onError={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:hotpot_img_error',
-                      message: 'Hot Pot image failed to load',
-                      data: {
-                        src: 'https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif',
-                        error: 'Image load error',
-                      },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
               />
               <div className="p-8">
                 <div className="flex justify-center mb-4 gap-1">
@@ -370,41 +173,6 @@ function Landing() {
                 src="https://i.ibb.co/Myx4nrSr/concuo-gif.gif"
                 alt="Conuco Takeout Website Example"
                 className="w-full h-56 object-cover hover:scale-110 transition-smooth duration-500"
-                onLoad={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:conuco_img_loaded',
-                      message: 'Conuco image loaded',
-                      data: { src: 'https://i.ibb.co/Myx4nrSr/concuo-gif.gif' },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
-                onError={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:conuco_img_error',
-                      message: 'Conuco image failed to load',
-                      data: {
-                        src: 'https://i.ibb.co/Myx4nrSr/concuo-gif.gif',
-                        error: 'Image load error',
-                      },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
               />
               <div className="p-8">
                 <div className="flex justify-center mb-4 gap-1">
@@ -429,41 +197,6 @@ function Landing() {
                 src="https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif"
                 alt="Dunn Construction Website Example"
                 className="w-full h-56 object-cover hover:scale-110 transition-smooth duration-500"
-                onLoad={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:dunn_img_loaded',
-                      message: 'Dunn Construction image loaded',
-                      data: { src: 'https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif' },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
-                onError={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:dunn_img_error',
-                      message: 'Dunn Construction image failed to load',
-                      data: {
-                        src: 'https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif',
-                        error: 'Image load error',
-                      },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
               />
               <div className="p-8">
                 <div className="flex justify-center mb-4 gap-1">
@@ -493,41 +226,6 @@ function Landing() {
                 src="https://i.ibb.co/DP2X8fXT/handsome.jpg"
                 alt="Web Designers"
                 className="rounded-3xl shadow-2xl object-cover w-full aspect-[3/4] hover:shadow-2xl transition-smooth duration-500 transform hover:scale-105 border-4 border-white hover-lift"
-                onLoad={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:handsome_img_loaded',
-                      message: 'Web designers photo loaded',
-                      data: { src: 'https://i.ibb.co/DP2X8fXT/handsome.jpg' },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
-                onError={() => {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:handsome_img_error',
-                      message: 'Web designers photo failed to load',
-                      data: {
-                        src: 'https://i.ibb.co/DP2X8fXT/handsome.jpg',
-                        error: 'Image load error',
-                      },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'B',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-                }}
               />
             </div>
             <div className="md:col-span-3 animate-fade-in-right">
@@ -656,52 +354,6 @@ function Landing() {
               className="calendly-inline-widget"
               data-url={CALENDLY_URL}
               style={{ minWidth: '320px', height: '700px' }}
-              ref={element => {
-                if (element) {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:calendly_widget_mounted',
-                      message: 'Calendly widget element mounted',
-                      data: {
-                        dataUrl: CALENDLY_URL,
-                        CalendlyExists: !!window.Calendly,
-                        elementExists: !!element,
-                      },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      hypothesisId: 'C',
-                    }),
-                  }).catch(() => {})
-                  // #endregion
-
-                  // Check if Calendly has initialized the widget after a short delay
-                  setTimeout(() => {
-                    const hasCalendlyContent =
-                      element.innerHTML.length > 0 || element.children.length > 0
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        location: 'Landing.tsx:calendly_widget_check',
-                        message: 'Calendly widget initialization check',
-                        data: {
-                          hasContent: hasCalendlyContent,
-                          innerHTML: element.innerHTML.slice(0, 100),
-                          childrenCount: element.children.length,
-                        },
-                        timestamp: Date.now(),
-                        sessionId: 'debug-session',
-                        hypothesisId: 'C',
-                      }),
-                    }).catch(() => {})
-                    // #endregion
-                  }, 2000)
-                }
-              }}
             />
           </div>
 

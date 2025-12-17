@@ -184,56 +184,12 @@ function App() {
   }, [currentPage])
 
   React.useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'App.tsx:url_check',
-        message: 'Checking URL for routing',
-        data: { pathname: window.location.pathname, href: window.location.href },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        hypothesisId: 'E',
-      }),
-    }).catch(() => {})
-    // #endregion
-
     // Check if the URL path is /landing or /refer and set the page accordingly
-    const path = window.location.pathname
-    if (path === '/landing') {
+    const path = window.location.pathname.toLowerCase().replace(/\/$/, '') // Remove trailing slash and normalize
+    if (path === '/landing' || path.includes('/landing')) {
       setCurrentPage('landing')
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'App.tsx:set_landing',
-          message: 'Setting page to landing',
-          data: { path },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          hypothesisId: 'E',
-        }),
-      }).catch(() => {})
-      // #endregion
-    } else if (path === '/refer') {
+    } else if (path === '/refer' || path.includes('/refer')) {
       setCurrentPage('refer')
-    } else {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'App.tsx:staying_home',
-          message: 'Path not /landing or /refer, staying on home',
-          data: { path },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          hypothesisId: 'E',
-        }),
-      }).catch(() => {})
-      // #endregion
     }
 
     const handleNavigation = (event: CustomEvent) => {
@@ -535,21 +491,6 @@ function App() {
   }
 
   const renderContent = () => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'App.tsx:renderContent',
-        message: 'renderContent called',
-        data: { currentPage },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        hypothesisId: 'E',
-      }),
-    }).catch(() => {})
-    // #endregion
-
     if (currentPage === 'contact') {
       return <Contact initialData={formData} />
     }
@@ -563,20 +504,6 @@ function App() {
       return <Services />
     }
     if (currentPage === 'landing') {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'App.tsx:rendering_landing',
-          message: 'Rendering Landing component',
-          data: { currentPage },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          hypothesisId: 'E',
-        }),
-      }).catch(() => {})
-      // #endregion
       return (
         <div className="w-full h-full">
           <Landing />
