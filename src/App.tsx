@@ -503,7 +503,7 @@ function App() {
                 <span className="text-blue-800 font-semibold">Industries We Serve</span>
               </div>
               <h2 className="heading-xl text-gradient-blue mb-6">We Build Professional Websites for Small Businesses in Every Industry Nationwide</h2>
-              <p className="body-lg text-gray-700 max-w-3xl mx-auto">
+              <p className="body-lg text-gray-600 max-w-3xl mx-auto">
                 From local restaurants to construction companies, we specialize in helping small business owners across America establish their online presence and grow their customer base. Our small business web design services are trusted by entrepreneurs in all 50 states who need professional websites that drive results and increase revenue.
               </p>
             </div>
@@ -529,7 +529,7 @@ function App() {
                 <span className="text-green-800 font-semibold">Performance & Security</span>
               </div>
               <h2 className="heading-xl text-gradient-blue mb-6">Small Business Websites Built for Speed, Security & Success</h2>
-              <p className="body-lg text-gray-700 max-w-3xl mx-auto">
+              <p className="body-lg text-gray-600 max-w-3xl mx-auto">
                 Every small business website we build is optimized for maximum performance, security, and search engine rankings. Our professional web design ensures your small business stands out online and attracts more customers nationwide.
               </p>
             </div>
@@ -558,7 +558,7 @@ function App() {
                 <span className="text-green-800 font-semibold">Our Guarantees</span>
               </div>
               <h2 className="heading-xl text-gradient-blue mb-6">Zero Risk, All Reward</h2>
-              <p className="body-lg text-gray-700 max-w-3xl mx-auto">
+              <p className="body-lg text-gray-600 max-w-3xl mx-auto">
                 Experience our quality risk-free. We're so confident you'll love your design, we guarantee it.
               </p>
             </div>
@@ -586,7 +586,7 @@ function App() {
                 <span className="text-blue-800 font-semibold">Our Process</span>
               </div>
               <h2 className="heading-xl text-gradient-blue mb-6">How It Works</h2>
-              <p className="body-lg text-gray-700 max-w-3xl mx-auto">
+              <p className="body-lg text-gray-600 max-w-3xl mx-auto">
                 Our proven 4-step process ensures you get exactly what you want, when you want it
               </p>
             </div>
