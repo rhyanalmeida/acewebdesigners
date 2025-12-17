@@ -7,7 +7,6 @@ import './index.css';
 // Initialize monitoring (only in production)
 if (process.env.NODE_ENV === 'production') {
   import('./utils/monitoring').then(() => {
-    // Monitoring is automatically initialized when imported
     console.log('Monitoring initialized');
   }).catch(error => {
     console.warn('Failed to initialize monitoring:', error);

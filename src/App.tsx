@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MousePointer2, ChevronRight, Menu, X, ArrowRight, Users, Zap, Trophy, Star, Clock, Shield, Calculator, MessageCircle, Plus, Minus, TrendingUp, Globe, Smartphone, Lock, ExternalLink } from 'lucide-react';
+import { MousePointer2, ChevronRight, Menu, X, ArrowRight, Users, Zap, Trophy, Star, Clock, Shield, Calculator, MessageCircle, Plus, Minus, TrendingUp, Globe, Smartphone, Lock, ExternalLink, Award } from 'lucide-react';
 import Contact from './Contact';
 import AboutUs from './AboutUs';
 import Work from './Work';

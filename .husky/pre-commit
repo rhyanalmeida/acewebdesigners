@@ -8,4 +8,4 @@ npx lint-staged
 npm run type-check
 
 # Run tests
-npm run test -- --passWithNoTests --bail
+npm run test -- --passWithNoTests
