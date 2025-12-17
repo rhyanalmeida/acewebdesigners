@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useForm, ValidationError } from '@formspree/react';
-import { Gift, Users, DollarSign, CheckCircle2, Star, ArrowRight } from 'lucide-react';
+import { Gift, Users, DollarSign, CheckCircle2, Star, ArrowRight, MousePointer2 } from 'lucide-react';
 
 
 
@@ -323,6 +323,76 @@ function Refer() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white" role="contentinfo">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Main Footer */}
+          <div className="py-12 grid md:grid-cols-2 gap-8">
+            <div>
+              <div className="flex flex-col items-start mb-4">
+                <div className="flex items-center">
+                  <span className="text-xl font-bold tracking-tight">ACE</span>
+                  <MousePointer2 
+                    className="w-4 h-4 ml-0.5" 
+                    style={{ marginTop: '-2px' }}
+                    aria-hidden="true"
+                  />
+                </div>
+                <span className="text-sm text-gray-400" style={{ marginTop: '-4px' }}>Web Designers</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Based in Leominster, MA, serving small businesses nationwide. Professional web design and development services helping small business owners across America build their online presence.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Contact</h3>
+              <ul className="space-y-2">
+                <li>
+                  <a 
+                    href="mailto:support@acewebdesigners.com"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    support@acewebdesigners.com
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="tel:+17743151951"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    (774) 315-1951
+                  </a>
+                </li>
+                <li className="text-gray-400">
+                  Based in Leominster, MA • Serving Nationwide
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Privacy Policy and Copyright */}
+          <div className="py-6 border-t border-gray-800">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-gray-400">
+                © {new Date().getFullYear()} Ace Web Designers. All rights reserved.
+              </p>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <button 
+                  onClick={() => {
+                    // Navigate to main site privacy policy
+                    window.location.href = '/privacy';
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Privacy Policy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

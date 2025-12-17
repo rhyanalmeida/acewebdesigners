@@ -8,37 +8,126 @@
 [functions]
   directory = "netlify/functions"
 
-# Canonical domain redirects - must come before SPA redirect
-[[redirects]]
-  from = "http://acewebdesigners.com/*"
-  to   = "https://www.acewebdesigners.com/:splat"
-  status = 301
-  force  = true
-
-[[redirects]]
-  from = "https://acewebdesigners.com/*"
-  to   = "https://www.acewebdesigners.com/:splat"
-  status = 301
-  force  = true
-
-# SPA redirect - must come last
+# SPA redirect for React Router
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[headers]
-  [[headers]]
-    for = "/*"
-    [headers.values]
-      Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-      Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:;"
-      X-Content-Type-Options = "nosniff"
-      Referrer-Policy = "strict-origin-when-cross-origin"
-      Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-      Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Security Headers
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "cross-origin"
+    
+    # Enhanced Content Security Policy
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' 
+        https://www.google.com 
+        https://www.gstatic.com 
+        https://assets.calendly.com 
+        https://connect.facebook.net 
+        https://www.facebook.com
+        https://player.vimeo.com;
+      style-src 'self' 'unsafe-inline' 
+        https://fonts.googleapis.com 
+        https://assets.calendly.com;
+      img-src 'self' data: blob: 
+        https://i.ibb.co 
+        https://i.postimg.cc 
+        https://images.unsplash.com 
+        https://fast.wistia.com 
+        https://www.facebook.com;
+      connect-src 'self' 
+        https://fast.wistia.com 
+        https://*.wistia.com 
+        https://*.vimeo.com 
+        https://vimeo.com 
+        https://formspree.io 
+        https://www.facebook.com 
+        https://*.calendly.com 
+        https://www.google.com 
+        https://www.gstatic.com;
+      font-src 'self' data: 
+        https://fonts.gstatic.com;
+      frame-src 'self' 
+        https://www.google.com 
+        https://www.recaptcha.net 
+        https://fast.wistia.com 
+        https://player.vimeo.com 
+        https://www.facebook.com 
+        https://calendly.com;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self' https://formspree.io;
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+    """
+    
+    # Permissions Policy (Feature Policy)
+    Permissions-Policy = """
+      geolocation=(),
+      microphone=(),
+      camera=(),
+      payment=(),
+      usb=(),
+      magnetometer=(),
+      gyroscope=(),
+      speaker=(),
+      vibrate=(),
+      fullscreen=(self),
+      sync-xhr=()
+    """
+    
+    # Cache Control
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-  [[headers]]
-    for = "/assets/*"
-    [headers.values]
-      Cache-Control = "public, max-age=31536000, immutable"
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.woff2"
+  [headers.values]
+    Content-Type = "font/woff2"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "*.woff"
+  [headers.values]
+    Content-Type = "font/woff"
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    Cache-Control = "public, max-age=3600"

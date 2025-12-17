@@ -56,6 +56,59 @@ function AboutUs() {
         </div>
       </section>
 
+      {/* Why We Offer Free Designs Story */}
+      <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-5 py-2 rounded-full mb-6 border border-blue-100">
+            <Star className="w-5 h-5 text-blue-600" />
+            <span className="text-blue-800 font-semibold">Our Story</span>
+          </div>
+          <h2 className="heading-xl text-gradient-blue mb-8">Why We Offer Free Designs</h2>
+          <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
+            <p>
+              We believe every business deserves to see their vision come to life before making any commitment. 
+              Too many business owners have been burned by designers who promise the world but deliver disappointment.
+            </p>
+            <p className="text-xl font-semibold text-blue-600">
+              That's why we do things differently. We create your complete design mockup first, completely free.
+            </p>
+            <p>
+              When you see exactly what your website will look like, how it will function, and how it represents your brand, 
+              you can make an informed decision. No surprises, no regrets, just confidence in your investment.
+            </p>
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-100 mt-8">
+              <p className="text-blue-800 font-semibold text-xl italic">
+                "We only succeed when you're absolutely thrilled with your website. 
+                The free design ensures we're the perfect fit before you invest a single dollar."
+              </p>
+              <div className="flex items-center justify-center gap-4 mt-6">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src="https://i.ibb.co/DP2X8fXT/handsome.jpg" 
+                    alt="Rhyan - Lead Developer" 
+                    className="w-12 h-12 rounded-full object-cover border-2 border-blue-200"
+                  />
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-800">Rhyan</p>
+                    <p className="text-sm text-gray-600">Lead Developer</p>
+                  </div>
+                </div>
+                <div className="text-gray-400">•</div>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 flex items-center justify-center border-2 border-purple-200">
+                    <span className="text-white font-bold text-lg">V</span>
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-gray-800">Valerie</p>
+                    <p className="text-sm text-gray-600">Design Lead</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
@@ -163,6 +216,26 @@ function AboutUs() {
                 loading="lazy"
               />
             </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3')] opacity-10"></div>
+          <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 className="heading-xl text-white mb-6 text-shadow-bold">Experience Our Work Risk-Free</h2>
+            <p className="text-blue-100 text-xl mb-8 leading-relaxed">
+              See why businesses choose us. Get your free design mockup and experience our quality firsthand.
+            </p>
+            <button 
+              onClick={() => {
+                window.location.href = '/contact';
+              }}
+              className="bg-white text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-blue-50 transition-smooth hover:scale-110 inline-flex items-center group text-xl shadow-2xl animate-glow-pulse"
+            >
+              <span className="animate-slide-right-left">👉 GET MY FREE DESIGN NOW!</span>
+              <Calendar className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         </section>
       </div>

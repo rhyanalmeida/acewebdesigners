@@ -73,44 +73,47 @@ function Reviews() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-white">
       {/* Hero Section */}
-      <section className="pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="pt-28 pb-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
+        <div className="absolute top-10 right-10 w-72 h-72 bg-yellow-300 rounded-full blur-3xl opacity-20 animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-72 h-72 bg-blue-300 rounded-full blur-3xl opacity-20 animate-float animation-delay-2000"></div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full mb-4">
-              <Star className="w-4 h-4 text-blue-600" />
-              <span className="text-blue-800 font-medium">Client Reviews</span>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-50 to-blue-50 px-5 py-2 rounded-full mb-6 border border-yellow-100 animate-fade-in-down">
+              <Star className="w-5 h-5 text-yellow-600" />
+              <span className="text-yellow-800 font-semibold">Client Reviews</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+            <h1 className="heading-lg text-gradient-blue mb-8 animate-fade-in-up">
               What Our Clients Say
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="body-lg text-gray-700 mb-10 max-w-3xl mx-auto animate-fade-in-up delay-100">
               Real reviews from real businesses who trusted us with their digital success. See the results we deliver and why clients choose Ace Web Designers.
             </p>
-            <div className="flex items-center justify-center gap-1 mb-4">
+            <div className="flex items-center justify-center gap-2 mb-2 animate-scale-in delay-200">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-8 h-8 text-yellow-400 fill-yellow-400" />
+                <Star key={i} className={`w-10 h-10 text-yellow-400 fill-yellow-400 animate-scale-in delay-${(i + 2) * 100}`} />
               ))}
-              <span className="ml-2 text-2xl font-bold text-gray-900">5.0</span>
-              <span className="ml-1 text-lg text-gray-600">(100+ reviews)</span>
+              <span className="ml-3 text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-blue-600">5.0</span>
+              <span className="ml-2 text-xl text-gray-700 font-semibold">(100+ reviews)</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Review Statistics */}
-      <section className="py-16 bg-white">
+      <section className="py-20 bg-white relative">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-10">
             {reviewStats.map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div className="bg-gray-50 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+              <div key={index} className={`text-center group hover-lift animate-fade-in-up delay-${index * 100}`}>
+                <div className="bg-gradient-to-br from-gray-50 to-blue-50 w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-125 transition-smooth shadow-lg border border-blue-100">
                   {stat.icon}
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.number}</div>
-                <div className="font-semibold mb-2">{stat.label}</div>
-                <div className="text-sm text-gray-600">{stat.description}</div>
+                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-3">{stat.number}</div>
+                <div className="font-bold text-lg mb-2 text-gray-900">{stat.label}</div>
+                <div className="text-sm text-gray-600 leading-relaxed">{stat.description}</div>
               </div>
             ))}
           </div>
@@ -118,22 +121,23 @@ function Reviews() {
       </section>
 
       {/* Industry Results */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Results by Industry</h2>
-            <p className="text-gray-600 text-lg">See how different types of businesses benefit from our web design services</p>
+      <section className="py-24 bg-gradient-to-b from-gray-50 via-green-50 to-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(34,197,94,0.05),transparent_50%)]"></div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="heading-xl text-gradient-blue mb-6">Results by Industry</h2>
+            <p className="body-lg text-gray-700">See how different types of businesses benefit from our web design services</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-10">
             {industryResults.map((result, index) => (
-              <div key={index} className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-2 group">
-                <div className="flex items-start gap-4">
-                  <div className="text-4xl group-hover:scale-110 transition-transform">{result.icon}</div>
+              <div key={index} className={`bg-white p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-smooth hover-lift group border-2 border-gray-100 animate-fade-in-up delay-${index * 100}`}>
+                <div className="flex items-start gap-6">
+                  <div className="text-5xl group-hover:scale-125 transition-smooth animate-levitate">{result.icon}</div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-2">{result.industry}</h3>
-                    <div className="text-3xl font-bold text-green-600 mb-1">{result.avgIncrease}</div>
-                    <div className="text-gray-600 mb-2">{result.metric}</div>
-                    <p className="text-gray-600 text-sm">{result.description}</p>
+                    <h3 className="text-2xl font-bold mb-4 text-gray-900">{result.industry}</h3>
+                    <div className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600 mb-2">{result.avgIncrease}</div>
+                    <div className="text-gray-700 mb-4 font-semibold text-lg">{result.metric}</div>
+                    <p className="text-gray-600 leading-relaxed">{result.description}</p>
                   </div>
                 </div>
               </div>
@@ -147,81 +151,65 @@ function Reviews() {
 
 
       {/* Why Clients Choose Us */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-white relative">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Why Clients Keep Coming Back</h2>
-            <p className="text-gray-600 text-lg">The reasons behind our 5-star rating and client satisfaction</p>
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="heading-xl text-gradient-blue mb-6">Why Clients Keep Coming Back</h2>
+            <p className="body-lg text-gray-700">The reasons behind our 5-star rating and client satisfaction</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center group">
-              <div className="bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <CheckCircle2 className="w-8 h-8 text-blue-600" />
+          <div className="grid md:grid-cols-3 gap-10">
+            <div className="text-center group hover-lift animate-fade-in-up">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-125 transition-smooth shadow-lg">
+                <CheckCircle2 className="w-10 h-10 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Proven Results</h3>
-              <p className="text-gray-600">We don't just build websites - we build websites that drive real business results and measurable ROI.</p>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">Proven Results</h3>
+              <p className="text-gray-600 leading-relaxed text-lg">We don't just build websites - we build websites that drive real business results and measurable ROI.</p>
             </div>
-            <div className="text-center group">
-              <div className="bg-green-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <Users className="w-8 h-8 text-green-600" />
+            <div className="text-center group hover-lift animate-fade-in-up delay-100">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-125 transition-smooth shadow-lg">
+                <Users className="w-10 h-10 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Client-First Approach</h3>
-              <p className="text-gray-600">Your success is our priority. We work closely with you to ensure every detail meets your vision.</p>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">Client-First Approach</h3>
+              <p className="text-gray-600 leading-relaxed text-lg">Your success is our priority. We work closely with you to ensure every detail meets your vision.</p>
             </div>
-            <div className="text-center group">
-              <div className="bg-purple-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                <Award className="w-8 h-8 text-purple-600" />
+            <div className="text-center group hover-lift animate-fade-in-up delay-200">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-125 transition-smooth shadow-lg">
+                <Award className="w-10 h-10 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Quality Guarantee</h3>
-              <p className="text-gray-600">We're so confident in our work that we offer a money-back guarantee if you're not 100% satisfied.</p>
+              <h3 className="text-2xl font-bold mb-4 text-gray-900">Quality Guarantee</h3>
+              <p className="text-gray-600 leading-relaxed text-lg">We're so confident in our work that we offer a money-back guarantee if you're not 100% satisfied.</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Google Reviews Widget */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full mb-4">
-              <Star className="w-4 h-4 text-green-600" />
-              <span className="text-green-800 font-medium">Google Reviews</span>
-            </div>
-            <h2 className="text-4xl font-bold mb-4">Live Google Reviews</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              See real-time reviews from our satisfied clients on Google. These are authentic reviews from real customers.
-            </p>
-          </div>
-          <div className="flex justify-center">
-            <div locationId="10311921268967440718" className="review-widget-carousel"></div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">Ready to Join Our Happy Clients?</h2>
-          <p className="text-blue-100 text-lg mb-8">
+      <section className="py-24 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3')] opacity-10 animate-gradient-shift"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float animation-delay-2000"></div>
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+          <h2 className="heading-xl text-white mb-8 text-shadow-bold animate-fade-in-up">Ready to Join Our Happy Clients?</h2>
+          <p className="text-blue-100 text-2xl mb-10 leading-relaxed animate-fade-in-up delay-100">
             See why businesses choose Ace Web Designers for their digital success. Get your free design mockup today!
           </p>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 max-w-md mx-auto mb-8">
-            <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="bg-white/15 backdrop-blur-md rounded-3xl p-8 max-w-md mx-auto mb-10 border border-white/20 hover-lift animate-scale-in delay-200">
+            <div className="flex items-center justify-center gap-2 mb-3">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+                <Star key={i} className="w-8 h-8 text-yellow-400 fill-yellow-400" />
               ))}
             </div>
-            <div className="text-white font-semibold">Join 100+ satisfied clients</div>
+            <div className="text-white font-bold text-xl">Join 100+ satisfied clients</div>
           </div>
           <button 
             onClick={() => {
               // Navigate to contact page
               window.location.href = '/#contact';
             }}
-            className="bg-white text-blue-600 px-8 py-4 rounded-full font-medium hover:bg-blue-50 transition-all hover:scale-105 inline-flex items-center group text-lg"
+            className="bg-white text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-blue-50 transition-smooth hover:scale-110 inline-flex items-center group text-2xl shadow-2xl animate-glow-pulse"
           >
             Get My Free Design Now
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </section>
