@@ -184,9 +184,11 @@ function App() {
   }, [currentPage])
 
   React.useEffect(() => {
-    // Check if the URL path is /landing or /refer and set the page accordingly
+    // Check if the URL path is /landing, /landingcontractors, or /refer and set the page accordingly
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '') // Remove trailing slash and normalize
-    if (path === '/landing' || path.includes('/landing')) {
+    if (path === '/landingcontractors' || path.includes('/landingcontractors')) {
+      setCurrentPage('landingcontractors')
+    } else if (path === '/landing' || path.includes('/landing')) {
       setCurrentPage('landing')
     } else if (path === '/refer' || path.includes('/refer')) {
       setCurrentPage('refer')
@@ -1225,7 +1227,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      {currentPage !== 'landing' && currentPage !== 'refer' && (
+      {currentPage !== 'landing' && currentPage !== 'landingcontractors' && currentPage !== 'refer' && (
         <>
           {/* Navigation */}
           <header>
@@ -1406,7 +1408,7 @@ function App() {
       {/* Main Content */}
       {renderContent()}
 
-      {currentPage !== 'landing' && currentPage !== 'refer' && (
+      {currentPage !== 'landing' && currentPage !== 'landingcontractors' && currentPage !== 'refer' && (
         <>
           {/* Footer CTA Section */}
           <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden animate-gradient-shift">
