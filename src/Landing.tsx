@@ -2,33 +2,6 @@ import React, { useRef, useEffect } from 'react'
 import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
 
 function Landing() {
-  useEffect(() => {
-
-    // Check for JavaScript errors
-    const errorHandler = event => {
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'Landing.tsx:js_error',
-          message: 'JavaScript error detected',
-          data: {
-            error: event.error?.message || event.message,
-            filename: event.filename,
-            lineno: event.lineno,
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'runtime-debug',
-          hypothesisId: 'E',
-        }),
-      }).catch(() => {})
-    }
-
-    window.addEventListener('error', errorHandler)
-    return () => window.removeEventListener('error', errorHandler)
-  }, [])
-  // #endregion
 
   const bookingFormRef = useRef(null)
 
