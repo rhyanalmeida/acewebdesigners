@@ -204,3 +204,4 @@ Hi [Name]! Looking forward to our call at [TIME] today 😊 We'll discuss your w
 ---
 
 *This sequence is designed to maximize show-up rates while providing exceptional customer experience. Regular testing and optimization based on metrics is recommended.*
+

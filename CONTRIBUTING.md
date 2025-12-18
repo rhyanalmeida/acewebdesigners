@@ -278,3 +278,4 @@ Contributors will be recognized in:
 - LinkedIn recommendations (for significant contributions)
 
 Thank you for contributing to Ace Web Designers! Your efforts help us provide better web design services to small businesses nationwide.
+

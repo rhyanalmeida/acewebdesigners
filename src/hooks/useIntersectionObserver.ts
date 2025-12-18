@@ -42,3 +42,4 @@ export function useIntersectionObserver(
 
   return [elementRef, isIntersecting]
 }
+

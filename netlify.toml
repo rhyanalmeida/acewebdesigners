@@ -34,18 +34,22 @@
         https://www.google.com 
         https://www.gstatic.com 
         https://assets.calendly.com 
+        https://calendly.com
         https://connect.facebook.net 
         https://www.facebook.com
         https://player.vimeo.com;
       style-src 'self' 'unsafe-inline' 
         https://fonts.googleapis.com 
-        https://assets.calendly.com;
+        https://assets.calendly.com
+        https://calendly.com;
       img-src 'self' data: blob: 
         https://i.ibb.co 
         https://i.postimg.cc 
         https://images.unsplash.com 
         https://fast.wistia.com 
-        https://www.facebook.com;
+        https://www.facebook.com
+        https://calendly.com
+        https://*.calendly.com;
       connect-src 'self' 
         https://fast.wistia.com 
         https://*.wistia.com 
@@ -53,6 +57,7 @@
         https://vimeo.com 
         https://formspree.io 
         https://www.facebook.com 
+        https://calendly.com
         https://*.calendly.com 
         https://www.google.com 
         https://www.gstatic.com;
@@ -64,7 +69,8 @@
         https://fast.wistia.com 
         https://player.vimeo.com 
         https://www.facebook.com 
-        https://calendly.com;
+        https://calendly.com
+        https://*.calendly.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self' https://formspree.io;

@@ -63,3 +63,4 @@ Object.defineProperty(window, 'localStorage', {
 Object.defineProperty(window, 'sessionStorage', {
   value: localStorageMock,
 })
+
