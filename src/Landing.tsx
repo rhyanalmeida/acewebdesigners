@@ -113,6 +113,37 @@ function Landing() {
   }, [])
 
   useEffect(() => {
+    // #region agent log - Manual Calendly initialization
+    console.log('🔧 Attempting manual Calendly initialization');
+    
+    const initCalendly = () => {
+      const widgetDiv = document.querySelector('.calendly-inline-widget') as HTMLElement;
+      console.log('   - Widget div found?', !!widgetDiv);
+      console.log('   - window.Calendly exists?', !!(window as any).Calendly);
+      
+      if (widgetDiv && (window as any).Calendly) {
+        console.log('   - Calling Calendly.initInlineWidget()');
+        try {
+          (window as any).Calendly.initInlineWidget({
+            url: 'https://calendly.com/rhyanalmeida31/30min',
+            parentElement: widgetDiv,
+            prefill: {},
+            utm: {}
+          });
+          console.log('✅ Calendly widget initialized successfully');
+        } catch (error) {
+          console.error('❌ Error initializing Calendly:', error);
+        }
+      } else {
+        console.log('⏳ Calendly not ready, will retry...');
+        setTimeout(initCalendly, 500);
+      }
+    };
+    
+    // Try immediately
+    setTimeout(initCalendly, 100);
+    // #endregion
+    
     // Calendly script is loaded in index.html
     // Just preload fonts here
     const head = document.querySelector('head')
