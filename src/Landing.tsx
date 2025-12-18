@@ -66,26 +66,8 @@ function Landing() {
   }, [])
 
   useEffect(() => {
-    // Load the Calendly script
-    const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
-    
-    if (!existingScript) {
-      const script = document.createElement('script')
-      script.src = 'https://assets.calendly.com/assets/external/widget.js'
-      script.type = 'text/javascript'
-      script.async = true
-      document.body.appendChild(script)
-      
-      script.onload = () => {
-        console.log('Calendly script loaded successfully')
-      }
-      
-      script.onerror = () => {
-        console.error('Failed to load Calendly script')
-      }
-    }
-
-    // Preload critical resources
+    // Calendly script is loaded in index.html
+    // Just preload fonts here
     const head = document.querySelector('head')
     const preloadLink = document.createElement('link')
     preloadLink.rel = 'preload'
