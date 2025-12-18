@@ -10,7 +10,7 @@ function Landing() {
       body: JSON.stringify({
         location: 'Landing.tsx:component_mounted',
         message: 'Landing component mounted',
-        data: { CalendlyURL: CALENDLY_URL },
+        data: { CalendlyURL: 'https://calendly.com/rhyanalmeida31/30min' },
         timestamp: Date.now(),
         sessionId: 'debug-session',
         runId: 'runtime-debug',
