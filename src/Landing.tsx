@@ -10,13 +10,45 @@ function Landing() {
       body: JSON.stringify({
         location: 'Landing.tsx:component_mounted',
         message: 'Landing component mounted',
-        data: { CalendlyURL: 'https://calendly.com/rhyanalmeida31/30min' },
+        data: { 
+          CalendlyURL: 'https://calendly.com/rhyanalmeida31/30min',
+          windowCalendlyExists: !!(typeof window !== 'undefined' && window.Calendly),
+          calendlyType: typeof window !== 'undefined' ? typeof window.Calendly : 'window_undefined'
+        },
         timestamp: Date.now(),
         sessionId: 'debug-session',
         runId: 'runtime-debug',
         hypothesisId: 'B',
       }),
     }).catch(() => {})
+    
+    // #region agent log - Check for Calendly widget div and attributes
+    setTimeout(() => {
+      const widgetDiv = document.querySelector('.calendly-inline-widget');
+      const containerDiv = document.getElementById('landing-form-container');
+      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'Landing.tsx:dom_check',
+          message: 'Checking Calendly widget DOM after mount',
+          data: {
+            widgetDivExists: !!widgetDiv,
+            containerExists: !!containerDiv,
+            dataUrl: widgetDiv?.getAttribute('data-url') || 'not_found',
+            widgetDivStyle: widgetDiv?.getAttribute('style') || 'not_found',
+            widgetDivClasses: widgetDiv?.className || 'not_found',
+            windowCalendlyNow: !!(typeof window !== 'undefined' && window.Calendly),
+            calendlyMethods: typeof window !== 'undefined' && window.Calendly ? Object.keys(window.Calendly) : []
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'runtime-debug',
+          hypothesisId: 'B-C',
+        }),
+      }).catch(() => {});
+    }, 1000);
+    // #endregion
 
     // Check for JavaScript errors
     const errorHandler = event => {
@@ -379,6 +411,35 @@ function Landing() {
           <div
             className="bg-white rounded-3xl shadow-2xl p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
             id="landing-form-container"
+            ref={(el) => {
+              // #region agent log
+              if (el) {
+                setTimeout(() => {
+                  const widgetDiv = el.querySelector('.calendly-inline-widget');
+                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      location: 'Landing.tsx:container_ref',
+                      message: 'Container rendered with widget div',
+                      data: {
+                        containerRendered: true,
+                        widgetDivFound: !!widgetDiv,
+                        widgetDataUrl: widgetDiv?.getAttribute('data-url'),
+                        widgetInnerHTML: widgetDiv?.innerHTML || 'empty',
+                        widgetChildrenCount: widgetDiv?.children.length || 0,
+                        iframeExists: !!widgetDiv?.querySelector('iframe')
+                      },
+                      timestamp: Date.now(),
+                      sessionId: 'debug-session',
+                      runId: 'runtime-debug',
+                      hypothesisId: 'C-D',
+                    }),
+                  }).catch(() => {});
+                }, 500);
+              }
+              // #endregion
+            }}
           >
             {/* Calendly inline widget begin */}
             <div

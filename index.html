@@ -885,11 +885,49 @@
           console.log('✅ Facebook Pixel confirmed loaded');
         }
       }, 2000);
+      
+      // #region agent log - Check Calendly initialization after page load
+      setTimeout(function() {
+        var allWidgets = document.querySelectorAll('.calendly-inline-widget');
+        var calendlyData = {
+          windowCalendlyExists: !!window.Calendly,
+          calendlyType: typeof window.Calendly,
+          widgetCount: allWidgets.length,
+          widgets: []
+        };
+        
+        allWidgets.forEach(function(widget, idx) {
+          calendlyData.widgets.push({
+            index: idx,
+            dataUrl: widget.getAttribute('data-url'),
+            hasIframe: !!widget.querySelector('iframe'),
+            innerHTML: widget.innerHTML.substring(0, 200),
+            childCount: widget.children.length
+          });
+        });
+        
+        fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            location:'index.html:page_load_check',
+            message:'Checking Calendly state after page load',
+            data:calendlyData,
+            timestamp:Date.now(),
+            sessionId:'debug-session',
+            runId:'runtime-debug',
+            hypothesisId:'E'
+          })
+        }).catch(function(){});
+      }, 3000);
+      // #endregion
     </script>
     <!-- End Calendly Event Tracking -->
 
     <!-- Calendly Widget Script -->
-    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async 
+      onload="fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:calendly_script',message:'Calendly script loaded successfully',data:{windowCalendlyExists:!!window.Calendly,calendlyType:typeof window.Calendly},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'A'})}).catch(()=>{});"
+      onerror="fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.html:calendly_script',message:'Calendly script FAILED to load',data:{error:'script_load_error'},timestamp:Date.now(),sessionId:'debug-session',runId:'runtime-debug',hypothesisId:'A'})}).catch(()=>{});"></script>
     <!-- End Calendly Widget Script -->
 
   </head>
