@@ -67,14 +67,26 @@ function Landing() {
 
   useEffect(() => {
     // Load the Calendly script
-    const head = document.querySelector('head')
-    const script = document.createElement('script')
-    script.src = 'https://assets.calendly.com/assets/external/widget.js'
-    script.async = true
-    script.defer = true
-    head?.appendChild(script)
+    const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]')
+    
+    if (!existingScript) {
+      const script = document.createElement('script')
+      script.src = 'https://assets.calendly.com/assets/external/widget.js'
+      script.type = 'text/javascript'
+      script.async = true
+      document.body.appendChild(script)
+      
+      script.onload = () => {
+        console.log('Calendly script loaded successfully')
+      }
+      
+      script.onerror = () => {
+        console.error('Failed to load Calendly script')
+      }
+    }
 
     // Preload critical resources
+    const head = document.querySelector('head')
     const preloadLink = document.createElement('link')
     preloadLink.rel = 'preload'
     preloadLink.href =
@@ -83,10 +95,6 @@ function Landing() {
     head?.appendChild(preloadLink)
 
     return () => {
-      // Clean up script if component unmounts
-      if (head?.contains(script)) {
-        head.removeChild(script)
-      }
       if (head?.contains(preloadLink)) {
         head.removeChild(preloadLink)
       }
