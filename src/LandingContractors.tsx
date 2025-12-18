@@ -1,65 +1,31 @@
 import React, { useRef, useEffect } from 'react'
-import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
+import {
+  CheckCircle2,
+  Star,
+  MousePointer2,
+  Hammer,
+  HardHat,
+  Wrench,
+  TrendingUp,
+} from 'lucide-react'
 
-function Landing() {
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'Landing.tsx:component_mounted',
-        message: 'Landing component mounted',
-        data: { CalendlyURL: CALENDLY_URL },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'runtime-debug',
-        hypothesisId: 'B',
-      }),
-    }).catch(() => {})
-
-    // Check for JavaScript errors
-    const errorHandler = event => {
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'Landing.tsx:js_error',
-          message: 'JavaScript error detected',
-          data: {
-            error: event.error?.message || event.message,
-            filename: event.filename,
-            lineno: event.lineno,
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'runtime-debug',
-          hypothesisId: 'E',
-        }),
-      }).catch(() => {})
-    }
-
-    window.addEventListener('error', errorHandler)
-    return () => window.removeEventListener('error', errorHandler)
-  }, [])
-  // #endregion
-
+function LandingContractors() {
   const bookingFormRef = useRef(null)
 
   useEffect(() => {
-    document.title = 'Free Website Design for Your Business | Limited Time Offer'
+    document.title = 'Free Website Design for Contractors | Get More Leads & Jobs'
     const metaDescription = document.querySelector('meta[name="description"]')
     if (metaDescription) {
       metaDescription.setAttribute(
         'content',
-        'Get a free website design for your business. No obligation, no hidden fees. Limited time offer - only 10 spots available!'
+        'Get a free website design for your contracting business. Attract more clients, showcase your work, and grow your business online. No payment until you love it!'
       )
     }
 
     // Set a URL parameter that can be tracked
     const urlParams = new URLSearchParams(window.location.search)
     if (!urlParams.has('source')) {
-      urlParams.append('source', 'landing')
+      urlParams.append('source', 'landing-contractors')
       const newUrl = `${window.location.pathname}?${urlParams.toString()}`
       window.history.replaceState({}, '', newUrl)
     }
@@ -97,26 +63,49 @@ function Landing() {
     bookingFormRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const industries = [
-    'Landscaping',
-    'Construction',
-    'Plumbing',
-    'Electricians',
-    'Restaurants',
-    'Retail Stores',
-    'Professional Services',
-    'Healthcare Providers',
-    'Fitness Centers',
-    '+ many more',
+  const contractorTypes = [
+    'General Contractors',
+    'Home Builders',
+    'Remodeling Contractors',
+    'Roofing Contractors',
+    'Plumbing Companies',
+    'Electrical Contractors',
+    'HVAC Companies',
+    'Landscaping Contractors',
+    'Painting Contractors',
+    'Concrete & Masonry',
   ]
 
   const benefits = [
     'A free homepage mockup/design before paying a penny',
-    'Professional hosting packages available',
-    'Websites delivered within 1-3 weeks',
-    'Basic SEO implemented in every website',
-    'Ongoing SEO and local rankings available',
-    'Ongoing support and website updates available',
+    'Mobile-friendly design that works on all devices',
+    'Project gallery to showcase your best work',
+    'Lead capture forms to get more inquiries',
+    'Fast 1-3 week turnaround time',
+    'Local SEO to rank in your service area',
+    'Easy-to-update content management',
+    'Professional hosting included',
+  ]
+
+  const contractorPainPoints = [
+    {
+      icon: <TrendingUp className="w-8 h-8 text-blue-600" />,
+      title: 'Get More Leads',
+      description:
+        'Stop relying on word-of-mouth alone. A professional website helps potential clients find you 24/7 and generates qualified leads while you sleep.',
+    },
+    {
+      icon: <Star className="w-8 h-8 text-blue-600" />,
+      title: 'Stand Out From Competition',
+      description:
+        'Most contractors have outdated or no websites. A modern, professional site immediately sets you apart and builds trust with homeowners.',
+    },
+    {
+      icon: <CheckCircle2 className="w-8 h-8 text-blue-600" />,
+      title: 'Showcase Your Work',
+      description:
+        'Display your best projects with before/after photos, testimonials, and detailed case studies that prove your quality and expertise.',
+    },
   ]
 
   return (
@@ -129,17 +118,47 @@ function Landing() {
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-50 to-blue-50 px-4 py-2 rounded-full mb-6 animate-fade-in-down border border-orange-100">
+                <HardHat className="w-5 h-5 text-orange-600" />
+                <span className="text-orange-800 font-semibold">
+                  For Contractors & Home Service Pros
+                </span>
+              </div>
               <h1 className="heading-lg mb-8 leading-tight animate-fade-in-up">
                 GET A{' '}
                 <span className="text-gradient-blue relative animate-glow-pulse inline-block px-2 font-extrabold">
                   FREE
                 </span>{' '}
-                WEBSITE DESIGN FOR YOUR BUSINESS
+                WEBSITE DESIGN FOR YOUR CONTRACTING BUSINESS
               </h1>
               <p className="text-2xl md:text-3xl mb-8 text-gray-800 font-semibold leading-relaxed animate-fade-in-up delay-100">
-                We'll design your website for FREE. If you like it, you can buy it. If not, no harm
-                done!
+                We'll design your contractor website for FREE. If you like it, you can buy it. If
+                not, no harm done!
               </p>
+              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-2xl p-6 mb-6 animate-fade-in-up delay-200">
+                <div className="flex items-start gap-4">
+                  <Hammer className="w-8 h-8 text-orange-600 flex-shrink-0 mt-1" />
+                  <div className="text-left">
+                    <p className="text-lg font-bold text-gray-900 mb-2">
+                      Perfect for contractors who need:
+                    </p>
+                    <ul className="space-y-1 text-gray-700">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <span>More leads and project inquiries</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <span>A portfolio to showcase their work</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <span>Professional online presence</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
               <p className="text-xl font-bold mb-6 text-red-600 bg-red-50 inline-block px-6 py-3 rounded-full border-2 border-red-200 animate-fade-in-up delay-200">
                 Free design mockup — no payment until you love it
               </p>
@@ -159,7 +178,7 @@ function Landing() {
                 ))}
               </div>
               <p className="text-gray-700 mt-3 font-semibold text-lg animate-fade-in-up delay-400">
-                ⭐ Rated 5.0 / 5 on Google!
+                ⭐ Rated 5.0 / 5 on Google by Contractors Like You!
               </p>
             </div>
             <div className="video-container relative rounded-2xl shadow-2xl overflow-hidden transform hover:scale-105 transition-smooth duration-500 border-4 border-blue-200 hover:border-purple-300 animate-fade-in-right">
@@ -177,67 +196,44 @@ function Landing() {
         </div>
       </section>
 
-      {/* Examples Section */}
+      {/* Why Contractors Need a Website Section */}
       <section className="py-20 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(249,115,22,0.05),transparent_50%)]"></div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <h2 className="heading-xl text-gradient-blue text-center mb-16 animate-fade-in-up">
+            WHY CONTRACTORS NEED A PROFESSIONAL WEBSITE
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {contractorPainPoints.map((point, index) => (
+              <div
+                key={index}
+                className={`bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-xl p-8 hover:shadow-2xl transition-smooth hover-lift border-2 border-blue-100 animate-fade-in-up delay-${index * 100}`}
+              >
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 w-20 h-20 rounded-2xl flex items-center justify-center mb-6 shadow-lg animate-levitate">
+                  {point.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-4 text-gray-900">{point.title}</h3>
+                <p className="text-gray-700 leading-relaxed text-lg">{point.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Contractor Examples Section */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(147,51,234,0.05),transparent_50%)]"></div>
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <h2 className="heading-xl text-gradient-blue text-center mb-16 animate-fade-in-up">
-            SEE EXAMPLES...
+            CONTRACTOR WEBSITES WE'VE BUILT
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Example 1 */}
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-smooth hover-lift duration-300 border-2 border-gray-100 animate-fade-in-up">
-              <img
-                src="https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif"
-                alt="Hot Pot One Website Example"
-                className="w-full h-56 object-cover hover:scale-110 transition-smooth duration-500"
-              />
-              <div className="p-8">
-                <div className="flex justify-center mb-4 gap-1">
-                  {[1, 2, 3, 4, 5].map((_, index) => (
-                    <Star key={index} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-center text-base italic mb-6 text-gray-700 leading-relaxed">
-                  "Ace Web Designers created an amazing website for our restaurant. The ordering
-                  system works flawlessly and we've seen a significant increase in online orders."
-                </p>
-                <p className="text-center font-bold text-lg text-gray-900">
-                  Hot Pot One - Restaurant
-                </p>
-              </div>
-            </div>
-
-            {/* Example 2 */}
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-smooth hover-lift duration-300 border-2 border-gray-100 animate-fade-in-up delay-100">
-              <img
-                src="https://i.ibb.co/Myx4nrSr/concuo-gif.gif"
-                alt="Conuco Takeout Website Example"
-                className="w-full h-56 object-cover hover:scale-110 transition-smooth duration-500"
-              />
-              <div className="p-8">
-                <div className="flex justify-center mb-4 gap-1">
-                  {[1, 2, 3, 4, 5].map((_, index) => (
-                    <Star key={index} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-center text-base italic mb-6 text-gray-700 leading-relaxed">
-                  "The team at Ace Web Designers understood exactly what we needed. Our Dominican
-                  cuisine is now beautifully showcased online, and customers love ordering through
-                  our website."
-                </p>
-                <p className="text-center font-bold text-lg text-gray-900">
-                  Conuco Takeout - Restaurant
-                </p>
-              </div>
-            </div>
-
-            {/* Example 3 */}
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-smooth hover-lift duration-300 border-2 border-gray-100 animate-fade-in-up delay-200">
+            {/* Dunn Construction - Featured */}
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-smooth hover-lift duration-300 border-2 border-gray-100 animate-fade-in-up md:col-span-2">
               <img
                 src="https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif"
                 alt="Dunn Construction Website Example"
-                className="w-full h-56 object-cover hover:scale-110 transition-smooth duration-500"
+                className="w-full h-72 object-cover hover:scale-110 transition-smooth duration-500"
               />
               <div className="p-8">
                 <div className="flex justify-center mb-4 gap-1">
@@ -245,12 +241,40 @@ function Landing() {
                     <Star key={index} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                   ))}
                 </div>
-                <p className="text-center text-base italic mb-6 text-gray-700 leading-relaxed">
+                <p className="text-center text-lg italic mb-6 text-gray-700 leading-relaxed">
                   "We were recommended to Rhyan and Valerie by a friend. Within days, we had a
                   professional website that perfectly represented our construction business. We're
-                  already getting more leads!"
+                  already getting 3x more leads than before!"
                 </p>
-                <p className="text-center font-bold text-lg text-gray-900">Dunn Construction</p>
+                <p className="text-center font-bold text-xl text-gray-900">
+                  John Dunn - Dunn Construction
+                </p>
+                <div className="mt-4 text-center">
+                  <span className="inline-block px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 rounded-full text-green-700 font-semibold border border-green-200">
+                    📈 Result: 3x More Qualified Leads
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional contractor testimonial */}
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-smooth hover-lift duration-300 border-2 border-gray-100 animate-fade-in-up delay-100">
+              <div className="p-8 h-full flex flex-col justify-center">
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Wrench className="w-10 h-10 text-orange-600" />
+                </div>
+                <div className="flex justify-center mb-4 gap-1">
+                  {[1, 2, 3, 4, 5].map((_, index) => (
+                    <Star key={index} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                  ))}
+                </div>
+                <p className="text-center text-base italic mb-6 text-gray-700 leading-relaxed">
+                  "As a small plumbing contractor, I needed a way to compete with bigger companies.
+                  This website has been a game-changer for getting new customers online."
+                </p>
+                <p className="text-center font-bold text-lg text-gray-900">
+                  Mike S. - Local Plumbing Contractor
+                </p>
               </div>
             </div>
           </div>
@@ -271,50 +295,40 @@ function Landing() {
             </div>
             <div className="md:col-span-3 animate-fade-in-right">
               <h2 className="heading-md mb-6 text-gray-900">
-                👋 Hey We're Rhyan & Valerie... Web designers at Ace Web Designers!
+                👋 Hey We're Rhyan & Valerie... We Help Contractors Get More Business Online!
               </h2>
-              <p className="text-xl mb-5 bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-2xl text-blue-900 font-semibold border border-blue-200 shadow-sm">
-                Our goal is to help make sure you don't overpay on a new website.
+              <p className="text-xl mb-5 bg-gradient-to-r from-orange-100 to-yellow-100 p-4 rounded-2xl text-orange-900 font-semibold border border-orange-200 shadow-sm">
+                We know contractors are busy running their business. That's why we make getting a
+                website EASY.
               </p>
               <p className="text-lg mb-5 bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-2xl text-blue-900 leading-relaxed border border-blue-200 shadow-sm">
-                Of course a nice looking website is hugely important when it comes to growing your
-                business, getting more leads, and having somewhere to showcase all of your work.
+                Most contractors lose jobs to competitors simply because they don't have a
+                professional online presence. Homeowners search online first, and if they can't find
+                you or your website looks outdated, they'll call someone else.
               </p>
               <p className="text-lg mb-8 bg-gradient-to-r from-blue-100 to-purple-100 p-4 rounded-2xl text-blue-900 leading-relaxed border border-blue-200 shadow-sm">
-                But that doesn't mean that you need to spend thousands and thousands of dollars with
-                an expensive agency.
-              </p>
-              <p className="text-lg mb-5 text-gray-700 leading-relaxed">
-                Here at Ace Web Designers, we specialize in fast and affordable websites for
-                businesses of all types.
-              </p>
-              <p className="text-lg mb-8 text-gray-700 leading-relaxed font-semibold">
-                We build websites that turn clicks into customers, but also we don't charge an arm
-                and a leg for it.
-              </p>
-              <p className="text-lg mb-8 text-gray-700 leading-relaxed">
-                So if you are looking for an affordable website for your business, book in a call
-                below and we will do you a free design.
+                We've helped dozens of contractors get professional websites that showcase their
+                work, build trust, and generate leads 24/7.
               </p>
               <div className="font-bold text-2xl mb-6 text-gradient-blue">
-                We build websites for...
+                We build websites for contractors including...
               </div>
               <div className="grid grid-cols-2 gap-3 mb-10">
-                {industries.map((industry, index) => (
+                {contractorTypes.map((type, index) => (
                   <div
                     key={index}
-                    className={`flex items-center gap-3 group hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 p-3 rounded-xl transition-smooth hover-lift border border-transparent hover:border-blue-200 animate-fade-in-up delay-${index * 50}`}
+                    className={`flex items-center gap-3 group hover:bg-gradient-to-r hover:from-orange-50 hover:to-yellow-50 p-3 rounded-xl transition-smooth hover-lift border border-transparent hover:border-orange-200 animate-fade-in-up delay-${index * 50}`}
                   >
                     <CheckCircle2 className="w-6 h-6 text-green-600 group-hover:scale-125 transition-smooth" />
-                    <span className="font-semibold text-gray-800">{industry}</span>
+                    <span className="font-semibold text-gray-800">{type}</span>
                   </div>
                 ))}
               </div>
               <p className="text-xl mb-10 text-gray-700 leading-relaxed font-semibold">
-                Simply book in a quick phone call below, let us know what you want and we'll have
-                your design ready within 48 hours.
+                Simply book a quick 15-minute call below, tell us about your contracting business,
+                and we'll have your free design ready within 48 hours.
               </p>
-              <div className="text-center bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-3xl border-2 border-blue-200 shadow-xl">
+              <div className="text-center bg-gradient-to-br from-orange-50 to-yellow-50 p-8 rounded-3xl border-2 border-orange-200 shadow-xl">
                 <p className="text-xl font-bold mb-6 text-red-600 bg-red-50 inline-block px-6 py-3 rounded-full border-2 border-red-200">
                   Free design mockup — no payment until you love it
                 </p>
@@ -344,7 +358,7 @@ function Landing() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(34,197,94,0.05),transparent_50%)]"></div>
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <h2 className="heading-xl text-gradient-blue text-center mb-16 animate-fade-in-up">
-            WHAT YOU GET WITH OUR WEBSITES...
+            WHAT YOUR CONTRACTOR WEBSITE INCLUDES...
           </h2>
           <div className="max-w-4xl mx-auto">
             {benefits.map((benefit, index) => (
@@ -383,12 +397,13 @@ function Landing() {
             BOOK YOUR FREE DESIGN CONSULTATION
           </h2>
           <p className="text-xl text-center mb-12 text-gray-700 font-semibold animate-fade-in-up delay-100">
-            Schedule a time to discuss your website needs and get your free design!
+            Schedule a quick 15-minute call to discuss your contracting business and get your free
+            website design!
           </p>
 
           <div
             className="bg-white rounded-3xl shadow-2xl p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
-            id="landing-form-container"
+            id="landing-contractors-form-container"
           >
             {/* Calendly inline widget begin */}
             <div
@@ -411,9 +426,9 @@ function Landing() {
 
       {/* Hidden element for URL-based custom conversion tracking */}
       <div
-        id="landing-conversion-tracker"
+        id="landing-contractors-conversion-tracker"
         style={{ display: 'none' }}
-        data-conversion-type="free_design_landing"
+        data-conversion-type="free_design_contractors"
       ></div>
 
       {/* Footer */}
@@ -436,9 +451,9 @@ function Landing() {
                 </span>
               </div>
               <p className="text-gray-400 text-sm">
-                Based in Leominster, MA, serving small businesses nationwide. Professional web
-                design and development services helping small business owners across America build
-                their online presence.
+                Based in Leominster, MA, serving contractors nationwide. Professional web design
+                services helping contractors across America build their online presence and get more
+                leads.
               </p>
             </div>
 
@@ -491,4 +506,4 @@ function Landing() {
   )
 }
 
-export default Landing
+export default LandingContractors

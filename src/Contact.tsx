@@ -1,46 +1,41 @@
-import React, { useEffect } from 'react';
-import { CALENDLY_URL } from './config';
-import { Mail, Phone, Calendar, MapPin } from 'lucide-react';
+import React, { useEffect } from 'react'
+import { Mail, Phone, Calendar, MapPin } from 'lucide-react'
 
 interface ContactProps {
   initialData?: {
-    budget?: string;
-    message?: string;
-  };
-}
-
-// Define global Calendly for TypeScript
-declare global {
-  interface Window {
-    Calendly: any;
+    budget?: string
+    message?: string
   }
 }
 
 function Contact({ initialData }: ContactProps) {
   useEffect(() => {
-    document.title = 'Schedule a Consultation | Web Design Services Nationwide';
-    const metaDescription = document.querySelector('meta[name="description"]');
+    document.title = 'Schedule a Consultation | Web Design Services Nationwide'
+    const metaDescription = document.querySelector('meta[name="description"]')
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Schedule a free consultation with our web design team. Book a time to discuss your project needs and learn how we can help grow your online presence.');
+      metaDescription.setAttribute(
+        'content',
+        'Schedule a free consultation with our web design team. Book a time to discuss your project needs and learn how we can help grow your online presence.'
+      )
     }
-  }, [initialData]);
+  }, [initialData])
 
   useEffect(() => {
     // Properly load the Calendly script
-    const head = document.querySelector('head');
-    const script = document.createElement('script');
-    script.src = 'https://assets.calendly.com/assets/external/widget.js';
-    script.async = true;
-    
-    head?.appendChild(script);
+    const head = document.querySelector('head')
+    const script = document.createElement('script')
+    script.src = 'https://assets.calendly.com/assets/external/widget.js'
+    script.async = true
+
+    head?.appendChild(script)
 
     return () => {
       // Clean up script if component unmounts
       if (head?.contains(script)) {
-        head.removeChild(script);
+        head.removeChild(script)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   return (
     <div className="pt-24 pb-16 bg-gradient-to-b from-blue-50 to-white">
@@ -59,7 +54,9 @@ function Contact({ initialData }: ContactProps) {
             <div className="flex items-center gap-2 text-gray-600">
               <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">★</span>
+                  <span key={i} className="text-yellow-400">
+                    ★
+                  </span>
                 ))}
               </div>
               <span className="font-semibold">5.0 Rating</span>
@@ -76,28 +73,43 @@ function Contact({ initialData }: ContactProps) {
           <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-100">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold mb-2">Schedule Your Free Consultation</h1>
-              <p className="text-gray-600">Book a time to discuss your project and get your <span className="font-bold text-blue-600">FREE</span> design mockup!</p>
-              
+              <p className="text-gray-600">
+                Book a time to discuss your project and get your{' '}
+                <span className="font-bold text-blue-600">FREE</span> design mockup!
+              </p>
+
               {initialData?.budget && (
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg text-blue-800">
-                  <p>You selected the <span className="font-bold">
-                    {initialData.budget === 'basic' ? 'Website in a Day ($200)' : 
-                     initialData.budget === 'standard' ? 'Standard Website ($1,000)' : 
-                     initialData.budget === 'ecommerce' ? 'E-commerce Website ($1,500)' : 
-                     'Custom Project'}</span> package.
+                  <p>
+                    You selected the{' '}
+                    <span className="font-bold">
+                      {initialData.budget === 'basic'
+                        ? 'Website in a Day ($200)'
+                        : initialData.budget === 'standard'
+                          ? 'Standard Website ($1,000)'
+                          : initialData.budget === 'ecommerce'
+                            ? 'E-commerce Website ($1,500)'
+                            : 'Custom Project'}
+                    </span>{' '}
+                    package.
                   </p>
-                  {initialData.message && <p className="mt-2">"<i>{initialData.message}</i>"</p>}
+                  {initialData.message && (
+                    <p className="mt-2">
+                      "<i>{initialData.message}</i>"
+                    </p>
+                  )}
                 </div>
               )}
             </div>
-            
-            {/* Calendly inline widget */}
-            <div 
-              className="calendly-inline-widget" 
-              data-url={CALENDLY_URL} 
-              style={{minWidth:"320px", height:"700px"}}
+
+            {/* Calendly inline widget begin */}
+            <div
+              className="calendly-inline-widget"
+              data-url="https://calendly.com/rhyanalmeida31/30min"
+              style={{ minWidth: '320px', height: '700px' }}
             />
-            
+            {/* Calendly inline widget end */}
+
             {/* Respectful meeting reminder */}
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
@@ -109,7 +121,9 @@ function Contact({ initialData }: ContactProps) {
           {/* Alternative Contact Methods - Secondary */}
           <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
             <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Prefer Another Way to Connect?</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Prefer Another Way to Connect?
+              </h3>
               <p className="text-gray-600 text-sm">We're here to help however you prefer</p>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
@@ -120,13 +134,16 @@ function Contact({ initialData }: ContactProps) {
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">Email</p>
-                    <a href="mailto:support@acewebdesigners.com" className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium">
+                    <a
+                      href="mailto:support@acewebdesigners.com"
+                      className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
+                    >
                       support@acewebdesigners.com
                     </a>
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
                   <div className="bg-blue-50 p-2 rounded-lg">
@@ -134,14 +151,17 @@ function Contact({ initialData }: ContactProps) {
                   </div>
                   <div>
                     <p className="text-gray-500 text-xs">Phone</p>
-                    <a href="tel:+17743151951" className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium">
+                    <a
+                      href="tel:+17743151951"
+                      className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
+                    >
                       (774) 315-1951
                     </a>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <div className="text-center mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
                 <MapPin className="w-4 h-4" />
@@ -152,7 +172,7 @@ function Contact({ initialData }: ContactProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default Contact;
+export default Contact

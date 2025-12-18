@@ -60,4 +60,11 @@
     <priority>0.5</priority>
     <mobile:mobile/>
   </url>
+  <url>
+    <loc>https://www.acewebdesigners.com/landingcontractors</loc>
+    <lastmod>2024-12-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <mobile:mobile/>
+  </url>
 </urlset>
