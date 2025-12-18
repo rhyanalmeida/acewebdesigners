@@ -4,6 +4,10 @@ import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
 function Landing() {
   // #region agent log
   useEffect(() => {
+    console.log('🟢 LANDING COMPONENT MOUNTED');
+    console.log('   - window.Calendly exists?', !!(typeof window !== 'undefined' && (window as any).Calendly));
+    console.log('   - window.Calendly type:', typeof window !== 'undefined' ? typeof (window as any).Calendly : 'window_undefined');
+    
     fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -12,8 +16,8 @@ function Landing() {
         message: 'Landing component mounted',
         data: { 
           CalendlyURL: 'https://calendly.com/rhyanalmeida31/30min',
-          windowCalendlyExists: !!(typeof window !== 'undefined' && window.Calendly),
-          calendlyType: typeof window !== 'undefined' ? typeof window.Calendly : 'window_undefined'
+          windowCalendlyExists: !!(typeof window !== 'undefined' && (window as any).Calendly),
+          calendlyType: typeof window !== 'undefined' ? typeof (window as any).Calendly : 'window_undefined'
         },
         timestamp: Date.now(),
         sessionId: 'debug-session',
@@ -26,6 +30,17 @@ function Landing() {
     setTimeout(() => {
       const widgetDiv = document.querySelector('.calendly-inline-widget');
       const containerDiv = document.getElementById('landing-form-container');
+      
+      console.log('🔍 CHECKING CALENDLY WIDGET (1 second after mount):');
+      console.log('   - Widget div exists?', !!widgetDiv);
+      console.log('   - Widget data-url:', widgetDiv?.getAttribute('data-url'));
+      console.log('   - Widget has iframe?', !!widgetDiv?.querySelector('iframe'));
+      console.log('   - Widget innerHTML:', widgetDiv?.innerHTML.substring(0, 100));
+      console.log('   - window.Calendly NOW?', !!(typeof window !== 'undefined' && (window as any).Calendly));
+      if (typeof window !== 'undefined' && (window as any).Calendly) {
+        console.log('   - Calendly methods:', Object.keys((window as any).Calendly));
+      }
+      
       fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -38,8 +53,8 @@ function Landing() {
             dataUrl: widgetDiv?.getAttribute('data-url') || 'not_found',
             widgetDivStyle: widgetDiv?.getAttribute('style') || 'not_found',
             widgetDivClasses: widgetDiv?.className || 'not_found',
-            windowCalendlyNow: !!(typeof window !== 'undefined' && window.Calendly),
-            calendlyMethods: typeof window !== 'undefined' && window.Calendly ? Object.keys(window.Calendly) : []
+            windowCalendlyNow: !!(typeof window !== 'undefined' && (window as any).Calendly),
+            calendlyMethods: typeof window !== 'undefined' && (window as any).Calendly ? Object.keys((window as any).Calendly) : []
           },
           timestamp: Date.now(),
           sessionId: 'debug-session',
