@@ -2,68 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
 
 function Landing() {
-  // #region agent log
   useEffect(() => {
-    console.log('🟢 LANDING COMPONENT MOUNTED');
-    console.log('   - window.Calendly exists?', !!(typeof window !== 'undefined' && (window as any).Calendly));
-    console.log('   - window.Calendly type:', typeof window !== 'undefined' ? typeof (window as any).Calendly : 'window_undefined');
-    
-    fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'Landing.tsx:component_mounted',
-        message: 'Landing component mounted',
-        data: { 
-          CalendlyURL: 'https://calendly.com/rhyanalmeida31/30min',
-          windowCalendlyExists: !!(typeof window !== 'undefined' && (window as any).Calendly),
-          calendlyType: typeof window !== 'undefined' ? typeof (window as any).Calendly : 'window_undefined'
-        },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'runtime-debug',
-        hypothesisId: 'B',
-      }),
-    }).catch(() => {})
-    
-    // #region agent log - Check for Calendly widget div and attributes
-    setTimeout(() => {
-      const widgetDiv = document.querySelector('.calendly-inline-widget');
-      const containerDiv = document.getElementById('landing-form-container');
-      
-      console.log('🔍 CHECKING CALENDLY WIDGET (1 second after mount):');
-      console.log('   - Widget div exists?', !!widgetDiv);
-      console.log('   - Widget data-url:', widgetDiv?.getAttribute('data-url'));
-      console.log('   - Widget has iframe?', !!widgetDiv?.querySelector('iframe'));
-      console.log('   - Widget innerHTML:', widgetDiv?.innerHTML.substring(0, 100));
-      console.log('   - window.Calendly NOW?', !!(typeof window !== 'undefined' && (window as any).Calendly));
-      if (typeof window !== 'undefined' && (window as any).Calendly) {
-        console.log('   - Calendly methods:', Object.keys((window as any).Calendly));
-      }
-      
-      fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'Landing.tsx:dom_check',
-          message: 'Checking Calendly widget DOM after mount',
-          data: {
-            widgetDivExists: !!widgetDiv,
-            containerExists: !!containerDiv,
-            dataUrl: widgetDiv?.getAttribute('data-url') || 'not_found',
-            widgetDivStyle: widgetDiv?.getAttribute('style') || 'not_found',
-            widgetDivClasses: widgetDiv?.className || 'not_found',
-            windowCalendlyNow: !!(typeof window !== 'undefined' && (window as any).Calendly),
-            calendlyMethods: typeof window !== 'undefined' && (window as any).Calendly ? Object.keys((window as any).Calendly) : []
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'runtime-debug',
-          hypothesisId: 'B-C',
-        }),
-      }).catch(() => {});
-    }, 1000);
-    // #endregion
 
     // Check for JavaScript errors
     const errorHandler = event => {
@@ -113,16 +52,11 @@ function Landing() {
   }, [])
 
   useEffect(() => {
-    // #region agent log - Manual Calendly initialization
-    console.log('🔧 Attempting manual Calendly initialization');
-    
+    // Manual Calendly initialization
     const initCalendly = () => {
       const widgetDiv = document.querySelector('.calendly-inline-widget') as HTMLElement;
-      console.log('   - Widget div found?', !!widgetDiv);
-      console.log('   - window.Calendly exists?', !!(window as any).Calendly);
       
-      if (widgetDiv && (window as any).Calendly) {
-        console.log('   - Calling Calendly.initInlineWidget()');
+      if (widgetDiv && (window as any).Calendly && (window as any).Calendly.initInlineWidget) {
         try {
           (window as any).Calendly.initInlineWidget({
             url: 'https://calendly.com/rhyanalmeida31/30min',
@@ -130,19 +64,15 @@ function Landing() {
             prefill: {},
             utm: {}
           });
-          console.log('✅ Calendly widget initialized successfully');
         } catch (error) {
-          console.error('❌ Error initializing Calendly:', error);
+          console.error('Calendly initialization error:', error);
         }
       } else {
-        console.log('⏳ Calendly not ready, will retry...');
         setTimeout(initCalendly, 500);
       }
     };
     
-    // Try immediately
     setTimeout(initCalendly, 100);
-    // #endregion
     
     // Calendly script is loaded in index.html
     // Just preload fonts here
@@ -457,35 +387,6 @@ function Landing() {
           <div
             className="bg-white rounded-3xl shadow-2xl p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
             id="landing-form-container"
-            ref={(el) => {
-              // #region agent log
-              if (el) {
-                setTimeout(() => {
-                  const widgetDiv = el.querySelector('.calendly-inline-widget');
-                  fetch('http://127.0.0.1:7242/ingest/b5ef41d3-5738-4b13-bc19-643c9f9be9d5', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      location: 'Landing.tsx:container_ref',
-                      message: 'Container rendered with widget div',
-                      data: {
-                        containerRendered: true,
-                        widgetDivFound: !!widgetDiv,
-                        widgetDataUrl: widgetDiv?.getAttribute('data-url'),
-                        widgetInnerHTML: widgetDiv?.innerHTML || 'empty',
-                        widgetChildrenCount: widgetDiv?.children.length || 0,
-                        iframeExists: !!widgetDiv?.querySelector('iframe')
-                      },
-                      timestamp: Date.now(),
-                      sessionId: 'debug-session',
-                      runId: 'runtime-debug',
-                      hypothesisId: 'C-D',
-                    }),
-                  }).catch(() => {});
-                }, 500);
-              }
-              // #endregion
-            }}
           >
             {/* Calendly inline widget begin */}
             <div
