@@ -2,7 +2,6 @@ import React, { useRef, useEffect } from 'react'
 import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
 
 function Landing() {
-
   const bookingFormRef = useRef(null)
 
   useEffect(() => {
@@ -21,46 +20,6 @@ function Landing() {
       urlParams.append('source', 'landing')
       const newUrl = `${window.location.pathname}?${urlParams.toString()}`
       window.history.replaceState({}, '', newUrl)
-    }
-  }, [])
-
-  useEffect(() => {
-    // Manual Calendly initialization
-    const initCalendly = () => {
-      const widgetDiv = document.querySelector('.calendly-inline-widget') as HTMLElement;
-      
-      if (widgetDiv && (window as any).Calendly && (window as any).Calendly.initInlineWidget) {
-        try {
-          (window as any).Calendly.initInlineWidget({
-            url: 'https://calendly.com/rhyanalmeida31/30min',
-            parentElement: widgetDiv,
-            prefill: {},
-            utm: {}
-          });
-        } catch (error) {
-          console.error('Calendly initialization error:', error);
-        }
-      } else {
-        setTimeout(initCalendly, 500);
-      }
-    };
-    
-    setTimeout(initCalendly, 100);
-    
-    // Calendly script is loaded in index.html
-    // Just preload fonts here
-    const head = document.querySelector('head')
-    const preloadLink = document.createElement('link')
-    preloadLink.rel = 'preload'
-    preloadLink.href =
-      'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap'
-    preloadLink.as = 'style'
-    head?.appendChild(preloadLink)
-
-    return () => {
-      if (head?.contains(preloadLink)) {
-        head.removeChild(preloadLink)
-      }
     }
   }, [])
 
@@ -235,7 +194,7 @@ function Landing() {
           <div className="grid md:grid-cols-5 gap-12 items-center">
             <div className="md:col-span-2 animate-fade-in-left">
               <img
-                src="https://i.ibb.co/DP2X8fXT/handsome.jpg"
+                src="/rhyan.jpg"
                 alt="Web Designers"
                 className="rounded-3xl shadow-2xl object-cover w-full aspect-[3/4] hover:shadow-2xl transition-smooth duration-500 transform hover:scale-105 border-4 border-white hover-lift"
               />

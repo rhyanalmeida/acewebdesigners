@@ -27,21 +27,42 @@
     
     # Enhanced Content Security Policy
     Content-Security-Policy = """
-      default-src 'self';
+      default-src 'self' data: blob:;
       script-src 'self' 'unsafe-inline' 'unsafe-eval' 
         https://www.google.com 
         https://www.gstatic.com 
         https://assets.calendly.com 
         https://calendly.com
+        https://*.calendly.com
         https://connect.facebook.net 
         https://www.facebook.com
-        https://player.vimeo.com;
+        https://link.msgsndr.com
+        https://player.vimeo.com
+        https://*.vimeo.com;
+      script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' 
+        https://www.google.com 
+        https://www.gstatic.com 
+        https://assets.calendly.com 
+        https://calendly.com
+        https://*.calendly.com
+        https://connect.facebook.net 
+        https://www.facebook.com
+        https://link.msgsndr.com
+        https://player.vimeo.com
+        https://*.vimeo.com;
       style-src 'self' 'unsafe-inline' 
         https://fonts.googleapis.com 
         https://assets.calendly.com
-        https://calendly.com;
+        https://calendly.com
+        https://*.calendly.com;
+      style-src-elem 'self' 'unsafe-inline' 
+        https://fonts.googleapis.com 
+        https://assets.calendly.com
+        https://calendly.com
+        https://*.calendly.com;
       img-src 'self' data: blob: 
-        https://i.ibb.co 
+        https://i.ibb.co
+        https://*.ibb.co
         https://i.postimg.cc 
         https://images.unsplash.com 
         https://fast.wistia.com 
@@ -60,15 +81,21 @@
         https://www.google.com 
         https://www.gstatic.com;
       font-src 'self' data: 
-        https://fonts.gstatic.com;
+        https://fonts.gstatic.com
+        https://assets.calendly.com;
       frame-src 'self' 
         https://www.google.com 
         https://www.recaptcha.net 
         https://fast.wistia.com 
-        https://player.vimeo.com 
+        https://player.vimeo.com
+        https://*.vimeo.com
         https://www.facebook.com 
         https://calendly.com
         https://*.calendly.com;
+      media-src 'self'
+        https://player.vimeo.com
+        https://*.vimeo.com
+        https://fast.wistia.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self' https://formspree.io;

@@ -31,34 +31,6 @@ function LandingContractors() {
     }
   }, [])
 
-  useEffect(() => {
-    // Load the Calendly script
-    const head = document.querySelector('head')
-    const script = document.createElement('script')
-    script.src = 'https://assets.calendly.com/assets/external/widget.js'
-    script.async = true
-    script.defer = true
-    head?.appendChild(script)
-
-    // Preload critical resources
-    const preloadLink = document.createElement('link')
-    preloadLink.rel = 'preload'
-    preloadLink.href =
-      'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap'
-    preloadLink.as = 'style'
-    head?.appendChild(preloadLink)
-
-    return () => {
-      // Clean up script if component unmounts
-      if (head?.contains(script)) {
-        head.removeChild(script)
-      }
-      if (head?.contains(preloadLink)) {
-        head.removeChild(preloadLink)
-      }
-    }
-  }, [])
-
   const handleGetStarted = () => {
     bookingFormRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -288,7 +260,7 @@ function LandingContractors() {
           <div className="grid md:grid-cols-5 gap-12 items-center">
             <div className="md:col-span-2 animate-fade-in-left">
               <img
-                src="https://i.ibb.co/DP2X8fXT/handsome.jpg"
+                src="/rhyan.jpg"
                 alt="Web Designers"
                 className="rounded-3xl shadow-2xl object-cover w-full aspect-[3/4] hover:shadow-2xl transition-smooth duration-500 transform hover:scale-105 border-4 border-white hover-lift"
               />

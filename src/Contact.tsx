@@ -20,23 +20,6 @@ function Contact({ initialData }: ContactProps) {
     }
   }, [initialData])
 
-  useEffect(() => {
-    // Properly load the Calendly script
-    const head = document.querySelector('head')
-    const script = document.createElement('script')
-    script.src = 'https://assets.calendly.com/assets/external/widget.js'
-    script.async = true
-
-    head?.appendChild(script)
-
-    return () => {
-      // Clean up script if component unmounts
-      if (head?.contains(script)) {
-        head.removeChild(script)
-      }
-    }
-  }, [])
-
   return (
     <div className="pt-24 pb-16 bg-gradient-to-b from-blue-50 to-white">
       <div className="max-w-4xl mx-auto px-4">
