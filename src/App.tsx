@@ -145,10 +145,10 @@ function App() {
   }, [currentPage])
 
   React.useEffect(() => {
-    // Check if the URL path is /landing, /landingcontractor, or /refer and set the page accordingly
+    // Check if the URL path is /landing, /contractorlanding, or /refer and set the page accordingly
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '') // Remove trailing slash and normalize
-    if (path === '/landingcontractor' || path.includes('/landingcontractor')) {
-      setCurrentPage('landingcontractor')
+    if (path === '/contractorlanding' || path.includes('/contractorlanding')) {
+      setCurrentPage('contractorlanding')
     } else if (path === '/landing' || path.includes('/landing')) {
       setCurrentPage('landing')
     } else if (path === '/refer' || path.includes('/refer')) {
@@ -473,7 +473,7 @@ function App() {
         </div>
       )
     }
-    if (currentPage === 'landingcontractor') {
+    if (currentPage === 'contractorlanding') {
       return (
         <div className="w-full h-full">
           <LandingContractors />
@@ -1196,7 +1196,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {currentPage !== 'landing' &&
-        currentPage !== 'landingcontractor' &&
+        currentPage !== 'contractorlanding' &&
         currentPage !== 'refer' && (
           <>
             {/* Navigation */}
@@ -1379,7 +1379,7 @@ function App() {
       {renderContent()}
 
       {currentPage !== 'landing' &&
-        currentPage !== 'landingcontractor' &&
+        currentPage !== 'contractorlanding' &&
         currentPage !== 'refer' && (
           <>
             {/* Footer CTA Section */}
