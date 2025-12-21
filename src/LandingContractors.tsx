@@ -214,12 +214,10 @@ function LandingContractors() {
                   ))}
                 </div>
                 <p className="text-center text-lg italic mb-6 text-gray-700 leading-relaxed">
-                  "We were recommended to Rhyan and Valerie by a friend. Within days, we had a
-                  professional website that perfectly represented our construction business. The
-                  quality and attention to detail exceeded our expectations!"
+                  "Happy with the professional website design and service."
                 </p>
                 <p className="text-center font-bold text-xl text-gray-900">
-                  John Dunn - Dunn Construction
+                  Jordan Dunn - Dunn Construction
                 </p>
               </div>
             </div>
