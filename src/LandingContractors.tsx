@@ -29,6 +29,14 @@ function LandingContractors() {
       const newUrl = `${window.location.pathname}?${urlParams.toString()}`
       window.history.replaceState({}, '', newUrl)
     }
+
+    // Initialize Calendly widget
+    if (window.Calendly) {
+      window.Calendly.initInlineWidget({
+        url: 'https://calendly.com/rhyanalmeida31/30min',
+        parentElement: document.querySelector('.calendly-inline-widget'),
+      })
+    }
   }, [])
 
   const handleGetStarted = () => {
