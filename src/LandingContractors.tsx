@@ -208,16 +208,8 @@ function LandingContractors() {
                 className="w-full h-72 object-cover hover:scale-110 transition-smooth duration-500"
               />
               <div className="p-8">
-                <div className="flex justify-center mb-4 gap-1">
-                  {[1, 2, 3, 4, 5].map((_, index) => (
-                    <Star key={index} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-center text-lg italic mb-6 text-gray-700 leading-relaxed">
-                  "Happy with the professional website design and service."
-                </p>
                 <p className="text-center font-bold text-xl text-gray-900">
-                  Jordan Dunn - Dunn Construction
+                  Dunn Construction - Happy Client
                 </p>
               </div>
             </div>
