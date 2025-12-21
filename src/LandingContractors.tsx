@@ -156,11 +156,11 @@ function LandingContractors() {
             <div className="video-container relative rounded-2xl shadow-2xl overflow-hidden transform hover:scale-105 transition-smooth duration-500 border-4 border-blue-200 hover:border-purple-300 animate-fade-in-right">
               <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
                 <iframe
-                  src="https://player.vimeo.com/video/1088261551?h=a19a5e95f4&badge=0&autopause=0&player_id=0&app_id=58479"
+                  src="https://player.vimeo.com/video/1148381897?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1"
                   frameBorder="0"
                   allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                  title="Free Preview Rhyan 1 - 526"
+                  title="Ace Winter"
                 ></iframe>
               </div>
             </div>
@@ -215,17 +215,12 @@ function LandingContractors() {
                 </div>
                 <p className="text-center text-lg italic mb-6 text-gray-700 leading-relaxed">
                   "We were recommended to Rhyan and Valerie by a friend. Within days, we had a
-                  professional website that perfectly represented our construction business. We're
-                  already getting 3x more leads than before!"
+                  professional website that perfectly represented our construction business. The
+                  quality and attention to detail exceeded our expectations!"
                 </p>
                 <p className="text-center font-bold text-xl text-gray-900">
                   John Dunn - Dunn Construction
                 </p>
-                <div className="mt-4 text-center">
-                  <span className="inline-block px-4 py-2 bg-gradient-to-r from-green-50 to-green-100 rounded-full text-green-700 font-semibold border border-green-200">
-                    📈 Result: 3x More Qualified Leads
-                  </span>
-                </div>
               </div>
             </div>
 

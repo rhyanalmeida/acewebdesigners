@@ -26,6 +26,7 @@ import AboutUs from './AboutUs'
 import Work from './Work'
 import Services from './Services'
 import Landing from './Landing'
+import LandingContractors from './LandingContractors'
 import Refer from './Refer'
 import PrivacyPolicy from './PrivacyPolicy'
 
@@ -89,7 +90,6 @@ const LazyImage: React.FC<{
 }
 
 function App() {
-
   const [currentPage, setCurrentPage] = React.useState('home')
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)
   const [pendingScroll, setPendingScroll] = React.useState<string | null>(null)
@@ -145,10 +145,10 @@ function App() {
   }, [currentPage])
 
   React.useEffect(() => {
-    // Check if the URL path is /landing, /landingcontractors, or /refer and set the page accordingly
+    // Check if the URL path is /landing, /landingcontractor, or /refer and set the page accordingly
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '') // Remove trailing slash and normalize
-    if (path === '/landingcontractors' || path.includes('/landingcontractors')) {
-      setCurrentPage('landingcontractors')
+    if (path === '/landingcontractor' || path.includes('/landingcontractor')) {
+      setCurrentPage('landingcontractor')
     } else if (path === '/landing' || path.includes('/landing')) {
       setCurrentPage('landing')
     } else if (path === '/refer' || path.includes('/refer')) {
@@ -470,6 +470,13 @@ function App() {
       return (
         <div className="w-full h-full">
           <Landing />
+        </div>
+      )
+    }
+    if (currentPage === 'landingcontractor') {
+      return (
+        <div className="w-full h-full">
+          <LandingContractors />
         </div>
       )
     }
@@ -1188,108 +1195,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      {currentPage !== 'landing' && currentPage !== 'landingcontractors' && currentPage !== 'refer' && (
-        <>
-          {/* Navigation */}
-          <header>
-            <nav
-              className="fixed w-full bg-white/90 backdrop-blur-lg z-50 border-b shadow-sm transition-all duration-300"
-              aria-label="Main navigation"
-            >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 items-center">
-                  <button
-                    onClick={() => handleNavigation('home')}
-                    className="flex flex-col items-start"
-                    aria-label="Go to homepage"
-                  >
-                    <div className="flex items-center">
-                      <span className="text-2xl font-bold tracking-tight">ACE</span>
-                      <MousePointer2
-                        className="w-5 h-5 ml-0.5"
-                        style={{ marginTop: '-2px' }}
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <span className="text-sm font-medium" style={{ marginTop: '-4px' }}>
-                      Web Designers
-                    </span>
-                  </button>
-
-                  {/* Desktop Navigation */}
-                  <div className="hidden md:flex space-x-8 items-center">
-                    <button
-                      onClick={() => handleNavigation('home')}
-                      className="text-gray-700 hover:text-black transition-colors"
-                    >
-                      Home
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('about')}
-                      className="text-gray-700 hover:text-black transition-colors"
-                    >
-                      About Us
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('services')}
-                      className="text-gray-700 hover:text-black transition-colors"
-                    >
-                      Services
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('work')}
-                      className="text-gray-700 hover:text-black transition-colors"
-                    >
-                      Our Work
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('contact')}
-                      className="text-gray-700 hover:text-black transition-colors"
-                    >
-                      Contact
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('refer')}
-                      className="text-gray-700 hover:text-black transition-colors"
-                    >
-                      Refer & Earn
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('contact')}
-                      className="ml-4 bg-gradient-blue-purple text-white px-6 py-2 rounded-full font-semibold hover:scale-105 transition-smooth shadow-lg animate-glow-pulse"
-                    >
-                      Free Design
-                    </button>
-                  </div>
-
-                  {/* Mobile menu button */}
-                  <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="md:hidden p-2 rounded-md text-gray-700 hover:text-black"
-                    aria-expanded={isMenuOpen}
-                    aria-label="Toggle menu"
-                  >
-                    {isMenuOpen ? (
-                      <X className="h-6 w-6" aria-hidden="true" />
-                    ) : (
-                      <Menu className="h-6 w-6" aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Mobile menu */}
-              <div
-                className={`md:hidden fixed inset-0 bg-white z-[100] transform transition-transform duration-300 ease-in-out ${
-                  isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-                }`}
-                style={{
-                  height: '100dvh',
-                  backgroundColor: 'white',
-                }}
+      {currentPage !== 'landing' &&
+        currentPage !== 'landingcontractor' &&
+        currentPage !== 'refer' && (
+          <>
+            {/* Navigation */}
+            <header>
+              <nav
+                className="fixed w-full bg-white/90 backdrop-blur-lg z-50 border-b shadow-sm transition-all duration-300"
+                aria-label="Main navigation"
               >
-                <div className="flex flex-col h-full">
-                  <div className="flex justify-between items-center p-4 border-b">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex justify-between h-16 items-center">
                     <button
                       onClick={() => handleNavigation('home')}
                       className="flex flex-col items-start"
@@ -1307,182 +1224,278 @@ function App() {
                         Web Designers
                       </span>
                     </button>
+
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex space-x-8 items-center">
+                      <button
+                        onClick={() => handleNavigation('home')}
+                        className="text-gray-700 hover:text-black transition-colors"
+                      >
+                        Home
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('about')}
+                        className="text-gray-700 hover:text-black transition-colors"
+                      >
+                        About Us
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('services')}
+                        className="text-gray-700 hover:text-black transition-colors"
+                      >
+                        Services
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('work')}
+                        className="text-gray-700 hover:text-black transition-colors"
+                      >
+                        Our Work
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('contact')}
+                        className="text-gray-700 hover:text-black transition-colors"
+                      >
+                        Contact
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('refer')}
+                        className="text-gray-700 hover:text-black transition-colors"
+                      >
+                        Refer & Earn
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('contact')}
+                        className="ml-4 bg-gradient-blue-purple text-white px-6 py-2 rounded-full font-semibold hover:scale-105 transition-smooth shadow-lg animate-glow-pulse"
+                      >
+                        Free Design
+                      </button>
+                    </div>
+
+                    {/* Mobile menu button */}
                     <button
-                      onClick={() => setIsMenuOpen(false)}
-                      className="p-2 rounded-md text-gray-700 hover:text-black"
-                      aria-label="Close menu"
+                      onClick={() => setIsMenuOpen(!isMenuOpen)}
+                      className="md:hidden p-2 rounded-md text-gray-700 hover:text-black"
+                      aria-expanded={isMenuOpen}
+                      aria-label="Toggle menu"
                     >
-                      <X className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
-                  <div className="flex flex-col space-y-4 p-4">
-                    <button
-                      onClick={() => handleNavigation('home')}
-                      className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
-                    >
-                      Home
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('about')}
-                      className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
-                    >
-                      About Us
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('services')}
-                      className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
-                    >
-                      Services
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('work')}
-                      className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
-                    >
-                      Our Work
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('contact')}
-                      className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
-                    >
-                      Contact
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('refer')}
-                      className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
-                    >
-                      Refer & Earn
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('contact')}
-                      className="mt-4 bg-gradient-blue-purple text-white px-8 py-3 rounded-full font-bold hover:scale-105 transition-smooth shadow-lg animate-glow-pulse text-center"
-                    >
-                      👉 GET MY FREE DESIGN NOW!
+                      {isMenuOpen ? (
+                        <X className="h-6 w-6" aria-hidden="true" />
+                      ) : (
+                        <Menu className="h-6 w-6" aria-hidden="true" />
+                      )}
                     </button>
                   </div>
                 </div>
-              </div>
-            </nav>
-          </header>
-        </>
-      )}
+
+                {/* Mobile menu */}
+                <div
+                  className={`md:hidden fixed inset-0 bg-white z-[100] transform transition-transform duration-300 ease-in-out ${
+                    isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                  }`}
+                  style={{
+                    height: '100dvh',
+                    backgroundColor: 'white',
+                  }}
+                >
+                  <div className="flex flex-col h-full">
+                    <div className="flex justify-between items-center p-4 border-b">
+                      <button
+                        onClick={() => handleNavigation('home')}
+                        className="flex flex-col items-start"
+                        aria-label="Go to homepage"
+                      >
+                        <div className="flex items-center">
+                          <span className="text-2xl font-bold tracking-tight">ACE</span>
+                          <MousePointer2
+                            className="w-5 h-5 ml-0.5"
+                            style={{ marginTop: '-2px' }}
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <span className="text-sm font-medium" style={{ marginTop: '-4px' }}>
+                          Web Designers
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setIsMenuOpen(false)}
+                        className="p-2 rounded-md text-gray-700 hover:text-black"
+                        aria-label="Close menu"
+                      >
+                        <X className="h-6 w-6" aria-hidden="true" />
+                      </button>
+                    </div>
+                    <div className="flex flex-col space-y-4 p-4">
+                      <button
+                        onClick={() => handleNavigation('home')}
+                        className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
+                      >
+                        Home
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('about')}
+                        className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
+                      >
+                        About Us
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('services')}
+                        className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
+                      >
+                        Services
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('work')}
+                        className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
+                      >
+                        Our Work
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('contact')}
+                        className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
+                      >
+                        Contact
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('refer')}
+                        className="text-xl py-2 text-gray-700 hover:text-black text-left transition-colors"
+                      >
+                        Refer & Earn
+                      </button>
+                      <button
+                        onClick={() => handleNavigation('contact')}
+                        className="mt-4 bg-gradient-blue-purple text-white px-8 py-3 rounded-full font-bold hover:scale-105 transition-smooth shadow-lg animate-glow-pulse text-center"
+                      >
+                        👉 GET MY FREE DESIGN NOW!
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </nav>
+            </header>
+          </>
+        )}
 
       {/* Main Content */}
       {renderContent()}
 
-      {currentPage !== 'landing' && currentPage !== 'landingcontractors' && currentPage !== 'refer' && (
-        <>
-          {/* Footer CTA Section */}
-          <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden animate-gradient-shift">
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3')] opacity-10"></div>
-            <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-              <div className="animate-fade-in-up">
-                <h2 className="heading-lg text-white mb-6 text-shadow-bold">
-                  Ready to See Your Website Design?
-                </h2>
-                <p className="text-blue-100 text-xl mb-8 leading-relaxed max-w-2xl mx-auto">
-                  Get a free mockup. Love it? Let's build it. Simple as that.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-                  <a
-                    href="https://www.google.com/search?q=ace+web+designers+reviews"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-100 hover:text-white transition-colors"
-                  >
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-current" />
-                      ))}
-                    </div>
-                    <span className="font-semibold">5.0 Google Reviews</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                  <div className="flex items-center gap-2 text-blue-100">
-                    <Shield className="w-5 h-5" />
-                    <span>SSL Secured & No Credit Card Required</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleNavigation('contact')}
-                  className="bg-white text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-blue-50 transition-smooth hover:scale-110 inline-flex items-center group text-xl shadow-2xl animate-glow-pulse"
-                >
-                  <span className="animate-slide-right-left">👉 GET MY FREE DESIGN NOW!</span>
-                  <ChevronRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* Footer */}
-          <footer className="bg-gray-900 text-white" role="contentinfo">
-            <div className="max-w-7xl mx-auto px-4">
-              {/* Main Footer */}
-              <div className="py-12 grid md:grid-cols-2 gap-8">
-                <div>
-                  <div className="flex flex-col items-start mb-4">
-                    <div className="flex items-center">
-                      <span className="text-xl font-bold tracking-tight">ACE</span>
-                      <MousePointer2
-                        className="w-4 h-4 ml-0.5"
-                        style={{ marginTop: '-2px' }}
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <span className="text-sm text-gray-400" style={{ marginTop: '-4px' }}>
-                      Web Designers
-                    </span>
-                  </div>
-                  <p className="text-gray-400 text-sm">
-                    Based in Leominster, MA, serving small businesses nationwide. Professional web
-                    design and development services helping small business owners across America
-                    build their online presence.
+      {currentPage !== 'landing' &&
+        currentPage !== 'landingcontractor' &&
+        currentPage !== 'refer' && (
+          <>
+            {/* Footer CTA Section */}
+            <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden animate-gradient-shift">
+              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3')] opacity-10"></div>
+              <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+                <div className="animate-fade-in-up">
+                  <h2 className="heading-lg text-white mb-6 text-shadow-bold">
+                    Ready to See Your Website Design?
+                  </h2>
+                  <p className="text-blue-100 text-xl mb-8 leading-relaxed max-w-2xl mx-auto">
+                    Get a free mockup. Love it? Let's build it. Simple as that.
                   </p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Contact</h3>
-                  <ul className="space-y-2">
-                    <li>
-                      <a
-                        href="mailto:support@acewebdesigners.com"
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        support@acewebdesigners.com
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="tel:+17743151951"
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        (774) 315-1951
-                      </a>
-                    </li>
-                    <li className="text-gray-400">Based in Leominster, MA • Serving Nationwide</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Privacy Policy and Copyright */}
-              <div className="py-6 border-t border-gray-800">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                  <p className="text-sm text-gray-400">
-                    © {new Date().getFullYear()} Ace Web Designers. All rights reserved.
-                  </p>
-                  <div className="flex flex-wrap gap-4 text-sm">
-                    <button
-                      onClick={() => handleNavigation('privacy')}
-                      className="text-gray-400 hover:text-white transition-colors"
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                    <a
+                      href="https://www.google.com/search?q=ace+web+designers+reviews"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-blue-100 hover:text-white transition-colors"
                     >
-                      Privacy Policy
-                    </button>
+                      <div className="flex text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 fill-current" />
+                        ))}
+                      </div>
+                      <span className="font-semibold">5.0 Google Reviews</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                    <div className="flex items-center gap-2 text-blue-100">
+                      <Shield className="w-5 h-5" />
+                      <span>SSL Secured & No Credit Card Required</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleNavigation('contact')}
+                    className="bg-white text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-blue-50 transition-smooth hover:scale-110 inline-flex items-center group text-xl shadow-2xl animate-glow-pulse"
+                  >
+                    <span className="animate-slide-right-left">👉 GET MY FREE DESIGN NOW!</span>
+                    <ChevronRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-gray-900 text-white" role="contentinfo">
+              <div className="max-w-7xl mx-auto px-4">
+                {/* Main Footer */}
+                <div className="py-12 grid md:grid-cols-2 gap-8">
+                  <div>
+                    <div className="flex flex-col items-start mb-4">
+                      <div className="flex items-center">
+                        <span className="text-xl font-bold tracking-tight">ACE</span>
+                        <MousePointer2
+                          className="w-4 h-4 ml-0.5"
+                          style={{ marginTop: '-2px' }}
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <span className="text-sm text-gray-400" style={{ marginTop: '-4px' }}>
+                        Web Designers
+                      </span>
+                    </div>
+                    <p className="text-gray-400 text-sm">
+                      Based in Leominster, MA, serving small businesses nationwide. Professional web
+                      design and development services helping small business owners across America
+                      build their online presence.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Contact</h3>
+                    <ul className="space-y-2">
+                      <li>
+                        <a
+                          href="mailto:support@acewebdesigners.com"
+                          className="text-gray-400 hover:text-white transition-colors"
+                        >
+                          support@acewebdesigners.com
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href="tel:+17743151951"
+                          className="text-gray-400 hover:text-white transition-colors"
+                        >
+                          (774) 315-1951
+                        </a>
+                      </li>
+                      <li className="text-gray-400">
+                        Based in Leominster, MA • Serving Nationwide
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Privacy Policy and Copyright */}
+                <div className="py-6 border-t border-gray-800">
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-sm text-gray-400">
+                      © {new Date().getFullYear()} Ace Web Designers. All rights reserved.
+                    </p>
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <button
+                        onClick={() => handleNavigation('privacy')}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        Privacy Policy
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </footer>
-        </>
-      )}
+            </footer>
+          </>
+        )}
 
       {/* Mobile Sticky CTA Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-blue-purple p-4 shadow-2xl z-40 border-t-4 border-white/20 animate-gradient-shift">
