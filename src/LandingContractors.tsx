@@ -37,6 +37,24 @@ function LandingContractors() {
         parentElement: document.querySelector('.calendly-inline-widget'),
       })
     }
+
+    // Facebook Pixel - Track contractor landing page view
+    if (window.fbq) {
+      // Track ViewContent event (standard event for landing pages)
+      window.fbq('track', 'ViewContent', {
+        content_name: 'Contractor Landing Page',
+        content_category: 'Landing Page',
+        content_type: 'contractor_services',
+      })
+
+      // Track custom event for contractor-specific tracking
+      window.fbq('trackCustom', 'ContractorLandingView', {
+        page: 'contractor_landing',
+        source: urlParams.get('source') || 'direct',
+      })
+
+      console.log('✅ Facebook Pixel: Contractor landing page view tracked')
+    }
   }, [])
 
   const handleGetStarted = () => {
