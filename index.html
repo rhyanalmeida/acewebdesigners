@@ -778,8 +778,82 @@
     <script>
       console.log('📅 Calendly event listener installed - waiting for booking events...')
 
-      // Function to send booking events
-      function sendBookingEvents() {
+      // SHA-256 hashing utility for PII data (Facebook Conversions API requirement)
+      async function hashValue(value) {
+        if (!value) return null
+        try {
+          // Normalize: lowercase and trim whitespace
+          var normalized = value.toString().toLowerCase().trim()
+          // Remove any extra spaces
+          normalized = normalized.replace(/\s+/g, ' ')
+          
+          // Use SubtleCrypto API to hash
+          var msgBuffer = new TextEncoder().encode(normalized)
+          var hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
+          var hashArray = Array.from(new Uint8Array(hashBuffer))
+          var hashHex = hashArray.map(function(b) {
+            return b.toString(16).padStart(2, '0')
+          }).join('')
+          
+          return hashHex
+        } catch (error) {
+          console.error('❌ Error hashing value:', error)
+          return null
+        }
+      }
+
+      // Extract user data from Calendly event payload
+      function extractCalendlyUserData(eventData) {
+        var userData = {
+          email: null,
+          firstName: null,
+          lastName: null,
+          phone: null,
+          name: null
+        }
+
+        try {
+          // Try different payload structures that Calendly uses
+          var invitee = null
+          
+          if (eventData.payload && eventData.payload.invitee) {
+            invitee = eventData.payload.invitee
+          } else if (eventData.event && eventData.event.invitee) {
+            invitee = eventData.event.invitee
+          } else if (eventData.invitee) {
+            invitee = eventData.invitee
+          }
+
+          if (invitee) {
+            userData.email = invitee.email || null
+            userData.name = invitee.name || null
+            userData.phone = invitee.phone || invitee.phone_number || null
+            
+            // Try to extract first and last name from full name
+            if (userData.name && !invitee.first_name && !invitee.last_name) {
+              var nameParts = userData.name.split(' ')
+              userData.firstName = nameParts[0] || null
+              userData.lastName = nameParts.slice(1).join(' ') || null
+            } else {
+              userData.firstName = invitee.first_name || null
+              userData.lastName = invitee.last_name || null
+            }
+          }
+
+          console.log('📊 Extracted user data:', {
+            hasEmail: !!userData.email,
+            hasName: !!userData.name,
+            hasPhone: !!userData.phone
+          })
+        } catch (error) {
+          console.error('❌ Error extracting user data:', error)
+        }
+
+        return userData
+      }
+
+      // Function to send booking events with enhanced user data
+      async function sendBookingEvents(eventData) {
         if (window.fbq) {
           // Detect which page we're on for proper tracking
           var isContractorPage = window.location.pathname.toLowerCase().includes('/contractorlanding')
@@ -788,12 +862,53 @@
           
           console.log('📤 Sending booking events to Facebook Pixel ' + pixelId + ' (' + pageName + ')...')
 
+          // Extract user data from Calendly payload
+          var userData = extractCalendlyUserData(eventData || {})
+          
+          // Hash user data for privacy compliance
+          var hashedEmail = userData.email ? await hashValue(userData.email) : null
+          var hashedFirstName = userData.firstName ? await hashValue(userData.firstName) : null
+          var hashedLastName = userData.lastName ? await hashValue(userData.lastName) : null
+          var hashedPhone = userData.phone ? await hashValue(userData.phone) : null
+          
+          // Generate unique event ID for deduplication
+          var eventId = 'calendly_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15)
+          
+          console.log('🔐 User data hashed:', {
+            hasEmail: !!hashedEmail,
+            hasFirstName: !!hashedFirstName,
+            hasLastName: !!hashedLastName,
+            hasPhone: !!hashedPhone,
+            eventId: eventId
+          })
+
+          // Prepare advanced matching parameters (hashed user data)
+          var advancedMatching = {}
+          if (hashedEmail) advancedMatching.em = hashedEmail
+          if (hashedFirstName) advancedMatching.fn = hashedFirstName
+          if (hashedLastName) advancedMatching.ln = hashedLastName
+          if (hashedPhone) advancedMatching.ph = hashedPhone
+          if (hashedEmail) advancedMatching.external_id = hashedEmail
+          
+          // Add client user agent (not hashed)
+          advancedMatching.client_user_agent = navigator.userAgent
+
           // Send CompleteRegistration (standard Facebook event for ads)
           fbq('track', 'CompleteRegistration', {
             content_name: isContractorPage ? 'Contractor Calendly Booking' : 'Calendly Booking',
             content_category: isContractorPage ? 'Contractor Consultation' : 'Website Consultation',
             currency: 'USD',
             value: 0,
+            event_source_url: window.location.href,
+            action_source: 'website'
+          }, {
+            eventID: eventId,
+            em: advancedMatching.em,
+            fn: advancedMatching.fn,
+            ln: advancedMatching.ln,
+            ph: advancedMatching.ph,
+            external_id: advancedMatching.external_id,
+            client_user_agent: advancedMatching.client_user_agent
           })
 
           // Send CalendlyBookingComplete (custom event that Events Manager expects)
@@ -802,10 +917,20 @@
             content_category: isContractorPage ? 'Contractor Consultation' : 'Website Consultation',
             currency: 'USD',
             value: 0,
+            event_source_url: window.location.href,
+            action_source: 'website'
+          }, {
+            eventID: eventId + '_custom',
+            em: advancedMatching.em,
+            fn: advancedMatching.fn,
+            ln: advancedMatching.ln,
+            ph: advancedMatching.ph,
+            external_id: advancedMatching.external_id,
+            client_user_agent: advancedMatching.client_user_agent
           })
 
           console.log(
-            '✅ Booking events sent successfully to Pixel ' + pixelId + '! (CompleteRegistration + CalendlyBookingComplete)'
+            '✅ Booking events sent successfully to Pixel ' + pixelId + '! (CompleteRegistration + CalendlyBookingComplete with enhanced user data)'
           )
           return true
         } else {
@@ -853,19 +978,36 @@
         if (calendlyEvent) {
           console.log('✅ Calendly booking completed! Event detected:', calendlyEvent)
 
-          if (sendBookingEvents()) {
-            // Success - events sent
-          } else {
-            // Retry after a delay if fbq isn't ready
-            console.log('⏳ Retrying in 1 second...')
-            setTimeout(function () {
-              if (sendBookingEvents()) {
-                console.log('✅ Retry successful!')
-              } else {
-                console.error('❌ Failed after retry. Facebook Pixel may not be loaded.')
-              }
-            }, 1000)
-          }
+          // Call async function and handle promise
+          sendBookingEvents(e.data).then(function(success) {
+            if (success) {
+              // Success - events sent
+              console.log('✅ Events sent with enhanced user data!')
+            } else {
+              // Retry after a delay if fbq isn't ready
+              console.log('⏳ Retrying in 1 second...')
+              setTimeout(function () {
+                sendBookingEvents(e.data).then(function(retrySuccess) {
+                  if (retrySuccess) {
+                    console.log('✅ Retry successful!')
+                  } else {
+                    console.error('❌ Failed after retry. Facebook Pixel may not be loaded.')
+                  }
+                }).catch(function(error) {
+                  console.error('❌ Error on retry:', error)
+                })
+              }, 1000)
+            }
+          }).catch(function(error) {
+            console.error('❌ Error sending booking events:', error)
+            // Try one more time without async features in case of error
+            console.log('⏳ Attempting fallback...')
+            setTimeout(function() {
+              sendBookingEvents({}).catch(function(e) {
+                console.error('❌ Fallback also failed:', e)
+              })
+            }, 500)
+          })
         }
       })
 
@@ -889,29 +1031,34 @@
           return
         }
 
-        // Send test events
-        console.log('📤 Sending test booking events...')
+        // Create mock Calendly event data for testing
+        var mockEventData = {
+          event: 'calendly.event_scheduled',
+          payload: {
+            invitee: {
+              email: 'test@example.com',
+              name: 'Test User',
+              first_name: 'Test',
+              last_name: 'User',
+              phone: '+15555551234'
+            }
+          }
+        }
 
-        // Standard event for ads
-        fbq('track', 'CompleteRegistration', {
-          content_name: 'Test Booking',
-          content_category: 'Test Consultation',
-          currency: 'USD',
-          value: 0,
+        console.log('📤 Sending test booking events with mock user data...')
+        
+        // Call the enhanced sendBookingEvents function
+        sendBookingEvents(mockEventData).then(function(success) {
+          if (success) {
+            console.log('✅ Test events sent! (CompleteRegistration + CalendlyBookingComplete with enhanced user data)')
+            console.log('💡 Check Facebook Events Manager - Events should show with improved Event Match Quality')
+            console.log('💡 The user data (email, name, phone) was hashed with SHA-256 before sending')
+          } else {
+            console.error('❌ Test failed - events could not be sent')
+          }
+        }).catch(function(error) {
+          console.error('❌ Test error:', error)
         })
-
-        // Custom event that Events Manager shows
-        fbq('trackCustom', 'CalendlyBookingComplete', {
-          content_name: 'Test Booking',
-          content_category: 'Test Consultation',
-          currency: 'USD',
-          value: 0,
-        })
-
-        console.log('✅ Test events sent! (CompleteRegistration + CalendlyBookingComplete)')
-        console.log(
-          '💡 Check Facebook Events Manager - CalendlyBookingComplete should now show as Active'
-        )
       }
 
       // Helper to check pixel status
