@@ -854,7 +854,12 @@
 
       // Function to send booking events with enhanced user data
       async function sendBookingEvents(eventData) {
-        if (window.fbq) {
+        if (!window.fbq) {
+          console.error('❌ Facebook Pixel (fbq) not available')
+          return false
+        }
+
+        try {
           // Detect which page we're on for proper tracking
           var isContractorPage = window.location.pathname.toLowerCase().includes('/contractorlanding')
           var pixelId = isContractorPage ? '1357182892280101' : '1703925480259996'
@@ -866,15 +871,24 @@
           var userData = extractCalendlyUserData(eventData || {})
           
           // Hash user data for privacy compliance
-          var hashedEmail = userData.email ? await hashValue(userData.email) : null
-          var hashedFirstName = userData.firstName ? await hashValue(userData.firstName) : null
-          var hashedLastName = userData.lastName ? await hashValue(userData.lastName) : null
-          var hashedPhone = userData.phone ? await hashValue(userData.phone) : null
+          var hashedEmail = null
+          var hashedFirstName = null
+          var hashedLastName = null
+          var hashedPhone = null
+          
+          try {
+            hashedEmail = userData.email ? await hashValue(userData.email) : null
+            hashedFirstName = userData.firstName ? await hashValue(userData.firstName) : null
+            hashedLastName = userData.lastName ? await hashValue(userData.lastName) : null
+            hashedPhone = userData.phone ? await hashValue(userData.phone) : null
+          } catch (hashError) {
+            console.warn('⚠️ Error hashing user data, sending without hashed data:', hashError)
+          }
           
           // Generate unique event ID for deduplication
           var eventId = 'calendly_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15)
           
-          console.log('🔐 User data hashed:', {
+          console.log('🔐 User data processed:', {
             hasEmail: !!hashedEmail,
             hasFirstName: !!hashedFirstName,
             hasLastName: !!hashedLastName,
@@ -883,15 +897,17 @@
           })
 
           // Prepare advanced matching parameters (hashed user data)
-          var advancedMatching = {}
-          if (hashedEmail) advancedMatching.em = hashedEmail
+          var advancedMatching = {
+            client_user_agent: navigator.userAgent
+          }
+          
+          if (hashedEmail) {
+            advancedMatching.em = hashedEmail
+            advancedMatching.external_id = hashedEmail
+          }
           if (hashedFirstName) advancedMatching.fn = hashedFirstName
           if (hashedLastName) advancedMatching.ln = hashedLastName
           if (hashedPhone) advancedMatching.ph = hashedPhone
-          if (hashedEmail) advancedMatching.external_id = hashedEmail
-          
-          // Add client user agent (not hashed)
-          advancedMatching.client_user_agent = navigator.userAgent
 
           // Send CompleteRegistration (standard Facebook event for ads)
           fbq('track', 'CompleteRegistration', {
@@ -929,13 +945,32 @@
             client_user_agent: advancedMatching.client_user_agent
           })
 
-          console.log(
-            '✅ Booking events sent successfully to Pixel ' + pixelId + '! (CompleteRegistration + CalendlyBookingComplete with enhanced user data)'
-          )
+          console.log('✅ Booking events sent successfully to Pixel ' + pixelId + '!')
+          console.log('   - CompleteRegistration event sent')
+          console.log('   - CalendlyBookingComplete event sent')
+          console.log('   - Event ID: ' + eventId)
+          console.log('   - Check Facebook Events Manager to verify')
+          
           return true
-        } else {
-          console.error('❌ Facebook Pixel (fbq) not available')
-          return false
+        } catch (error) {
+          console.error('❌ Error in sendBookingEvents:', error)
+          
+          // Fallback: Send basic event without user data
+          console.log('⚠️ Attempting to send basic event without user data...')
+          try {
+            var isContractorPage = window.location.pathname.toLowerCase().includes('/contractorlanding')
+            fbq('track', 'CompleteRegistration', {
+              content_name: isContractorPage ? 'Contractor Calendly Booking' : 'Calendly Booking',
+              content_category: isContractorPage ? 'Contractor Consultation' : 'Website Consultation',
+              currency: 'USD',
+              value: 0
+            })
+            console.log('✅ Basic event sent as fallback')
+            return true
+          } catch (fallbackError) {
+            console.error('❌ Fallback also failed:', fallbackError)
+            return false
+          }
         }
       }
 
@@ -1024,12 +1059,24 @@
       // Helper function for manual testing
       window.testCalendlyTracking = function () {
         console.log('🧪 Manual test: Simulating Calendly booking completion...')
+        console.log('📍 Current URL:', window.location.pathname)
+
+        // Check which pixel should be active
+        var isContractorPage = window.location.pathname.toLowerCase().includes('/contractorlanding')
+        var expectedPixelId = isContractorPage ? '1357182892280101' : '1703925480259996'
+        console.log('📌 Expected Pixel ID for this page:', expectedPixelId)
 
         // Test if pixel works
         if (!window.fbq) {
           console.error('❌ Facebook Pixel not loaded. Cannot test.')
+          console.error('💡 Possible issues:')
+          console.error('   - Ad blocker is enabled')
+          console.error('   - Network issues')
+          console.error('   - Script blocked by browser')
           return
         }
+
+        console.log('✅ Facebook Pixel is loaded')
 
         // Create mock Calendly event data for testing
         var mockEventData = {
@@ -1050,11 +1097,16 @@
         // Call the enhanced sendBookingEvents function
         sendBookingEvents(mockEventData).then(function(success) {
           if (success) {
-            console.log('✅ Test events sent! (CompleteRegistration + CalendlyBookingComplete with enhanced user data)')
-            console.log('💡 Check Facebook Events Manager - Events should show with improved Event Match Quality')
-            console.log('💡 The user data (email, name, phone) was hashed with SHA-256 before sending')
+            console.log('✅ ✅ ✅ TEST SUCCESSFUL! ✅ ✅ ✅')
+            console.log('Events sent to Pixel ID:', expectedPixelId)
+            console.log('📊 Next steps:')
+            console.log('   1. Open Facebook Events Manager')
+            console.log('   2. Go to Test Events tab')
+            console.log('   3. Look for CompleteRegistration and CalendlyBookingComplete events')
+            console.log('   4. Verify they appear within 10-30 seconds')
+            console.log('💡 The user data (email, name, phone) was hashed with SHA-256')
           } else {
-            console.error('❌ Test failed - events could not be sent')
+            console.error('❌ TEST FAILED - events could not be sent')
           }
         }).catch(function(error) {
           console.error('❌ Test error:', error)
