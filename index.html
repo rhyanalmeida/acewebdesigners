@@ -781,26 +781,31 @@
       // Function to send booking events
       function sendBookingEvents() {
         if (window.fbq) {
-          console.log('📤 Sending booking events to Facebook Pixel...')
+          // Detect which page we're on for proper tracking
+          var isContractorPage = window.location.pathname.toLowerCase().includes('/contractorlanding')
+          var pixelId = isContractorPage ? '1403049141348706' : '1703925480259996'
+          var pageName = isContractorPage ? 'Contractor Landing Page' : 'Main Landing Page'
+          
+          console.log('📤 Sending booking events to Facebook Pixel ' + pixelId + ' (' + pageName + ')...')
 
           // Send CompleteRegistration (standard Facebook event for ads)
           fbq('track', 'CompleteRegistration', {
-            content_name: 'Calendly Booking',
-            content_category: 'Website Consultation',
+            content_name: isContractorPage ? 'Contractor Calendly Booking' : 'Calendly Booking',
+            content_category: isContractorPage ? 'Contractor Consultation' : 'Website Consultation',
             currency: 'USD',
             value: 0,
           })
 
           // Send CalendlyBookingComplete (custom event that Events Manager expects)
           fbq('trackCustom', 'CalendlyBookingComplete', {
-            content_name: 'Calendly Booking',
-            content_category: 'Website Consultation',
+            content_name: isContractorPage ? 'Contractor Calendly Booking' : 'Calendly Booking',
+            content_category: isContractorPage ? 'Contractor Consultation' : 'Website Consultation',
             currency: 'USD',
             value: 0,
           })
 
           console.log(
-            '✅ Booking events sent successfully! (CompleteRegistration + CalendlyBookingComplete)'
+            '✅ Booking events sent successfully to Pixel ' + pixelId + '! (CompleteRegistration + CalendlyBookingComplete)'
           )
           return true
         } else {
