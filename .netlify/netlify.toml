@@ -1,0 +1,132 @@
+functionsDirectory = "C:\\Users\\rhyan\\Downloads\\Ace Web Designers\\Ace Web Designers Website\\Ace Web Designers Website\\netlify\\functions"
+functionsDirectoryOrigin = "config"
+headersOrigin = "config"
+redirectsOrigin = "config"
+plugins = []
+
+[build]
+publish = "C:\\Users\\rhyan\\Downloads\\Ace Web Designers\\Ace Web Designers Website\\Ace Web Designers Website\\dist"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm install && npm run build"
+functions = "C:\\Users\\rhyan\\Downloads\\Ace Web Designers\\Ace Web Designers Website\\Ace Web Designers Website\\netlify\\functions"
+
+[build.environment]
+NODE_VERSION = "20"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "DENY"
+X-XSS-Protection = "1; mode=block"
+Referrer-Policy = "strict-origin-when-cross-origin"
+Cross-Origin-Embedder-Policy = "require-corp"
+Cross-Origin-Opener-Policy = "same-origin"
+Cross-Origin-Resource-Policy = "cross-origin"
+Content-Security-Policy = "default-src 'self';\n      script-src 'self' 'unsafe-inline' 'unsafe-eval' \n        https://www.google.com \n        https://www.gstatic.com \n        https://assets.calendly.com \n        https://connect.facebook.net \n        https://www.facebook.com\n        https://player.vimeo.com;\n      style-src 'self' 'unsafe-inline' \n        https://fonts.googleapis.com \n        https://assets.calendly.com;\n      img-src 'self' data: blob: \n        https://i.ibb.co \n        https://i.postimg.cc \n        https://images.unsplash.com \n        https://fast.wistia.com \n        https://www.facebook.com;\n      connect-src 'self' \n        https://fast.wistia.com \n        https://*.wistia.com \n        https://*.vimeo.com \n        https://vimeo.com \n        https://formspree.io \n        https://www.facebook.com \n        https://*.calendly.com \n        https://www.google.com \n        https://www.gstatic.com;\n      font-src 'self' data: \n        https://fonts.gstatic.com;\n      frame-src 'self' \n        https://www.google.com \n        https://www.recaptcha.net \n        https://fast.wistia.com \n        https://player.vimeo.com \n        https://www.facebook.com \n        https://calendly.com;\n      object-src 'none';\n      base-uri 'self';\n      form-action 'self' https://formspree.io;\n      frame-ancestors 'none';\n      upgrade-insecure-requests;"
+Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=(), vibrate=(), fullscreen=(self), sync-xhr=()"
+Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/assets/*"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+X-Content-Type-Options = "nosniff"
+
+[[headers]]
+for = "*.js"
+
+[headers.values]
+Content-Type = "application/javascript; charset=utf-8"
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.css"
+
+[headers.values]
+Content-Type = "text/css; charset=utf-8"
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.woff2"
+
+[headers.values]
+Content-Type = "font/woff2"
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "*.woff"
+
+[headers.values]
+Content-Type = "font/woff"
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/sitemap.xml"
+
+[headers.values]
+Content-Type = "application/xml; charset=utf-8"
+Cache-Control = "public, max-age=3600"
+
+[[headers]]
+for = "/robots.txt"
+
+[headers.values]
+Content-Type = "text/plain; charset=utf-8"
+Cache-Control = "public, max-age=3600"
+
+[[redirects]]
+from = "/landing"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/refer"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
