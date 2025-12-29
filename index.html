@@ -765,7 +765,7 @@
       
       // Load different pixel based on URL path
       var isContractorPage = window.location.pathname.toLowerCase().includes('/contractorlanding')
-      var pixelId = isContractorPage ? '1560349761941814' : '1703925480259996'
+      var pixelId = isContractorPage ? '1403049141348706' : '1703925480259996'
       
       fbq('init', pixelId)
       fbq('track', 'PageView')
@@ -783,7 +783,7 @@
         if (window.fbq) {
           // Detect which page we're on for proper tracking
           var isContractorPage = window.location.pathname.toLowerCase().includes('/contractorlanding')
-          var pixelId = isContractorPage ? '1560349761941814' : '1703925480259996'
+          var pixelId = isContractorPage ? '1403049141348706' : '1703925480259996'
           var pageName = isContractorPage ? 'Contractor Landing Page' : 'Main Landing Page'
           
           console.log('📤 Sending booking events to Facebook Pixel ' + pixelId + ' (' + pageName + ')...')
