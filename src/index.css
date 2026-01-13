@@ -696,3 +696,45 @@
     color: #1e40af;
   }
 }
+
+/* Calendly widget mobile optimization */
+.calendly-inline-widget {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.calendly-inline-widget iframe {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+/* Mobile-specific Calendly optimizations */
+@media (max-width: 768px) {
+  .calendly-inline-widget {
+    min-height: 700px;
+    height: auto;
+  }
+  
+  /* Ensure Calendly widget is scrollable on mobile */
+  #landing-form-container,
+  #landing-contractors-form-container {
+    -webkit-overflow-scrolling: touch;
+    overflow: visible;
+  }
+  
+  /* Prevent zoom on input focus for iOS */
+  .calendly-inline-widget input,
+  .calendly-inline-widget select,
+  .calendly-inline-widget textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Touch device optimization */
+@media (hover: none) and (pointer: coarse) {
+  .calendly-inline-widget {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

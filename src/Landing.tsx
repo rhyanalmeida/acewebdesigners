@@ -21,6 +21,110 @@ function Landing() {
       const newUrl = `${window.location.pathname}?${urlParams.toString()}`
       window.history.replaceState({}, '', newUrl)
     }
+
+    // Track main landing page view with main pixel (1703925480259996)
+    // This pixel is already loaded from index.html
+    if (window.fbq) {
+      // Track ViewContent event (standard event for landing pages)
+      window.fbq('track', 'ViewContent', {
+        content_name: 'Main Landing Page',
+        content_category: 'Landing Page',
+        content_type: 'general_services',
+      })
+
+      // Track custom event for main landing tracking
+      window.fbq('trackCustom', 'MainLandingView', {
+        page: 'main_landing',
+        source: urlParams.get('source') || 'direct',
+      })
+
+      console.log('✅ Main Facebook Pixel (1703925480259996): Landing page view tracked')
+    }
+
+    // Initialize Calendly widget (mobile & desktop optimized)
+    const initCalendly = () => {
+      if (window.Calendly) {
+        const widget = document.querySelector('.calendly-inline-widget')
+        if (widget && !widget.querySelector('iframe')) {
+          try {
+            window.Calendly.initInlineWidget({
+              url: 'https://calendly.com/rhyanalmeida31/30min',
+              parentElement: widget,
+              prefill: {},
+              utm: {},
+            })
+            console.log('✅ Calendly widget initialized on Landing page (mobile & desktop ready)')
+          } catch (error) {
+            console.error('❌ Error initializing Calendly:', error)
+          }
+        }
+      } else {
+        console.log('⏳ Waiting for Calendly to load...')
+        setTimeout(initCalendly, 100)
+      }
+    }
+
+    // Start initialization after a short delay to ensure DOM is ready
+    // Extra delay on mobile for slower connections
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    setTimeout(initCalendly, isMobile ? 800 : 500)
+
+    // Add Calendly booking event listener for main pixel
+    const handleCalendlyBooking = (e: MessageEvent) => {
+      // Check if it's a Calendly booking event
+      let isBooking = false
+
+      if (e.data.event && e.data.event === 'calendly.event_scheduled') {
+        isBooking = true
+      } else if (
+        e.data.event &&
+        typeof e.data.event === 'object' &&
+        e.data.event.event === 'scheduled'
+      ) {
+        isBooking = true
+      } else if (
+        e.data.type &&
+        e.data.type.includes('calendly') &&
+        e.data.type.includes('scheduled')
+      ) {
+        isBooking = true
+      }
+
+      if (isBooking && window.fbq) {
+        console.log('✅ Main Landing Calendly booking detected!')
+
+        // Track CompleteRegistration (standard Facebook event for ads)
+        window.fbq('track', 'CompleteRegistration', {
+          content_name: 'Main Landing Calendly Booking',
+          content_category: 'Website Consultation',
+          currency: 'USD',
+          value: 0,
+        })
+
+        // Track Lead event
+        window.fbq('track', 'Lead', {
+          content_name: 'Website Consultation Booking',
+          content_category: 'Free Design Consultation',
+        })
+
+        // Track custom event
+        window.fbq('trackCustom', 'MainLandingCalendlyBooking', {
+          content_name: 'Main Landing Booking',
+          content_category: 'Website Consultation',
+          currency: 'USD',
+          value: 0,
+        })
+
+        console.log('✅ Main landing booking events sent to Facebook Pixel (1703925480259996)')
+      }
+    }
+
+    window.addEventListener('message', handleCalendlyBooking)
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('message', handleCalendlyBooking)
+    }
   }, [])
 
   const handleGetStarted = () => {
@@ -317,14 +421,14 @@ function Landing() {
           </p>
 
           <div
-            className="bg-white rounded-3xl shadow-2xl p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
+            className="bg-white rounded-3xl shadow-2xl p-4 md:p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
             id="landing-form-container"
           >
             {/* Calendly inline widget begin */}
             <div
               className="calendly-inline-widget"
               data-url="https://calendly.com/rhyanalmeida31/30min"
-              style={{ minWidth: '320px', height: '700px' }}
+              style={{ minWidth: '320px', height: '700px', width: '100%' }}
             />
             {/* Calendly inline widget end */}
           </div>

@@ -30,30 +30,139 @@ function LandingContractors() {
       window.history.replaceState({}, '', newUrl)
     }
 
-    // Initialize Calendly widget
-    if (window.Calendly) {
-      window.Calendly.initInlineWidget({
-        url: 'https://calendly.com/rhyanalmeida31/30min',
-        parentElement: document.querySelector('.calendly-inline-widget'),
-      })
+    // Initialize Contractor-Specific Facebook Pixel (1403049141348706)
+    // This is separate from the main site pixel
+    const initContractorPixel = () => {
+      if (!window.fbq) {
+        // Load Facebook Pixel if not already loaded
+        !(function (f, b, e, v, n, t, s) {
+          if (f.fbq) return
+          n = f.fbq = function () {
+            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+          }
+          if (!f._fbq) f._fbq = n
+          n.push = n
+          n.loaded = !0
+          n.version = '2.0'
+          n.queue = []
+          t = b.createElement(e)
+          t.async = !0
+          t.src = v
+          s = b.getElementsByTagName(e)[0]
+          s.parentNode.insertBefore(t, s)
+        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
+      }
+
+      // Initialize contractor pixel ID: 1403049141348706
+      if (window.fbq) {
+        window.fbq('init', '1403049141348706')
+        window.fbq('track', 'PageView')
+
+        // Track ViewContent event (standard event for landing pages)
+        window.fbq('track', 'ViewContent', {
+          content_name: 'Contractor Landing Page',
+          content_category: 'Landing Page',
+          content_type: 'contractor_services',
+        })
+
+        // Track custom event for contractor-specific tracking
+        window.fbq('trackCustom', 'ContractorLandingView', {
+          page: 'contractor_landing',
+          source: urlParams.get('source') || 'direct',
+        })
+
+        console.log('✅ Contractor Facebook Pixel (1403049141348706): Initialized and tracking')
+      }
     }
 
-    // Facebook Pixel - Track contractor landing page view (Pixel ID: 1403049141348706)
-    if (window.fbq) {
-      // Track ViewContent event (standard event for landing pages)
-      window.fbq('track', 'ViewContent', {
-        content_name: 'Contractor Landing Page',
-        content_category: 'Landing Page',
-        content_type: 'contractor_services',
-      })
+    // Initialize contractor pixel
+    initContractorPixel()
 
-      // Track custom event for contractor-specific tracking
-      window.fbq('trackCustom', 'ContractorLandingView', {
-        page: 'contractor_landing',
-        source: urlParams.get('source') || 'direct',
-      })
+    // Initialize Calendly widget (mobile & desktop optimized)
+    const initCalendly = () => {
+      if (window.Calendly) {
+        const widget = document.querySelector('.calendly-inline-widget')
+        if (widget && !widget.querySelector('iframe')) {
+          try {
+            window.Calendly.initInlineWidget({
+              url: 'https://calendly.com/rhyanalmeida31/30min',
+              parentElement: widget,
+              prefill: {},
+              utm: {},
+            })
+            console.log(
+              '✅ Calendly widget initialized on Contractors Landing page (mobile & desktop ready)'
+            )
+          } catch (error) {
+            console.error('❌ Error initializing Calendly:', error)
+          }
+        }
+      } else {
+        console.log('⏳ Waiting for Calendly to load...')
+        setTimeout(initCalendly, 100)
+      }
+    }
 
-      console.log('✅ Facebook Pixel (1403049141348706): Contractor landing page view tracked')
+    // Start initialization after a short delay to ensure DOM is ready
+    // Extra delay on mobile for slower connections
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    setTimeout(initCalendly, isMobile ? 800 : 500)
+
+    // Add Calendly booking event listener for contractor pixel
+    const handleCalendlyBooking = (e: MessageEvent) => {
+      // Check if it's a Calendly booking event
+      let isBooking = false
+
+      if (e.data.event && e.data.event === 'calendly.event_scheduled') {
+        isBooking = true
+      } else if (
+        e.data.event &&
+        typeof e.data.event === 'object' &&
+        e.data.event.event === 'scheduled'
+      ) {
+        isBooking = true
+      } else if (
+        e.data.type &&
+        e.data.type.includes('calendly') &&
+        e.data.type.includes('scheduled')
+      ) {
+        isBooking = true
+      }
+
+      if (isBooking && window.fbq) {
+        console.log('✅ Contractor Calendly booking detected!')
+
+        // Track CompleteRegistration (standard Facebook event for ads)
+        window.fbq('track', 'CompleteRegistration', {
+          content_name: 'Contractor Calendly Booking',
+          content_category: 'Contractor Consultation',
+          currency: 'USD',
+          value: 0,
+        })
+
+        // Track Lead event
+        window.fbq('track', 'Lead', {
+          content_name: 'Contractor Consultation Booking',
+          content_category: 'Free Contractor Consultation',
+        })
+
+        // Track custom event
+        window.fbq('trackCustom', 'ContractorCalendlyBooking', {
+          content_name: 'Contractor Booking',
+          content_category: 'Contractor Consultation',
+          currency: 'USD',
+          value: 0,
+        })
+
+        console.log('✅ Contractor booking events sent to Facebook Pixel (1403049141348706)')
+      }
+    }
+
+    window.addEventListener('message', handleCalendlyBooking)
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('message', handleCalendlyBooking)
     }
   }, [])
 
@@ -108,6 +217,16 @@ function LandingContractors() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-white">
+      {/* Facebook Pixel noscript fallback for contractors */}
+      <noscript>
+        <img
+          height="1"
+          width="1"
+          style={{ display: 'none' }}
+          src="https://www.facebook.com/tr?id=1403049141348706&ev=PageView&noscript=1"
+          alt=""
+        />
+      </noscript>
       {/* Hero Section */}
       <section className="relative py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
@@ -385,14 +504,14 @@ function LandingContractors() {
           </p>
 
           <div
-            className="bg-white rounded-3xl shadow-2xl p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
+            className="bg-white rounded-3xl shadow-2xl p-4 md:p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
             id="landing-contractors-form-container"
           >
             {/* Calendly inline widget begin */}
             <div
               className="calendly-inline-widget"
               data-url="https://calendly.com/rhyanalmeida31/30min"
-              style={{ minWidth: '320px', height: '700px' }}
+              style={{ minWidth: '320px', height: '700px', width: '100%' }}
             />
             {/* Calendly inline widget end */}
           </div>
