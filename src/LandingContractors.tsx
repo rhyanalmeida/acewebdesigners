@@ -30,7 +30,7 @@ function LandingContractors() {
       window.history.replaceState({}, '', newUrl)
     }
 
-    // Initialize Contractor-Specific Facebook Pixel (1403049141348706)
+    // Initialize Contractor-Specific Facebook Pixel (1357182892280101)
     // This is separate from the main site pixel
     const initContractorPixel = () => {
       if (!window.fbq) {
@@ -53,9 +53,9 @@ function LandingContractors() {
         })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
       }
 
-      // Initialize contractor pixel ID: 1403049141348706
+      // Initialize contractor pixel ID: 1357182892280101
       if (window.fbq) {
-        window.fbq('init', '1403049141348706')
+        window.fbq('init', '1357182892280101')
         window.fbq('track', 'PageView')
 
         // Track ViewContent event (standard event for landing pages)
@@ -71,7 +71,7 @@ function LandingContractors() {
           source: urlParams.get('source') || 'direct',
         })
 
-        console.log('✅ Contractor Facebook Pixel (1403049141348706): Initialized and tracking')
+        console.log('✅ Contractor Facebook Pixel (1357182892280101): Initialized and tracking')
       }
     }
 
@@ -123,7 +123,7 @@ function LandingContractors() {
           value: 0,
         })
 
-        console.log('✅ Contractor booking events sent to Facebook Pixel (1403049141348706)')
+        console.log('✅ Contractor booking events sent to Facebook Pixel (1357182892280101)')
       }
     }
 
@@ -192,7 +192,7 @@ function LandingContractors() {
           height="1"
           width="1"
           style={{ display: 'none' }}
-          src="https://www.facebook.com/tr?id=1403049141348706&ev=PageView&noscript=1"
+          src="https://www.facebook.com/tr?id=1357182892280101&ev=PageView&noscript=1"
           alt=""
         />
       </noscript>
