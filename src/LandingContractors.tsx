@@ -11,6 +11,8 @@ import {
 
 function LandingContractors() {
   const bookingFormRef = useRef(null)
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = React.useState(false)
+  const [showTermsOfService, setShowTermsOfService] = React.useState(false)
 
   useEffect(() => {
     document.title = 'Free Website Design for Contractors | Get More Leads & Jobs'
@@ -670,19 +672,200 @@ function LandingContractors() {
               </p>
               <div className="flex flex-wrap gap-4 text-sm">
                 <button
-                  onClick={() => {
-                    // Navigate to main site privacy policy
-                    window.location.href = '/privacy'
-                  }}
+                  onClick={() => setShowPrivacyPolicy(true)}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Privacy Policy
+                </button>
+                <button
+                  onClick={() => setShowTermsOfService(true)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Terms of Service
                 </button>
               </div>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyPolicy && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
+            <button
+              onClick={() => setShowPrivacyPolicy(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold"
+            >
+              ×
+            </button>
+            <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
+            <p className="text-sm text-gray-600 mb-6">Last updated: January 14, 2026</p>
+            
+            <div className="space-y-6 text-gray-700">
+              <p>
+                Ace Web Designers ("we," "us," or "our") values your privacy. This Privacy Policy explains how we collect, use, and protect your information.
+              </p>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Information We Collect</h2>
+                <p>We may collect:</p>
+                <ul className="list-disc ml-6 mt-2 space-y-1">
+                  <li>Name</li>
+                  <li>Email address</li>
+                  <li>Phone number</li>
+                  <li>Business information</li>
+                  <li>Any information you submit through forms or calendars</li>
+                </ul>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">How We Use Your Information</h2>
+                <p>We use your information to:</p>
+                <ul className="list-disc ml-6 mt-2 space-y-1">
+                  <li>Contact you regarding your inquiry or services</li>
+                  <li>Schedule and confirm appointments</li>
+                  <li>Provide customer support</li>
+                  <li>Send service-related messages</li>
+                </ul>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">SMS & A2P Compliance</h2>
+                <p>If you provide your phone number, you agree to receive SMS messages from Ace Web Designers related to your inquiry or services.</p>
+                <ul className="list-disc ml-6 mt-2 space-y-1">
+                  <li>Message frequency varies</li>
+                  <li>Message & data rates may apply</li>
+                  <li>You may opt out anytime by replying STOP</li>
+                  <li>Reply HELP for assistance</li>
+                </ul>
+                <p className="mt-2">We do not sell or share your phone number with third parties for marketing purposes.</p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Data Sharing</h2>
+                <p>
+                  We may share information only with trusted service providers (such as scheduling, CRM, or messaging platforms) strictly to operate our business.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Data Security</h2>
+                <p>
+                  We take reasonable steps to protect your personal information from unauthorized access or disclosure.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Your Rights</h2>
+                <p>
+                  You may request access, correction, or deletion of your personal data by contacting us.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Contact Information</h2>
+                <p>
+                  Ace Web Designers<br />
+                  Massachusetts, USA<br />
+                  Phone: +1 (774) 315-1951<br />
+                  Email: hello@acewebdesigners.com
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Terms of Service Modal */}
+      {showTermsOfService && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-8 relative">
+            <button
+              onClick={() => setShowTermsOfService(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold"
+            >
+              ×
+            </button>
+            <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
+            <p className="text-sm text-gray-600 mb-6">Last updated: January 14, 2026</p>
+            
+            <div className="space-y-6 text-gray-700">
+              <p>
+                Welcome to Ace Web Designers ("Company," "we," "us," or "our"). By accessing our website or submitting your information, you agree to these Terms of Service.
+              </p>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Services</h2>
+                <p>
+                  We provide web design, landing pages, marketing automation, and related digital services for businesses. Any free or paid services are provided as described on our website or during consultation.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Communication Consent</h2>
+                <p>
+                  By submitting your phone number and/or email address on our website, booking calendar, or forms, you consent to receive communications from Ace Web Designers, including:
+                </p>
+                <ul className="list-disc ml-6 mt-2 space-y-1">
+                  <li>Appointment confirmations and reminders</li>
+                  <li>Follow-up messages related to your inquiry</li>
+                  <li>Service updates or relevant business communications</li>
+                </ul>
+                <p className="mt-2">
+                  Message frequency varies. Message and data rates may apply.
+                </p>
+                <p className="mt-2">
+                  You can opt out at any time by replying STOP to any text message. For help, reply HELP or contact us directly.
+                </p>
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm">
+                    <strong>SMS Opt-Out:</strong> You may receive SMS messages from Ace Web Designers at +1 (774) 315-1951. Reply STOP to opt out. Message & data rates may apply.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">No Guarantee of Results</h2>
+                <p>
+                  We do not guarantee specific business results, rankings, revenue, or performance unless explicitly stated in writing.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Intellectual Property</h2>
+                <p>
+                  All website designs, content, graphics, and materials created by us remain our property until paid in full, unless otherwise agreed.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Limitation of Liability</h2>
+                <p>
+                  We are not liable for indirect, incidental, or consequential damages arising from the use of our services or website.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Governing Law</h2>
+                <p>
+                  These terms are governed by the laws of the Commonwealth of Massachusetts, United States.
+                </p>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">Contact</h2>
+                <p>
+                  Ace Web Designers<br />
+                  Massachusetts, USA<br />
+                  Phone: +1 (774) 315-1951<br />
+                  Email: hello@acewebdesigners.com
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
