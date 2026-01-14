@@ -29,6 +29,8 @@ import Landing from './Landing'
 import LandingContractors from './LandingContractors'
 import Refer from './Refer'
 import PrivacyPolicy from './PrivacyPolicy'
+import PrivacyPolicyPage from './PrivacyPolicyPage'
+import TermsOfService from './TermsOfService'
 
 // Optimized Lazy Image Component
 const LazyImage: React.FC<{
@@ -145,7 +147,7 @@ function App() {
   }, [currentPage])
 
   React.useEffect(() => {
-    // Check if the URL path is /landing, /contractorlanding, or /refer and set the page accordingly
+    // Check if the URL path is /landing, /contractorlanding, /refer, /privacypolicy, or /termsofservice and set the page accordingly
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '') // Remove trailing slash and normalize
     if (path === '/contractorlanding' || path.includes('/contractorlanding')) {
       setCurrentPage('contractorlanding')
@@ -153,6 +155,10 @@ function App() {
       setCurrentPage('landing')
     } else if (path === '/refer' || path.includes('/refer')) {
       setCurrentPage('refer')
+    } else if (path === '/privacypolicy' || path.includes('/privacypolicy')) {
+      setCurrentPage('privacypolicy')
+    } else if (path === '/termsofservice' || path.includes('/termsofservice')) {
+      setCurrentPage('termsofservice')
     }
 
     const handleNavigation = (event: CustomEvent) => {
@@ -485,6 +491,12 @@ function App() {
     }
     if (currentPage === 'privacy') {
       return <PrivacyPolicy />
+    }
+    if (currentPage === 'privacypolicy') {
+      return <PrivacyPolicyPage />
+    }
+    if (currentPage === 'termsofservice') {
+      return <TermsOfService />
     }
 
     return (
@@ -1197,7 +1209,9 @@ function App() {
     <div className="min-h-screen bg-white">
       {currentPage !== 'landing' &&
         currentPage !== 'contractorlanding' &&
-        currentPage !== 'refer' && (
+        currentPage !== 'refer' &&
+        currentPage !== 'privacypolicy' &&
+        currentPage !== 'termsofservice' && (
           <>
             {/* Navigation */}
             <header>
@@ -1380,7 +1394,9 @@ function App() {
 
       {currentPage !== 'landing' &&
         currentPage !== 'contractorlanding' &&
-        currentPage !== 'refer' && (
+        currentPage !== 'refer' &&
+        currentPage !== 'privacypolicy' &&
+        currentPage !== 'termsofservice' && (
           <>
             {/* Footer CTA Section */}
             <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden animate-gradient-shift">
