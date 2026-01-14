@@ -43,20 +43,64 @@ function Landing() {
 
     console.log('✅ LeadConnector booking widget loaded on Main Landing page')
 
+    // Debug: Log ALL postMessage events to identify LeadConnector's format
+    const debugAllMessages = (e: MessageEvent) => {
+      console.log('📨 PostMessage received:', {
+        origin: e.origin,
+        data: e.data,
+        type: typeof e.data,
+        dataType: e.data?.type,
+        dataEvent: e.data?.event,
+        fullData: JSON.stringify(e.data, null, 2),
+      })
+    }
+
+    window.addEventListener('message', debugAllMessages)
+
     // Add booking event listener for LeadConnector widget
     const handleBookingComplete = (e: MessageEvent) => {
-      // Check if it's a LeadConnector booking event
       let isBooking = false
 
-      // LeadConnector sends events through postMessage
+      // Log for debugging
+      if (e.origin.includes('leadconnectorhq.com') || e.origin.includes('msgsndr.com')) {
+        console.log('🎯 LeadConnector message detected:', e.data)
+      }
+
       if (e.data && typeof e.data === 'object') {
-        // Check for various booking completion signals
+        // Check multiple possible event patterns
         if (
+          // Standard patterns
           e.data.type === 'booking_completed' ||
           e.data.type === 'appointment_scheduled' ||
           e.data.event === 'booking_completed' ||
-          e.data.event === 'appointment_scheduled'
+          e.data.event === 'appointment_scheduled' ||
+          // GHL-specific patterns
+          e.data.type === 'form_submitted' ||
+          e.data.type === 'calendar_booking' ||
+          e.data.event === 'form_submitted' ||
+          e.data.event === 'calendar_booking' ||
+          // Check for success/complete in message
+          (typeof e.data === 'string' &&
+            (e.data.includes('success') || e.data.includes('complete'))) ||
+          // Check nested event property
+          e.data.message?.type === 'booking_completed' ||
+          // Check for any booking-related keywords
+          (e.data.action && e.data.action.includes('book'))
         ) {
+          isBooking = true
+        }
+      }
+
+      // Also check string messages
+      if (typeof e.data === 'string') {
+        const lowerData = e.data.toLowerCase()
+        if (
+          lowerData.includes('booking') ||
+          lowerData.includes('appointment') ||
+          lowerData.includes('scheduled') ||
+          lowerData.includes('confirmed')
+        ) {
+          console.log('🔍 Possible booking message (string):', e.data)
           isBooking = true
         }
       }
@@ -92,9 +136,74 @@ function Landing() {
 
     window.addEventListener('message', handleBookingComplete)
 
+    // Add to window for testing
+    if (typeof window !== 'undefined') {
+      ;(window as any).testMainPixel = () => {
+        console.log('🧪 Manual pixel test triggered')
+        if (window.fbq) {
+          window.fbq('track', 'CompleteRegistration', {
+            content_name: 'TEST Main Landing Booking',
+            content_category: 'Website Consultation',
+            currency: 'USD',
+            value: 0,
+          })
+          console.log('✅ Test event sent to Facebook Pixel (1703925480259996)')
+          alert('Test event sent! Check Meta Events Manager.')
+        } else {
+          console.error('❌ Facebook Pixel not loaded')
+          alert('Facebook Pixel not loaded!')
+        }
+      }
+    }
+
+    // Check if GHL script provides callbacks
+    const checkGHLCallback = setInterval(() => {
+      if ((window as any).leadConnectorBooking) {
+        console.log('✅ GHL booking object found')
+        clearInterval(checkGHLCallback)
+
+        // Hook into GHL's callback if available
+        const originalCallback = (window as any).leadConnectorBooking.onComplete
+        ;(window as any).leadConnectorBooking.onComplete = function (...args: any[]) {
+          console.log('✅ GHL callback triggered:', args)
+
+          // Track with Facebook Pixel
+          if (window.fbq) {
+            window.fbq('track', 'CompleteRegistration', {
+              content_name: 'Main Landing Booking',
+              content_category: 'Website Consultation',
+              currency: 'USD',
+              value: 0,
+            })
+          }
+
+          // Call original callback if exists
+          if (originalCallback) originalCallback.apply(this, args)
+        }
+      }
+    }, 500)
+
+    // Cleanup after 10 seconds
+    setTimeout(() => clearInterval(checkGHLCallback), 10000)
+
+    // Track iframe load
+    const iframe = document.getElementById('MseWjwAf3rDlJRoj1p75_booking_widget')
+    if (iframe) {
+      iframe.addEventListener('load', () => {
+        console.log('✅ LeadConnector iframe loaded successfully')
+      })
+    }
+
+    // Testing instructions
+    console.log('🧪 Testing commands available:')
+    console.log('  - testMainPixel() - Manually test Facebook Pixel')
+    console.log('  - Check console for all postMessage events after booking')
+
     // Cleanup
     return () => {
       window.removeEventListener('message', handleBookingComplete)
+      window.removeEventListener('message', debugAllMessages)
+      clearInterval(checkGHLCallback)
     }
   }, [])
 
