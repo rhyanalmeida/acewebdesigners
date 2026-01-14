@@ -697,27 +697,26 @@
   }
 }
 
-/* Calendly widget mobile optimization */
-.calendly-inline-widget {
+/* LeadConnector booking widget mobile optimization */
+#landing-form-container iframe,
+#landing-contractors-form-container iframe {
   position: relative;
   overflow: hidden;
   border-radius: 1rem;
-}
-
-.calendly-inline-widget iframe {
   width: 100% !important;
-  height: 100% !important;
+  min-height: 700px;
   border: none !important;
 }
 
-/* Mobile-specific Calendly optimizations */
+/* Mobile-specific booking widget optimizations */
 @media (max-width: 768px) {
-  .calendly-inline-widget {
+  #landing-form-container iframe,
+  #landing-contractors-form-container iframe {
     min-height: 700px;
     height: auto;
   }
   
-  /* Ensure Calendly widget is scrollable on mobile */
+  /* Ensure booking widget is scrollable on mobile */
   #landing-form-container,
   #landing-contractors-form-container {
     -webkit-overflow-scrolling: touch;
@@ -725,16 +724,20 @@
   }
   
   /* Prevent zoom on input focus for iOS */
-  .calendly-inline-widget input,
-  .calendly-inline-widget select,
-  .calendly-inline-widget textarea {
+  #landing-form-container iframe input,
+  #landing-form-container iframe select,
+  #landing-form-container iframe textarea,
+  #landing-contractors-form-container iframe input,
+  #landing-contractors-form-container iframe select,
+  #landing-contractors-form-container iframe textarea {
     font-size: 16px !important;
   }
 }
 
 /* Touch device optimization */
 @media (hover: none) and (pointer: coarse) {
-  .calendly-inline-widget {
+  #landing-form-container iframe,
+  #landing-contractors-form-container iframe {
     -webkit-tap-highlight-color: transparent;
   }
 }

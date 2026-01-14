@@ -78,63 +78,32 @@ function LandingContractors() {
     // Initialize contractor pixel
     initContractorPixel()
 
-    // Initialize Calendly widget (mobile & desktop optimized)
-    const initCalendly = () => {
-      if (window.Calendly) {
-        const widget = document.querySelector('.calendly-inline-widget')
-        if (widget && !widget.querySelector('iframe')) {
-          try {
-            window.Calendly.initInlineWidget({
-              url: 'https://calendly.com/rhyanalmeida31/30min',
-              parentElement: widget,
-              prefill: {},
-              utm: {},
-            })
-            console.log(
-              '✅ Calendly widget initialized on Contractors Landing page (mobile & desktop ready)'
-            )
-          } catch (error) {
-            console.error('❌ Error initializing Calendly:', error)
-          }
-        }
-      } else {
-        console.log('⏳ Waiting for Calendly to load...')
-        setTimeout(initCalendly, 100)
-      }
-    }
+    console.log('✅ LeadConnector booking widget loaded on Contractor Landing page')
 
-    // Start initialization after a short delay to ensure DOM is ready
-    // Extra delay on mobile for slower connections
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-    setTimeout(initCalendly, isMobile ? 800 : 500)
-
-    // Add Calendly booking event listener for contractor pixel
-    const handleCalendlyBooking = (e: MessageEvent) => {
-      // Check if it's a Calendly booking event
+    // Add booking event listener for LeadConnector widget
+    const handleBookingComplete = (e: MessageEvent) => {
+      // Check if it's a LeadConnector booking event
       let isBooking = false
 
-      if (e.data.event && e.data.event === 'calendly.event_scheduled') {
-        isBooking = true
-      } else if (
-        e.data.event &&
-        typeof e.data.event === 'object' &&
-        e.data.event.event === 'scheduled'
-      ) {
-        isBooking = true
-      } else if (
-        e.data.type &&
-        e.data.type.includes('calendly') &&
-        e.data.type.includes('scheduled')
-      ) {
-        isBooking = true
+      // LeadConnector sends events through postMessage
+      if (e.data && typeof e.data === 'object') {
+        // Check for various booking completion signals
+        if (
+          e.data.type === 'booking_completed' ||
+          e.data.type === 'appointment_scheduled' ||
+          e.data.event === 'booking_completed' ||
+          e.data.event === 'appointment_scheduled'
+        ) {
+          isBooking = true
+        }
       }
 
       if (isBooking && window.fbq) {
-        console.log('✅ Contractor Calendly booking detected!')
+        console.log('✅ Contractor booking detected!')
 
         // Track CompleteRegistration (standard Facebook event for ads)
         window.fbq('track', 'CompleteRegistration', {
-          content_name: 'Contractor Calendly Booking',
+          content_name: 'Contractor Booking',
           content_category: 'Contractor Consultation',
           currency: 'USD',
           value: 0,
@@ -147,7 +116,7 @@ function LandingContractors() {
         })
 
         // Track custom event
-        window.fbq('trackCustom', 'ContractorCalendlyBooking', {
+        window.fbq('trackCustom', 'ContractorBookingComplete', {
           content_name: 'Contractor Booking',
           content_category: 'Contractor Consultation',
           currency: 'USD',
@@ -158,11 +127,11 @@ function LandingContractors() {
       }
     }
 
-    window.addEventListener('message', handleCalendlyBooking)
+    window.addEventListener('message', handleBookingComplete)
 
     // Cleanup
     return () => {
-      window.removeEventListener('message', handleCalendlyBooking)
+      window.removeEventListener('message', handleBookingComplete)
     }
   }, [])
 
@@ -507,13 +476,14 @@ function LandingContractors() {
             className="bg-white rounded-3xl shadow-2xl p-4 md:p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
             id="landing-contractors-form-container"
           >
-            {/* Calendly inline widget begin */}
-            <div
-              className="calendly-inline-widget"
-              data-url="https://calendly.com/rhyanalmeida31/30min"
-              style={{ minWidth: '320px', height: '700px', width: '100%' }}
+            {/* LeadConnector booking widget */}
+            <iframe
+              src="https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75"
+              style={{ width: '100%', border: 'none', overflow: 'hidden', minHeight: '700px' }}
+              scrolling="no"
+              id="MseWjwAf3rDlJRoj1p75_booking_widget_contractor"
+              title="Book Consultation"
             />
-            {/* Calendly inline widget end */}
           </div>
 
           {/* Respectful meeting reminder */}
