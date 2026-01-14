@@ -30,7 +30,7 @@ function LandingContractors() {
       window.history.replaceState({}, '', newUrl)
     }
 
-    // Initialize Contractor-Specific Facebook Pixel (1357182892280101)
+    // Initialize Contractor-Specific Facebook Pixel (4230021860577001)
     // This is separate from the main site pixel
     const initContractorPixel = () => {
       if (!window.fbq) {
@@ -53,9 +53,9 @@ function LandingContractors() {
         })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
       }
 
-      // Initialize contractor pixel ID: 1357182892280101
+      // Initialize contractor pixel ID: 4230021860577001
       if (window.fbq) {
-        window.fbq('init', '1357182892280101')
+        window.fbq('init', '4230021860577001')
         window.fbq('track', 'PageView')
 
         // Track ViewContent event (standard event for landing pages)
@@ -71,7 +71,7 @@ function LandingContractors() {
           source: urlParams.get('source') || 'direct',
         })
 
-        console.log('✅ Contractor Facebook Pixel (1357182892280101): Initialized and tracking')
+        console.log('✅ Contractor Facebook Pixel (4230021860577001): Initialized and tracking')
       }
     }
 
@@ -167,7 +167,7 @@ function LandingContractors() {
           value: 0,
         })
 
-        console.log('✅ Contractor booking events sent to Facebook Pixel (1357182892280101)')
+        console.log('✅ Contractor booking events sent to Facebook Pixel (4230021860577001)')
       }
     }
 
@@ -184,7 +184,7 @@ function LandingContractors() {
             currency: 'USD',
             value: 0,
           })
-          console.log('✅ Test event sent to Facebook Pixel (1357182892280101)')
+          console.log('✅ Test event sent to Facebook Pixel (4230021860577001)')
           alert('Test event sent! Check Meta Events Manager.')
         } else {
           console.error('❌ Facebook Pixel not loaded')
@@ -301,7 +301,7 @@ function LandingContractors() {
           height="1"
           width="1"
           style={{ display: 'none' }}
-          src="https://www.facebook.com/tr?id=1357182892280101&ev=PageView&noscript=1"
+          src="https://www.facebook.com/tr?id=4230021860577001&ev=PageView&noscript=1"
           alt=""
         />
       </noscript>
