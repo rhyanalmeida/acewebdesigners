@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
+import { trackMainLandingBooking, testOfflineConversion } from './utils/facebookConversions'
 
 function Landing() {
   const bookingFormRef = useRef(null)
@@ -108,7 +109,7 @@ function Landing() {
       if (isBooking && window.fbq) {
         console.log('✅ Main Landing booking detected!')
 
-        // Track CompleteRegistration (standard Facebook event for ads)
+        // Track with browser pixel
         window.fbq('track', 'CompleteRegistration', {
           content_name: 'Main Landing Booking',
           content_category: 'Website Consultation',
@@ -116,13 +117,11 @@ function Landing() {
           value: 0,
         })
 
-        // Track Lead event
         window.fbq('track', 'Lead', {
           content_name: 'Website Consultation Booking',
           content_category: 'Free Design Consultation',
         })
 
-        // Track custom event
         window.fbq('trackCustom', 'MainLandingBookingComplete', {
           content_name: 'Main Landing Booking',
           content_category: 'Website Consultation',
@@ -131,6 +130,14 @@ function Landing() {
         })
 
         console.log('✅ Main landing booking events sent to Facebook Pixel (1703925480259996)')
+
+        // ALSO send via Conversions API (Offline Conversion) for better reliability
+        trackMainLandingBooking({
+          content_name: 'Main Landing Booking',
+          content_category: 'Website Consultation',
+        }).then(() => {
+          console.log('✅ Offline conversion sent via Conversions API')
+        })
       }
     }
 
@@ -153,6 +160,11 @@ function Landing() {
           console.error('❌ Facebook Pixel not loaded')
           alert('Facebook Pixel not loaded!')
         }
+      }
+
+      // Add offline conversion test
+      ;(window as any).testMainOfflineConversion = () => {
+        testOfflineConversion('1703925480259996')
       }
     }
 
@@ -196,7 +208,8 @@ function Landing() {
 
     // Testing instructions
     console.log('🧪 Testing commands available:')
-    console.log('  - testMainPixel() - Manually test Facebook Pixel')
+    console.log('  - testMainPixel() - Manually test Facebook Pixel (browser)')
+    console.log('  - testMainOfflineConversion() - Test Conversions API (server-side)')
     console.log('  - Check console for all postMessage events after booking')
 
     // Cleanup

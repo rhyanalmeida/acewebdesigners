@@ -8,6 +8,7 @@ import {
   Wrench,
   TrendingUp,
 } from 'lucide-react'
+import { trackContractorBooking, testOfflineConversion } from './utils/facebookConversions'
 
 function LandingContractors() {
   const bookingFormRef = useRef(null)
@@ -147,7 +148,7 @@ function LandingContractors() {
       if (isBooking && window.fbq) {
         console.log('✅ Contractor booking detected!')
 
-        // Track CompleteRegistration (standard Facebook event for ads)
+        // Track with browser pixel
         window.fbq('track', 'CompleteRegistration', {
           content_name: 'Contractor Booking',
           content_category: 'Contractor Consultation',
@@ -155,13 +156,11 @@ function LandingContractors() {
           value: 0,
         })
 
-        // Track Lead event
         window.fbq('track', 'Lead', {
           content_name: 'Contractor Consultation Booking',
           content_category: 'Free Contractor Consultation',
         })
 
-        // Track custom event
         window.fbq('trackCustom', 'ContractorBookingComplete', {
           content_name: 'Contractor Booking',
           content_category: 'Contractor Consultation',
@@ -170,6 +169,14 @@ function LandingContractors() {
         })
 
         console.log('✅ Contractor booking events sent to Facebook Pixel (4230021860577001)')
+
+        // ALSO send via Conversions API (Offline Conversion) for better reliability
+        trackContractorBooking({
+          content_name: 'Contractor Booking',
+          content_category: 'Contractor Consultation',
+        }).then(() => {
+          console.log('✅ Offline conversion sent via Conversions API')
+        })
       }
     }
 
@@ -192,6 +199,11 @@ function LandingContractors() {
           console.error('❌ Facebook Pixel not loaded')
           alert('Facebook Pixel not loaded!')
         }
+      }
+
+      // Add offline conversion test
+      ;(window as any).testOfflineConversion = () => {
+        testOfflineConversion('4230021860577001')
       }
     }
 
@@ -235,7 +247,8 @@ function LandingContractors() {
 
     // Testing instructions
     console.log('🧪 Testing commands available:')
-    console.log('  - testContractorPixel() - Manually test Facebook Pixel')
+    console.log('  - testContractorPixel() - Manually test Facebook Pixel (browser)')
+    console.log('  - testOfflineConversion() - Test Conversions API (server-side)')
     console.log('  - Check console for all postMessage events after booking')
 
     // Cleanup
