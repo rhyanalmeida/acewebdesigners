@@ -238,7 +238,7 @@ function LandingContractors() {
     setTimeout(() => clearInterval(checkGHLCallback), 10000)
 
     // Track iframe load
-    const iframe = document.getElementById('MseWjwAf3rDlJRoj1p75_booking_widget_contractor')
+    const iframe = document.getElementById('MseWjwAf3rDlJRoj1p75_1768499231909')
     if (iframe) {
       iframe.addEventListener('load', () => {
         console.log('✅ LeadConnector iframe loaded successfully')
@@ -603,9 +603,9 @@ function LandingContractors() {
             {/* LeadConnector booking widget */}
             <iframe
               src="https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75"
-              style={{ width: '100%', border: 'none', overflow: 'hidden', minHeight: '700px' }}
+              style={{ width: '100%', border: 'none', overflow: 'hidden' }}
               scrolling="no"
-              id="MseWjwAf3rDlJRoj1p75_booking_widget_contractor"
+              id="MseWjwAf3rDlJRoj1p75_1768499231909"
               title="Book Consultation"
             />
           </div>
