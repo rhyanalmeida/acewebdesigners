@@ -704,15 +704,17 @@
   overflow: hidden;
   border-radius: 1rem;
   width: 100% !important;
-  min-height: 700px;
+  min-height: 800px !important;
+  height: 100%;
   border: none !important;
+  display: block;
 }
 
 /* Mobile-specific booking widget optimizations */
 @media (max-width: 768px) {
   #landing-form-container iframe,
   #landing-contractors-form-container iframe {
-    min-height: 700px;
+    min-height: 900px !important;
     height: auto;
   }
   

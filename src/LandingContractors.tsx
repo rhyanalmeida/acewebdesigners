@@ -603,10 +603,11 @@ function LandingContractors() {
             {/* LeadConnector booking widget */}
             <iframe
               src="https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75"
-              style={{ width: '100%', border: 'none', overflow: 'hidden' }}
+              style={{ width: '100%', border: 'none', overflow: 'hidden', minHeight: '800px', height: '100%' }}
               scrolling="no"
               id="MseWjwAf3rDlJRoj1p75_1768499231909"
               title="Book Consultation"
+              allow="payment"
             />
           </div>
 
