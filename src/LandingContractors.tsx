@@ -746,20 +746,23 @@ function LandingContractors() {
 
               <div>
                 <h2 className="text-xl font-bold mb-2">SMS & A2P Compliance</h2>
-                <p>If you provide your phone number, you agree to receive SMS messages from Ace Web Designers related to your inquiry or services.</p>
+                <p>If you provide your phone number and opt in via the SMS consent checkbox, you agree to receive SMS messages from Ace Web Designers related to your inquiry, appointment confirmations, reminders, and rescheduling.</p>
                 <ul className="list-disc ml-6 mt-2 space-y-1">
                   <li>Message frequency varies</li>
                   <li>Message & data rates may apply</li>
-                  <li>You may opt out anytime by replying STOP</li>
+                  <li>You may opt out at any time by replying STOP</li>
                   <li>Reply HELP for assistance</li>
                 </ul>
-                <p className="mt-2">We do not sell or share your phone number with third parties for marketing purposes.</p>
+                <p className="mt-2">We do not sell or share your phone number with third parties for marketing purposes. Consent is not a condition of purchase.</p>
               </div>
 
               <div>
                 <h2 className="text-xl font-bold mb-2">Data Sharing</h2>
-                <p>
+                <p className="mb-2">
                   We may share information only with trusted service providers (such as scheduling, CRM, or messaging platforms) strictly to operate our business.
+                </p>
+                <p>
+                  We use GoHighLevel and messaging providers to send appointment-related communications.
                 </p>
               </div>
 
@@ -819,7 +822,7 @@ function LandingContractors() {
               <div>
                 <h2 className="text-xl font-bold mb-2">Communication Consent</h2>
                 <p>
-                  By submitting your phone number and/or email address on our website, booking calendar, or forms, you consent to receive communications from Ace Web Designers, including:
+                  By submitting your information and opting in via the SMS consent checkbox on our website, booking calendar, or forms, you consent to receive communications from Ace Web Designers, including:
                 </p>
                 <ul className="list-disc ml-6 mt-2 space-y-1">
                   <li>Appointment confirmations and reminders</li>
@@ -827,7 +830,7 @@ function LandingContractors() {
                   <li>Service updates or relevant business communications</li>
                 </ul>
                 <p className="mt-2">
-                  Message frequency varies. Message and data rates may apply.
+                  Message frequency varies. Message & data rates may apply. Consent is not a condition of purchase.
                 </p>
                 <p className="mt-2">
                   You can opt out at any time by replying STOP to any text message. For help, reply HELP or contact us directly.

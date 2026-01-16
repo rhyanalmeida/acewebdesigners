@@ -64,28 +64,27 @@ function PrivacyPolicyPage() {
           <section>
             <h2 className="text-2xl font-bold mb-4 text-gray-900">SMS & A2P Compliance</h2>
             <p className="mb-4">
-              If you provide your phone number, you agree to receive SMS messages from Ace Web
-              Designers related to your inquiry or services.
+              If you provide your phone number and opt in via the SMS consent checkbox, you agree to receive SMS messages from Ace Web Designers related to your inquiry, appointment confirmations, reminders, and rescheduling.
             </p>
             <ul className="list-disc ml-6 space-y-2 mb-4">
               <li>Message frequency varies</li>
               <li>Message & data rates may apply</li>
-              <li>You may opt out anytime by replying STOP</li>
+              <li>You may opt out at any time by replying STOP</li>
               <li>Reply HELP for assistance</li>
             </ul>
-            <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-lg">
-              <p className="font-semibold text-gray-900">Important:</p>
-              <p className="mt-2">
-                We do not sell or share your phone number with third parties for marketing purposes.
-              </p>
-            </div>
+            <p className="mb-4">
+              We do not sell or share your phone number with third parties for marketing purposes. Consent is not a condition of purchase.
+            </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold mb-4 text-gray-900">Data Sharing</h2>
-            <p>
+            <p className="mb-4">
               We may share information only with trusted service providers (such as scheduling, CRM,
               or messaging platforms) strictly to operate our business.
+            </p>
+            <p>
+              We use GoHighLevel and messaging providers to send appointment-related communications.
             </p>
           </section>
 

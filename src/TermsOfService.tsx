@@ -50,8 +50,7 @@ function TermsOfService() {
           <section>
             <h2 className="text-2xl font-bold mb-4 text-gray-900">Communication Consent</h2>
             <p className="mb-4">
-              By submitting your phone number and/or email address on our website, booking calendar,
-              or forms, you consent to receive communications from Ace Web Designers, including:
+              By submitting your information and opting in via the SMS consent checkbox on our website, booking calendar, or forms, you consent to receive communications from Ace Web Designers, including:
             </p>
             <ul className="list-disc ml-6 space-y-2 mb-4">
               <li>Appointment confirmations and reminders</li>
@@ -59,7 +58,7 @@ function TermsOfService() {
               <li>Service updates or relevant business communications</li>
             </ul>
             <p className="mb-4">
-              Message frequency varies. Message and data rates may apply.
+              Message frequency varies. Message & data rates may apply. Consent is not a condition of purchase.
             </p>
             <p className="mb-4">
               You can opt out at any time by replying STOP to any text message. For help, reply HELP
