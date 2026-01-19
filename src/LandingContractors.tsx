@@ -667,10 +667,10 @@ function LandingContractors() {
                 </li>
                 <li>
                   <a
-                    href="tel:+17743151951"
+                    href="tel:+17744467375"
                     className="text-gray-400 hover:text-white transition-colors"
                   >
-                    (774) 315-1951
+                    (774) 446-7375
                   </a>
                 </li>
                 <li className="text-gray-400">Based in Leominster, MA • Serving Nationwide</li>
@@ -714,7 +714,7 @@ function LandingContractors() {
               ×
             </button>
             <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
-            <p className="text-sm text-gray-600 mb-6">Last updated: January 14, 2026</p>
+            <p className="text-sm text-gray-600 mb-6">Last updated: January 16, 2026</p>
             
             <div className="space-y-6 text-gray-700">
               <p>
@@ -785,7 +785,7 @@ function LandingContractors() {
                 <p>
                   Ace Web Designers<br />
                   Massachusetts, USA<br />
-                  Phone: +1 (774) 315-1951<br />
+                  Phone: +1 (774) 446-7375<br />
                   Email: hello@acewebdesigners.com
                 </p>
               </div>
@@ -805,7 +805,7 @@ function LandingContractors() {
               ×
             </button>
             <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
-            <p className="text-sm text-gray-600 mb-6">Last updated: January 14, 2026</p>
+            <p className="text-sm text-gray-600 mb-6">Last updated: January 16, 2026</p>
             
             <div className="space-y-6 text-gray-700">
               <p>
@@ -822,24 +822,26 @@ function LandingContractors() {
               <div>
                 <h2 className="text-xl font-bold mb-2">Communication Consent</h2>
                 <p>
-                  By submitting your information and opting in via the SMS consent checkbox on our website, booking calendar, or forms, you consent to receive communications from Ace Web Designers, including:
+                  By submitting your information and <strong>opting in via the SMS consent checkbox</strong> on our website, booking calendar, or forms, you consent to receive communications from <strong>Ace Web Designers</strong>, including:
                 </p>
                 <ul className="list-disc ml-6 mt-2 space-y-1">
                   <li>Appointment confirmations and reminders</li>
-                  <li>Follow-up messages related to your inquiry</li>
-                  <li>Service updates or relevant business communications</li>
+                  <li>Follow-up messages related to your inquiry and scheduled appointment</li>
+                  <li>Rescheduling and appointment support messages</li>
                 </ul>
                 <p className="mt-2">
-                  Message frequency varies. Message & data rates may apply. Consent is not a condition of purchase.
+                  Message frequency varies. Message & data rates may apply. <strong>Consent is not a condition of purchase.</strong>
                 </p>
                 <p className="mt-2">
-                  You can opt out at any time by replying STOP to any text message. For help, reply HELP or contact us directly.
+                  You can opt out at any time by replying <strong>STOP</strong> to any text message. For help, reply <strong>HELP</strong> or contact us directly.
                 </p>
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm">
-                    <strong>SMS Opt-Out:</strong> You may receive SMS messages from Ace Web Designers at +1 (774) 315-1951. Reply STOP to opt out. Message & data rates may apply.
-                  </p>
-                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold mb-2">SMS Opt-Out Notice</h2>
+                <p>
+                  You may receive SMS messages from <strong>Ace Web Designers</strong> at <strong>+1 (774) 315-1951</strong>. Reply <strong>STOP</strong> to opt out. Reply <strong>HELP</strong> for help. Message & data rates may apply.
+                </p>
               </div>
 
               <div>
@@ -875,7 +877,7 @@ function LandingContractors() {
                 <p>
                   Ace Web Designers<br />
                   Massachusetts, USA<br />
-                  Phone: +1 (774) 315-1951<br />
+                  Phone: +1 (774) 446-7375<br />
                   Email: hello@acewebdesigners.com
                 </p>
               </div>

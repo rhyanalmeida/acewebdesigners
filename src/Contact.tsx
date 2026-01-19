@@ -135,10 +135,10 @@ function Contact({ initialData }: ContactProps) {
                   <div>
                     <p className="text-gray-500 text-xs">Phone</p>
                     <a
-                      href="tel:+17743151951"
+                      href="tel:+17744467375"
                       className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
                     >
-                      (774) 315-1951
+                      (774) 446-7375
                     </a>
                   </div>
                 </div>

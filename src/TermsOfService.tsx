@@ -30,7 +30,7 @@ function TermsOfService() {
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Terms of Service</h1>
-        <p className="text-gray-600 mb-12">Last updated: January 14, 2026</p>
+        <p className="text-gray-600 mb-12">Last updated: January 16, 2026</p>
 
         <div className="space-y-8 text-gray-700 leading-relaxed">
           <p className="text-lg">
@@ -50,30 +50,30 @@ function TermsOfService() {
           <section>
             <h2 className="text-2xl font-bold mb-4 text-gray-900">Communication Consent</h2>
             <p className="mb-4">
-              By submitting your information and opting in via the SMS consent checkbox on our website, booking calendar, or forms, you consent to receive communications from Ace Web Designers, including:
+              By submitting your information and <strong>opting in via the SMS consent checkbox</strong> on our website, booking calendar, or forms, you consent to receive communications from <strong>Ace Web Designers</strong>, including:
             </p>
             <ul className="list-disc ml-6 space-y-2 mb-4">
               <li>Appointment confirmations and reminders</li>
-              <li>Follow-up messages related to your inquiry</li>
-              <li>Service updates or relevant business communications</li>
+              <li>Follow-up messages related to your inquiry and scheduled appointment</li>
+              <li>Rescheduling and appointment support messages</li>
             </ul>
             <p className="mb-4">
-              Message frequency varies. Message & data rates may apply. Consent is not a condition of purchase.
+              Message frequency varies. Message & data rates may apply. <strong>Consent is not a condition of purchase.</strong>
             </p>
             <p className="mb-4">
-              You can opt out at any time by replying STOP to any text message. For help, reply HELP
-              or contact us directly.
+              You can opt out at any time by replying <strong>STOP</strong> to any text message. For help, reply <strong>HELP</strong> or contact us directly.
             </p>
-            <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-lg">
-              <p className="font-semibold text-gray-900">SMS Opt-Out Notice:</p>
-              <p className="mt-2">
-                You may receive SMS messages from Ace Web Designers at{' '}
-                <a href="tel:+17743151951" className="text-blue-600 hover:underline font-semibold">
-                  +1 (774) 315-1951
-                </a>
-                . Reply <strong>STOP</strong> to opt out. Message & data rates may apply.
-              </p>
-            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900">SMS Opt-Out Notice</h2>
+            <p className="mb-4">
+              You may receive SMS messages from <strong>Ace Web Designers</strong> at{' '}
+              <a href="tel:+17743151951" className="text-blue-600 hover:underline font-semibold">
+                <strong>+1 (774) 315-1951</strong>
+              </a>
+              . Reply <strong>STOP</strong> to opt out. Reply <strong>HELP</strong> for help. Message & data rates may apply.
+            </p>
           </section>
 
           <section>
@@ -115,8 +115,8 @@ function TermsOfService() {
               <p>Massachusetts, USA</p>
               <p>
                 Phone:{' '}
-                <a href="tel:+17743151951" className="text-blue-600 hover:underline">
-                  +1 (774) 315-1951
+                <a href="tel:+17744467375" className="text-blue-600 hover:underline">
+                  +1 (774) 446-7375
                 </a>
               </p>
               <p>

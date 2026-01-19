@@ -92,7 +92,7 @@ function PrivacyPolicy() {
                 may opt out of receiving telemarketing calls or text messages at any time by:
               </p>
               <ul className="list-disc pl-6 text-gray-700 space-y-2 mb-4">
-                <li>Calling us at (774) 315-1951</li>
+                <li>Calling us at (774) 446-7375</li>
                 <li>Emailing us at hello@acewebdesigners.com</li>
                 <li>Replying "STOP" to any text message you receive from us</li>
                 <li>Using the unsubscribe options provided in our marketing communications</li>
@@ -154,8 +154,8 @@ function PrivacyPolicy() {
                     <Phone className="w-5 h-5 text-blue-600" />
                     <span className="text-gray-700">
                       Phone:{' '}
-                      <a href="tel:+17743151951" className="text-blue-600 hover:text-blue-800">
-                        (774) 315-1951
+                      <a href="tel:+17744467375" className="text-blue-600 hover:text-blue-800">
+                        (774) 446-7375
                       </a>
                     </span>
                   </div>

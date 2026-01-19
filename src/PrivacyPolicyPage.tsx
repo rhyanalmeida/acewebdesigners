@@ -30,7 +30,7 @@ function PrivacyPolicyPage() {
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Privacy Policy</h1>
-        <p className="text-gray-600 mb-12">Last updated: January 14, 2026</p>
+        <p className="text-gray-600 mb-12">Last updated: January 16, 2026</p>
 
         <div className="space-y-8 text-gray-700 leading-relaxed">
           <p className="text-lg">
@@ -110,8 +110,8 @@ function PrivacyPolicyPage() {
               <p>Massachusetts, USA</p>
               <p>
                 Phone:{' '}
-                <a href="tel:+17743151951" className="text-blue-600 hover:underline">
-                  +1 (774) 315-1951
+                <a href="tel:+17744467375" className="text-blue-600 hover:underline">
+                  +1 (774) 446-7375
                 </a>
               </p>
               <p>

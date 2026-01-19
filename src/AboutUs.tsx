@@ -226,10 +226,10 @@ function AboutUs() {
                     <Phone className="w-6 h-6 text-blue-600" />
                   </div>
                   <a
-                    href="tel:+17743151951"
+                    href="tel:+17744467375"
                     className="hover:text-blue-600 transition-colors text-lg"
                   >
-                    (774) 315-1951
+                    (774) 446-7375
                   </a>
                 </div>
                 <div className="flex items-center gap-4 text-gray-700">

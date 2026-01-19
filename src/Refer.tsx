@@ -359,10 +359,10 @@ function Refer() {
                 </li>
                 <li>
                   <a
-                    href="tel:+17743151951"
+                    href="tel:+17744467375"
                     className="text-gray-400 hover:text-white transition-colors"
                   >
-                    (774) 315-1951
+                    (774) 446-7375
                   </a>
                 </li>
                 <li className="text-gray-400">

@@ -520,12 +520,12 @@ function Landing() {
             {/* LeadConnector booking widget */}
             <iframe
               src="https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75"
-              style={{ width: '100%', border: 'none', overflow: 'hidden', minHeight: '800px', height: '100%' }}
+              style={{ width: '100%', border: 'none', overflow: 'hidden' }}
               scrolling="no"
-              id="MseWjwAf3rDlJRoj1p75_1768499231909"
+              id="MseWjwAf3rDlJRoj1p75_1768863181685"
               title="Book Consultation"
-              allow="payment"
             />
+            <script src="https://link.msgsndr.com/js/form_embed.js" type="text/javascript"></script>
           </div>
 
           {/* Respectful meeting reminder */}
@@ -584,10 +584,10 @@ function Landing() {
                 </li>
                 <li>
                   <a
-                    href="tel:+17743151951"
+                    href="tel:+17744467375"
                     className="text-gray-400 hover:text-white transition-colors"
                   >
-                    (774) 315-1951
+                    (774) 446-7375
                   </a>
                 </li>
                 <li className="text-gray-400">Based in Leominster, MA • Serving Nationwide</li>
