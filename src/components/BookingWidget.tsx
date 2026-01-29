@@ -175,12 +175,11 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
         style={{
           width: '100%',
           border: 'none',
-          overflow: 'hidden',
           minHeight: `${calendarConfig.minHeight}px`,
-          height: '100%',
+          height: 'auto',
           display: isLoaded && !hasError ? 'block' : 'none',
         }}
-        scrolling="no"
+        scrolling="yes"
         allow="payment"
         onLoad={handleIframeLoad}
         onError={handleIframeError}
