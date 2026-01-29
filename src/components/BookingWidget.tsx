@@ -132,7 +132,7 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
     <div
       id={containerId}
       className={`booking-widget-container ${className}`}
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', minHeight: `${calendarConfig.minHeight}px` }}
     >
       {/* Loading state */}
       {!isLoaded && !hasError && (

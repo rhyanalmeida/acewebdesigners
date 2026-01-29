@@ -11,7 +11,7 @@ import {
 } from './utils/pixelTracking'
 
 function Landing() {
-  const bookingFormRef = useRef(null)
+  const bookingFormRef = useRef<HTMLElement>(null)
 
   // Handle booking completion callback
   const handleBookingComplete = useCallback(() => {
