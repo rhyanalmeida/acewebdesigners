@@ -31,8 +31,8 @@ export const MAIN_CALENDAR: CalendarConfig = {
   url: 'https://api.leadconnectorhq.com/widget/booking/mdd2ImGj9qnzPZxQciNF',
   name: 'Main Site Booking',
   iframeId: 'mdd2ImGj9qnzPZxQciNF_1769694054880',
-  minHeight: 1000,
-  mobileMinHeight: 1100,
+  minHeight: 800,
+  mobileMinHeight: 900,
 }
 
 /**
@@ -48,8 +48,8 @@ export const CONTRACTOR_CALENDAR: CalendarConfig = {
   url: 'https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75',
   name: 'Contractor Booking',
   iframeId: 'contractor-booking-widget',
-  minHeight: 1000,
-  mobileMinHeight: 1100,
+  minHeight: 800,
+  mobileMinHeight: 900,
 }
 
 /**
