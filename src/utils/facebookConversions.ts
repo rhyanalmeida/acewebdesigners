@@ -1,9 +1,29 @@
-// Facebook Conversions API (Offline Conversions) utility
-// Sends conversion events server-side for more reliable tracking
+/**
+ * Facebook Conversions API (Offline Conversions) utility
+ * 
+ * SECURITY WARNING: 
+ * - The Conversions API should ideally be called from a BACKEND SERVER, not client-side
+ * - Access tokens should NEVER be exposed in client-side code
+ * - For production, set up a Netlify Function or backend endpoint to handle these calls
+ * 
+ * This file now uses import.meta.env for the access token which should be set as:
+ * - VITE_FB_ACCESS_TOKEN in your .env file (for local development)
+ * - Set in Netlify/hosting environment variables (for production)
+ * 
+ * NOTE: Client-side Conversions API calls may not work due to CORS.
+ * The browser-based pixel tracking (fbq) is the primary tracking method.
+ * This is a fallback for server-side tracking which should be set up separately.
+ */
 
-const FB_ACCESS_TOKEN = 'EAAIIvHD8ehIBQeSvkpUh4iKNIjKYcWT66q5ZBnRGNMTdsg6xLnF7ZCBCroMujfYzyrudg5IZAtEaEMho6bNUbiDZCt0eoO5dFbpBCmZARb74hmI9lo0xpgrbSKdRITl1JGaZBGJ8NVRMbwx1X0aZC8TJWTIoTkWSZAaSS7JgGrkrDKn7FzlkPoJ8iu59s0iSwqwBnAZDZD'
-const CONTRACTOR_PIXEL_ID = '4230021860577001'
-const MAIN_PIXEL_ID = '1703925480259996'
+import { CONTRACTOR_PIXEL, MAIN_PIXEL } from '../config/pixels'
+
+// Access token should be set via environment variable for security
+// In production, this should be called from a backend function
+const FB_ACCESS_TOKEN = import.meta.env.VITE_FB_ACCESS_TOKEN || ''
+
+// Use centralized pixel configuration
+const CONTRACTOR_PIXEL_ID = CONTRACTOR_PIXEL.pixelId
+const MAIN_PIXEL_ID = MAIN_PIXEL.pixelId
 
 interface ConversionEventData {
   eventName: string

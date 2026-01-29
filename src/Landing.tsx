@@ -1,9 +1,33 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useCallback } from 'react'
 import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
 import { trackMainLandingBooking, testOfflineConversion } from './utils/facebookConversions'
+import { BookingWidget } from './components/BookingWidget'
+import { MAIN_CALENDAR } from './config/calendars'
+import { MAIN_PIXEL } from './config/pixels'
+import {
+  trackViewContent,
+  trackBookingComplete,
+  setupTestingFunctions,
+} from './utils/pixelTracking'
 
 function Landing() {
   const bookingFormRef = useRef(null)
+
+  // Handle booking completion callback
+  const handleBookingComplete = useCallback(() => {
+    console.log('✅ Main Landing booking detected!')
+
+    // Track with centralized pixel tracking utility
+    trackBookingComplete('main')
+
+    // Also send via Conversions API for better reliability
+    trackMainLandingBooking({
+      content_name: 'Main Landing Booking',
+      content_category: 'Website Consultation',
+    }).then(() => {
+      console.log('✅ Offline conversion sent via Conversions API')
+    })
+  }, [])
 
   useEffect(() => {
     document.title = 'Free Website Design for Your Business | Limited Time Offer'
@@ -23,200 +47,30 @@ function Landing() {
       window.history.replaceState({}, '', newUrl)
     }
 
-    // Track main landing page view with main pixel (1703925480259996)
-    // This pixel is already loaded from index.html
-    if (window.fbq) {
-      // Track ViewContent event (standard event for landing pages)
-      window.fbq('track', 'ViewContent', {
-        content_name: 'Main Landing Page',
-        content_category: 'Landing Page',
-        content_type: 'general_services',
-      })
+    // Track main landing page view with centralized pixel tracking
+    // Main pixel is already loaded from index.html
+    trackViewContent('Main Landing Page', 'Landing Page', 'general_services')
 
-      // Track custom event for main landing tracking
+    // Track custom event for main landing tracking
+    if (window.fbq) {
       window.fbq('trackCustom', 'MainLandingView', {
         page: 'main_landing',
         source: urlParams.get('source') || 'direct',
       })
-
-      console.log('✅ Main Facebook Pixel (1703925480259996): Landing page view tracked')
+      console.log(`✅ ${MAIN_PIXEL.name} (${MAIN_PIXEL.pixelId}): Landing page view tracked`)
     }
 
-    console.log('✅ LeadConnector booking widget loaded on Main Landing page')
+    console.log(`✅ LeadConnector booking widget loaded on Main Landing page`)
+    console.log(`📅 Using calendar: ${MAIN_CALENDAR.name}`)
 
-    // Debug: Log ALL postMessage events to identify LeadConnector's format
-    const debugAllMessages = (e: MessageEvent) => {
-      console.log('📨 PostMessage received:', {
-        origin: e.origin,
-        data: e.data,
-        type: typeof e.data,
-        dataType: e.data?.type,
-        dataEvent: e.data?.event,
-        fullData: JSON.stringify(e.data, null, 2),
-      })
-    }
+    // Setup testing functions for debugging
+    setupTestingFunctions('main')
 
-    window.addEventListener('message', debugAllMessages)
-
-    // Add booking event listener for LeadConnector widget
-    const handleBookingComplete = (e: MessageEvent) => {
-      let isBooking = false
-
-      // Log for debugging
-      if (e.origin.includes('leadconnectorhq.com') || e.origin.includes('msgsndr.com')) {
-        console.log('🎯 LeadConnector message detected:', e.data)
-      }
-
-      if (e.data && typeof e.data === 'object') {
-        // Check multiple possible event patterns
-        if (
-          // Standard patterns
-          e.data.type === 'booking_completed' ||
-          e.data.type === 'appointment_scheduled' ||
-          e.data.event === 'booking_completed' ||
-          e.data.event === 'appointment_scheduled' ||
-          // GHL-specific patterns
-          e.data.type === 'form_submitted' ||
-          e.data.type === 'calendar_booking' ||
-          e.data.event === 'form_submitted' ||
-          e.data.event === 'calendar_booking' ||
-          // Check for success/complete in message
-          (typeof e.data === 'string' &&
-            (e.data.includes('success') || e.data.includes('complete'))) ||
-          // Check nested event property
-          e.data.message?.type === 'booking_completed' ||
-          // Check for any booking-related keywords
-          (e.data.action && e.data.action.includes('book'))
-        ) {
-          isBooking = true
-        }
-      }
-
-      // Also check string messages
-      if (typeof e.data === 'string') {
-        const lowerData = e.data.toLowerCase()
-        if (
-          lowerData.includes('booking') ||
-          lowerData.includes('appointment') ||
-          lowerData.includes('scheduled') ||
-          lowerData.includes('confirmed')
-        ) {
-          console.log('🔍 Possible booking message (string):', e.data)
-          isBooking = true
-        }
-      }
-
-      if (isBooking && window.fbq) {
-        console.log('✅ Main Landing booking detected!')
-
-        // Track with browser pixel
-        window.fbq('track', 'CompleteRegistration', {
-          content_name: 'Main Landing Booking',
-          content_category: 'Website Consultation',
-          currency: 'USD',
-          value: 0,
-        })
-
-        window.fbq('track', 'Lead', {
-          content_name: 'Website Consultation Booking',
-          content_category: 'Free Design Consultation',
-        })
-
-        window.fbq('trackCustom', 'MainLandingBookingComplete', {
-          content_name: 'Main Landing Booking',
-          content_category: 'Website Consultation',
-          currency: 'USD',
-          value: 0,
-        })
-
-        console.log('✅ Main landing booking events sent to Facebook Pixel (1703925480259996)')
-
-        // ALSO send via Conversions API (Offline Conversion) for better reliability
-        trackMainLandingBooking({
-          content_name: 'Main Landing Booking',
-          content_category: 'Website Consultation',
-        }).then(() => {
-          console.log('✅ Offline conversion sent via Conversions API')
-        })
-      }
-    }
-
-    window.addEventListener('message', handleBookingComplete)
-
-    // Add to window for testing
+    // Add offline conversion test
     if (typeof window !== 'undefined') {
-      ;(window as any).testMainPixel = () => {
-        console.log('🧪 Manual pixel test triggered')
-        if (window.fbq) {
-          window.fbq('track', 'CompleteRegistration', {
-            content_name: 'TEST Main Landing Booking',
-            content_category: 'Website Consultation',
-            currency: 'USD',
-            value: 0,
-          })
-          console.log('✅ Test event sent to Facebook Pixel (1703925480259996)')
-          alert('Test event sent! Check Meta Events Manager.')
-        } else {
-          console.error('❌ Facebook Pixel not loaded')
-          alert('Facebook Pixel not loaded!')
-        }
+      window.testOfflineConversion = (pixelId: string) => {
+        testOfflineConversion(pixelId || MAIN_PIXEL.pixelId)
       }
-
-      // Add offline conversion test
-      ;(window as any).testMainOfflineConversion = () => {
-        testOfflineConversion('1703925480259996')
-      }
-    }
-
-    // Check if GHL script provides callbacks
-    const checkGHLCallback = setInterval(() => {
-      if ((window as any).leadConnectorBooking) {
-        console.log('✅ GHL booking object found')
-        clearInterval(checkGHLCallback)
-
-        // Hook into GHL's callback if available
-        const originalCallback = (window as any).leadConnectorBooking.onComplete
-        ;(window as any).leadConnectorBooking.onComplete = function (...args: any[]) {
-          console.log('✅ GHL callback triggered:', args)
-
-          // Track with Facebook Pixel
-          if (window.fbq) {
-            window.fbq('track', 'CompleteRegistration', {
-              content_name: 'Main Landing Booking',
-              content_category: 'Website Consultation',
-              currency: 'USD',
-              value: 0,
-            })
-          }
-
-          // Call original callback if exists
-          if (originalCallback) originalCallback.apply(this, args)
-        }
-      }
-    }, 500)
-
-    // Cleanup after 10 seconds
-    setTimeout(() => clearInterval(checkGHLCallback), 10000)
-
-    // Track iframe load
-    const iframe = document.getElementById('MseWjwAf3rDlJRoj1p75_1768499231909')
-    if (iframe) {
-      iframe.addEventListener('load', () => {
-        console.log('✅ LeadConnector iframe loaded successfully')
-      })
-    }
-
-    // Testing instructions
-    console.log('🧪 Testing commands available:')
-    console.log('  - testMainPixel() - Manually test Facebook Pixel (browser)')
-    console.log('  - testMainOfflineConversion() - Test Conversions API (server-side)')
-    console.log('  - Check console for all postMessage events after booking')
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('message', handleBookingComplete)
-      window.removeEventListener('message', debugAllMessages)
-      clearInterval(checkGHLCallback)
     }
   }, [])
 
@@ -515,17 +369,13 @@ function Landing() {
 
           <div
             className="bg-white rounded-3xl shadow-2xl p-4 md:p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
-            id="landing-form-container"
           >
-            {/* LeadConnector booking widget */}
-            <iframe
-              src="https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75"
-              style={{ width: '100%', border: 'none', overflow: 'hidden' }}
-              scrolling="no"
-              id="MseWjwAf3rDlJRoj1p75_1768863181685"
-              title="Book Consultation"
+            {/* LeadConnector booking widget - using reusable component */}
+            <BookingWidget
+              calendarConfig={MAIN_CALENDAR}
+              onBookingComplete={handleBookingComplete}
+              containerId="landing-form-container"
             />
-            <script src="https://link.msgsndr.com/js/form_embed.js" type="text/javascript"></script>
           </div>
 
           {/* Respectful meeting reminder */}

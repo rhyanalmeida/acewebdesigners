@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useCallback } from 'react'
 import {
   CheckCircle2,
   Star,
@@ -9,11 +9,36 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { trackContractorBooking, testOfflineConversion } from './utils/facebookConversions'
+import { BookingWidget } from './components/BookingWidget'
+import { CONTRACTOR_CALENDAR } from './config/calendars'
+import { CONTRACTOR_PIXEL } from './config/pixels'
+import {
+  initializeContractorPixel,
+  trackViewContent,
+  trackBookingComplete,
+  setupTestingFunctions,
+} from './utils/pixelTracking'
 
 function LandingContractors() {
-  const bookingFormRef = useRef(null)
+  const bookingFormRef = useRef<HTMLElement>(null)
   const [showPrivacyPolicy, setShowPrivacyPolicy] = React.useState(false)
   const [showTermsOfService, setShowTermsOfService] = React.useState(false)
+
+  // Handle booking completion callback
+  const handleBookingComplete = useCallback(() => {
+    console.log('✅ Contractor booking detected!')
+
+    // Track with centralized pixel tracking utility
+    trackBookingComplete('contractor')
+
+    // Also send via Conversions API for better reliability
+    trackContractorBooking({
+      content_name: 'Contractor Booking',
+      content_category: 'Contractor Consultation',
+    }).then(() => {
+      console.log('✅ Offline conversion sent via Conversions API')
+    })
+  }, [])
 
   useEffect(() => {
     document.title = 'Free Website Design for Contractors | Get More Leads & Jobs'
@@ -33,229 +58,33 @@ function LandingContractors() {
       window.history.replaceState({}, '', newUrl)
     }
 
-    // Initialize Contractor-Specific Facebook Pixel (1548487516424971)
-    // This is separate from the main site pixel
-    const initContractorPixel = () => {
-      if (!window.fbq) {
-        // Load Facebook Pixel if not already loaded
-        !(function (f, b, e, v, n, t, s) {
-          if (f.fbq) return
-          n = f.fbq = function () {
-            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-          }
-          if (!f._fbq) f._fbq = n
-          n.push = n
-          n.loaded = !0
-          n.version = '2.0'
-          n.queue = []
-          t = b.createElement(e)
-          t.async = !0
-          t.src = v
-          s = b.getElementsByTagName(e)[0]
-          s.parentNode.insertBefore(t, s)
-        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
-      }
+    // Initialize Contractor-Specific Facebook Pixel (separate from main site pixel)
+    // Uses centralized pixel tracking utility
+    initializeContractorPixel()
 
-      // Initialize contractor pixel ID: 1548487516424971
-      if (window.fbq) {
-        window.fbq('init', '1548487516424971')
-        window.fbq('track', 'PageView')
+    // Track ViewContent event for contractor landing page
+    trackViewContent('Contractor Landing Page', 'Landing Page', 'contractor_services')
 
-        // Track ViewContent event (standard event for landing pages)
-        window.fbq('track', 'ViewContent', {
-          content_name: 'Contractor Landing Page',
-          content_category: 'Landing Page',
-          content_type: 'contractor_services',
-        })
-
-        // Track custom event for contractor-specific tracking
-        window.fbq('trackCustom', 'ContractorLandingView', {
-          page: 'contractor_landing',
-          source: urlParams.get('source') || 'direct',
-        })
-
-        console.log('✅ Contractor Facebook Pixel (1548487516424971): Initialized and tracking')
-      }
-    }
-
-    // Initialize contractor pixel
-    initContractorPixel()
-
-    console.log('✅ LeadConnector booking widget loaded on Contractor Landing page')
-
-    // Debug: Log ALL postMessage events to identify LeadConnector's format
-    const debugAllMessages = (e: MessageEvent) => {
-      console.log('📨 PostMessage received:', {
-        origin: e.origin,
-        data: e.data,
-        type: typeof e.data,
-        dataType: e.data?.type,
-        dataEvent: e.data?.event,
-        fullData: JSON.stringify(e.data, null, 2),
+    // Track custom event for contractor-specific tracking
+    if (window.fbq) {
+      window.fbq('trackCustom', 'ContractorLandingView', {
+        page: 'contractor_landing',
+        source: urlParams.get('source') || 'direct',
       })
     }
 
-    window.addEventListener('message', debugAllMessages)
+    console.log(`✅ ${CONTRACTOR_PIXEL.name} (${CONTRACTOR_PIXEL.pixelId}): Initialized and tracking`)
+    console.log(`✅ LeadConnector booking widget loaded on Contractor Landing page`)
+    console.log(`📅 Using calendar: ${CONTRACTOR_CALENDAR.name}`)
 
-    // Add booking event listener for LeadConnector widget
-    const handleBookingComplete = (e: MessageEvent) => {
-      let isBooking = false
+    // Setup testing functions for debugging
+    setupTestingFunctions('contractor')
 
-      // Log for debugging
-      if (e.origin.includes('leadconnectorhq.com') || e.origin.includes('msgsndr.com')) {
-        console.log('🎯 LeadConnector message detected:', e.data)
-      }
-
-      if (e.data && typeof e.data === 'object') {
-        // Check multiple possible event patterns
-        if (
-          // Standard patterns
-          e.data.type === 'booking_completed' ||
-          e.data.type === 'appointment_scheduled' ||
-          e.data.event === 'booking_completed' ||
-          e.data.event === 'appointment_scheduled' ||
-          // GHL-specific patterns
-          e.data.type === 'form_submitted' ||
-          e.data.type === 'calendar_booking' ||
-          e.data.event === 'form_submitted' ||
-          e.data.event === 'calendar_booking' ||
-          // Check for success/complete in message
-          (typeof e.data === 'string' &&
-            (e.data.includes('success') || e.data.includes('complete'))) ||
-          // Check nested event property
-          e.data.message?.type === 'booking_completed' ||
-          // Check for any booking-related keywords
-          (e.data.action && e.data.action.includes('book'))
-        ) {
-          isBooking = true
-        }
-      }
-
-      // Also check string messages
-      if (typeof e.data === 'string') {
-        const lowerData = e.data.toLowerCase()
-        if (
-          lowerData.includes('booking') ||
-          lowerData.includes('appointment') ||
-          lowerData.includes('scheduled') ||
-          lowerData.includes('confirmed')
-        ) {
-          console.log('🔍 Possible booking message (string):', e.data)
-          isBooking = true
-        }
-      }
-
-      if (isBooking && window.fbq) {
-        console.log('✅ Contractor booking detected!')
-
-        // Track with browser pixel
-        window.fbq('track', 'CompleteRegistration', {
-          content_name: 'Contractor Booking',
-          content_category: 'Contractor Consultation',
-          currency: 'USD',
-          value: 0,
-        })
-
-        window.fbq('track', 'Lead', {
-          content_name: 'Contractor Consultation Booking',
-          content_category: 'Free Contractor Consultation',
-        })
-
-        window.fbq('trackCustom', 'ContractorBookingComplete', {
-          content_name: 'Contractor Booking',
-          content_category: 'Contractor Consultation',
-          currency: 'USD',
-          value: 0,
-        })
-
-        console.log('✅ Contractor booking events sent to Facebook Pixel (1548487516424971)')
-
-        // ALSO send via Conversions API (Offline Conversion) for better reliability
-        trackContractorBooking({
-          content_name: 'Contractor Booking',
-          content_category: 'Contractor Consultation',
-        }).then(() => {
-          console.log('✅ Offline conversion sent via Conversions API')
-        })
-      }
-    }
-
-    window.addEventListener('message', handleBookingComplete)
-
-    // Add to window for testing
+    // Add offline conversion test
     if (typeof window !== 'undefined') {
-      ;(window as any).testContractorPixel = () => {
-        console.log('🧪 Manual pixel test triggered')
-        if (window.fbq) {
-          window.fbq('track', 'CompleteRegistration', {
-            content_name: 'TEST Contractor Booking',
-            content_category: 'Contractor Consultation',
-            currency: 'USD',
-            value: 0,
-          })
-          console.log('✅ Test event sent to Facebook Pixel (1548487516424971)')
-          alert('Test event sent! Check Meta Events Manager.')
-        } else {
-          console.error('❌ Facebook Pixel not loaded')
-          alert('Facebook Pixel not loaded!')
-        }
+      window.testOfflineConversion = (pixelId: string) => {
+        testOfflineConversion(pixelId || CONTRACTOR_PIXEL.pixelId)
       }
-
-      // Add offline conversion test
-      ;(window as any).testOfflineConversion = () => {
-        testOfflineConversion('1548487516424971')
-      }
-    }
-
-    // Check if GHL script provides callbacks
-    const checkGHLCallback = setInterval(() => {
-      if ((window as any).leadConnectorBooking) {
-        console.log('✅ GHL booking object found')
-        clearInterval(checkGHLCallback)
-
-        // Hook into GHL's callback if available
-        const originalCallback = (window as any).leadConnectorBooking.onComplete
-        ;(window as any).leadConnectorBooking.onComplete = function (...args: any[]) {
-          console.log('✅ GHL callback triggered:', args)
-
-          // Track with Facebook Pixel
-          if (window.fbq) {
-            window.fbq('track', 'CompleteRegistration', {
-              content_name: 'Contractor Booking',
-              content_category: 'Contractor Consultation',
-              currency: 'USD',
-              value: 0,
-            })
-          }
-
-          // Call original callback if exists
-          if (originalCallback) originalCallback.apply(this, args)
-        }
-      }
-    }, 500)
-
-    // Cleanup after 10 seconds
-    setTimeout(() => clearInterval(checkGHLCallback), 10000)
-
-    // Track iframe load
-    const iframe = document.getElementById('MseWjwAf3rDlJRoj1p75_1768499231909')
-    if (iframe) {
-      iframe.addEventListener('load', () => {
-        console.log('✅ LeadConnector iframe loaded successfully')
-      })
-    }
-
-    // Testing instructions
-    console.log('🧪 Testing commands available:')
-    console.log('  - testContractorPixel() - Manually test Facebook Pixel (browser)')
-    console.log('  - testOfflineConversion() - Test Conversions API (server-side)')
-    console.log('  - Check console for all postMessage events after booking')
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('message', handleBookingComplete)
-      window.removeEventListener('message', debugAllMessages)
-      clearInterval(checkGHLCallback)
     }
   }, [])
 
@@ -598,16 +427,12 @@ function LandingContractors() {
 
           <div
             className="bg-white rounded-3xl shadow-2xl p-4 md:p-10 animate-glow-pulse border-2 border-blue-200 animate-scale-in"
-            id="landing-contractors-form-container"
           >
-            {/* LeadConnector booking widget */}
-            <iframe
-              src="https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75"
-              style={{ width: '100%', border: 'none', overflow: 'hidden', minHeight: '800px', height: '100%' }}
-              scrolling="no"
-              id="MseWjwAf3rDlJRoj1p75_1768499231909"
-              title="Book Consultation"
-              allow="payment"
+            {/* LeadConnector booking widget - using reusable component */}
+            <BookingWidget
+              calendarConfig={CONTRACTOR_CALENDAR}
+              onBookingComplete={handleBookingComplete}
+              containerId="landing-contractors-form-container"
             />
           </div>
 
