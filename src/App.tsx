@@ -1513,18 +1513,26 @@ function App() {
           </>
         )}
 
-      {/* Mobile Sticky CTA Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-blue-purple p-4 shadow-2xl z-40 border-t-4 border-white/20 animate-gradient-shift">
-        <button
-          onClick={() => handleNavigation('contact')}
-          className="w-full bg-white text-blue-600 py-4 px-6 rounded-full font-bold text-lg shadow-xl hover:scale-105 transition-smooth flex items-center justify-center gap-2 animate-pulse-glow-enhanced"
-        >
-          <span>👉 GET MY FREE DESIGN NOW!</span>
-        </button>
-      </div>
+      {/* Mobile Sticky CTA Bar - Hidden on landing pages that have their own booking widgets */}
+      {currentPage !== 'landing' &&
+        currentPage !== 'contractorlanding' &&
+        currentPage !== 'refer' &&
+        currentPage !== 'privacypolicy' &&
+        currentPage !== 'termsofservice' && (
+        <>
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gradient-blue-purple p-4 shadow-2xl z-40 border-t-4 border-white/20 animate-gradient-shift">
+            <button
+              onClick={() => handleNavigation('contact')}
+              className="w-full bg-white text-blue-600 py-4 px-6 rounded-full font-bold text-lg shadow-xl hover:scale-105 transition-smooth flex items-center justify-center gap-2 animate-pulse-glow-enhanced"
+            >
+              <span>👉 GET MY FREE DESIGN NOW!</span>
+            </button>
+          </div>
 
-      {/* Mobile padding to prevent content overlap */}
-      <div className="md:hidden h-20"></div>
+          {/* Mobile padding to prevent content overlap */}
+          <div className="md:hidden h-20"></div>
+        </>
+      )}
     </div>
   )
 }
