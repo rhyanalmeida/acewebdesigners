@@ -4,8 +4,9 @@
  * A reusable, properly configured LeadConnector booking widget.
  * This component handles:
  * - Proper iframe configuration for mobile and desktop
- * - Loading states
- * - Error handling
+ * - Mobile-responsive height using mobileMinHeight config
+ * - Loading states with timeout fallback
+ * - Error handling with retry functionality
  * - Booking event detection
  * 
  * Usage:
@@ -31,6 +32,9 @@ interface BookingWidgetProps {
   containerId?: string
 }
 
+// Loading timeout in milliseconds (10 seconds)
+const LOADING_TIMEOUT_MS = 10000
+
 /**
  * BookingWidget - A properly configured LeadConnector booking iframe
  */
@@ -43,6 +47,61 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    // Check on mount
+    checkMobile()
+    
+    // Listen for resize events
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Calculate effective min height based on device
+  const effectiveMinHeight = isMobile 
+    ? calendarConfig.mobileMinHeight 
+    : calendarConfig.minHeight
+
+  // Loading timeout - show fallback if widget takes too long
+  useEffect(() => {
+    if (isLoaded || hasError) return
+
+    const timeoutId = setTimeout(() => {
+      if (!isLoaded && !hasError) {
+        console.warn(`⚠️ BookingWidget loading timeout after ${LOADING_TIMEOUT_MS}ms`)
+        setLoadingTimedOut(true)
+      }
+    }, LOADING_TIMEOUT_MS)
+
+    return () => clearTimeout(timeoutId)
+  }, [isLoaded, hasError, retryCount])
+
+  // Retry loading the widget
+  const handleRetry = useCallback(() => {
+    setIsLoaded(false)
+    setHasError(false)
+    setLoadingTimedOut(false)
+    setRetryCount(prev => prev + 1)
+    
+    // Force iframe reload by updating src
+    if (iframeRef.current) {
+      const currentSrc = iframeRef.current.src
+      iframeRef.current.src = ''
+      setTimeout(() => {
+        if (iframeRef.current) {
+          iframeRef.current.src = currentSrc
+        }
+      }, 100)
+    }
+  }, [])
 
   // Handle booking completion detection via postMessage
   const handleMessage = useCallback(
@@ -103,12 +162,14 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
   const handleIframeLoad = useCallback(() => {
     setIsLoaded(true)
     setHasError(false)
+    setLoadingTimedOut(false)
     console.log(`✅ LeadConnector iframe loaded: ${calendarConfig.name}`)
   }, [calendarConfig.name])
 
   // Handle iframe error
   const handleIframeError = useCallback(() => {
     setHasError(true)
+    setLoadingTimedOut(false)
     console.error(`❌ LeadConnector iframe failed to load: ${calendarConfig.name}`)
   }, [calendarConfig.name])
 
@@ -126,23 +187,52 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
     console.log(`📅 BookingWidget mounted: ${calendarConfig.name}`)
     console.log(`   URL: ${calendarConfig.url}`)
     console.log(`   Iframe ID: ${calendarConfig.iframeId}`)
-  }, [calendarConfig])
+    console.log(`   Mobile: ${isMobile}, Height: ${effectiveMinHeight}px`)
+  }, [calendarConfig, isMobile, effectiveMinHeight])
 
   return (
     <div
       id={containerId}
       className={`booking-widget-container ${className}`}
-      style={{ position: 'relative', minHeight: `${calendarConfig.minHeight}px` }}
+      style={{ position: 'relative', minHeight: `${effectiveMinHeight}px` }}
     >
       {/* Loading state */}
-      {!isLoaded && !hasError && (
+      {!isLoaded && !hasError && !loadingTimedOut && (
         <div
           className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-2xl"
-          style={{ minHeight: calendarConfig.minHeight }}
+          style={{ minHeight: effectiveMinHeight }}
         >
-          <div className="text-center">
+          <div className="text-center p-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600 font-medium">Loading booking calendar...</p>
+            <p className="text-gray-400 text-sm mt-2">This may take a few seconds</p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading timeout state - widget is taking too long */}
+      {!isLoaded && !hasError && loadingTimedOut && (
+        <div
+          className="flex items-center justify-center bg-yellow-50 rounded-2xl border-2 border-yellow-200"
+          style={{ minHeight: effectiveMinHeight }}
+        >
+          <div className="text-center p-8">
+            <p className="text-yellow-700 font-semibold mb-2">Taking longer than expected...</p>
+            <p className="text-gray-600 mb-4">The booking calendar is still loading. You can wait or try reloading.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={handleRetry}
+                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Tap to Reload
+              </button>
+              <a
+                href="tel:+17744467375"
+                className="inline-block bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors"
+              >
+                Call (774) 446-7375
+              </a>
+            </div>
           </div>
         </div>
       )}
@@ -151,23 +241,32 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
       {hasError && (
         <div
           className="flex items-center justify-center bg-red-50 rounded-2xl border-2 border-red-200"
-          style={{ minHeight: calendarConfig.minHeight }}
+          style={{ minHeight: effectiveMinHeight }}
         >
           <div className="text-center p-8">
             <p className="text-red-600 font-semibold mb-2">Failed to load booking calendar</p>
-            <p className="text-gray-600 mb-4">Please try refreshing the page or contact us directly.</p>
-            <a
-              href="tel:+17744467375"
-              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
-            >
-              Call (774) 446-7375
-            </a>
+            <p className="text-gray-600 mb-4">Please try again or contact us directly.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={handleRetry}
+                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+              <a
+                href="tel:+17744467375"
+                className="inline-block bg-gray-100 text-gray-700 px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors"
+              >
+                Call (774) 446-7375
+              </a>
+            </div>
           </div>
         </div>
       )}
 
       {/* LeadConnector booking widget iframe */}
       <iframe
+        key={retryCount} // Force re-render on retry
         ref={iframeRef}
         src={calendarConfig.url}
         id={calendarConfig.iframeId}
@@ -175,12 +274,11 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
         style={{
           width: '100%',
           border: 'none',
-          overflow: 'hidden',
-          minHeight: `${calendarConfig.minHeight}px`,
-          height: '100%',
+          minHeight: `${effectiveMinHeight}px`,
+          height: 'auto',
           display: isLoaded && !hasError ? 'block' : 'none',
         }}
-        scrolling="no"
+        scrolling="yes"
         allow="payment"
         onLoad={handleIframeLoad}
         onError={handleIframeError}

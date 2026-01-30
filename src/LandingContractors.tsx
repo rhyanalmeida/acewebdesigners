@@ -89,7 +89,28 @@ function LandingContractors() {
   }, [])
 
   const handleGetStarted = () => {
-    bookingFormRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const element = bookingFormRef.current
+    if (!element) return
+
+    // Use requestAnimationFrame to ensure layout is stable before calculating scroll position
+    requestAnimationFrame(() => {
+      const rect = element.getBoundingClientRect()
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      
+      // Calculate offset based on viewport width
+      // Mobile needs extra offset for the sticky CTA bar at bottom (80px) + padding (16px)
+      const isMobile = window.innerWidth < 768
+      const offset = isMobile ? 16 : 96 // Less offset on mobile since there's no fixed header
+      
+      const targetPosition = rect.top + scrollTop - offset
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      })
+
+      console.log(`📜 Scrolling to booking form: offset=${offset}px, target=${targetPosition}px, mobile=${isMobile}`)
+    })
   }
 
   const contractorTypes = [
@@ -413,7 +434,8 @@ function LandingContractors() {
       {/* Booking Form Section */}
       <section
         ref={bookingFormRef}
-        className="py-20 bg-gradient-to-b from-blue-50 via-purple-50 to-blue-50 scroll-mt-24 relative overflow-hidden"
+        id="booking-form"
+        className="py-20 bg-gradient-to-b from-blue-50 via-purple-50 to-blue-50 scroll-mt-4 md:scroll-mt-24 relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
         <div className="max-w-4xl mx-auto px-4 relative z-10">
