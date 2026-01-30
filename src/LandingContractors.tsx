@@ -7,6 +7,8 @@ import {
   HardHat,
   Wrench,
   TrendingUp,
+  Zap,
+  Clock,
 } from 'lucide-react'
 import { trackContractorBooking, testOfflineConversion } from './utils/facebookConversions'
 import { BookingWidget } from './components/BookingWidget'
@@ -127,17 +129,23 @@ function LandingContractors() {
   ]
 
   const benefits = [
+    '⚡ SAME-DAY website launch available — get online TODAY!',
     'A free homepage mockup/design before paying a penny',
     'Mobile-friendly design that works on all devices',
     'Project gallery to showcase your best work',
     'Lead capture forms to get more inquiries',
-    'Fast 1-3 week turnaround time',
     'Local SEO to rank in your service area',
     'Easy-to-update content management',
     'Professional hosting included',
   ]
 
   const contractorPainPoints = [
+    {
+      icon: <Zap className="w-8 h-8 text-green-600" />,
+      title: 'Get Online TODAY',
+      description:
+        "No waiting weeks or months. We can have your professional contractor website live and generating leads the SAME DAY. You're busy — we work fast.",
+    },
     {
       icon: <TrendingUp className="w-8 h-8 text-blue-600" />,
       title: 'Get More Leads',
@@ -178,11 +186,19 @@ function LandingContractors() {
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="text-center md:text-left">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-50 to-blue-50 px-4 py-2 rounded-full mb-6 animate-fade-in-down border border-orange-100">
-                <HardHat className="w-5 h-5 text-orange-600" />
-                <span className="text-orange-800 font-semibold">
-                  For Contractors & Home Service Pros
-                </span>
+              <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-6">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-50 to-blue-50 px-4 py-2 rounded-full animate-fade-in-down border border-orange-100">
+                  <HardHat className="w-5 h-5 text-orange-600" />
+                  <span className="text-orange-800 font-semibold">
+                    For Contractors & Home Service Pros
+                  </span>
+                </div>
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-full animate-fade-in-down border-2 border-green-400 animate-pulse">
+                  <Zap className="w-5 h-5 text-green-600" />
+                  <span className="text-green-800 font-bold">
+                    SAME-DAY LAUNCH AVAILABLE!
+                  </span>
+                </div>
               </div>
               <h1 className="heading-lg mb-8 leading-tight animate-fade-in-up">
                 GET A{' '}
@@ -203,6 +219,10 @@ function LandingContractors() {
                       Perfect for contractors who need:
                     </p>
                     <ul className="space-y-1 text-gray-700">
+                      <li className="flex items-center gap-2">
+                        <Zap className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <span className="font-bold text-green-700">A website up and running TODAY</span>
+                      </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
                         <span>More leads and project inquiries</span>
