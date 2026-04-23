@@ -44,34 +44,52 @@ export function initializePixel(pixelId: string): void {
 }
 
 /**
- * Track a standard Facebook event
+ * Track a standard Facebook event.
+ * Pass eventId to dedupe with a matching server-side CAPI event.
  */
-export function trackEvent(eventName: string, options?: TrackEventOptions): void {
+export function trackEvent(
+  eventName: string,
+  options?: TrackEventOptions,
+  eventId?: string
+): void {
   if (!isPixelLoaded()) {
     console.warn('⚠️ Facebook Pixel not loaded. Cannot track event:', eventName)
     return
   }
 
   try {
-    window.fbq('track', eventName, options)
-    console.log(`✅ Facebook Pixel: ${eventName} tracked`, options)
+    if (eventId) {
+      window.fbq('track', eventName, options, { eventID: eventId })
+    } else {
+      window.fbq('track', eventName, options)
+    }
+    console.log(`✅ Facebook Pixel: ${eventName} tracked`, options, eventId ? `(eventID=${eventId})` : '')
   } catch (error) {
     console.error('❌ Error tracking event:', eventName, error)
   }
 }
 
 /**
- * Track a custom Facebook event
+ * Track a custom Facebook event.
+ * Pass eventId to dedupe with a matching server-side CAPI event.
  */
-export function trackCustomEvent(eventName: string, options?: TrackEventOptions): void {
+export function trackCustomEvent(
+  eventName: string,
+  options?: TrackEventOptions,
+  eventId?: string
+): void {
   if (!isPixelLoaded()) {
     console.warn('⚠️ Facebook Pixel not loaded. Cannot track custom event:', eventName)
     return
   }
 
   try {
-    window.fbq('trackCustom', eventName, options)
-    console.log(`✅ Facebook Pixel: Custom event ${eventName} tracked`, options)
+    if (eventId) {
+      window.fbq('trackCustom', eventName, options, { eventID: eventId })
+    } else {
+      window.fbq('trackCustom', eventName, options)
+    }
+    console.log(`✅ Facebook Pixel: Custom event ${eventName} tracked`, options, eventId ? `(eventID=${eventId})` : '')
   } catch (error) {
     console.error('❌ Error tracking custom event:', eventName, error)
   }
@@ -89,38 +107,55 @@ export function trackViewContent(contentName: string, contentCategory: string, c
 }
 
 /**
- * Track Lead event (for form submissions / bookings)
+ * Track Lead event (for form submissions / bookings).
+ * Pass eventId for CAPI dedup.
  */
-export function trackLead(contentName: string, contentCategory: string): void {
-  trackEvent('Lead', {
-    content_name: contentName,
-    content_category: contentCategory,
-  })
+export function trackLead(
+  contentName: string,
+  contentCategory: string,
+  eventId?: string
+): void {
+  trackEvent(
+    'Lead',
+    {
+      content_name: contentName,
+      content_category: contentCategory,
+    },
+    eventId
+  )
 }
 
 /**
- * Track CompleteRegistration event (for completed bookings)
+ * Track CompleteRegistration event (for completed bookings).
+ * Pass eventId for CAPI dedup.
  */
 export function trackCompleteRegistration(
   contentName: string,
   contentCategory: string,
-  value: number = 0
+  value: number = 0,
+  eventId?: string
 ): void {
-  trackEvent('CompleteRegistration', {
-    content_name: contentName,
-    content_category: contentCategory,
-    currency: 'USD',
-    value,
-  })
+  trackEvent(
+    'CompleteRegistration',
+    {
+      content_name: contentName,
+      content_category: contentCategory,
+      currency: 'USD',
+      value,
+    },
+    eventId
+  )
 }
 
 /**
- * Track booking completion with all relevant events
- * This is the main function to call when a booking is completed
+ * Track booking completion with all relevant events.
+ * Pass eventId to dedupe these client-side events with the server-side
+ * Meta CAPI call that fires from the GHL webhook.
  */
 export function trackBookingComplete(
   source: 'main' | 'contractor',
-  additionalData?: TrackEventOptions
+  additionalData?: TrackEventOptions,
+  eventId?: string
 ): void {
   const config = source === 'contractor' ? CONTRACTOR_PIXEL : MAIN_PIXEL
   const contentName = source === 'contractor' ? 'Contractor Booking' : 'Main Landing Booking'
@@ -128,21 +163,21 @@ export function trackBookingComplete(
 
   console.log(`✅ ${config.name}: Booking detected!`)
 
-  // Track CompleteRegistration (standard event for ads)
-  trackCompleteRegistration(contentName, contentCategory, 0)
+  trackCompleteRegistration(contentName, contentCategory, 0, eventId)
+  trackLead(contentName, contentCategory, eventId)
 
-  // Track Lead event
-  trackLead(contentName, contentCategory)
-
-  // Track custom event specific to the source
   const customEventName = source === 'contractor' ? 'ContractorBookingComplete' : 'MainLandingBookingComplete'
-  trackCustomEvent(customEventName, {
-    content_name: contentName,
-    content_category: contentCategory,
-    currency: 'USD',
-    value: 0,
-    ...additionalData,
-  })
+  trackCustomEvent(
+    customEventName,
+    {
+      content_name: contentName,
+      content_category: contentCategory,
+      currency: 'USD',
+      value: 0,
+      ...additionalData,
+    },
+    eventId
+  )
 
   console.log(`✅ ${config.name}: All booking events sent`)
 }

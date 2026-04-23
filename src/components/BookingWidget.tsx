@@ -18,8 +18,9 @@
  * ```
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import type { CalendarConfig } from '../config/calendars'
+import { appendAttributionToUrl } from '../utils/attribution'
 
 interface BookingWidgetProps {
   /** Calendar configuration from config/calendars.ts */
@@ -50,6 +51,14 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
   const [isMobile, setIsMobile] = useState(false)
   const [loadingTimedOut, setLoadingTimedOut] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+
+  // Inject attribution (event_id, fbc, fbp, fbclid) into the GHL iframe URL so
+  // GHL captures them as custom fields on the contact. These flow through to
+  // the server-side Meta CAPI call, enabling dedup with the client-side Pixel.
+  const iframeSrc = useMemo(
+    () => appendAttributionToUrl(calendarConfig.url),
+    [calendarConfig.url],
+  )
 
   // Detect mobile viewport
   useEffect(() => {
@@ -268,7 +277,7 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
       <iframe
         key={retryCount} // Force re-render on retry
         ref={iframeRef}
-        src={calendarConfig.url}
+        src={iframeSrc}
         id={calendarConfig.iframeId}
         title={`Book ${calendarConfig.name}`}
         style={{

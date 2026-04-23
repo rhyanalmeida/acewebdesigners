@@ -17,14 +17,28 @@ interface FacebookPixelOptions {
   [key: string]: unknown
 }
 
+interface FacebookPixelEventOptions {
+  eventID?: string
+}
+
 interface FacebookPixelFunction {
   (
     command: 'init',
     pixelId: string,
     advancedMatching?: { em?: string; fn?: string; ln?: string; ph?: string }
   ): void
-  (command: 'track', eventName: string, options?: FacebookPixelOptions): void
-  (command: 'trackCustom', eventName: string, options?: FacebookPixelOptions): void
+  (
+    command: 'track',
+    eventName: string,
+    options?: FacebookPixelOptions,
+    eventOptions?: FacebookPixelEventOptions
+  ): void
+  (
+    command: 'trackCustom',
+    eventName: string,
+    options?: FacebookPixelOptions,
+    eventOptions?: FacebookPixelEventOptions
+  ): void
   (command: 'set', property: string, value: unknown): void
   callMethod?: (...args: unknown[]) => void
   queue: unknown[]

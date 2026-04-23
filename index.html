@@ -739,6 +739,9 @@
     <script src="https://player.vimeo.com/api/player.js" async></script>
 
     <!-- Meta Pixel Code -->
+    <!-- The main-site pixel is skipped on /contractorlanding — that page loads
+         the contractor pixel (1548487516424971) in LandingContractors.tsx so we
+         don't double-fire events to two pixels on the same page. -->
     <script>
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return
@@ -756,8 +759,10 @@
         s = b.getElementsByTagName(e)[0]
         s.parentNode.insertBefore(t, s)
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
-      fbq('init', '1703925480259996')
-      fbq('track', 'PageView')
+      if (!/\/contractorlanding(\/|$|\?)/i.test(window.location.pathname + window.location.search)) {
+        fbq('init', '1703925480259996')
+        fbq('track', 'PageView')
+      }
     </script>
     <!-- End Meta Pixel Code -->
 
@@ -1001,7 +1006,7 @@
     <!-- End Calendly Widget Script -->
   </head>
   <body>
-    <!-- Meta Pixel Code noscript -->
+    <!-- Meta Pixel Code noscript (main pixel fallback; contractor page has its own noscript) -->
     <noscript
       ><img
         height="1"

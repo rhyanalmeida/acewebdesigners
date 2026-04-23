@@ -10,7 +10,6 @@ import {
   Zap,
   Clock,
 } from 'lucide-react'
-import { trackContractorBooking, testOfflineConversion } from './utils/facebookConversions'
 import { BookingWidget } from './components/BookingWidget'
 import { CONTRACTOR_CALENDAR } from './config/calendars'
 import { CONTRACTOR_PIXEL } from './config/pixels'
@@ -20,26 +19,21 @@ import {
   trackBookingComplete,
   setupTestingFunctions,
 } from './utils/pixelTracking'
+import { initAttribution, getAttribution } from './utils/attribution'
 
 function LandingContractors() {
   const bookingFormRef = useRef<HTMLElement>(null)
   const [showPrivacyPolicy, setShowPrivacyPolicy] = React.useState(false)
   const [showTermsOfService, setShowTermsOfService] = React.useState(false)
 
-  // Handle booking completion callback
+  // Handle booking completion callback.
+  // We fire the client-side Pixel with the shared event_id. The matching
+  // server-side CAPI event fires later from the GHL webhook → Netlify function,
+  // and Meta dedupes the two by event_id.
   const handleBookingComplete = useCallback(() => {
-    console.log('✅ Contractor booking detected!')
-
-    // Track with centralized pixel tracking utility
-    trackBookingComplete('contractor')
-
-    // Also send via Conversions API for better reliability
-    trackContractorBooking({
-      content_name: 'Contractor Booking',
-      content_category: 'Contractor Consultation',
-    }).then(() => {
-      console.log('✅ Offline conversion sent via Conversions API')
-    })
+    const { event_id } = getAttribution()
+    console.log(`✅ Contractor booking detected! event_id=${event_id}`)
+    trackBookingComplete('contractor', undefined, event_id)
   }, [])
 
   useEffect(() => {
@@ -51,6 +45,13 @@ function LandingContractors() {
         'Get a free website design for your contracting business. Attract more clients, showcase your work, and grow your business online. No payment until you love it!'
       )
     }
+
+    // Capture attribution data (fbclid from URL, _fbc / _fbp cookies, generate event_id)
+    // BEFORE modifying the URL — we need the original fbclid before we replace history.
+    const attribution = initAttribution()
+    console.log(
+      `🎯 Attribution: event_id=${attribution.event_id} fbclid=${attribution.fbclid || 'none'} fbc=${attribution.fbc ? 'set' : 'none'} fbp=${attribution.fbp ? 'set' : 'none'}`
+    )
 
     // Set a URL parameter that can be tracked
     const urlParams = new URLSearchParams(window.location.search)
@@ -81,13 +82,6 @@ function LandingContractors() {
 
     // Setup testing functions for debugging
     setupTestingFunctions('contractor')
-
-    // Add offline conversion test
-    if (typeof window !== 'undefined') {
-      window.testOfflineConversion = (pixelId: string) => {
-        testOfflineConversion(pixelId || CONTRACTOR_PIXEL.pixelId)
-      }
-    }
   }, [])
 
   const handleGetStarted = () => {
