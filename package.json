@@ -7,10 +7,16 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "meta-ads:setup": "node scripts/meta-ads-setup.mjs",
+    "meta-ads:status": "node scripts/meta-ads-status.mjs",
+    "meta-ads:tighten": "node scripts/meta-ads-setup.mjs --update-targeting",
+    "meta-ads:create-ad": "node scripts/meta-ads-create-ad.mjs",
+    "meta-ads:teardown": "node scripts/meta-ads-setup.mjs --delete"
   },
   "dependencies": {
     "@formspree/react": "^2.5.1",
+    "@netlify/blobs": "^10.7.4",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -26,6 +32,7 @@
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "playwright": "^1.59.1",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.2.2",

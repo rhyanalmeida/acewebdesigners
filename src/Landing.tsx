@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react'
 import { CheckCircle2, Star, MousePointer2 } from 'lucide-react'
-import { trackMainLandingBooking, testOfflineConversion } from './utils/facebookConversions'
 import { BookingWidget } from './components/BookingWidget'
 import { MAIN_CALENDAR } from './config/calendars'
 import { MAIN_PIXEL } from './config/pixels'
@@ -16,17 +15,7 @@ function Landing() {
   // Handle booking completion callback
   const handleBookingComplete = useCallback(() => {
     console.log('✅ Main Landing booking detected!')
-
-    // Track with centralized pixel tracking utility
     trackBookingComplete('main')
-
-    // Also send via Conversions API for better reliability
-    trackMainLandingBooking({
-      content_name: 'Main Landing Booking',
-      content_category: 'Website Consultation',
-    }).then(() => {
-      console.log('✅ Offline conversion sent via Conversions API')
-    })
   }, [])
 
   useEffect(() => {
@@ -65,13 +54,6 @@ function Landing() {
 
     // Setup testing functions for debugging
     setupTestingFunctions('main')
-
-    // Add offline conversion test
-    if (typeof window !== 'undefined') {
-      window.testOfflineConversion = (pixelId: string) => {
-        testOfflineConversion(pixelId || MAIN_PIXEL.pixelId)
-      }
-    }
   }, [])
 
   const handleGetStarted = () => {

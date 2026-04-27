@@ -36,15 +36,12 @@ export const MAIN_CALENDAR: CalendarConfig = {
 }
 
 /**
- * Contractor landing page calendar - SEPARATE from main site
- * This calendar is specifically for contractor leads from Facebook ads
- * 
- * NOTE: If you want to use a different calendar for contractors,
- * update the 'id' and 'url' below with the new calendar details.
- * For now, it uses the same calendar but with a different iframe ID.
+ * Contractor landing page calendar — "Contractors - Free Design Meeting" in GHL.
+ * Separate from MAIN_CALENDAR. Triggers the contractor appointment workflow,
+ * which forwards events to /.netlify/functions/ghl-capi for Meta CAPI dedup.
  */
 export const CONTRACTOR_CALENDAR: CalendarConfig = {
-  id: 'MseWjwAf3rDlJRoj1p75', // TODO: Replace with contractor-specific calendar ID if different
+  id: 'MseWjwAf3rDlJRoj1p75',
   url: 'https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75',
   name: 'Contractor Booking',
   iframeId: 'contractor-booking-widget',

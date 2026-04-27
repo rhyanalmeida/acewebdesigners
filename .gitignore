@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Netlify CI artifacts — must NOT be committed (Linux CI regenerates per build;
+# committing causes EINTEGRITY plugin-install errors and Windows-path leaks)
+.netlify/
+
+# Local creative assets (videos, images for ad uploads — not source)
+creative/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

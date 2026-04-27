@@ -61,7 +61,6 @@ declare global {
     }
     testContractorPixel?: () => void
     testMainPixel?: () => void
-    testOfflineConversion?: (pixelId: string) => void
     testCalendlyTracking?: () => void
     testFacebookDirectly?: () => boolean
     checkPixelStatus?: () => { pixel: boolean; calendly: boolean }

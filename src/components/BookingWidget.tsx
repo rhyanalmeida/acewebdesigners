@@ -20,7 +20,7 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import type { CalendarConfig } from '../config/calendars'
-import { appendAttributionToUrl } from '../utils/attribution'
+import { appendAttributionToUrl, stashAttribution } from '../utils/attribution'
 
 interface BookingWidgetProps {
   /** Calendar configuration from config/calendars.ts */
@@ -159,9 +159,25 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
         }
       }
 
-      if (isBooking && onBookingComplete) {
-        console.log('✅ Booking detected! Calling onBookingComplete callback.')
-        onBookingComplete()
+      if (isBooking) {
+        // Push attribution to server-side stash so the CAPI function can merge
+        // fbc/fbp/event_id when the GHL webhook fires shortly after. Email and
+        // contact_id are best-effort — postMessage shape varies by GHL widget
+        // version; the server falls back to ip+ua correlation if missing.
+        const data = (event.data || {}) as Record<string, unknown>
+        const contact = (data.contact || (data.message as Record<string, unknown> | undefined)?.contact || {}) as Record<string, unknown>
+        const email =
+          (typeof contact.email === 'string' ? contact.email : '') ||
+          (typeof data.email === 'string' ? data.email : '')
+        const contact_id =
+          (typeof contact.id === 'string' ? contact.id : '') ||
+          (typeof data.contactId === 'string' ? data.contactId : '')
+        stashAttribution({ email, contact_id })
+
+        if (onBookingComplete) {
+          console.log('✅ Booking detected! Calling onBookingComplete callback.')
+          onBookingComplete()
+        }
       }
     },
     [onBookingComplete]

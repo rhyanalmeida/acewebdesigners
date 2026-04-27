@@ -100,16 +100,68 @@ export function getAttribution(): Attribution {
 }
 
 /**
- * Append attribution fields as query params to a URL.
- * Used to inject fbc / fbp / event_id / fbclid into the GHL booking iframe src,
- * so GHL can capture them as custom fields on the contact.
+ * GHL custom-field IDs for the contractor location (A2zlaOOL5JLn883XGWWl).
+ * The widget's `customField[<id>]=<value>` URL param requires the field's
+ * internal ID, NOT the field's unique key name. Tested 2026-04-25: the
+ * `customField[fbc]=...` form did NOT populate the contact (custom fields
+ * remained empty). The ID form below does.
+ *
+ * If these IDs change (e.g. fields recreated), retrieve current ones via:
+ *   GET https://backend.leadconnectorhq.com/locations/A2zlaOOL5JLn883XGWWl/customFields/search?documentType=field&model=contact
+ */
+const GHL_CUSTOM_FIELD_IDS = {
+  fbc: 'klWCXR25U9P8TkpsEc2t',
+  fbp: 'vSm5ey4ntRn3l1Q9Yx6w',
+  event_id: 'FEeWp7qaPpd34Nn57bI4',
+  fbclid: 'J3QRxlV4Ufjchj8VN8MV',
+} as const
+
+/**
+ * Push attribution to the server-side stash so the CAPI function can merge
+ * fbc/fbp/event_id into the offline conversion event when GHL's workflow
+ * webhook fires moments later.
+ *
+ * Fire-and-forget — failures here MUST NOT block the booking flow.
+ * Pass email and/or contact_id when available (varies by GHL postMessage
+ * payload). When absent, the server falls back to ip+ua correlation.
+ */
+export function stashAttribution(opts: { email?: string; contact_id?: string } = {}): void {
+  const a = getAttribution()
+  if (!a.event_id && !a.fbc && !a.fbp && !a.fbclid) return
+  try {
+    fetch('/.netlify/functions/attribution-stash', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: opts.email,
+        contact_id: opts.contact_id,
+        fbc: a.fbc,
+        fbp: a.fbp,
+        event_id: a.event_id,
+        fbclid: a.fbclid,
+      }),
+      keepalive: true,
+    }).catch(() => {})
+  } catch {
+    // never propagate
+  }
+}
+
+/**
+ * Append attribution fields as query params to a GHL booking widget URL.
+ *
+ * `fbclid` is also kept as a bare param because Facebook puts it there on ad
+ * clicks and GHL's attribution capture reads it from the URL.
  */
 export function appendAttributionToUrl(baseUrl: string): string {
   const a = getAttribution()
   const u = new URL(baseUrl)
-  if (a.event_id) u.searchParams.set('event_id', a.event_id)
-  if (a.fbc) u.searchParams.set('fbc', a.fbc)
-  if (a.fbp) u.searchParams.set('fbp', a.fbp)
-  if (a.fbclid) u.searchParams.set('fbclid', a.fbclid)
+  if (a.event_id) u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.event_id}]`, a.event_id)
+  if (a.fbc) u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.fbc}]`, a.fbc)
+  if (a.fbp) u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.fbp}]`, a.fbp)
+  if (a.fbclid) {
+    u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.fbclid}]`, a.fbclid)
+    u.searchParams.set('fbclid', a.fbclid)
+  }
   return u.toString()
 }

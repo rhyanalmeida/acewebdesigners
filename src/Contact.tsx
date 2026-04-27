@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react'
 import { Mail, Phone, Calendar, MapPin } from 'lucide-react'
+import { BookingWidget } from './components/BookingWidget'
+import { MAIN_CALENDAR } from './config/calendars'
 
 interface ContactProps {
   initialData?: {
@@ -85,13 +87,8 @@ function Contact({ initialData }: ContactProps) {
               )}
             </div>
 
-            {/* Calendly inline widget begin */}
-            <div
-              className="calendly-inline-widget"
-              data-url="https://calendly.com/rhyanalmeida31/30min"
-              style={{ minWidth: '320px', height: '700px' }}
-            />
-            {/* Calendly inline widget end */}
+            {/* LeadConnector booking widget — main calendar */}
+            <BookingWidget calendarConfig={MAIN_CALENDAR} containerId="contact-page-booking" />
 
             {/* Respectful meeting reminder */}
             <div className="mt-6 text-center">
