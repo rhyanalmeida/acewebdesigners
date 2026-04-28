@@ -6,12 +6,12 @@ import { MAIN_CALENDAR } from './config/calendars'
 import {
   Section,
   Container,
-  Eyebrow,
-  GradientHeading,
   Card,
   TrustBar,
   IconTile,
   BadgePill,
+  PageHero,
+  SectionHeading,
 } from './components/ui'
 
 interface ContactProps {
@@ -42,33 +42,22 @@ function Contact({ initialData }: ContactProps) {
 
   return (
     <>
-      {/* HERO */}
-      <Section tone="mesh" padding="lg" className="!pb-12">
-        <div className="text-center max-w-3xl mx-auto" data-reveal="up">
-          <Eyebrow tone="inverted">
-            <Calendar className="h-3.5 w-3.5" aria-hidden />
-            Free consultation
-          </Eyebrow>
-          <GradientHeading
-            level={1}
-            size="xl"
+      <PageHero
+        eyebrow="Free consultation"
+        eyebrowIcon={Calendar}
+        size="xl"
+        headline="Book your"
+        accent="free design consultation"
+        sub="15 minutes with our team → free homepage mockup in 24-48 hours."
+        className="!pb-12"
+      >
+        <div className="mt-6 flex justify-center">
+          <TrustBar
             tone="inverted"
-            className="mt-5"
-            accent="free design consultation"
-          >
-            Book your
-          </GradientHeading>
-          <p className="mt-5 text-lg text-white/80 leading-relaxed">
-            15 minutes with our team → free homepage mockup in 24-48 hours.
-          </p>
-          <div className="mt-6 flex justify-center">
-            <TrustBar
-              tone="inverted"
-              guarantees={['SSL secured', 'No credit card required', 'No obligation']}
-            />
-          </div>
+            guarantees={['SSL secured', 'No credit card required', 'No obligation']}
+          />
         </div>
-      </Section>
+      </PageHero>
 
       {/* BOOKING WIDGET */}
       <Section tone="muted" padding="md" containerSize="md" className="-mt-10">
@@ -107,13 +96,12 @@ function Contact({ initialData }: ContactProps) {
 
       {/* ALTERNATIVE CONTACT */}
       <Section tone="default" padding="lg" containerSize="md">
-        <div className="text-center">
-          <Eyebrow>Other ways to reach us</Eyebrow>
-          <h2 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-surface-900">
-            Prefer another way to connect?
-          </h2>
-          <p className="mt-3 text-surface-600">We're here to help however you prefer.</p>
-        </div>
+        <SectionHeading
+          eyebrow="Other ways to reach us"
+          heading="Prefer another way to connect?"
+          sub="We're here to help however you prefer."
+          maxWidth="max-w-none"
+        />
 
         <div className="mt-10 grid gap-5 sm:grid-cols-2">
           <Card tone="default" padding="lg" rounded="xl2" interactive shine>

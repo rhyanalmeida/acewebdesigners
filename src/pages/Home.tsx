@@ -2,7 +2,6 @@ import React from 'react'
 import {
   ArrowRight,
   ChevronRight,
-  Users,
   Star,
   Clock,
   Shield,
@@ -11,8 +10,6 @@ import {
   MessageCircle,
   Smartphone,
   Lock,
-  Globe,
-  TrendingUp,
   Calculator as CalcIcon,
   CheckCircle2,
   Plus,
@@ -31,6 +28,9 @@ import {
   TestimonialCard,
   TrustBar,
   BadgePill,
+  SectionHeading,
+  StaggerGrid,
+  FinalCta,
 } from '../components/ui'
 
 import type { NavigateFn } from '../components/layout'
@@ -116,6 +116,13 @@ const GUARANTEES = [
   { title: 'Quality Promise', desc: 'Professional design, every time. We deliver excellence you can count on.', Icon: Trophy },
 ]
 
+const STATS = [
+  { v: '100+', l: 'Websites launched', s: 'Across 15+ industries' },
+  { v: '5.0★', l: 'Google rating', s: 'From 100+ clients' },
+  { v: '1–3wk', l: 'Average delivery', s: 'Same-day option available' },
+  { v: '100%', l: 'See before you pay', s: 'Free mockup, no obligation' },
+]
+
 const CALC_FEATURES = [
   { id: 'ecom', label: 'E-commerce / Online ordering', cost: 200 },
   { id: 'booking', label: 'Booking / appointments', cost: 200 },
@@ -155,7 +162,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
 
   return (
     <>
-      {/* HERO */}
+      {/* HERO — custom 2-column layout (kept; PageHero is for centered single-col heroes) */}
       <section className="relative isolate overflow-hidden bg-surface-950 text-white" aria-label="Hero">
         <div className="absolute inset-0 bg-mesh-2 opacity-90" aria-hidden />
         <div className="absolute -top-40 -left-32 h-96 w-96 rounded-full bg-brand-500/30 blur-3xl animate-float-soft" aria-hidden />
@@ -231,156 +238,161 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
 
       {/* STATS */}
       <Section tone="default" padding="md">
-        <Reveal variant="stagger" className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { v: '100+', l: 'Websites launched', s: 'Across 15+ industries' },
-            { v: '5.0★', l: 'Google rating', s: 'From 100+ clients' },
-            { v: '1–3wk', l: 'Average delivery', s: 'Same-day option available' },
-            { v: '100%', l: 'See before you pay', s: 'Free mockup, no obligation' },
-          ].map((s, i) => (
-            <div key={s.l} data-reveal-stagger-child style={{ transitionDelay: `${i * 70}ms` }}>
-              <StatBlock value={s.v} label={s.l} sub={s.s} />
-            </div>
-          ))}
-        </Reveal>
+        <StaggerGrid
+          items={STATS}
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+          keyFn={s => s.l}
+          renderItem={s => <StatBlock value={s.v} label={s.l} sub={s.s} />}
+        />
       </Section>
 
       {/* INDUSTRIES */}
       <Section id="industries" tone="muted" padding="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow>Who we serve</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="every industry">
-            Built for small businesses across
-          </GradientHeading>
-        </div>
-        <Reveal variant="stagger" className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {INDUSTRIES.map((ind, i) => (
-            <div key={ind.name} data-reveal-stagger-child style={{ transitionDelay: `${i * 60}ms` }}>
-              <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl shrink-0" aria-hidden>{ind.icon}</span>
-                  <div>
-                    <h3 className="font-display text-xl font-semibold text-surface-900">{ind.name}</h3>
-                    <p className="mt-2 text-surface-600 leading-relaxed">{ind.desc}</p>
-                    <BadgePill tone="brand" className="mt-4">{ind.count}</BadgePill>
-                  </div>
+        <SectionHeading
+          eyebrow="Who we serve"
+          heading="Built for small businesses across"
+          accent="every industry"
+        />
+        <StaggerGrid
+          items={INDUSTRIES}
+          className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          delayMs={60}
+          keyFn={ind => ind.name}
+          renderItem={ind => (
+            <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
+              <div className="flex items-start gap-4">
+                <span className="text-4xl shrink-0" aria-hidden>{ind.icon}</span>
+                <div>
+                  <h3 className="font-display text-xl font-semibold text-surface-900">{ind.name}</h3>
+                  <p className="mt-2 text-surface-600 leading-relaxed">{ind.desc}</p>
+                  <BadgePill tone="brand" className="mt-4">{ind.count}</BadgePill>
                 </div>
-              </Card>
-            </div>
-          ))}
-        </Reveal>
+              </div>
+            </Card>
+          )}
+        />
       </Section>
 
-      {/* PROCESS */}
+      {/* PROCESS — timeline overlay sits behind StaggerGrid */}
       <Section id="process" tone="default" padding="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow>How it works</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="four simple steps">
-            From idea to live site in
-          </GradientHeading>
+        <SectionHeading
+          eyebrow="How it works"
+          heading="From idea to live site in"
+          accent="four simple steps"
+        />
+        <div className="mt-14 relative">
+          <div
+            className="hidden lg:block absolute top-7 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-brand-200 to-transparent"
+            aria-hidden
+          />
+          <StaggerGrid
+            items={PROCESS_STEPS}
+            className="grid gap-8 lg:grid-cols-4 relative"
+            delayMs={90}
+            keyFn={step => step.title}
+            childClassName="text-center relative"
+            renderItem={(step, i) => (
+              <>
+                <div className="relative inline-flex">
+                  <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-gradient text-white text-base font-bold shadow-glow-brand ring-4 ring-white">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                </div>
+                <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{step.title}</h3>
+                <p className="mt-2 text-surface-600 leading-relaxed">{step.desc}</p>
+                <BadgePill tone="neutral" className="mt-4">
+                  <Clock className="h-3 w-3" aria-hidden />
+                  {step.duration}
+                </BadgePill>
+              </>
+            )}
+          />
         </div>
-        <Reveal variant="stagger" className="mt-14 grid gap-8 lg:grid-cols-4 relative">
-          <div className="hidden lg:block absolute top-7 left-[12%] right-[12%] h-px bg-gradient-to-r from-transparent via-brand-200 to-transparent" aria-hidden />
-          {PROCESS_STEPS.map((step, i) => (
-            <div key={step.title} data-reveal-stagger-child style={{ transitionDelay: `${i * 90}ms` }} className="text-center relative">
-              <div className="relative inline-flex">
-                <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-gradient text-white text-base font-bold shadow-glow-brand ring-4 ring-white">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-              </div>
-              <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{step.title}</h3>
-              <p className="mt-2 text-surface-600 leading-relaxed">{step.desc}</p>
-              <BadgePill tone="neutral" className="mt-4">
-                <Clock className="h-3 w-3" aria-hidden />
-                {step.duration}
-              </BadgePill>
-            </div>
-          ))}
-        </Reveal>
       </Section>
 
       {/* PERFORMANCE & SECURITY */}
       <Section tone="muted" padding="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow tone="accent">Performance & security</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="without compromise">
-            Fast, secure, reliable —
-          </GradientHeading>
-        </div>
-        <Reveal variant="stagger" className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {PERFORMANCE.map((p, i) => (
-            <div key={p.label} data-reveal-stagger-child style={{ transitionDelay: `${i * 70}ms` }}>
-              <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
-                <IconTile tone="brand" size="md">
-                  <p.Icon />
-                </IconTile>
-                <p className="mt-4 font-display text-3xl font-bold text-surface-900">{p.metric}</p>
-                <p className="mt-1 text-sm font-semibold text-surface-700">{p.label}</p>
-                <p className="mt-2 text-sm text-surface-500">{p.desc}</p>
-              </Card>
-            </div>
-          ))}
-        </Reveal>
+        <SectionHeading
+          eyebrow="Performance & security"
+          eyebrowTone="accent"
+          heading="Fast, secure, reliable —"
+          accent="without compromise"
+        />
+        <StaggerGrid
+          items={PERFORMANCE}
+          className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+          keyFn={p => p.label}
+          renderItem={p => (
+            <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
+              <IconTile tone="brand" size="md">
+                <p.Icon />
+              </IconTile>
+              <p className="mt-4 font-display text-3xl font-bold text-surface-900">{p.metric}</p>
+              <p className="mt-1 text-sm font-semibold text-surface-700">{p.label}</p>
+              <p className="mt-2 text-sm text-surface-500">{p.desc}</p>
+            </Card>
+          )}
+        />
       </Section>
 
       {/* TESTIMONIALS */}
       <Section id="testimonials" tone="default" padding="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow>Real results</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="our clients say">
-            Don't take our word for it — here's what
-          </GradientHeading>
-        </div>
-        <Reveal variant="stagger" className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {TESTIMONIALS.map((t, i) => (
-            <div key={t.name} data-reveal-stagger-child style={{ transitionDelay: `${i * 80}ms` }}>
-              <TestimonialCard
-                quote={t.quote}
-                authorName={t.name}
-                authorRole={t.business}
-                rating={t.rating}
-                resultMetric={t.metric}
-                avatarUrl={t.image}
-              />
-            </div>
-          ))}
-        </Reveal>
+        <SectionHeading
+          eyebrow="Real results"
+          heading="Don't take our word for it — here's what"
+          accent="our clients say"
+        />
+        <StaggerGrid
+          items={TESTIMONIALS}
+          className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          delayMs={80}
+          keyFn={t => t.name}
+          renderItem={t => (
+            <TestimonialCard
+              quote={t.quote}
+              authorName={t.name}
+              authorRole={t.business}
+              rating={t.rating}
+              resultMetric={t.metric}
+              avatarUrl={t.image}
+            />
+          )}
+        />
       </Section>
 
       {/* GUARANTEES */}
       <Section tone="muted" padding="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow tone="accent">Our promise</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="every project">
-            Three guarantees we make on
-          </GradientHeading>
-        </div>
-        <Reveal variant="stagger" className="mt-12 grid gap-5 md:grid-cols-3">
-          {GUARANTEES.map((g, i) => (
-            <div key={g.title} data-reveal-stagger-child style={{ transitionDelay: `${i * 90}ms` }}>
-              <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
-                <IconTile tone="accent" size="md">
-                  <g.Icon />
-                </IconTile>
-                <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{g.title}</h3>
-                <p className="mt-2 text-surface-600 leading-relaxed">{g.desc}</p>
-              </Card>
-            </div>
-          ))}
-        </Reveal>
+        <SectionHeading
+          eyebrow="Our promise"
+          eyebrowTone="accent"
+          heading="Three guarantees we make on"
+          accent="every project"
+        />
+        <StaggerGrid
+          items={GUARANTEES}
+          className="mt-12 grid gap-5 md:grid-cols-3"
+          delayMs={90}
+          keyFn={g => g.title}
+          renderItem={g => (
+            <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
+              <IconTile tone="accent" size="md">
+                <g.Icon />
+              </IconTile>
+              <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{g.title}</h3>
+              <p className="mt-2 text-surface-600 leading-relaxed">{g.desc}</p>
+            </Card>
+          )}
+        />
       </Section>
 
       {/* CALCULATOR */}
       <Section id="calculator" tone="default" padding="lg" containerSize="md">
-        <div className="text-center">
-          <Eyebrow>Quick estimate</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="ballpark price">
-            Get an instant
-          </GradientHeading>
-          <p className="mt-4 text-surface-600 max-w-xl mx-auto">
-            A rough estimate based on what you need. Final price comes after the free design call.
-          </p>
-        </div>
+        <SectionHeading
+          eyebrow="Quick estimate"
+          heading="Get an instant"
+          accent="ballpark price"
+          sub="A rough estimate based on what you need. Final price comes after the free design call."
+        />
         <Card tone="default" padding="xl" rounded="xl3" className="mt-10">
           <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
             <div className="space-y-7">
@@ -469,12 +481,11 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
 
       {/* FAQ */}
       <Section id="faq" tone="muted" padding="lg" containerSize="md">
-        <div className="text-center">
-          <Eyebrow>Questions</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="frequently asked">
-            Everything you need to know,
-          </GradientHeading>
-        </div>
+        <SectionHeading
+          eyebrow="Questions"
+          heading="Everything you need to know,"
+          accent="frequently asked"
+        />
         <Reveal variant="up" className="mt-12 space-y-3">
           {FAQS.map((faq, i) => {
             const isOpen = openFaq === i
@@ -512,27 +523,13 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
       </Section>
 
       {/* FINAL CTA */}
-      <Section tone="mesh" padding="lg" containerSize="md">
-        <Reveal variant="up" className="text-center">
-          <Eyebrow tone="inverted">Ready when you are</Eyebrow>
-          <GradientHeading level={2} size="lg" tone="inverted" className="mt-4">
-            Let's build something your customers will love.
-          </GradientHeading>
-          <p className="mt-5 text-white/80 max-w-xl mx-auto">
-            Book a 15-minute consultation. We'll send a free homepage design — pay only if you want to keep it.
-          </p>
-          <button
-            onClick={() => onNavigate('contact')}
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white text-surface-900 font-bold text-base sm:text-lg px-8 py-4 shadow-lift magnetic-btn ring-focus-brand"
-          >
-            Get my free design
-            <ArrowRight className="h-5 w-5" aria-hidden />
-          </button>
-          <div className="mt-6 flex justify-center">
-            <TrustBar tone="inverted" />
-          </div>
-        </Reveal>
-      </Section>
+      <FinalCta
+        eyebrow="Ready when you are"
+        heading="Let's build something your customers will love."
+        body="Book a 15-minute consultation. We'll send a free homepage design — pay only if you want to keep it."
+        ctaLabel="Get my free design"
+        onCta={() => onNavigate('contact')}
+      />
     </>
   )
 }

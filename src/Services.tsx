@@ -3,12 +3,12 @@ import { Rocket, Palette, Code2, CheckCircle2, ArrowRight, Sparkles } from 'luci
 
 import {
   Section,
-  Eyebrow,
-  GradientHeading,
   Card,
-  Reveal,
   IconTile,
   BadgePill,
+  PageHero,
+  SectionHeading,
+  StaggerGrid,
 } from './components/ui'
 
 interface Pkg {
@@ -108,44 +108,33 @@ function Services() {
 
   return (
     <>
-      {/* HERO */}
-      <Section tone="mesh" padding="lg" className="!pb-12">
-        <div className="text-center max-w-3xl mx-auto" data-reveal="up">
-          <Eyebrow tone="inverted">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            Our packages
-          </Eyebrow>
-          <GradientHeading
-            level={1}
-            size="xl"
-            tone="inverted"
-            className="mt-5"
-            accent="free design"
-          >
-            Pick the package that fits — after seeing your
-          </GradientHeading>
-          <p className="mt-5 text-lg text-white/80 leading-relaxed">
-            Professional web solutions tailored to your business. Every package starts with a free homepage mockup.
-          </p>
-          <div className="mt-6 inline-flex">
-            <BadgePill tone="success">
-              <CheckCircle2 className="h-3 w-3" aria-hidden />
-              All packages include a free design mockup
-            </BadgePill>
-          </div>
+      <PageHero
+        eyebrow="Our packages"
+        eyebrowIcon={Sparkles}
+        size="xl"
+        headline="Pick the package that fits — after seeing your"
+        accent="free design"
+        sub="Professional web solutions tailored to your business. Every package starts with a free homepage mockup."
+        className="!pb-12"
+      >
+        <div className="mt-6 inline-flex">
+          <BadgePill tone="success">
+            <CheckCircle2 className="h-3 w-3" aria-hidden />
+            All packages include a free design mockup
+          </BadgePill>
         </div>
-      </Section>
+      </PageHero>
 
       {/* PACKAGES */}
       <Section tone="muted" padding="lg" className="-mt-8">
-        <Reveal variant="stagger" className="grid gap-6 lg:grid-cols-3">
-          {PACKAGES.map((pkg, i) => (
-            <div
-              key={pkg.name}
-              data-reveal-stagger-child
-              style={{ transitionDelay: `${i * 90}ms` }}
-              className="relative h-full"
-            >
+        <StaggerGrid
+          items={PACKAGES}
+          className="grid gap-6 lg:grid-cols-3"
+          delayMs={90}
+          keyFn={pkg => pkg.name}
+          childClassName="relative h-full"
+          renderItem={pkg => (
+            <>
               {pkg.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                   <BadgePill tone="brand" glow>
@@ -154,7 +143,7 @@ function Services() {
                 </div>
               )}
               <Card
-                tone={pkg.popular ? 'default' : 'default'}
+                tone="default"
                 padding="xl"
                 rounded="xl3"
                 interactive
@@ -199,19 +188,19 @@ function Services() {
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </button>
               </Card>
-            </div>
-          ))}
-        </Reveal>
+            </>
+          )}
+        />
       </Section>
 
       {/* COMPARISON TABLE */}
       <Section tone="default" padding="lg" containerSize="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow>Compare</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="best for you">
-            Which package is
-          </GradientHeading>
-        </div>
+        <SectionHeading
+          eyebrow="Compare"
+          heading="Which package is"
+          accent="best for you"
+        />
+
 
         <div className="mt-12 overflow-x-auto rounded-xl3 ring-1 ring-surface-200 bg-white shadow-soft">
           <table className="w-full text-left text-sm">
