@@ -1,7 +1,7 @@
 import React from 'react'
 import { LucideIcon } from 'lucide-react'
 
-type Variant = 'primary' | 'brand' | 'secondary' | 'outline' | 'ghost' | 'link' | 'inverted'
+type Variant = 'primary' | 'brand' | 'rust' | 'secondary' | 'outline' | 'ghost' | 'link' | 'inverted'
 type Size = 'sm' | 'md' | 'lg' | 'xl'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -16,25 +16,28 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseClasses =
-  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-300 ease-premium disabled:opacity-50 disabled:cursor-not-allowed ring-focus-brand'
+  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-300 ease-premium disabled:opacity-50 disabled:cursor-not-allowed ring-focus-rust'
 
 const variantClasses: Record<Variant, string> = {
-  // Legacy primary kept identical so existing pages don't shift visually
+  // Editorial primary — ink-on-cream filled pill
   primary:
-    'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl',
-  // New premium variant — use this in redesigned pages
+    'bg-ink-900 text-cream-50 hover:bg-ink-800 shadow-soft hover:shadow-lift',
+  // Editorial brand-equivalent — same as primary (kept for backward compat)
   brand:
-    'bg-brand-gradient text-white shadow-glow-brand hover:shadow-lift',
+    'bg-ink-900 text-cream-50 hover:bg-ink-800 shadow-soft hover:shadow-lift',
+  // Rust — primary CTA when contrast on cream is wanted
+  rust:
+    'bg-rust-500 text-white hover:bg-rust-600 shadow-glow-rust',
   secondary:
-    'bg-surface-800 text-white hover:bg-surface-900 shadow-soft hover:shadow-lift',
+    'bg-cream-100 text-ink-900 ring-1 ring-ink-900/15 hover:bg-cream-200 shadow-soft',
   outline:
-    'border-2 border-surface-300 text-surface-700 hover:border-brand-500 hover:text-brand-700 hover:bg-brand-50',
+    'border-2 border-ink-900/20 text-ink-900 hover:border-rust-500 hover:text-rust-700 hover:bg-rust-50',
   ghost:
-    'text-surface-700 hover:text-brand-700 hover:bg-brand-50',
+    'text-ink-800 hover:text-rust-700 hover:bg-rust-50',
   link:
-    'text-brand-700 underline-offset-4 hover:underline px-0 py-0 rounded-none shadow-none',
+    'text-rust-700 underline-offset-4 hover:underline px-0 py-0 rounded-none shadow-none',
   inverted:
-    'bg-white text-surface-900 hover:bg-surface-100 shadow-soft hover:shadow-lift',
+    'bg-cream-50 text-ink-900 hover:bg-cream-100 shadow-soft hover:shadow-lift',
 }
 
 const sizeClasses: Record<Size, string> = {

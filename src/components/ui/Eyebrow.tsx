@@ -1,17 +1,20 @@
 import React from 'react'
 
-type EyebrowTone = 'brand' | 'muted' | 'inverted' | 'accent'
+type EyebrowTone = 'brand' | 'muted' | 'inverted' | 'accent' | 'forest'
 
 interface EyebrowProps extends React.HTMLAttributes<HTMLSpanElement> {
   tone?: EyebrowTone
   pill?: boolean
 }
 
+// Editorial: rust = primary accent, forest = trust/safety accent.
+// Tone names kept for backward compat; visuals warmed up.
 const toneMap: Record<EyebrowTone, string> = {
-  brand:    'text-brand-700 bg-brand-50 ring-brand-100',
-  muted:    'text-surface-600 bg-surface-100 ring-surface-200',
-  inverted: 'text-white/80 bg-white/10 ring-white/15',
-  accent:   'text-accent-700 bg-accent-50 ring-accent-100',
+  brand:    'text-rust-700 bg-rust-50 ring-rust-100',
+  muted:    'text-ink-700 bg-cream-100 ring-ink-900/10',
+  inverted: 'text-cream-100/85 bg-cream-50/10 ring-cream-50/15',
+  accent:   'text-rust-700 bg-rust-50 ring-rust-100',
+  forest:   'text-forest-700 bg-forest-50 ring-forest-100',
 }
 
 const Eyebrow: React.FC<EyebrowProps> = ({
@@ -22,11 +25,20 @@ const Eyebrow: React.FC<EyebrowProps> = ({
   ...rest
 }) => (
   <span
-    className={`inline-flex items-center gap-2 text-xs sm:text-sm font-semibold tracking-[0.18em] uppercase ${
+    className={`inline-flex items-center gap-2 text-xs sm:text-sm font-medium tracking-[0.18em] uppercase ${
       pill
         ? `px-3 py-1.5 rounded-full ring-1 ring-inset ${toneMap[tone]}`
-        : `${tone === 'inverted' ? 'text-white/80' : tone === 'accent' ? 'text-accent-600' : tone === 'muted' ? 'text-surface-500' : 'text-brand-600'}`
+        : `${
+            tone === 'inverted'
+              ? 'text-cream-100/85'
+              : tone === 'forest'
+              ? 'text-forest-700'
+              : tone === 'muted'
+              ? 'text-ink-700'
+              : 'text-rust-700'
+          }`
     } ${className}`}
+    style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}
     {...rest}
   >
     {children}

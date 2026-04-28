@@ -1,7 +1,7 @@
 import React from 'react'
 import Container from './Container'
 
-type SectionTone = 'default' | 'muted' | 'inverted' | 'gradient' | 'mesh'
+type SectionTone = 'default' | 'muted' | 'inverted' | 'gradient' | 'mesh' | 'panel'
 type SectionPadding = 'none' | 'sm' | 'md' | 'lg' | 'xl'
 type ContainerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full'
 
@@ -13,12 +13,15 @@ interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   as?: 'section' | 'header' | 'footer' | 'div' | 'article'
 }
 
+// Editorial cream palette — old tone names remapped so existing pages
+// inherit the new look without per-page changes.
 const toneMap: Record<SectionTone, string> = {
-  default:  'bg-surface-0 text-surface-900',
-  muted:    'bg-surface-50 text-surface-900',
-  inverted: 'bg-surface-950 text-surface-50',
-  gradient: 'bg-brand-gradient text-white',
-  mesh:     'bg-surface-950 text-surface-50 bg-mesh-2',
+  default:  'bg-cream-50 text-ink-900',
+  muted:    'bg-cream-100 text-ink-900',
+  panel:    'bg-cream-200 text-ink-900',
+  inverted: 'bg-ink-900 text-cream-50',
+  gradient: 'bg-ink-900 text-cream-50',
+  mesh:     'bg-cream-100 text-ink-900 bg-paper-noise',
 }
 
 const paddingMap: Record<SectionPadding, string> = {

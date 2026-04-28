@@ -8,6 +8,7 @@ interface GradientHeadingProps extends React.HTMLAttributes<HTMLHeadingElement> 
   level?: Level
   size?: Size
   tone?: Tone
+  /** Italic accent phrase — rendered as Fraunces italic in rust */
   accent?: React.ReactNode
   accentPlacement?: 'inline' | 'after' | 'before'
 }
@@ -21,10 +22,20 @@ const sizeMap: Record<Size, string> = {
 }
 
 const toneMap: Record<Tone, string> = {
-  default:  'text-surface-900',
-  inverted: 'text-white',
+  default:  'text-ink-900',
+  inverted: 'text-cream-50',
 }
 
+const accentToneMap: Record<Tone, string> = {
+  default:  'text-rust-600',
+  inverted: 'text-rust-300',
+}
+
+/**
+ * GradientHeading — editorial: serif Fraunces, italic accent in rust.
+ * Component name preserved for backward compat; behavior shifted from
+ * gradient text to italic editorial accent.
+ */
 const GradientHeading: React.FC<GradientHeadingProps> = ({
   level = 2,
   size = 'lg',
@@ -37,12 +48,12 @@ const GradientHeading: React.FC<GradientHeadingProps> = ({
 }) => {
   const Tag = (`h${level}`) as React.ElementType
   const accentEl = accent ? (
-    <span className="text-gradient-brand-animated">{accent}</span>
+    <span className={`text-editorial-italic ${accentToneMap[tone]}`}>{accent}</span>
   ) : null
 
   return (
     <Tag
-      className={`font-display font-bold tracking-tight ${sizeMap[size]} ${toneMap[tone]} ${className}`}
+      className={`font-display font-semibold tracking-tight ${sizeMap[size]} ${toneMap[tone]} ${className}`}
       {...rest}
     >
       {accentPlacement === 'before' && accentEl ? <>{accentEl} </> : null}

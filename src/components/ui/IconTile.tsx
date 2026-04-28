@@ -1,6 +1,6 @@
 import React from 'react'
 
-type IconTileTone = 'brand' | 'accent' | 'neutral' | 'inverted'
+type IconTileTone = 'brand' | 'accent' | 'neutral' | 'inverted' | 'forest'
 type IconTileSize = 'sm' | 'md' | 'lg'
 
 interface IconTileProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -9,10 +9,11 @@ interface IconTileProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const toneMap: Record<IconTileTone, string> = {
-  brand:    'bg-brand-gradient text-white shadow-glow-brand',
-  accent:   'bg-accent-500 text-white',
-  neutral:  'bg-surface-100 text-surface-700 ring-1 ring-surface-200',
-  inverted: 'bg-white/10 text-white ring-1 ring-white/15',
+  brand:    'bg-rust-50 text-rust-600 ring-1 ring-rust-100',
+  accent:   'bg-rust-500 text-white shadow-glow-rust',
+  neutral:  'bg-cream-100 text-ink-700 ring-1 ring-ink-900/10',
+  inverted: 'bg-cream-50/10 text-cream-50 ring-1 ring-cream-50/15',
+  forest:   'bg-forest-50 text-forest-700 ring-1 ring-forest-100',
 }
 
 const sizeMap: Record<IconTileSize, string> = {

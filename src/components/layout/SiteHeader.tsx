@@ -1,5 +1,5 @@
 import React from 'react'
-import { MousePointer2, Menu, X, ArrowRight } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import Container from '../ui/Container'
 
 export type NavigateFn = (page: string, scrollTo?: string) => void
@@ -19,12 +19,9 @@ const NAV_LINKS: Array<{ label: string; page: string }> = [
 ]
 
 const Logo: React.FC<{ tone?: 'default' | 'inverted' }> = ({ tone = 'default' }) => (
-  <span className={`flex flex-col items-start ${tone === 'inverted' ? 'text-white' : 'text-surface-900'}`}>
-    <span className="flex items-center">
-      <span className="text-2xl font-bold tracking-tight font-display">ACE</span>
-      <MousePointer2 className="w-5 h-5 ml-0.5 -mt-[2px]" aria-hidden="true" />
-    </span>
-    <span className={`text-sm font-medium -mt-1 ${tone === 'inverted' ? 'text-white/80' : 'text-surface-700'}`}>
+  <span className={`flex items-baseline ${tone === 'inverted' ? 'text-cream-50' : 'text-ink-900'}`}>
+    <span className="font-display text-2xl font-semibold tracking-tight">Ace</span>
+    <span className={`ml-1.5 label-mono ${tone === 'inverted' ? 'text-cream-100/60' : 'text-ink-700/70'}`}>
       Web Designers
     </span>
   </span>
@@ -68,7 +65,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
     <header>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:bg-surface-900 focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:shadow-lift"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:bg-ink-900 focus:text-cream-50 focus:px-4 focus:py-2 focus:rounded-full focus:shadow-lift"
       >
         Skip to content
       </a>
@@ -76,15 +73,15 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
         aria-label="Main navigation"
         className={`fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-300 ease-premium ${
           isScrolled
-            ? 'bg-white/85 backdrop-blur-xl shadow-soft border-b border-surface-200/60'
-            : 'bg-white/70 backdrop-blur-md border-b border-transparent'
+            ? 'bg-cream-50/85 backdrop-blur-xl shadow-soft border-b border-ink-900/10'
+            : 'bg-cream-50/70 backdrop-blur-md border-b border-transparent'
         }`}
       >
         <Container size="lg">
           <div className="flex h-16 items-center justify-between">
             <button
               onClick={() => go('home')}
-              className="ring-focus-brand rounded-lg"
+              className="ring-focus-rust rounded-lg"
               aria-label="Go to homepage"
             >
               <Logo />
@@ -97,15 +94,15 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
                   <button
                     key={link.page}
                     onClick={() => go(link.page)}
-                    className={`relative text-sm font-medium ring-focus-brand rounded transition-colors duration-300 ease-premium ${
-                      active ? 'text-surface-900' : 'text-surface-600 hover:text-surface-900'
+                    className={`relative text-sm font-medium ring-focus-rust rounded transition-colors duration-300 ease-premium ${
+                      active ? 'text-ink-900' : 'text-ink-700 hover:text-ink-900'
                     }`}
                   >
                     {link.label}
                     <span
                       aria-hidden
-                      className={`absolute -bottom-1 left-0 h-[2px] rounded-full bg-brand-gradient transition-all duration-500 ease-premium ${
-                        active ? 'w-full' : 'w-0 group-hover:w-full'
+                      className={`absolute -bottom-1 left-0 h-[2px] rounded-full bg-rust-500 transition-all duration-500 ease-premium ${
+                        active ? 'w-full' : 'w-0'
                       }`}
                     />
                   </button>
@@ -113,7 +110,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
               })}
               <button
                 onClick={() => go('contact')}
-                className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-brand-gradient text-white px-5 py-2 text-sm font-semibold shadow-glow-brand magnetic-btn ring-focus-brand"
+                className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-5 py-2 text-sm font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300 ease-premium"
               >
                 Free Design
                 <ArrowRight className="h-4 w-4" aria-hidden />
@@ -122,7 +119,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-surface-700 hover:text-surface-900 ring-focus-brand"
+              className="md:hidden p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-rust"
               aria-expanded={isMenuOpen}
               aria-controls="mobile-drawer"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -140,20 +137,20 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
         role="dialog"
         aria-modal="true"
         aria-hidden={!isMenuOpen}
-        className={`md:hidden fixed inset-0 z-[100] bg-white transition-transform duration-500 ease-premium ${
+        className={`md:hidden fixed inset-0 z-[100] bg-cream-50 transition-transform duration-500 ease-premium ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
         }`}
         style={{ height: '100dvh' }}
       >
         <div className="flex flex-col h-full">
-          <div className="flex justify-between items-center p-4 border-b border-surface-200">
-            <button onClick={() => go('home')} className="ring-focus-brand rounded-lg" aria-label="Go to homepage">
+          <div className="flex justify-between items-center p-4 border-b border-ink-900/10">
+            <button onClick={() => go('home')} className="ring-focus-rust rounded-lg" aria-label="Go to homepage">
               <Logo />
             </button>
             <button
               data-drawer-close
               onClick={() => setIsMenuOpen(false)}
-              className="p-2 rounded-md text-surface-700 hover:text-surface-900 ring-focus-brand"
+              className="p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-rust"
               aria-label="Close menu"
             >
               <X className="h-6 w-6" aria-hidden />
@@ -164,14 +161,14 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
               <button
                 key={link.page}
                 onClick={() => go(link.page)}
-                className="text-left text-xl py-3 px-3 rounded-lg text-surface-700 hover:bg-surface-50 hover:text-surface-900 transition-colors ring-focus-brand"
+                className="text-left font-display text-2xl py-3 px-3 rounded-lg text-ink-800 hover:bg-cream-100 hover:text-ink-900 transition-colors ring-focus-rust"
               >
                 {link.label}
               </button>
             ))}
             <button
               onClick={() => go('contact')}
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient text-white px-8 py-4 font-bold shadow-glow-brand magnetic-btn ring-focus-brand"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-8 py-4 font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
             >
               GET MY FREE DESIGN NOW!
               <ArrowRight className="h-5 w-5" aria-hidden />
