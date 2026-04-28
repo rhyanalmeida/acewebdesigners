@@ -64,3 +64,25 @@ Object.defineProperty(window, 'sessionStorage', {
   value: localStorageMock,
 })
 
+// Mock Facebook Pixel — pages call window.fbq during mount; without this
+// they throw `Cannot read properties of undefined (reading 'push')`.
+type FbqFn = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void
+  queue: unknown[]
+  loaded: boolean
+  version: string
+  push: (...args: unknown[]) => void
+}
+const fbqMock = ((..._args: unknown[]) => {}) as FbqFn
+fbqMock.queue = []
+fbqMock.loaded = true
+fbqMock.version = '2.0'
+fbqMock.push = fbqMock
+;(window as unknown as { fbq: FbqFn }).fbq = fbqMock
+;(window as unknown as { _fbq: FbqFn })._fbq = fbqMock
+
+// Mock fetch (attribution-stash uses it; tests shouldn't hit real network)
+if (!globalThis.fetch) {
+  globalThis.fetch = (() => Promise.resolve(new Response('{}', { status: 200 }))) as typeof fetch
+}
+
