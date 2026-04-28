@@ -5,9 +5,49 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Outfit', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        display: ['Fraunces', 'ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
+        // ----- New editorial palette (Phase 3) -----
+        cream: {
+          50:  '#FBF7F0', // body paper
+          100: '#F5EFE3', // section alt
+          200: '#EDE3D0', // panels
+          300: '#E1D2B6', // dividers / muted
+          400: '#C9B68E',
+        },
+        ink: {
+          50:  '#F2EEE6', // inverted-on-dark text
+          100: '#D9D2C2',
+          200: '#9A9080',
+          500: '#5A4F3D',
+          700: '#3D3527', // body text muted
+          800: '#2A241C', // body text default
+          900: '#1A1611', // headlines / strong text
+          950: '#0D0A07',
+        },
+        rust: {
+          50:  '#FCF1EA',
+          100: '#F8DCC9',
+          200: '#F0B492',
+          300: '#E68A5C',
+          400: '#D9683A',
+          500: '#C04E1A', // primary accent
+          600: '#A23F12',
+          700: '#82310F',
+          800: '#62250C',
+          900: '#3F1808',
+        },
+        forest: {
+          50:  '#EEF3EF',
+          100: '#D6E1D8',
+          500: '#3F7558',
+          700: '#1F4D3D', // secondary accent (trust/safety)
+          800: '#163627',
+          900: '#0E2218',
+        },
+        // ----- Legacy palettes (kept registered for backward compat) -----
         brand: {
           50:  '#eef4ff',
           100: '#dbe7ff',
@@ -54,13 +94,16 @@ export default {
         'mesh-1': 'radial-gradient(at 20% 0%, rgba(96,136,255,0.18) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(163,48,230,0.18) 0px, transparent 50%), radial-gradient(at 80% 100%, rgba(39,71,245,0.12) 0px, transparent 50%)',
         'mesh-2': 'radial-gradient(at 0% 0%, rgba(39,71,245,0.22) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(163,48,230,0.22) 0px, transparent 55%)',
         'noise-fade': 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.02) 100%)',
+        // ----- Editorial backgrounds -----
+        'paper-noise': 'radial-gradient(at 0% 0%, rgba(192,78,26,0.04) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(31,77,61,0.04) 0px, transparent 55%)',
       },
       boxShadow: {
-        soft:    '0 1px 2px rgba(15, 18, 39, 0.04), 0 8px 24px rgba(15, 18, 39, 0.06)',
-        lift:    '0 4px 12px rgba(15, 18, 39, 0.08), 0 24px 48px rgba(15, 18, 39, 0.12)',
-        ring:    '0 0 0 1px rgba(15, 18, 39, 0.06)',
+        soft:    '0 1px 2px rgba(26, 22, 17, 0.04), 0 8px 24px rgba(26, 22, 17, 0.06)',
+        lift:    '0 4px 12px rgba(26, 22, 17, 0.08), 0 24px 48px rgba(26, 22, 17, 0.10)',
+        ring:    '0 0 0 1px rgba(26, 22, 17, 0.08)',
         'glow-brand':   '0 10px 40px -10px rgba(39, 71, 245, 0.55), 0 4px 16px -4px rgba(163, 48, 230, 0.45)',
-        'inner-soft':   'inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(15, 18, 39, 0.04)',
+        'glow-rust':    '0 10px 32px -10px rgba(192, 78, 26, 0.45), 0 4px 12px -4px rgba(192, 78, 26, 0.25)',
+        'inner-soft':   'inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(26, 22, 17, 0.04)',
       },
       borderRadius: {
         xl2: '1.25rem',
@@ -85,6 +128,10 @@ export default {
           '0%, 100%': { boxShadow: '0 0 24px rgba(39, 71, 245, 0.25)' },
           '50%':      { boxShadow: '0 0 40px rgba(39, 71, 245, 0.55), 0 0 60px rgba(163, 48, 230, 0.35)' },
         },
+        'pulse-rust':    {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(192, 78, 26, 0.35)' },
+          '50%':      { boxShadow: '0 0 0 8px rgba(192, 78, 26, 0)' },
+        },
         'float-soft':    { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
         marquee:         { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
         'border-shine':  { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
@@ -105,6 +152,7 @@ export default {
         'gradient-shift':'gradient-shift 6s ease infinite',
         shimmer:         'shimmer 3s linear infinite',
         'glow-pulse':    'glow-pulse 3s ease-in-out infinite',
+        'pulse-rust':    'pulse-rust 2.4s ease-in-out infinite',
         'float-soft':    'float-soft 5s ease-in-out infinite',
         marquee:         'marquee 30s linear infinite',
         'border-shine':  'border-shine 6s linear infinite',
