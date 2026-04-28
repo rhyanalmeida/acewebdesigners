@@ -22,7 +22,9 @@ import {
   Reveal,
   IconTile,
   StatBlock,
-  TrustBar,
+  SectionHeading,
+  StaggerGrid,
+  FinalCta,
 } from './components/ui'
 
 const VALUES = [
@@ -104,23 +106,22 @@ function AboutUs() {
 
       {/* STATS */}
       <Section tone="default" padding="md">
-        <Reveal variant="stagger" className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {STATS.map((s, i) => (
-            <div key={s.l} data-reveal-stagger-child style={{ transitionDelay: `${i * 70}ms` }}>
-              <StatBlock value={s.v} label={s.l} />
-            </div>
-          ))}
-        </Reveal>
+        <StaggerGrid
+          items={STATS}
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+          keyFn={s => s.l}
+          renderItem={s => <StatBlock value={s.v} label={s.l} />}
+        />
       </Section>
 
       {/* WHY FREE DESIGNS */}
       <Section tone="muted" padding="lg" containerSize="md">
-        <div className="text-center">
-          <Eyebrow>Our story</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="free designs">
-            Why we offer
-          </GradientHeading>
-        </div>
+        <SectionHeading
+          eyebrow="Our story"
+          heading="Why we offer"
+          accent="free designs"
+          maxWidth="max-w-none"
+        />
 
         <Reveal variant="up" className="mt-10 space-y-6 text-lg text-surface-700 leading-relaxed">
           <p>
@@ -167,45 +168,41 @@ function AboutUs() {
 
       {/* CORE VALUES */}
       <Section tone="default" padding="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow>What we believe</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="core values">
-            Our
-          </GradientHeading>
-        </div>
-        <Reveal variant="stagger" className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {VALUES.map((v, i) => (
-            <div key={v.title} data-reveal-stagger-child style={{ transitionDelay: `${i * 70}ms` }}>
-              <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
-                <IconTile tone="brand" size="md">
-                  <v.Icon />
-                </IconTile>
-                <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{v.title}</h3>
-                <p className="mt-2 text-surface-600 leading-relaxed">{v.desc}</p>
-              </Card>
-            </div>
-          ))}
-        </Reveal>
+        <SectionHeading eyebrow="What we believe" heading="Our" accent="core values" />
+        <StaggerGrid
+          items={VALUES}
+          className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+          keyFn={v => v.title}
+          renderItem={v => (
+            <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
+              <IconTile tone="brand" size="md">
+                <v.Icon />
+              </IconTile>
+              <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{v.title}</h3>
+              <p className="mt-2 text-surface-600 leading-relaxed">{v.desc}</p>
+            </Card>
+          )}
+        />
       </Section>
 
       {/* EXPERTISE */}
       <Section tone="muted" padding="lg">
-        <div className="text-center max-w-2xl mx-auto">
-          <Eyebrow>What we do</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent="expertise">
-            Our areas of
-          </GradientHeading>
-        </div>
-        <Reveal variant="stagger" className="mt-12 grid gap-6 grid-cols-2 lg:grid-cols-4">
-          {EXPERTISE.map((e, i) => (
-            <div key={e.label} data-reveal-stagger-child style={{ transitionDelay: `${i * 80}ms` }} className="text-center">
+        <SectionHeading eyebrow="What we do" heading="Our areas of" accent="expertise" />
+        <StaggerGrid
+          items={EXPERTISE}
+          className="mt-12 grid gap-6 grid-cols-2 lg:grid-cols-4"
+          delayMs={80}
+          keyFn={e => e.label}
+          childClassName="text-center"
+          renderItem={e => (
+            <>
               <IconTile tone="brand" size="lg" className="mx-auto">
                 <e.Icon />
               </IconTile>
               <h3 className="mt-5 font-display text-lg font-semibold text-surface-900">{e.label}</h3>
-            </div>
-          ))}
-        </Reveal>
+            </>
+          )}
+        />
       </Section>
 
       {/* CONTACT */}
@@ -252,27 +249,13 @@ function AboutUs() {
       </Section>
 
       {/* FINAL CTA */}
-      <Section tone="mesh" padding="lg" containerSize="md">
-        <Reveal variant="up" className="text-center">
-          <Eyebrow tone="inverted">Risk-free</Eyebrow>
-          <GradientHeading level={2} size="lg" tone="inverted" className="mt-4">
-            Experience our work with zero commitment.
-          </GradientHeading>
-          <p className="mt-5 text-white/80 max-w-xl mx-auto">
-            See why businesses choose us. Get your free design mockup and experience our quality firsthand.
-          </p>
-          <button
-            onClick={goContact}
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-surface-900 font-bold text-base sm:text-lg px-8 py-4 shadow-lift magnetic-btn ring-focus-brand"
-          >
-            Get my free design
-            <ArrowRight className="h-5 w-5" aria-hidden />
-          </button>
-          <div className="mt-6 flex justify-center">
-            <TrustBar tone="inverted" />
-          </div>
-        </Reveal>
-      </Section>
+      <FinalCta
+        eyebrow="Risk-free"
+        heading="Experience our work with zero commitment."
+        body="See why businesses choose us. Get your free design mockup and experience our quality firsthand."
+        ctaLabel="Get my free design"
+        onCta={goContact}
+      />
     </>
   )
 }

@@ -3,12 +3,11 @@ import { ExternalLink, Trophy, ArrowRight, Search } from 'lucide-react'
 
 import {
   Section,
-  Eyebrow,
-  GradientHeading,
   Card,
-  Reveal,
   BadgePill,
-  TrustBar,
+  PageHero,
+  StaggerGrid,
+  FinalCta,
 } from './components/ui'
 
 interface Project {
@@ -105,27 +104,13 @@ function Work() {
 
   return (
     <>
-      {/* HERO */}
-      <Section tone="mesh" padding="lg">
-        <div className="text-center max-w-3xl mx-auto" data-reveal="up">
-          <Eyebrow tone="inverted">
-            <Trophy className="h-3.5 w-3.5" aria-hidden />
-            Our portfolio
-          </Eyebrow>
-          <GradientHeading
-            level={1}
-            size="display"
-            tone="inverted"
-            className="mt-5"
-            accent="we've built"
-          >
-            Beautiful work
-          </GradientHeading>
-          <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed">
-            Explore our latest projects and see how we help businesses transform their digital presence.
-          </p>
-        </div>
-      </Section>
+      <PageHero
+        eyebrow="Our portfolio"
+        eyebrowIcon={Trophy}
+        headline="Beautiful work"
+        accent="we've built"
+        sub="Explore our latest projects and see how we help businesses transform their digital presence."
+      />
 
       {/* FILTER + SEARCH */}
       <Section tone="default" padding="md">
@@ -167,83 +152,66 @@ function Work() {
         {filtered.length === 0 ? (
           <p className="text-center text-surface-500 py-12">No projects match your search.</p>
         ) : (
-          <Reveal variant="stagger" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((project, i) => (
-              <article
-                key={project.title}
-                data-reveal-stagger-child
-                style={{ transitionDelay: `${i * 80}ms` }}
-              >
-                <Card tone="default" padding="none" rounded="xl2" interactive shine className="overflow-hidden h-full flex flex-col group">
-                  <div className="aspect-[4/3] overflow-hidden relative">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-surface-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-premium" aria-hidden />
-                  </div>
-                  <div className="p-6 flex flex-col flex-1">
-                    <BadgePill tone="brand" className="self-start">{project.category}</BadgePill>
-                    <h3 className="mt-3 font-display text-xl font-semibold text-surface-900">{project.title}</h3>
-                    <p className="mt-2 text-surface-600 leading-relaxed flex-1">{project.description}</p>
-                    {project.technologies && (
-                      <div className="mt-4 flex flex-wrap gap-1.5">
-                        {project.technologies.slice(0, 3).map(tech => (
-                          <span key={tech} className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100 text-surface-700 ring-1 ring-surface-200">
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    {project.link ? (
-                      <a
-                        href={project.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-5 inline-flex items-center gap-1.5 text-brand-700 font-semibold ring-focus-brand rounded"
-                      >
-                        Visit website
-                        <ExternalLink className="h-4 w-4" aria-hidden />
-                      </a>
-                    ) : (
-                      <span className="mt-5 inline-flex items-center gap-1.5 text-surface-500 font-medium">
-                        Coming soon
-                        <ArrowRight className="h-4 w-4" aria-hidden />
-                      </span>
-                    )}
-                  </div>
-                </Card>
-              </article>
-            ))}
-          </Reveal>
+          <StaggerGrid
+            items={filtered}
+            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            delayMs={80}
+            keyFn={p => p.title}
+            renderItem={project => (
+              <Card tone="default" padding="none" rounded="xl2" interactive shine className="overflow-hidden h-full flex flex-col group">
+                <div className="aspect-[4/3] overflow-hidden relative">
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-surface-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-premium" aria-hidden />
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <BadgePill tone="brand" className="self-start">{project.category}</BadgePill>
+                  <h3 className="mt-3 font-display text-xl font-semibold text-surface-900">{project.title}</h3>
+                  <p className="mt-2 text-surface-600 leading-relaxed flex-1">{project.description}</p>
+                  {project.technologies && (
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {project.technologies.slice(0, 3).map(tech => (
+                        <span key={tech} className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100 text-surface-700 ring-1 ring-surface-200">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {project.link ? (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-5 inline-flex items-center gap-1.5 text-brand-700 font-semibold ring-focus-brand rounded"
+                    >
+                      Visit website
+                      <ExternalLink className="h-4 w-4" aria-hidden />
+                    </a>
+                  ) : (
+                    <span className="mt-5 inline-flex items-center gap-1.5 text-surface-500 font-medium">
+                      Coming soon
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </span>
+                  )}
+                </div>
+              </Card>
+            )}
+          />
         )}
       </Section>
 
-      {/* CTA */}
-      <Section tone="mesh" padding="lg" containerSize="md">
-        <Reveal variant="up" className="text-center">
-          <Eyebrow tone="inverted">Want one like this?</Eyebrow>
-          <GradientHeading level={2} size="lg" tone="inverted" className="mt-4">
-            Get a design like these — for free.
-          </GradientHeading>
-          <p className="mt-5 text-white/80 max-w-xl mx-auto">
-            See your website design before paying anything. Love it? We'll build it together.
-          </p>
-          <button
-            onClick={goContact}
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-surface-900 font-bold text-base sm:text-lg px-8 py-4 shadow-lift magnetic-btn ring-focus-brand"
-          >
-            Get my free design
-            <ArrowRight className="h-5 w-5" aria-hidden />
-          </button>
-          <div className="mt-6 flex justify-center">
-            <TrustBar tone="inverted" />
-          </div>
-        </Reveal>
-      </Section>
+      <FinalCta
+        eyebrow="Want one like this?"
+        heading="Get a design like these — for free."
+        body="See your website design before paying anything. Love it? We'll build it together."
+        ctaLabel="Get my free design"
+        onCta={goContact}
+      />
     </>
   )
 }
