@@ -95,6 +95,16 @@ describe('App routing + chrome', () => {
     expect(screen.getAllByRole('link', { name: /support@acewebdesigners\.com/i }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('link', { name: /\(774\) 446-7375/i }).length).toBeGreaterThan(0)
   })
+
+  it('renders the three pricing tiers prominently on the home page', () => {
+    render(<App />)
+    // PriceCard primitives — pricing was buried in FAQ before, now must be its own section.
+    expect(screen.getAllByText(/^\$200$/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/^\$1,000$/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/^\$1,500$/).length).toBeGreaterThan(0)
+    // The highlighted tier ribbon ("Most popular")
+    expect(screen.getByText(/Most popular/i)).toBeInTheDocument()
+  })
 })
 
 describe('Stable preservation surfaces (regression guards)', () => {
