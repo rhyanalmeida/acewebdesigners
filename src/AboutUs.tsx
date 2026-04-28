@@ -1,8 +1,5 @@
 import React from 'react'
 import {
-  Mail,
-  Phone,
-  MapPin,
   Code,
   Briefcase,
   Star,
@@ -25,6 +22,8 @@ import {
   SectionHeading,
   StaggerGrid,
   FinalCta,
+  PhoneCta,
+  TrustStack,
 } from './components/ui'
 
 const VALUES = [
@@ -66,40 +65,50 @@ function AboutUs() {
 
   return (
     <>
-      {/* HERO */}
+      {/* HERO — editorial 2-col with owner photo */}
       <Section tone="mesh" padding="lg">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_1fr]">
+        <hr className="rule-hairline mb-12 sm:mb-14" />
+        <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
           <div data-reveal="up">
-            <Eyebrow tone="inverted">About us</Eyebrow>
+            <Eyebrow tone="brand">About us</Eyebrow>
             <GradientHeading
               level={1}
               size="display"
-              tone="inverted"
-              className="mt-5"
+              className="mt-6"
               accent="Rhyan & Valerie"
             >
               Meet
             </GradientHeading>
-            <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-xl">
+            <p className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl">
               Your partners in creating exceptional digital experiences. We design websites that are beautiful, fast, and built to grow your business.
             </p>
-            <button
-              onClick={goContact}
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-surface-900 font-bold px-7 py-3.5 magnetic-btn ring-focus-brand"
-            >
-              Get my free design
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
+            <div className="mt-9 flex flex-wrap items-center gap-4">
+              <button
+                onClick={goContact}
+                className="inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-7 py-3.5 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+              >
+                Get my free design
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
+            <div className="mt-8">
+              <PhoneCta />
+            </div>
           </div>
           <div data-reveal="right" className="relative max-w-md mx-auto lg:ml-auto w-full">
-            <div className="absolute inset-0 bg-brand-gradient rounded-xl3 blur-2xl opacity-50" aria-hidden />
+            <div className="absolute -inset-3 bg-rust-100/60 rounded-xl3 -z-10" aria-hidden />
             <img
               src="/rhyan.jpg"
-              alt="Lead web designers and developers"
-              className="relative rounded-xl3 shadow-glow-brand w-full h-[420px] object-cover ring-1 ring-white/20"
+              alt="Rhyan, lead developer at Ace Web Designers"
+              className="relative rounded-xl3 shadow-lift w-full h-[420px] object-cover ring-1 ring-ink-900/10"
               loading="lazy"
               decoding="async"
             />
+            <span className="absolute bottom-4 left-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-50/95 backdrop-blur-sm ring-1 ring-ink-900/10 text-xs">
+              <span className="label-mono text-ink-700">Rhyan</span>
+              <span className="text-ink-700/60">·</span>
+              <span className="text-ink-800">Lead Developer</span>
+            </span>
           </div>
         </div>
       </Section>
@@ -114,7 +123,7 @@ function AboutUs() {
         />
       </Section>
 
-      {/* WHY FREE DESIGNS */}
+      {/* WHY FREE DESIGNS — editorial story */}
       <Section tone="muted" padding="lg" containerSize="md">
         <SectionHeading
           eyebrow="Our story"
@@ -123,43 +132,51 @@ function AboutUs() {
           maxWidth="max-w-none"
         />
 
-        <Reveal variant="up" className="mt-10 space-y-6 text-lg text-surface-700 leading-relaxed">
+        <Reveal variant="up" className="mt-10 space-y-6 text-lg text-ink-800 leading-relaxed">
           <p>
             We believe every business deserves to see their vision come to life before making any commitment. Too many business owners have been burned by designers who promise the world but deliver disappointment.
           </p>
-          <p className="text-xl font-semibold text-brand-700">
-            That's why we do things differently. We create your complete design mockup first, completely free.
+          <p className="font-display text-2xl sm:text-3xl text-ink-900 leading-snug">
+            That&rsquo;s why we do things differently.{' '}
+            <span className="text-editorial-italic text-rust-600">
+              We create your complete design mockup first
+            </span>
+            , completely free.
           </p>
           <p>
             When you see exactly what your website will look like, how it will function, and how it represents your brand, you can make an informed decision. No surprises, no regrets — just confidence in your investment.
           </p>
         </Reveal>
 
-        <Card tone="default" padding="xl" rounded="xl3" className="mt-10" shine>
-          <p className="font-display text-xl text-surface-900 italic">
-            &ldquo;We only succeed when you're absolutely thrilled with your website. The free design ensures we're the perfect fit before you invest a single dollar.&rdquo;
+        <Card tone="default" padding="xl" rounded="xl3" className="mt-12">
+          <span className="label-mono text-rust-700">Quote · Founder</span>
+          <p className="mt-4 font-display text-xl sm:text-2xl text-ink-900 leading-snug">
+            <span className="text-rust-500 text-3xl leading-none mr-1 align-[-0.15em] text-editorial-italic">&ldquo;</span>
+            We only succeed when you&rsquo;re absolutely thrilled with your website. The free design ensures we&rsquo;re the perfect fit before you invest a single dollar.
+            <span className="text-rust-500 text-3xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
           </p>
-          <div className="mt-6 flex flex-wrap items-center gap-6">
+          <hr className="rule-hairline my-7" />
+          <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-3">
               <img
                 src="/rhyan.jpg"
-                alt="Rhyan — Lead Developer"
-                className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-soft"
+                alt=""
+                className="h-12 w-12 rounded-full object-cover ring-1 ring-ink-900/10"
                 loading="lazy"
               />
               <div>
-                <p className="font-semibold text-surface-900">Rhyan</p>
-                <p className="text-sm text-surface-500">Lead Developer</p>
+                <p className="label-mono text-ink-700">Rhyan</p>
+                <p className="text-sm text-ink-800">Lead Developer</p>
               </div>
             </div>
-            <span className="text-surface-300" aria-hidden>•</span>
+            <span className="text-ink-700/30" aria-hidden>·</span>
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand-gradient text-white font-bold ring-2 ring-white shadow-soft" aria-hidden>
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink-900 text-cream-50 font-display font-semibold ring-1 ring-ink-900/10" aria-hidden>
                 V
               </span>
               <div>
-                <p className="font-semibold text-surface-900">Valerie</p>
-                <p className="text-sm text-surface-500">Design Lead</p>
+                <p className="label-mono text-ink-700">Valerie</p>
+                <p className="text-sm text-ink-800">Design Lead</p>
               </div>
             </div>
           </div>
@@ -178,8 +195,8 @@ function AboutUs() {
               <IconTile tone="brand" size="md">
                 <v.Icon />
               </IconTile>
-              <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{v.title}</h3>
-              <p className="mt-2 text-surface-600 leading-relaxed">{v.desc}</p>
+              <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{v.title}</h3>
+              <p className="mt-2 text-ink-700 leading-relaxed">{v.desc}</p>
             </Card>
           )}
         />
@@ -199,51 +216,26 @@ function AboutUs() {
               <IconTile tone="brand" size="lg" className="mx-auto">
                 <e.Icon />
               </IconTile>
-              <h3 className="mt-5 font-display text-lg font-semibold text-surface-900">{e.label}</h3>
+              <h3 className="mt-5 font-display text-lg font-semibold text-ink-900">{e.label}</h3>
             </>
           )}
         />
       </Section>
 
-      {/* CONTACT */}
-      <Section tone="default" padding="lg" containerSize="lg">
-        <Card tone="default" padding="xl" rounded="xl3" className="grid lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <Eyebrow>Let's connect</Eyebrow>
-            <GradientHeading level={2} size="md" className="mt-4">
-              Ready to start your next project?
-            </GradientHeading>
-            <p className="mt-4 text-surface-600 leading-relaxed">
-              We're here to help turn your vision into reality. Reach out — we usually reply within a few hours.
-            </p>
-            <ul className="mt-6 space-y-4">
-              <li className="flex items-center gap-4">
-                <IconTile tone="brand" size="sm"><Mail /></IconTile>
-                <a href="mailto:support@acewebdesigners.com" className="text-surface-800 hover:text-brand-700 transition-colors ring-focus-brand rounded">
-                  support@acewebdesigners.com
-                </a>
-              </li>
-              <li className="flex items-center gap-4">
-                <IconTile tone="brand" size="sm"><Phone /></IconTile>
-                <a href="tel:+17744467375" className="text-surface-800 hover:text-brand-700 transition-colors ring-focus-brand rounded">
-                  (774) 446-7375
-                </a>
-              </li>
-              <li className="flex items-center gap-4">
-                <IconTile tone="brand" size="sm"><MapPin /></IconTile>
-                <span className="text-surface-700">Based in Leominster, MA • Serving Nationwide</span>
-              </li>
-            </ul>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-0 bg-brand-gradient rounded-xl3 blur-2xl opacity-30" aria-hidden />
-            <img
-              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3"
-              alt="Workspace"
-              loading="lazy"
-              decoding="async"
-              className="relative rounded-xl3 shadow-soft w-full object-cover aspect-[4/3]"
-            />
+      {/* CONTACT — editorial */}
+      <Section tone="default" padding="lg" containerSize="md">
+        <Card tone="default" padding="xl" rounded="xl3">
+          <Eyebrow tone="forest">Let&rsquo;s connect</Eyebrow>
+          <GradientHeading level={2} size="lg" className="mt-5" accent="we&rsquo;ll reply within hours">
+            Ready to start? —
+          </GradientHeading>
+          <p className="mt-5 text-ink-700 leading-relaxed max-w-xl">
+            Reach out and we&rsquo;ll send a free homepage design within 24 hours, often same day. Based in Leominster, MA — serving small businesses nationwide.
+          </p>
+          <hr className="rule-hairline my-8" />
+          <PhoneCta />
+          <div className="mt-8">
+            <TrustStack align="left" />
           </div>
         </Card>
       </Section>
@@ -251,7 +243,8 @@ function AboutUs() {
       {/* FINAL CTA */}
       <FinalCta
         eyebrow="Risk-free"
-        heading="Experience our work with zero commitment."
+        heading="Experience our work with"
+        accent="zero commitment."
         body="See why businesses choose us. Get your free design mockup and experience our quality firsthand."
         ctaLabel="Get my free design"
         onCta={goContact}

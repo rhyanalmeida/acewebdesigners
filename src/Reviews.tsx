@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react'
-import { Star, Users, TrendingUp, Award, CheckCircle2, ArrowRight } from 'lucide-react'
+import { Star, Users, Award, CheckCircle2 } from 'lucide-react'
 
 import {
   Section,
   Card,
   IconTile,
   StatBlock,
-  TrustBar,
   PageHero,
   SectionHeading,
   StaggerGrid,
+  TestimonialEditorial,
+  TrustStack,
+  FinalCta,
 } from './components/ui'
 
 const REVIEW_STATS = [
@@ -26,9 +28,26 @@ const INDUSTRY_RESULTS = [
   { industry: 'Professional Services', icon: '💼', avg: '2.8×', metric: 'Inquiries', desc: 'Service businesses receive more qualified client inquiries.' },
 ]
 
+const FEATURED_QUOTES = [
+  {
+    name: 'Mike Chen',
+    business: 'Hot Pot One',
+    city: 'Boston, MA',
+    quote: "Ace created an amazing website for our small restaurant. The ordering system works flawlessly and we've seen a 40% increase in online orders since launch.",
+    metric: '40% more orders',
+  },
+  {
+    name: 'John Dunn',
+    business: 'Dunn Construction',
+    city: 'Leominster, MA',
+    quote: "Within days, we had a professional website that perfectly represented our small construction business. We're already getting 3x more leads than before.",
+    metric: '3× qualified leads',
+  },
+]
+
 const WHY_CHOOSE = [
   { Icon: CheckCircle2, title: 'Proven results', desc: "We don't just build websites — we build websites that drive measurable ROI.", tone: 'brand' as const },
-  { Icon: Users, title: 'Client-first approach', desc: 'Your success is our priority. We work closely with you to ensure every detail meets your vision.', tone: 'accent' as const },
+  { Icon: Users, title: 'Client-first approach', desc: 'Your success is our priority. We work closely with you to ensure every detail meets your vision.', tone: 'forest' as const },
   { Icon: Award, title: 'Quality guarantee', desc: "We're so confident in our work that we offer a money-back guarantee if you're not 100% satisfied.", tone: 'brand' as const },
 ]
 
@@ -44,16 +63,20 @@ function Reviews() {
     }
   }, [])
 
+  const goContact = () => {
+    window.location.href = '/#contact'
+  }
+
   return (
     <>
       <PageHero
         eyebrow={<><Star className="h-3.5 w-3.5 fill-current" aria-hidden />Client reviews</>}
-        headline="What"
-        accent="our clients say"
+        headline="What our"
+        accent="clients say"
         sub="Real reviews from real businesses who trusted us with their digital success."
       >
-        <div className="mt-8 inline-flex">
-          <TrustBar tone="inverted" reviewsCount="100+ reviews" />
+        <div className="mt-10 flex justify-center">
+          <TrustStack />
         </div>
       </PageHero>
 
@@ -65,6 +88,46 @@ function Reviews() {
           keyFn={s => s.l}
           renderItem={s => <StatBlock value={s.v} label={s.l} sub={s.s} />}
         />
+      </Section>
+
+      {/* FEATURED PULL-QUOTES */}
+      <Section tone="muted" padding="lg">
+        <SectionHeading
+          eyebrow="In their words"
+          heading="Stories from"
+          accent="local owners"
+        />
+        <StaggerGrid
+          items={FEATURED_QUOTES}
+          className="mt-14 grid gap-6 lg:grid-cols-2"
+          delayMs={100}
+          keyFn={t => t.name}
+          renderItem={t => (
+            <TestimonialEditorial
+              quote={t.quote}
+              authorName={t.name}
+              business={t.business}
+              city={t.city}
+              result={t.metric}
+              variant="feature"
+            />
+          )}
+        />
+      </Section>
+
+      {/* GOOGLE REVIEWS LIVE WIDGET — replicated from Refer.tsx (locationId preserved on Refer too) */}
+      <Section tone="default" padding="lg">
+        <SectionHeading
+          eyebrow={<><Star className="h-3.5 w-3.5 fill-current" aria-hidden />Live from Google</>}
+          eyebrowTone="forest"
+          heading="100+ verified reviews,"
+          accent="straight from Google"
+          sub="Updated automatically — see what our clients are saying right now."
+        />
+        <div className="mt-12 flex justify-center">
+          {/* PRESERVED behavior: external review widget script reads `locationId` */}
+          <div locationId="10311921268967440718" className="review-widget-carousel" />
+        </div>
       </Section>
 
       {/* INDUSTRY RESULTS */}
@@ -85,10 +148,10 @@ function Reviews() {
               <div className="flex items-start gap-5">
                 <span className="text-5xl shrink-0" aria-hidden>{r.icon}</span>
                 <div>
-                  <h3 className="font-display text-xl font-semibold text-surface-900">{r.industry}</h3>
-                  <p className="mt-3 font-display text-4xl font-bold text-gradient-brand">{r.avg}</p>
-                  <p className="text-sm font-semibold uppercase tracking-[0.15em] text-surface-500">{r.metric}</p>
-                  <p className="mt-3 text-surface-600 leading-relaxed">{r.desc}</p>
+                  <h3 className="font-display text-xl font-semibold text-ink-900">{r.industry}</h3>
+                  <p className="mt-3 font-display text-5xl font-semibold text-rust-600">{r.avg}</p>
+                  <p className="label-mono text-ink-700/70">{r.metric}</p>
+                  <p className="mt-3 text-ink-700 leading-relaxed">{r.desc}</p>
                 </div>
               </div>
             </Card>
@@ -114,33 +177,22 @@ function Reviews() {
               <IconTile tone={w.tone} size="lg" className="mx-auto">
                 <w.Icon />
               </IconTile>
-              <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{w.title}</h3>
-              <p className="mt-2 text-surface-600 leading-relaxed">{w.desc}</p>
+              <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{w.title}</h3>
+              <p className="mt-2 text-ink-700 leading-relaxed">{w.desc}</p>
             </>
           )}
         />
       </Section>
 
-      {/* FINAL CTA — uses <a href="/#contact"> rather than onCta callback (Reviews has no SPA route registered) */}
-      <Section tone="mesh" padding="lg" containerSize="md">
-        <div className="text-center" data-reveal="up">
-          <SectionHeading
-            eyebrow="Be next"
-            heading="Ready to join our happy clients?"
-            sub="See why businesses choose Ace Web Designers for their digital success. Get your free design mockup today."
-            tone="inverted"
-            eyebrowTone="inverted"
-            maxWidth="max-w-xl"
-          />
-          <a
-            href="/#contact"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-surface-900 font-bold text-base sm:text-lg px-8 py-4 shadow-lift magnetic-btn ring-focus-brand"
-          >
-            Get my free design
-            <ArrowRight className="h-5 w-5" aria-hidden />
-          </a>
-        </div>
-      </Section>
+      {/* FINAL CTA */}
+      <FinalCta
+        eyebrow="Be next"
+        heading="Ready to join our"
+        accent="happy clients?"
+        body="See why businesses choose Ace Web Designers for their digital success. Get your free design mockup today."
+        ctaLabel="Get my free design"
+        onCta={goContact}
+      />
     </>
   )
 }
