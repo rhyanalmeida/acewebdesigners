@@ -14,17 +14,17 @@ function PrivacyPolicy() {
   }, [])
 
   return (
-    <div className="pt-24 pb-16 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
+    <div className="bg-surface-50">
+      <div className="max-w-3xl mx-auto px-4 py-16 sm:py-20">
+        <div className="bg-white rounded-xl3 shadow-soft ring-1 ring-surface-200 p-8 md:p-12">
           {/* Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full mb-4">
-              <Shield className="w-4 h-4 text-blue-600" />
-              <span className="text-blue-800 font-medium">Privacy Policy</span>
-            </div>
-            <h1 className="text-4xl font-bold mb-4">Privacy Policy</h1>
-            <p className="text-gray-600 text-lg">Last updated: {new Date().toLocaleDateString()}</p>
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full ring-1 ring-inset ring-brand-100 bg-brand-50 text-brand-700 text-xs font-semibold tracking-[0.18em] uppercase">
+              <Shield className="w-3.5 h-3.5" aria-hidden />
+              Privacy Policy
+            </span>
+            <h1 className="mt-5 font-display text-4xl sm:text-5xl font-bold text-surface-900">Privacy Policy</h1>
+            <p className="mt-3 text-surface-500">Last updated: {new Date().toLocaleDateString()}</p>
           </div>
 
           {/* Content */}
@@ -135,8 +135,8 @@ function PrivacyPolicy() {
                 handled, you may contact us at:
               </p>
 
-              <div className="bg-blue-50 rounded-xl p-6">
-                <h3 className="text-xl font-bold mb-4 text-gray-900">Ace Web Designers</h3>
+              <div className="bg-surface-50 ring-1 ring-surface-200 rounded-xl2 p-6">
+                <h3 className="text-xl font-bold mb-4 text-surface-900 font-display">Ace Web Designers</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-blue-600" />

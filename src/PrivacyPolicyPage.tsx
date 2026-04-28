@@ -8,19 +8,20 @@ function PrivacyPolicyPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-surface-50 text-surface-900">
       {/* Header */}
-      <header className="bg-white border-b shadow-sm">
-        <nav className="max-w-7xl mx-auto px-4 py-4">
+      <header className="bg-white/85 backdrop-blur-md border-b border-surface-200">
+        <nav className="max-w-5xl mx-auto px-4 py-4">
           <button
             onClick={() => (window.location.href = '/')}
-            className="flex flex-col items-start"
+            className="flex flex-col items-start ring-focus-brand rounded-lg"
+            aria-label="Go to homepage"
           >
             <div className="flex items-center">
-              <span className="text-2xl font-bold tracking-tight">ACE</span>
-              <MousePointer2 className="w-5 h-5 ml-0.5" style={{ marginTop: '-2px' }} />
+              <span className="text-2xl font-bold tracking-tight font-display">ACE</span>
+              <MousePointer2 className="w-5 h-5 ml-0.5 -mt-[2px]" aria-hidden />
             </div>
-            <span className="text-sm font-medium" style={{ marginTop: '-4px' }}>
+            <span className="text-sm font-medium text-surface-600 -mt-1">
               Web Designers
             </span>
           </button>
@@ -28,18 +29,18 @@ function PrivacyPolicyPage() {
       </header>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Privacy Policy</h1>
-        <p className="text-gray-600 mb-12">Last updated: January 16, 2026</p>
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        <h1 className="font-display text-4xl md:text-5xl font-bold text-surface-900">Privacy Policy</h1>
+        <p className="mt-3 text-surface-500">Last updated: January 16, 2026</p>
 
-        <div className="space-y-8 text-gray-700 leading-relaxed">
+        <div className="mt-12 space-y-8 text-surface-700 leading-relaxed">
           <p className="text-lg">
             Ace Web Designers ("we," "us," or "our") values your privacy. This Privacy Policy
             explains how we collect, use, and protect your information.
           </p>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Information We Collect</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Information We Collect</h2>
             <p className="mb-4">We may collect:</p>
             <ul className="list-disc ml-6 space-y-2">
               <li>Name</li>
@@ -51,7 +52,7 @@ function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">How We Use Your Information</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">How We Use Your Information</h2>
             <p className="mb-4">We use your information to:</p>
             <ul className="list-disc ml-6 space-y-2">
               <li>Contact you regarding your inquiry or services</li>
@@ -62,7 +63,7 @@ function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">SMS & A2P Compliance</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">SMS & A2P Compliance</h2>
             <p className="mb-4">
               If you provide your phone number and opt in via the SMS consent checkbox, you agree to receive SMS messages from Ace Web Designers related to your inquiry, appointment confirmations, reminders, and rescheduling.
             </p>
@@ -78,7 +79,7 @@ function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Data Sharing</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Data Sharing</h2>
             <p className="mb-4">
               We may share information only with trusted service providers (such as scheduling, CRM,
               or messaging platforms) strictly to operate our business.
@@ -89,7 +90,7 @@ function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Data Security</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Data Security</h2>
             <p>
               We take reasonable steps to protect your personal information from unauthorized access
               or disclosure.
@@ -97,16 +98,16 @@ function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Your Rights</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Your Rights</h2>
             <p>
               You may request access, correction, or deletion of your personal data by contacting us.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Contact Information</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Contact Information</h2>
             <div className="bg-gray-50 p-6 rounded-lg">
-              <p className="font-semibold text-gray-900 mb-2">Ace Web Designers</p>
+              <p className="font-semibold text-surface-900 font-display mb-2">Ace Web Designers</p>
               <p>Massachusetts, USA</p>
               <p>
                 Phone:{' '}

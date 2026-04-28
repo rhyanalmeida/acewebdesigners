@@ -8,19 +8,20 @@ function TermsOfService() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-surface-50 text-surface-900">
       {/* Header */}
-      <header className="bg-white border-b shadow-sm">
-        <nav className="max-w-7xl mx-auto px-4 py-4">
+      <header className="bg-white/85 backdrop-blur-md border-b border-surface-200">
+        <nav className="max-w-5xl mx-auto px-4 py-4">
           <button
             onClick={() => (window.location.href = '/')}
-            className="flex flex-col items-start"
+            className="flex flex-col items-start ring-focus-brand rounded-lg"
+            aria-label="Go to homepage"
           >
             <div className="flex items-center">
-              <span className="text-2xl font-bold tracking-tight">ACE</span>
-              <MousePointer2 className="w-5 h-5 ml-0.5" style={{ marginTop: '-2px' }} />
+              <span className="text-2xl font-bold tracking-tight font-display">ACE</span>
+              <MousePointer2 className="w-5 h-5 ml-0.5 -mt-[2px]" aria-hidden />
             </div>
-            <span className="text-sm font-medium" style={{ marginTop: '-4px' }}>
+            <span className="text-sm font-medium text-surface-600 -mt-1">
               Web Designers
             </span>
           </button>
@@ -28,18 +29,18 @@ function TermsOfService() {
       </header>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">Terms of Service</h1>
-        <p className="text-gray-600 mb-12">Last updated: January 16, 2026</p>
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        <h1 className="font-display text-4xl md:text-5xl font-bold text-surface-900">Terms of Service</h1>
+        <p className="mt-3 text-surface-500">Last updated: January 16, 2026</p>
 
-        <div className="space-y-8 text-gray-700 leading-relaxed">
+        <div className="mt-12 space-y-8 text-surface-700 leading-relaxed">
           <p className="text-lg">
             Welcome to Ace Web Designers ("Company," "we," "us," or "our"). By accessing our
             website or submitting your information, you agree to these Terms of Service.
           </p>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Services</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Services</h2>
             <p>
               We provide web design, landing pages, marketing automation, and related digital
               services for businesses. Any free or paid services are provided as described on our
@@ -48,7 +49,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Communication Consent</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Communication Consent</h2>
             <p className="mb-4">
               By submitting your information and <strong>opting in via the SMS consent checkbox</strong> on our website, booking calendar, or forms, you consent to receive communications from <strong>Ace Web Designers</strong>, including:
             </p>
@@ -66,7 +67,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">SMS Opt-Out Notice</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">SMS Opt-Out Notice</h2>
             <p className="mb-4">
               You may receive SMS messages from <strong>Ace Web Designers</strong> at{' '}
               <a href="tel:+17743151951" className="text-blue-600 hover:underline font-semibold">
@@ -77,7 +78,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">No Guarantee of Results</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">No Guarantee of Results</h2>
             <p>
               We do not guarantee specific business results, rankings, revenue, or performance unless
               explicitly stated in writing.
@@ -85,7 +86,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Intellectual Property</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Intellectual Property</h2>
             <p>
               All website designs, content, graphics, and materials created by us remain our property
               until paid in full, unless otherwise agreed.
@@ -93,7 +94,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Limitation of Liability</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Limitation of Liability</h2>
             <p>
               We are not liable for indirect, incidental, or consequential damages arising from the
               use of our services or website.
@@ -101,7 +102,7 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Governing Law</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Governing Law</h2>
             <p>
               These terms are governed by the laws of the Commonwealth of Massachusetts, United
               States.
@@ -109,9 +110,9 @@ function TermsOfService() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Contact</h2>
+            <h2 className="text-2xl font-bold mb-4 text-surface-900 font-display">Contact</h2>
             <div className="bg-gray-50 p-6 rounded-lg">
-              <p className="font-semibold text-gray-900 mb-2">Ace Web Designers</p>
+              <p className="font-semibold text-surface-900 font-display mb-2">Ace Web Designers</p>
               <p>Massachusetts, USA</p>
               <p>
                 Phone:{' '}

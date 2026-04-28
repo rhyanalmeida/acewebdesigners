@@ -2,7 +2,6 @@ import React from 'react'
 import {
   Mail,
   Phone,
-  Calendar,
   MapPin,
   Code,
   Briefcase,
@@ -12,7 +11,40 @@ import {
   Brain,
   Target,
   Rocket,
+  ArrowRight,
 } from 'lucide-react'
+
+import {
+  Section,
+  Eyebrow,
+  GradientHeading,
+  Card,
+  Reveal,
+  IconTile,
+  StatBlock,
+  TrustBar,
+} from './components/ui'
+
+const VALUES = [
+  { Icon: Target, title: 'Results-driven', desc: 'We focus on delivering measurable results that help your business grow.' },
+  { Icon: Brain, title: 'Innovation', desc: 'Staying ahead with the latest technologies and design trends.' },
+  { Icon: Users, title: 'Client-focused', desc: 'Your success is our priority. We build lasting partnerships.' },
+  { Icon: Rocket, title: 'Fast delivery', desc: 'Quick turnaround without compromising on quality.' },
+]
+
+const EXPERTISE = [
+  { Icon: Code, label: 'Custom development' },
+  { Icon: Star, label: 'UI/UX design' },
+  { Icon: Zap, label: 'Performance optimization' },
+  { Icon: Briefcase, label: 'Business strategy' },
+]
+
+const STATS = [
+  { v: '100+', l: 'Websites launched' },
+  { v: '5.0★', l: 'Google rating' },
+  { v: '15+', l: 'Industries served' },
+  { v: '1–3wk', l: 'Avg. delivery' },
+]
 
 function AboutUs() {
   React.useEffect(() => {
@@ -26,257 +58,222 @@ function AboutUs() {
     }
   }, [])
 
-  const values = [
-    {
-      icon: <Target className="w-6 h-6 text-blue-600" />,
-      title: 'Results-Driven',
-      description: 'We focus on delivering measurable results that help your business grow.',
-    },
-    {
-      icon: <Brain className="w-6 h-6 text-blue-600" />,
-      title: 'Innovation',
-      description: 'Staying ahead with the latest technologies and design trends.',
-    },
-    {
-      icon: <Users className="w-6 h-6 text-blue-600" />,
-      title: 'Client-Focused',
-      description: 'Your success is our priority. We build lasting partnerships.',
-    },
-    {
-      icon: <Rocket className="w-6 h-6 text-blue-600" />,
-      title: 'Fast Delivery',
-      description: 'Quick turnaround without compromising on quality.',
-    },
-  ]
-
-  const expertise = [
-    { icon: <Code />, label: 'Custom Development' },
-    { icon: <Star />, label: 'UI/UX Design' },
-    { icon: <Zap />, label: 'Performance Optimization' },
-    { icon: <Briefcase />, label: 'Business Strategy' },
-  ]
+  const goContact = () => {
+    window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'contact' } }))
+  }
 
   return (
-    <div className="pt-24 pb-16">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden mb-16">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-800"></div>
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3')] opacity-10 bg-cover bg-center"></div>
-        <div className="max-w-7xl mx-auto px-4 relative">
-          <div className="py-20 text-center text-white">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">
-              Meet Rhyan & Valerie
-            </h1>
-            <p className="text-2xl text-blue-100 max-w-2xl mx-auto font-light">
-              Your partners in creating exceptional digital experiences
+    <>
+      {/* HERO */}
+      <Section tone="mesh" padding="lg">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.2fr_1fr]">
+          <div data-reveal="up">
+            <Eyebrow tone="inverted">About us</Eyebrow>
+            <GradientHeading
+              level={1}
+              size="display"
+              tone="inverted"
+              className="mt-5"
+              accent="Rhyan & Valerie"
+            >
+              Meet
+            </GradientHeading>
+            <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-xl">
+              Your partners in creating exceptional digital experiences. We design websites that are beautiful, fast, and built to grow your business.
             </p>
+            <button
+              onClick={goContact}
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-surface-900 font-bold px-7 py-3.5 magnetic-btn ring-focus-brand"
+            >
+              Get my free design
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
           </div>
-        </div>
-      </section>
-
-      {/* Why We Offer Free Designs Story */}
-      <section className="py-20 bg-gradient-to-b from-blue-50 to-white">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-5 py-2 rounded-full mb-6 border border-blue-100">
-            <Star className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-800 font-semibold">Our Story</span>
-          </div>
-          <h2 className="heading-xl text-gradient-blue mb-8">Why We Offer Free Designs</h2>
-          <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
-            <p>
-              We believe every business deserves to see their vision come to life before making any
-              commitment. Too many business owners have been burned by designers who promise the
-              world but deliver disappointment.
-            </p>
-            <p className="text-xl font-semibold text-blue-600">
-              That's why we do things differently. We create your complete design mockup first,
-              completely free.
-            </p>
-            <p>
-              When you see exactly what your website will look like, how it will function, and how
-              it represents your brand, you can make an informed decision. No surprises, no regrets,
-              just confidence in your investment.
-            </p>
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-100 mt-8">
-              <p className="text-blue-800 font-semibold text-xl italic">
-                "We only succeed when you're absolutely thrilled with your website. The free design
-                ensures we're the perfect fit before you invest a single dollar."
-              </p>
-              <div className="flex items-center justify-center gap-4 mt-6">
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/rhyan.jpg"
-                    alt="Rhyan - Lead Developer"
-                    className="w-12 h-12 rounded-full object-cover border-2 border-blue-200"
-                  />
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-800">Rhyan</p>
-                    <p className="text-sm text-gray-600">Lead Developer</p>
-                  </div>
-                </div>
-                <div className="text-gray-400">•</div>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 flex items-center justify-center border-2 border-purple-200">
-                    <span className="text-white font-bold text-lg">V</span>
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-gray-800">Valerie</p>
-                    <p className="text-sm text-gray-600">Design Lead</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
-          <div className="space-y-10">
-            <div className="inline-flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full">
-              <Users className="w-4 h-4 text-blue-600" />
-              <span className="text-blue-800 font-medium">About Us</span>
-            </div>
-            <div className="space-y-6">
-              <h2 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                Who We Are
-              </h2>
-              <div className="space-y-6">
-                <p className="text-2xl text-gray-600 leading-relaxed">
-                  As a duo of passionate web designers, we specialize in crafting stunning websites
-                  that transform your business's online presence.
-                </p>
-                <p className="text-3xl font-semibold text-blue-600 leading-relaxed">
-                  Let us turn your vision into a digital masterpiece that captivates your audience
-                  and drives growth.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative max-w-md mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl transform rotate-3"></div>
+          <div data-reveal="right" className="relative max-w-md mx-auto lg:ml-auto w-full">
+            <div className="absolute inset-0 bg-brand-gradient rounded-xl3 blur-2xl opacity-50" aria-hidden />
             <img
               src="/rhyan.jpg"
-              alt="Lead Web Designers and Developers"
-              className="rounded-2xl relative shadow-xl transform -rotate-2 transition-transform duration-300 hover:rotate-0 w-full h-[300px] object-cover object-center"
+              alt="Lead web designers and developers"
+              className="relative rounded-xl3 shadow-glow-brand w-full h-[420px] object-cover ring-1 ring-white/20"
               loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
+      </Section>
 
-        {/* Values Section */}
-        <section className="mb-20">
-          <h2 className="text-4xl font-bold mb-12 text-center">Our Core Values</h2>
-          <div className="grid md:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <div
-                key={index}
-                className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
-              >
-                <div className="bg-blue-50 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
-                  {value.icon}
-                </div>
-                <h3 className="text-xl font-bold mb-3">{value.title}</h3>
-                <p className="text-gray-600">{value.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Expertise Section */}
-        <section className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-12 mb-20">
-          <h2 className="text-4xl font-bold mb-12 text-center">Our Expertise</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
-            {expertise.map((item, index) => (
-              <div key={index} className="text-center group">
-                <div className="bg-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg text-blue-600 group-hover:scale-110 transition-transform">
-                  {item.icon}
-                </div>
-                <h3 className="font-bold text-lg">{item.label}</h3>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Contact Section */}
-        <section className="bg-white rounded-2xl shadow-xl p-12">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Let's Connect</h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Ready to start your next project? We're here to help turn your vision into reality.
-              </p>
-              <div className="space-y-6">
-                <div className="flex items-center gap-4 text-gray-700">
-                  <div className="bg-blue-50 p-3 rounded-xl">
-                    <Mail className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="space-y-2">
-                    <a
-                      href="mailto:support@acewebdesigners.com"
-                      className="hover:text-blue-600 transition-colors block text-lg"
-                    >
-                      support@acewebdesigners.com
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 text-gray-700">
-                  <div className="bg-blue-50 p-3 rounded-xl">
-                    <Phone className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <a
-                    href="tel:+17744467375"
-                    className="hover:text-blue-600 transition-colors text-lg"
-                  >
-                    (774) 446-7375
-                  </a>
-                </div>
-                <div className="flex items-center gap-4 text-gray-700">
-                  <div className="bg-blue-50 p-3 rounded-xl">
-                    <MapPin className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <span className="text-lg">
-                    Based in Leominster, MA • Serving Businesses Nationwide
-                  </span>
-                </div>
-              </div>
+      {/* STATS */}
+      <Section tone="default" padding="md">
+        <Reveal variant="stagger" className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {STATS.map((s, i) => (
+            <div key={s.l} data-reveal-stagger-child style={{ transitionDelay: `${i * 70}ms` }}>
+              <StatBlock value={s.v} label={s.l} />
             </div>
-            <div className="relative">
+          ))}
+        </Reveal>
+      </Section>
+
+      {/* WHY FREE DESIGNS */}
+      <Section tone="muted" padding="lg" containerSize="md">
+        <div className="text-center">
+          <Eyebrow>Our story</Eyebrow>
+          <GradientHeading level={2} size="lg" className="mt-4" accent="free designs">
+            Why we offer
+          </GradientHeading>
+        </div>
+
+        <Reveal variant="up" className="mt-10 space-y-6 text-lg text-surface-700 leading-relaxed">
+          <p>
+            We believe every business deserves to see their vision come to life before making any commitment. Too many business owners have been burned by designers who promise the world but deliver disappointment.
+          </p>
+          <p className="text-xl font-semibold text-brand-700">
+            That's why we do things differently. We create your complete design mockup first, completely free.
+          </p>
+          <p>
+            When you see exactly what your website will look like, how it will function, and how it represents your brand, you can make an informed decision. No surprises, no regrets — just confidence in your investment.
+          </p>
+        </Reveal>
+
+        <Card tone="default" padding="xl" rounded="xl3" className="mt-10" shine>
+          <p className="font-display text-xl text-surface-900 italic">
+            &ldquo;We only succeed when you're absolutely thrilled with your website. The free design ensures we're the perfect fit before you invest a single dollar.&rdquo;
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-6">
+            <div className="flex items-center gap-3">
               <img
-                src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3"
-                alt="Office Space"
-                className="rounded-xl shadow-lg w-full object-cover aspect-[4/3]"
+                src="/rhyan.jpg"
+                alt="Rhyan — Lead Developer"
+                className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-soft"
                 loading="lazy"
               />
+              <div>
+                <p className="font-semibold text-surface-900">Rhyan</p>
+                <p className="text-sm text-surface-500">Lead Developer</p>
+              </div>
+            </div>
+            <span className="text-surface-300" aria-hidden>•</span>
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-brand-gradient text-white font-bold ring-2 ring-white shadow-soft" aria-hidden>
+                V
+              </span>
+              <div>
+                <p className="font-semibold text-surface-900">Valerie</p>
+                <p className="text-sm text-surface-500">Design Lead</p>
+              </div>
             </div>
           </div>
-        </section>
+        </Card>
+      </Section>
 
-        {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3')] opacity-10"></div>
-          <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-            <h2 className="heading-xl text-white mb-6 text-shadow-bold">
-              Experience Our Work Risk-Free
-            </h2>
-            <p className="text-blue-100 text-xl mb-8 leading-relaxed">
-              See why businesses choose us. Get your free design mockup and experience our quality
-              firsthand.
+      {/* CORE VALUES */}
+      <Section tone="default" padding="lg">
+        <div className="text-center max-w-2xl mx-auto">
+          <Eyebrow>What we believe</Eyebrow>
+          <GradientHeading level={2} size="lg" className="mt-4" accent="core values">
+            Our
+          </GradientHeading>
+        </div>
+        <Reveal variant="stagger" className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {VALUES.map((v, i) => (
+            <div key={v.title} data-reveal-stagger-child style={{ transitionDelay: `${i * 70}ms` }}>
+              <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
+                <IconTile tone="brand" size="md">
+                  <v.Icon />
+                </IconTile>
+                <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{v.title}</h3>
+                <p className="mt-2 text-surface-600 leading-relaxed">{v.desc}</p>
+              </Card>
+            </div>
+          ))}
+        </Reveal>
+      </Section>
+
+      {/* EXPERTISE */}
+      <Section tone="muted" padding="lg">
+        <div className="text-center max-w-2xl mx-auto">
+          <Eyebrow>What we do</Eyebrow>
+          <GradientHeading level={2} size="lg" className="mt-4" accent="expertise">
+            Our areas of
+          </GradientHeading>
+        </div>
+        <Reveal variant="stagger" className="mt-12 grid gap-6 grid-cols-2 lg:grid-cols-4">
+          {EXPERTISE.map((e, i) => (
+            <div key={e.label} data-reveal-stagger-child style={{ transitionDelay: `${i * 80}ms` }} className="text-center">
+              <IconTile tone="brand" size="lg" className="mx-auto">
+                <e.Icon />
+              </IconTile>
+              <h3 className="mt-5 font-display text-lg font-semibold text-surface-900">{e.label}</h3>
+            </div>
+          ))}
+        </Reveal>
+      </Section>
+
+      {/* CONTACT */}
+      <Section tone="default" padding="lg" containerSize="lg">
+        <Card tone="default" padding="xl" rounded="xl3" className="grid lg:grid-cols-2 gap-10 items-center">
+          <div>
+            <Eyebrow>Let's connect</Eyebrow>
+            <GradientHeading level={2} size="md" className="mt-4">
+              Ready to start your next project?
+            </GradientHeading>
+            <p className="mt-4 text-surface-600 leading-relaxed">
+              We're here to help turn your vision into reality. Reach out — we usually reply within a few hours.
             </p>
-            <button
-              onClick={() => {
-                window.location.href = '/contact'
-              }}
-              className="bg-white text-blue-600 px-10 py-5 rounded-full font-bold hover:bg-blue-50 transition-smooth hover:scale-110 inline-flex items-center group text-xl shadow-2xl animate-glow-pulse"
-            >
-              <span className="animate-slide-right-left">👉 GET MY FREE DESIGN NOW!</span>
-              <Calendar className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
-            </button>
+            <ul className="mt-6 space-y-4">
+              <li className="flex items-center gap-4">
+                <IconTile tone="brand" size="sm"><Mail /></IconTile>
+                <a href="mailto:support@acewebdesigners.com" className="text-surface-800 hover:text-brand-700 transition-colors ring-focus-brand rounded">
+                  support@acewebdesigners.com
+                </a>
+              </li>
+              <li className="flex items-center gap-4">
+                <IconTile tone="brand" size="sm"><Phone /></IconTile>
+                <a href="tel:+17744467375" className="text-surface-800 hover:text-brand-700 transition-colors ring-focus-brand rounded">
+                  (774) 446-7375
+                </a>
+              </li>
+              <li className="flex items-center gap-4">
+                <IconTile tone="brand" size="sm"><MapPin /></IconTile>
+                <span className="text-surface-700">Based in Leominster, MA • Serving Nationwide</span>
+              </li>
+            </ul>
           </div>
-        </section>
-      </div>
-    </div>
+          <div className="relative">
+            <div className="absolute inset-0 bg-brand-gradient rounded-xl3 blur-2xl opacity-30" aria-hidden />
+            <img
+              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3"
+              alt="Workspace"
+              loading="lazy"
+              decoding="async"
+              className="relative rounded-xl3 shadow-soft w-full object-cover aspect-[4/3]"
+            />
+          </div>
+        </Card>
+      </Section>
+
+      {/* FINAL CTA */}
+      <Section tone="mesh" padding="lg" containerSize="md">
+        <Reveal variant="up" className="text-center">
+          <Eyebrow tone="inverted">Risk-free</Eyebrow>
+          <GradientHeading level={2} size="lg" tone="inverted" className="mt-4">
+            Experience our work with zero commitment.
+          </GradientHeading>
+          <p className="mt-5 text-white/80 max-w-xl mx-auto">
+            See why businesses choose us. Get your free design mockup and experience our quality firsthand.
+          </p>
+          <button
+            onClick={goContact}
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-white text-surface-900 font-bold text-base sm:text-lg px-8 py-4 shadow-lift magnetic-btn ring-focus-brand"
+          >
+            Get my free design
+            <ArrowRight className="h-5 w-5" aria-hidden />
+          </button>
+          <div className="mt-6 flex justify-center">
+            <TrustBar tone="inverted" />
+          </div>
+        </Reveal>
+      </Section>
+    </>
   )
 }
 

@@ -1,13 +1,31 @@
 import React, { useEffect } from 'react'
-import { Mail, Phone, Calendar, MapPin } from 'lucide-react'
+import { Mail, Phone, MapPin, Calendar } from 'lucide-react'
+
 import { BookingWidget } from './components/BookingWidget'
 import { MAIN_CALENDAR } from './config/calendars'
+import {
+  Section,
+  Container,
+  Eyebrow,
+  GradientHeading,
+  Card,
+  TrustBar,
+  IconTile,
+  BadgePill,
+} from './components/ui'
 
 interface ContactProps {
   initialData?: {
     budget?: string
     message?: string
   }
+}
+
+const labelForBudget = (budget?: string) => {
+  if (budget === 'basic') return 'Website in a Day ($200)'
+  if (budget === 'standard') return 'Standard Website ($1,000)'
+  if (budget === 'ecommerce') return 'E-commerce Website ($1,500)'
+  return 'Custom Project'
 }
 
 function Contact({ initialData }: ContactProps) {
@@ -23,135 +41,127 @@ function Contact({ initialData }: ContactProps) {
   }, [initialData])
 
   return (
-    <div className="pt-24 pb-16 bg-gradient-to-b from-blue-50 to-white">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-5 py-2 rounded-full mb-6 border border-blue-100">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <span className="text-blue-800 font-semibold">Free Consultation</span>
-          </div>
-          <h1 className="heading-xl text-gradient-blue mb-6">Book Your Free Design Consultation</h1>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed">
-            15 minutes with our team → Free mockup in 24-48 hours
+    <>
+      {/* HERO */}
+      <Section tone="mesh" padding="lg" className="!pb-12">
+        <div className="text-center max-w-3xl mx-auto" data-reveal="up">
+          <Eyebrow tone="inverted">
+            <Calendar className="h-3.5 w-3.5" aria-hidden />
+            Free consultation
+          </Eyebrow>
+          <GradientHeading
+            level={1}
+            size="xl"
+            tone="inverted"
+            className="mt-5"
+            accent="free design consultation"
+          >
+            Book your
+          </GradientHeading>
+          <p className="mt-5 text-lg text-white/80 leading-relaxed">
+            15 minutes with our team → free homepage mockup in 24-48 hours.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
-            <div className="flex items-center gap-2 text-gray-600">
-              <div className="flex text-yellow-400">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">
-                    ★
-                  </span>
-                ))}
-              </div>
-              <span className="font-semibold">5.0 Rating</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <Calendar className="w-5 h-5 text-green-600" />
-              <span>SSL Secured • No Credit Card Required</span>
-            </div>
+          <div className="mt-6 flex justify-center">
+            <TrustBar
+              tone="inverted"
+              guarantees={['SSL secured', 'No credit card required', 'No obligation']}
+            />
           </div>
         </div>
+      </Section>
 
-        <div className="space-y-12">
-          {/* Calendly Widget - Primary Focus */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border-2 border-blue-100">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">Schedule Your Free Consultation</h1>
-              <p className="text-gray-600">
-                Book a time to discuss your project and get your{' '}
-                <span className="font-bold text-blue-600">FREE</span> design mockup!
-              </p>
+      {/* BOOKING WIDGET */}
+      <Section tone="muted" padding="md" containerSize="md" className="-mt-10">
+        <Card tone="default" padding="xl" rounded="xl3" className="shadow-lift">
+          <div className="text-center">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-surface-900">
+              Schedule your free consultation
+            </h2>
+            <p className="mt-3 text-surface-600">
+              Book a time to discuss your project and get your{' '}
+              <span className="font-semibold text-brand-700">free</span> design mockup.
+            </p>
 
-              {initialData?.budget && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-blue-800">
-                  <p>
-                    You selected the{' '}
-                    <span className="font-bold">
-                      {initialData.budget === 'basic'
-                        ? 'Website in a Day ($200)'
-                        : initialData.budget === 'standard'
-                          ? 'Standard Website ($1,000)'
-                          : initialData.budget === 'ecommerce'
-                            ? 'E-commerce Website ($1,500)'
-                            : 'Custom Project'}
-                    </span>{' '}
-                    package.
-                  </p>
-                  {initialData.message && (
-                    <p className="mt-2">
-                      "<i>{initialData.message}</i>"
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
+            {initialData?.budget && (
+              <div className="mt-5 inline-block text-left bg-brand-50 ring-1 ring-brand-100 rounded-xl px-4 py-3 text-sm text-brand-900">
+                <p>
+                  You selected the <span className="font-semibold">{labelForBudget(initialData.budget)}</span> package.
+                </p>
+                {initialData.message && (
+                  <p className="mt-2 italic text-brand-800">&ldquo;{initialData.message}&rdquo;</p>
+                )}
+              </div>
+            )}
+          </div>
 
-            {/* LeadConnector booking widget — main calendar */}
+          <div className="mt-8">
+            {/* LeadConnector booking widget — main calendar (containerId preserved) */}
             <BookingWidget calendarConfig={MAIN_CALENDAR} containerId="contact-page-booking" />
-
-            {/* Respectful meeting reminder */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                <strong>Please show up!</strong> We're real people who block time for you. Thanks!
-              </p>
-            </div>
           </div>
 
-          {/* Alternative Contact Methods - Secondary */}
-          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Prefer Another Way to Connect?
-              </h3>
-              <p className="text-gray-600 text-sm">We're here to help however you prefer</p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-50 p-2 rounded-lg">
-                    <Mail className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">Email</p>
-                    <a
-                      href="mailto:support@acewebdesigners.com"
-                      className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
-                    >
-                      support@acewebdesigners.com
-                    </a>
-                  </div>
-                </div>
-              </div>
+          <p className="mt-6 max-w-xl mx-auto text-sm text-surface-700 bg-brand-50 border-l-4 border-brand-500 rounded-xl p-4 text-left">
+            <strong className="text-brand-700">Please show up!</strong> We're real people who block time for you. Thanks!
+          </p>
+        </Card>
+      </Section>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-50 p-2 rounded-lg">
-                    <Phone className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-xs">Phone</p>
-                    <a
-                      href="tel:+17744467375"
-                      className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
-                    >
-                      (774) 446-7375
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center mt-4 pt-4 border-t border-gray-200">
-              <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>Based in Leominster, MA • Serving Nationwide</span>
-              </div>
-            </div>
-          </div>
+      {/* ALTERNATIVE CONTACT */}
+      <Section tone="default" padding="lg" containerSize="md">
+        <div className="text-center">
+          <Eyebrow>Other ways to reach us</Eyebrow>
+          <h2 className="mt-4 font-display text-2xl sm:text-3xl font-bold text-surface-900">
+            Prefer another way to connect?
+          </h2>
+          <p className="mt-3 text-surface-600">We're here to help however you prefer.</p>
         </div>
-      </div>
-    </div>
+
+        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+          <Card tone="default" padding="lg" rounded="xl2" interactive shine>
+            <div className="flex items-start gap-4">
+              <IconTile tone="brand" size="md">
+                <Mail />
+              </IconTile>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-surface-500">Email</p>
+                <a
+                  href="mailto:support@acewebdesigners.com"
+                  className="mt-1 inline-block text-base font-semibold text-surface-900 hover:text-brand-700 transition-colors ring-focus-brand rounded"
+                >
+                  support@acewebdesigners.com
+                </a>
+                <p className="mt-1 text-sm text-surface-500">Reply within 24 hours, Monday–Friday.</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card tone="default" padding="lg" rounded="xl2" interactive shine>
+            <div className="flex items-start gap-4">
+              <IconTile tone="brand" size="md">
+                <Phone />
+              </IconTile>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-surface-500">Phone</p>
+                <a
+                  href="tel:+17744467375"
+                  className="mt-1 inline-block text-base font-semibold text-surface-900 hover:text-brand-700 transition-colors ring-focus-brand rounded"
+                >
+                  (774) 446-7375
+                </a>
+                <p className="mt-1 text-sm text-surface-500">Call or text — we usually answer fast.</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <Container size="md" className="mt-8 px-0">
+          <div className="flex items-center justify-center gap-2 text-sm text-surface-500">
+            <MapPin className="h-4 w-4" aria-hidden />
+            Based in Leominster, MA — Serving Nationwide
+            <BadgePill tone="success" className="ml-2">Available now</BadgePill>
+          </div>
+        </Container>
+      </Section>
+    </>
   )
 }
 
