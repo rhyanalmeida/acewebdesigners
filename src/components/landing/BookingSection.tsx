@@ -2,7 +2,7 @@ import React from 'react'
 import Section from '../ui/Section'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
-import TrustBar from '../ui/TrustBar'
+import TrustStack from '../ui/TrustStack'
 import { BookingWidget } from '../BookingWidget'
 import { CalendarConfig } from '../../config/calendars'
 
@@ -23,7 +23,7 @@ interface BookingSectionProps {
 }
 
 /**
- * Premium-styled wrapper around BookingWidget.
+ * Editorial-styled wrapper around BookingWidget.
  * BookingWidget itself is rendered with EXACTLY the same props as the
  * existing landing pages — calendar config, container ID, booking
  * completion callback. No iframe, postMessage, or attribution behavior
@@ -68,16 +68,16 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
       >
         <div className="text-center">
           <Eyebrow>{eyebrow}</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-4" accent={accent}>
+          <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
             {heading}
           </GradientHeading>
-          {sub && <p className="mt-4 text-lg text-surface-600 max-w-2xl mx-auto">{sub}</p>}
-          <div className="mt-6 flex justify-center">
-            <TrustBar />
+          {sub && <p className="mt-5 text-base sm:text-lg text-ink-700 max-w-2xl mx-auto leading-relaxed">{sub}</p>}
+          <div className="mt-8 flex justify-center">
+            <TrustStack />
           </div>
         </div>
 
-        <div className="mt-10 rounded-xl3 bg-white shadow-lift ring-1 ring-surface-200 p-3 sm:p-6 md:p-10">
+        <div className="mt-10 rounded-xl3 bg-cream-50 shadow-lift ring-1 ring-ink-900/10 p-3 sm:p-6 md:p-10">
           <BookingWidget
             calendarConfig={calendarConfig}
             onBookingComplete={onBookingComplete}
@@ -87,7 +87,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
 
         {reminder && (
           <div className="mt-6 text-center">
-            <p className="inline-block max-w-2xl text-sm text-surface-700 bg-white border-l-4 border-brand-500 rounded-xl p-4 shadow-soft text-left">
+            <p className="inline-block max-w-2xl text-sm text-ink-800 bg-cream-50 border-l-4 border-rust-500 rounded-xl p-4 shadow-soft text-left">
               {reminder}
             </p>
           </div>

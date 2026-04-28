@@ -113,7 +113,7 @@ function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-0 text-surface-900">
+    <div className="min-h-screen bg-cream-50 text-ink-900">
       <main id="main">
         <LandingHero
           eyebrow="Free design — pay only if you love it"
@@ -164,7 +164,7 @@ function Landing() {
           trackerId="landing-conversion-tracker"
           reminder={
             <>
-              <strong className="text-brand-700">Please show up!</strong> We're real people who block time for you. Thanks!
+              <strong className="text-rust-700">Please show up!</strong> We're real people who block time for you. Thanks!
             </>
           }
         />

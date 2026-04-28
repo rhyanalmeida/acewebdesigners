@@ -4,6 +4,8 @@ import Container from '../ui/Container'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 import BadgePill from '../ui/BadgePill'
+import PhoneCta from '../ui/PhoneCta'
+import LiveProof from '../ui/LiveProof'
 
 interface LandingHeroProps {
   eyebrow?: string
@@ -32,22 +34,14 @@ const LandingHero: React.FC<LandingHeroProps> = ({
   rating = 5,
   ratingLabel = 'Rated 5.0 / 5 on Google',
 }) => (
-  <section className="relative isolate overflow-hidden bg-surface-950 text-white">
-    <div className="absolute inset-0 bg-mesh-2 opacity-90" aria-hidden />
-    <div
-      className="absolute -top-32 -left-32 h-80 w-80 rounded-full bg-brand-500/30 blur-3xl animate-float-soft"
-      aria-hidden
-    />
-    <div
-      className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-accent-500/20 blur-3xl animate-float-soft"
-      style={{ animationDelay: '2s' }}
-      aria-hidden
-    />
-
-    <Container size="lg" className="relative z-10 py-20 sm:py-28 lg:py-32">
-      <div className="grid items-center gap-12 lg:grid-cols-2">
+  <section className="relative isolate overflow-hidden bg-cream-50 text-ink-900 bg-paper-noise">
+    <Container size="lg" className="relative z-10 py-20 sm:py-24 lg:py-28">
+      <hr className="rule-hairline mb-12 sm:mb-14" />
+      <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
         <div data-reveal="up" className="text-center lg:text-left">
-          <Eyebrow tone="inverted" className="animate-fade-in">
+          <LiveProof className="mb-6" />
+
+          <Eyebrow tone="brand">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {eyebrow}
           </Eyebrow>
@@ -55,37 +49,36 @@ const LandingHero: React.FC<LandingHeroProps> = ({
           <GradientHeading
             level={1}
             size="display"
-            tone="inverted"
-            className="mt-5"
+            className="mt-6"
             accent={accent}
           >
             {headline}
           </GradientHeading>
 
-          <p className="mt-6 text-lg sm:text-xl text-white/80 leading-relaxed max-w-xl mx-auto lg:mx-0">
+          <p className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl mx-auto lg:mx-0">
             {sub}
           </p>
 
           {urgencyText && (
             <div className="mt-6 inline-flex">
-              <BadgePill tone="accent" glow>
+              <BadgePill tone="brand" glow>
                 {urgencyText}
               </BadgePill>
             </div>
           )}
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center sm:items-start lg:items-start justify-center lg:justify-start">
+          <div className="mt-9 flex flex-col sm:flex-row gap-3 items-center sm:items-start lg:items-start justify-center lg:justify-start">
             <button
               onClick={onCta}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient text-white font-bold text-base sm:text-lg px-8 py-4 shadow-glow-brand magnetic-btn ring-focus-brand"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
             >
               {ctaLabel}
               <ArrowRight className="h-5 w-5" aria-hidden />
             </button>
           </div>
 
-          <div className="mt-6 flex items-center justify-center lg:justify-start gap-3 text-sm text-white/80">
-            <div className="flex items-center gap-0.5 text-amber-300" aria-label={`${rating} out of 5 stars`}>
+          <div className="mt-6 flex items-center justify-center lg:justify-start gap-3 text-sm text-ink-700">
+            <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${rating} out of 5 stars`}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
@@ -94,13 +87,19 @@ const LandingHero: React.FC<LandingHeroProps> = ({
                 />
               ))}
             </div>
-            <span className="font-medium">{ratingLabel}</span>
+            <span className="font-medium text-ink-800">{ratingLabel}</span>
+          </div>
+
+          <hr className="rule-hairline my-8 max-w-sm lg:mx-0 mx-auto" />
+          <div className="flex justify-center lg:justify-start">
+            <PhoneCta showLabels={false} />
           </div>
         </div>
 
         {videoSrc && (
           <div data-reveal="right" className="relative">
-            <div className="relative rounded-xl3 overflow-hidden ring-1 ring-white/15 shadow-glow-brand">
+            <div className="absolute -inset-3 bg-rust-100/60 rounded-xl3 -z-10" aria-hidden />
+            <div className="relative rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 shadow-lift bg-cream-100">
               <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
                 <iframe
                   src={videoSrc}
@@ -112,13 +111,11 @@ const LandingHero: React.FC<LandingHeroProps> = ({
                 />
               </div>
             </div>
-            <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-brand-gradient blur-2xl opacity-60" aria-hidden />
           </div>
         )}
       </div>
     </Container>
-
-    <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" aria-hidden />
+    <hr className="rule-hairline" />
   </section>
 )
 

@@ -21,10 +21,10 @@ const FreeDesignBenefits: React.FC<FreeDesignBenefitsProps> = ({
   benefits,
   columns = 2,
 }) => (
-  <Section tone="default" padding="lg">
+  <Section tone="muted" padding="lg">
     <div className="text-center max-w-2xl mx-auto">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <GradientHeading level={2} size="lg" className="mt-4" accent={accent}>
+      <Eyebrow tone="forest">{eyebrow}</Eyebrow>
+      <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
         {heading}
       </GradientHeading>
     </div>
@@ -34,10 +34,10 @@ const FreeDesignBenefits: React.FC<FreeDesignBenefitsProps> = ({
         <div key={i} data-reveal-stagger-child style={{ transitionDelay: `${i * 60}ms` }}>
           <Card tone="default" padding="lg" rounded="xl2" interactive shine>
             <div className="flex items-start gap-4">
-              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-700 ring-1 ring-forest-100">
                 <CheckCircle2 className="h-5 w-5" aria-hidden />
               </span>
-              <p className="text-base sm:text-lg text-surface-800 leading-relaxed">{b}</p>
+              <p className="text-base sm:text-lg text-ink-800 leading-relaxed">{b}</p>
             </div>
           </Card>
         </div>

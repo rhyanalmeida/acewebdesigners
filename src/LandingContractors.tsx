@@ -156,7 +156,7 @@ function LandingContractors() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-surface-0 text-surface-900">
+    <div className="min-h-screen bg-cream-50 text-ink-900">
       {/* Facebook Pixel noscript fallback for contractors */}
       <noscript>
         <img
@@ -186,8 +186,8 @@ function LandingContractors() {
         {/* PAIN POINTS — contractor-specific value props */}
         <Section tone="default" padding="lg">
           <div className="text-center max-w-2xl mx-auto">
-            <Eyebrow tone="accent">Built for contractors</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-4" accent="contractors need">
+            <Eyebrow tone="brand">Built for contractors</Eyebrow>
+            <GradientHeading level={2} size="lg" className="mt-5" accent="contractors need">
               Everything
             </GradientHeading>
           </div>
@@ -200,8 +200,8 @@ function LandingContractors() {
                       <p.Icon />
                     </IconTile>
                     <div>
-                      <h3 className="font-display text-xl font-semibold text-surface-900">{p.title}</h3>
-                      <p className="mt-2 text-surface-600 leading-relaxed">{p.desc}</p>
+                      <h3 className="font-display text-xl font-semibold text-ink-900">{p.title}</h3>
+                      <p className="mt-2 text-ink-700 leading-relaxed">{p.desc}</p>
                     </div>
                   </div>
                 </Card>
@@ -245,7 +245,7 @@ function LandingContractors() {
           trackerId="contractor-conversion-tracker"
           reminder={
             <>
-              <strong className="text-brand-700">Please show up!</strong> We block real time for each call. We're contractors-friendly — we get how busy your day is.
+              <strong className="text-rust-700">Please show up!</strong> We block real time for each call. We're contractors-friendly — we get how busy your day is.
             </>
           }
         />
@@ -260,13 +260,13 @@ function LandingContractors() {
 
       {/* Mobile sticky CTA — preserved with the same scroll-offset behavior */}
       <div
-        className="md:hidden fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-white via-white/95 to-white/0"
+        className="md:hidden fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 bg-gradient-to-t from-cream-50 via-cream-50/95 to-cream-50/0"
         role="region"
         aria-label="Mobile call to action"
       >
         <button
           onClick={scrollToBooking}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient text-white py-4 px-6 font-bold shadow-glow-brand magnetic-btn ring-focus-brand"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white py-4 px-6 font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
         >
           <HardHat className="h-5 w-5" aria-hidden />
           GET MY FREE DESIGN NOW!

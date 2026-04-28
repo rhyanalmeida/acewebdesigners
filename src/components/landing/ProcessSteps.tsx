@@ -23,19 +23,19 @@ const ProcessSteps: React.FC<ProcessStepsProps> = ({
   heading,
   accent,
   steps,
-  tone = 'muted',
+  tone = 'default',
 }) => (
   <Section tone={tone} padding="lg">
     <div className="text-center max-w-2xl mx-auto">
       <Eyebrow>{eyebrow}</Eyebrow>
-      <GradientHeading level={2} size="lg" className="mt-4" accent={accent}>
+      <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
         {heading}
       </GradientHeading>
     </div>
 
     <Reveal variant="stagger" className="mt-14 relative">
       <div
-        className="hidden lg:block absolute top-7 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-brand-200 to-transparent"
+        className="hidden lg:block absolute top-7 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-ink-900/15 to-transparent"
         aria-hidden
       />
       <ol className="grid gap-8 lg:grid-cols-3 relative">
@@ -46,11 +46,11 @@ const ProcessSteps: React.FC<ProcessStepsProps> = ({
             style={{ transitionDelay: `${i * 80}ms` }}
             className="text-center"
           >
-            <span className="relative inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand-gradient text-white text-lg font-bold shadow-glow-brand ring-4 ring-white">
+            <span className="relative inline-flex h-14 w-14 items-center justify-center rounded-full bg-ink-900 text-cream-50 font-display text-base font-semibold ring-4 ring-cream-50">
               {String(i + 1).padStart(2, '0')}
             </span>
-            <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{step.title}</h3>
-            <p className="mt-2 text-surface-600 leading-relaxed">{step.description}</p>
+            <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{step.title}</h3>
+            <p className="mt-2 text-ink-700 leading-relaxed">{step.description}</p>
           </li>
         ))}
       </ol>

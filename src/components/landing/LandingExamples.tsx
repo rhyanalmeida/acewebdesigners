@@ -30,7 +30,7 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
   <Section tone="default" padding="lg">
     <div className="text-center max-w-2xl mx-auto">
       <Eyebrow>{eyebrow}</Eyebrow>
-      <GradientHeading level={2} size="lg" className="mt-4" accent={accent}>
+      <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
         {heading}
       </GradientHeading>
     </div>
@@ -38,8 +38,8 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
     <Reveal variant="stagger" className="mt-12 grid gap-6 md:grid-cols-3">
       {examples.map((ex, i) => (
         <div key={i} data-reveal-stagger-child style={{ transitionDelay: `${i * 100}ms` }}>
-          <Card tone="default" padding="none" rounded="xl2" interactive shine className="overflow-hidden h-full flex flex-col">
-            <div className="relative overflow-hidden aspect-[16/10]">
+          <Card tone="default" padding="none" rounded="xl3" interactive shine className="overflow-hidden h-full flex flex-col">
+            <div className="relative overflow-hidden aspect-[16/10] bg-cream-100">
               <img
                 src={ex.imageUrl}
                 alt={ex.imageAlt}
@@ -47,9 +47,8 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
                 decoding="async"
                 className="h-full w-full object-cover transition-transform duration-700 ease-premium group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-surface-950/30 via-transparent to-transparent" aria-hidden />
             </div>
-            <div className="p-6 sm:p-7 flex flex-col flex-1">
+            <div className="p-7 flex flex-col flex-1">
               <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${ex.rating ?? 5} out of 5 stars`}>
                 {Array.from({ length: 5 }).map((_, idx) => (
                   <Star
@@ -59,10 +58,13 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
                   />
                 ))}
               </div>
-              <blockquote className="mt-4 text-surface-800 leading-relaxed flex-1">
-                &ldquo;{ex.quote}&rdquo;
+              <blockquote className="mt-4 font-display text-lg text-ink-900 leading-snug flex-1">
+                <span className="text-rust-500 text-2xl leading-none mr-0.5 align-[-0.15em] text-editorial-italic">&ldquo;</span>
+                {ex.quote}
+                <span className="text-rust-500 text-2xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
               </blockquote>
-              <p className="mt-5 font-semibold text-surface-900">{ex.authorName}</p>
+              <hr className="rule-hairline mt-5 mb-4" />
+              <p className="label-mono text-ink-700">{ex.authorName}</p>
             </div>
           </Card>
         </div>
