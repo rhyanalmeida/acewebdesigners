@@ -7,18 +7,20 @@ import {
   CheckCircle2,
   Star,
   ArrowRight,
-  MousePointer2,
 } from 'lucide-react'
 
 import {
-  Container,
   Section,
   Eyebrow,
   GradientHeading,
   Card,
-  Reveal,
   IconTile,
   BadgePill,
+  SectionHeading,
+  StaggerGrid,
+  LandingFooter,
+  Input,
+  Textarea,
 } from './components/ui'
 
 const YOU_GET = [
@@ -32,6 +34,12 @@ const THEY_GET = [
   'Professional website starting at $200',
   'Same-day launches available',
 ]
+
+const HOW_STEPS = [
+  { Icon: Users, title: '1. Refer a client', desc: 'Share our contact information with someone who needs a website.' },
+  { Icon: CheckCircle2, title: '2. They get a website', desc: 'Your referral completes their website project with us.' },
+  { Icon: DollarSign, title: '3. You get paid', desc: 'Receive $200 cash once the project is completed.' },
+] as const
 
 function Refer() {
   // PRESERVED: same Formspree form ID — submissions go to the same endpoint.
@@ -101,37 +109,36 @@ function Refer() {
 
         {/* HOW IT WORKS */}
         <Section tone="default" padding="lg">
-          <div className="text-center max-w-2xl mx-auto">
-            <Eyebrow>How it works</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-4" accent="earn $200">
-              Three simple steps to
-            </GradientHeading>
-          </div>
-          <Reveal variant="stagger" className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              { Icon: Users, title: '1. Refer a client', desc: 'Share our contact information with someone who needs a website.' },
-              { Icon: CheckCircle2, title: '2. They get a website', desc: 'Your referral completes their website project with us.' },
-              { Icon: DollarSign, title: '3. You get paid', desc: 'Receive $200 cash once the project is completed.' },
-            ].map((step, i) => (
-              <div key={step.title} data-reveal-stagger-child style={{ transitionDelay: `${i * 80}ms` }} className="text-center">
+          <SectionHeading
+            eyebrow="How it works"
+            heading="Three simple steps to"
+            accent="earn $200"
+          />
+          <StaggerGrid
+            items={HOW_STEPS}
+            className="mt-12 grid gap-6 md:grid-cols-3"
+            delayMs={80}
+            keyFn={s => s.title}
+            childClassName="text-center"
+            renderItem={(step, i) => (
+              <>
                 <IconTile tone={i === 2 ? 'accent' : 'brand'} size="lg" className="mx-auto">
                   <step.Icon />
                 </IconTile>
                 <h3 className="mt-5 font-display text-xl font-semibold text-surface-900">{step.title}</h3>
                 <p className="mt-2 text-surface-600 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </Reveal>
+              </>
+            )}
+          />
         </Section>
 
         {/* BENEFITS */}
         <Section tone="muted" padding="lg">
-          <div className="text-center max-w-2xl mx-auto">
-            <Eyebrow>Mutual win</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-4" accent="refer to us">
-              Why
-            </GradientHeading>
-          </div>
+          <SectionHeading
+            eyebrow="Mutual win"
+            heading="Why"
+            accent="refer to us"
+          />
           <Reveal variant="up" className="mt-12 grid gap-6 md:grid-cols-2">
             <Card tone="default" padding="lg" rounded="xl2" shine>
               <BadgePill tone="success">You get</BadgePill>
@@ -160,15 +167,12 @@ function Refer() {
 
         {/* GOOGLE REVIEWS WIDGET — preserved locationId attribute for external JS */}
         <Section tone="default" padding="lg">
-          <div className="text-center max-w-2xl mx-auto">
-            <Eyebrow tone="accent">
-              <Star className="h-3.5 w-3.5 fill-current" aria-hidden />
-              Google reviews
-            </Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-4" accent="our reviews">
-              See what clients say in
-            </GradientHeading>
-          </div>
+          <SectionHeading
+            eyebrow={<><Star className="h-3.5 w-3.5 fill-current" aria-hidden />Google reviews</>}
+            eyebrowTone="accent"
+            heading="See what clients say in"
+            accent="our reviews"
+          />
           <div className="mt-12 flex justify-center">
             {/* PRESERVED: locationId attribute used by external review widget script */}
             <div locationId="10311921268967440718" className="review-widget-carousel" />
@@ -177,15 +181,13 @@ function Refer() {
 
         {/* REFERRAL FORM — Formspree (xvgbobpv) preserved */}
         <Section tone="muted" padding="lg" containerSize="md">
-          <div className="text-center">
-            <Eyebrow>Get started</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-4" accent="referral">
-              Submit your
-            </GradientHeading>
-            <p className="mt-4 text-surface-600">
-              Fill out the form below to submit a referral and start earning.
-            </p>
-          </div>
+          <SectionHeading
+            eyebrow="Get started"
+            heading="Submit your"
+            accent="referral"
+            sub="Fill out the form below to submit a referral and start earning."
+            maxWidth="max-w-none"
+          />
           <Card tone="default" padding="xl" rounded="xl3" className="mt-10">
             <form onSubmit={handleSubmit} className="space-y-8">
               <fieldset className="space-y-4">
@@ -193,26 +195,23 @@ function Refer() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-surface-700 mb-2">Your name *</label>
-                    <input
+                    <Input
                       id="name" type="text" name="name" required placeholder="Your full name"
-                      className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
-                    />
+                      />
                     <ValidationError prefix="Name" field="name" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-2">Your email *</label>
-                    <input
+                    <Input
                       id="email" type="email" name="email" required placeholder="your.email@example.com"
-                      className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
-                    />
+                      />
                     <ValidationError prefix="Email" field="email" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-surface-700 mb-2">Your phone number *</label>
-                  <input
+                  <Input
                     id="phone" type="tel" name="phone" required placeholder="(555) 123-4567"
-                    className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
                   />
                   <ValidationError prefix="Phone" field="phone" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                 </div>
@@ -222,43 +221,38 @@ function Refer() {
                 <legend className="font-display text-lg font-semibold text-surface-900">Referral information</legend>
                 <div>
                   <label htmlFor="referralBusiness" className="block text-sm font-medium text-surface-700 mb-2">Business name *</label>
-                  <input
+                  <Input
                     id="referralBusiness" type="text" name="referralBusiness" required placeholder="ABC Construction, Joe's Restaurant, etc."
-                    className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
                   />
                   <ValidationError prefix="Referral Business" field="referralBusiness" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="referralName" className="block text-sm font-medium text-surface-700 mb-2">Contact person's name *</label>
-                    <input
+                    <Input
                       id="referralName" type="text" name="referralName" required placeholder="John Smith"
-                      className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
-                    />
+                      />
                     <ValidationError prefix="Referral Name" field="referralName" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                   </div>
                   <div>
                     <label htmlFor="referralEmail" className="block text-sm font-medium text-surface-700 mb-2">Contact's email *</label>
-                    <input
+                    <Input
                       id="referralEmail" type="email" name="referralEmail" required placeholder="contact@business.com"
-                      className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
-                    />
+                      />
                     <ValidationError prefix="Referral Email" field="referralEmail" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                   </div>
                 </div>
                 <div>
                   <label htmlFor="referralPhone" className="block text-sm font-medium text-surface-700 mb-2">Contact's phone number</label>
-                  <input
+                  <Input
                     id="referralPhone" type="tel" name="referralPhone" placeholder="(555) 123-4567"
-                    className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
                   />
                   <ValidationError prefix="Referral Phone" field="referralPhone" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                 </div>
                 <div>
                   <label htmlFor="additionalInfo" className="block text-sm font-medium text-surface-700 mb-2">Additional information (optional)</label>
-                  <textarea
+                  <Textarea
                     id="additionalInfo" name="additionalInfo" rows={3} placeholder="Any additional details about the referral or their website needs..."
-                    className="w-full px-4 py-3 bg-white border border-surface-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent focus:outline-none transition-all duration-300 ease-premium"
                   />
                   <ValidationError prefix="Additional Info" field="additionalInfo" errors={state.errors} className="mt-1 text-sm text-rose-600" />
                 </div>
@@ -293,37 +287,7 @@ function Refer() {
         </Section>
       </main>
 
-      {/* Slim referral page footer */}
-      <footer className="bg-surface-950 text-surface-50" role="contentinfo">
-        <Container size="lg" className="py-12">
-          <div className="grid gap-8 md:grid-cols-2">
-            <div>
-              <span className="inline-flex flex-col items-start text-white">
-                <span className="flex items-center">
-                  <span className="text-xl font-bold tracking-tight font-display">ACE</span>
-                  <MousePointer2 className="w-4 h-4 ml-0.5 -mt-[2px]" aria-hidden />
-                </span>
-                <span className="text-sm text-white/60 -mt-1">Web Designers</span>
-              </span>
-              <p className="mt-4 text-sm text-white/60 max-w-md">
-                Based in Leominster, MA, serving small businesses nationwide.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xs font-semibold tracking-[0.2em] uppercase text-white/60">Contact</h3>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li><a href="mailto:support@acewebdesigners.com" className="text-white/70 hover:text-white transition-colors">support@acewebdesigners.com</a></li>
-                <li><a href="tel:+17744467375" className="text-white/70 hover:text-white transition-colors">(774) 446-7375</a></li>
-                <li className="text-white/70">Leominster, MA — Serving Nationwide</li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-10 pt-6 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <p className="text-sm text-white/50">© {new Date().getFullYear()} Ace Web Designers. All rights reserved.</p>
-            <a href="/privacy" className="text-sm text-white/60 hover:text-white transition-colors">Privacy Policy</a>
-          </div>
-        </Container>
-      </footer>
+      <LandingFooter tagline="Based in Leominster, MA, serving small businesses nationwide." />
     </div>
   )
 }
