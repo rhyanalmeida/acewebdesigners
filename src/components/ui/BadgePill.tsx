@@ -1,6 +1,6 @@
 import React from 'react'
 
-type BadgeTone = 'brand' | 'accent' | 'success' | 'neutral' | 'inverted' | 'danger'
+type BadgeTone = 'brand' | 'accent' | 'success' | 'neutral' | 'inverted' | 'danger' | 'forest'
 
 interface BadgePillProps extends React.HTMLAttributes<HTMLSpanElement> {
   tone?: BadgeTone
@@ -9,11 +9,12 @@ interface BadgePillProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const toneMap: Record<BadgeTone, string> = {
-  brand:    'bg-brand-50 text-brand-700 ring-brand-100',
-  accent:   'bg-accent-50 text-accent-700 ring-accent-100',
-  success:  'bg-emerald-50 text-emerald-700 ring-emerald-100',
-  neutral:  'bg-surface-100 text-surface-700 ring-surface-200',
-  inverted: 'bg-white/10 text-white ring-white/15',
+  brand:    'bg-rust-50 text-rust-700 ring-rust-100',
+  accent:   'bg-rust-50 text-rust-800 ring-rust-100',
+  success:  'bg-forest-50 text-forest-700 ring-forest-100',
+  forest:   'bg-forest-50 text-forest-700 ring-forest-100',
+  neutral:  'bg-cream-100 text-ink-800 ring-ink-900/10',
+  inverted: 'bg-cream-50/10 text-cream-50 ring-cream-50/15',
   danger:   'bg-rose-50 text-rose-700 ring-rose-100',
 }
 
@@ -26,8 +27,8 @@ const BadgePill: React.FC<BadgePillProps> = ({
   ...rest
 }) => (
   <span
-    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ring-1 ring-inset text-xs font-semibold ${toneMap[tone]} ${
-      glow ? 'animate-glow-pulse' : ''
+    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ring-1 ring-inset text-xs font-medium tracking-wide ${toneMap[tone]} ${
+      glow ? 'animate-pulse-rust' : ''
     } ${className}`}
     {...rest}
   >
