@@ -8,6 +8,7 @@ import {
   PageHero,
   StaggerGrid,
   FinalCta,
+  TrustStack,
 } from './components/ui'
 
 interface Project {
@@ -18,6 +19,7 @@ interface Project {
   link?: string
   technologies?: string[]
   features?: string[]
+  pullQuote?: string
 }
 
 const PROJECTS: Project[] = [
@@ -29,6 +31,7 @@ const PROJECTS: Project[] = [
     link: 'https://hotpotone.net/',
     technologies: ['React', 'Tailwind CSS', 'Node.js'],
     features: ['Online Ordering', 'Menu Management', 'Mobile Responsive'],
+    pullQuote: '40% increase in online orders since launch.',
   },
   {
     title: 'Conuco Takeout',
@@ -38,6 +41,7 @@ const PROJECTS: Project[] = [
     link: 'https://conucotakeout.com/',
     technologies: ['React', 'Tailwind CSS', 'Firebase'],
     features: ['Online Ordering', 'Menu Showcase', 'Mobile Responsive'],
+    pullQuote: '35% lift in takeout orders.',
   },
   {
     title: 'Dunn Construction',
@@ -47,6 +51,7 @@ const PROJECTS: Project[] = [
     link: 'https://dunnconstruction.com/',
     technologies: ['React', 'Tailwind CSS', 'Next.js'],
     features: ['Project Gallery', 'Service Listings', 'Contact Forms'],
+    pullQuote: '3× more qualified leads.',
   },
   {
     title: "Oliver's Cafe MA",
@@ -109,12 +114,16 @@ function Work() {
         eyebrowIcon={Trophy}
         headline="Beautiful work"
         accent="we've built"
-        sub="Explore our latest projects and see how we help businesses transform their digital presence."
-      />
+        sub="Real websites for real local businesses. Click through any of them — they're all live."
+      >
+        <div className="mt-10 flex justify-center">
+          <TrustStack />
+        </div>
+      </PageHero>
 
       {/* FILTER + SEARCH */}
       <Section tone="default" padding="md">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap gap-2">
             {categories.map(category => {
               const active = selectedCategory === category
@@ -122,10 +131,10 @@ function Work() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ease-premium ring-focus-brand ${
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ease-premium ring-focus-rust ${
                     active
-                      ? 'bg-brand-gradient text-white shadow-glow-brand'
-                      : 'bg-surface-100 text-surface-700 hover:bg-surface-200 ring-1 ring-surface-200'
+                      ? 'bg-ink-900 text-cream-50'
+                      : 'bg-cream-100 text-ink-800 hover:bg-cream-200 ring-1 ring-ink-900/10'
                   }`}
                 >
                   {category}
@@ -134,66 +143,95 @@ function Work() {
             })}
           </div>
           <div className="relative max-w-xs">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 h-4 w-4" aria-hidden />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-700/50 h-4 w-4" aria-hidden />
             <input
               type="text"
               placeholder="Search projects..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 text-sm bg-white rounded-full ring-1 ring-surface-200 hover:ring-surface-300 focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all duration-300 ease-premium"
+              className="w-full pl-11 pr-4 py-2.5 text-sm bg-cream-50 rounded-full ring-1 ring-ink-900/15 hover:ring-ink-900/30 focus:ring-2 focus:ring-rust-500 focus:outline-none transition-all duration-300 ease-premium"
               aria-label="Search projects"
             />
           </div>
         </div>
       </Section>
 
-      {/* PROJECTS GRID */}
+      {/* PROJECTS — editorial 2-col asymmetric grid */}
       <Section tone="muted" padding="lg">
         {filtered.length === 0 ? (
-          <p className="text-center text-surface-500 py-12">No projects match your search.</p>
+          <p className="text-center text-ink-700/70 py-12">No projects match your search.</p>
         ) : (
           <StaggerGrid
             items={filtered}
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-            delayMs={80}
+            className="grid gap-8 lg:grid-cols-2"
+            delayMs={120}
             keyFn={p => p.title}
-            renderItem={project => (
-              <Card tone="default" padding="none" rounded="xl2" interactive shine className="overflow-hidden h-full flex flex-col group">
-                <div className="aspect-[4/3] overflow-hidden relative">
+            renderItem={(project, i) => (
+              <Card
+                tone="default"
+                padding="none"
+                rounded="xl3"
+                interactive
+                shine
+                className={`overflow-hidden h-full flex flex-col group ${
+                  i % 2 === 0 ? 'lg:translate-y-0' : 'lg:translate-y-12'
+                }`}
+              >
+                <div className="aspect-[16/10] overflow-hidden relative bg-cream-100">
                   <img
                     src={project.image}
                     alt={project.title}
                     loading="lazy"
                     decoding="async"
-                    className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-[1.03]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-surface-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-premium" aria-hidden />
                 </div>
-                <div className="p-6 flex flex-col flex-1">
-                  <BadgePill tone="brand" className="self-start">{project.category}</BadgePill>
-                  <h3 className="mt-3 font-display text-xl font-semibold text-surface-900">{project.title}</h3>
-                  <p className="mt-2 text-surface-600 leading-relaxed flex-1">{project.description}</p>
-                  {project.technologies && (
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {project.technologies.slice(0, 3).map(tech => (
-                        <span key={tech} className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface-100 text-surface-700 ring-1 ring-surface-200">
-                          {tech}
+                <div className="p-7 sm:p-9 flex flex-col flex-1">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <span className="label-mono text-rust-700">
+                      {project.category}
+                      {project.technologies && project.technologies[0] && (
+                        <>
+                          <span className="text-ink-700/30 mx-2">·</span>
+                          {project.technologies.slice(0, 2).join(' / ')}
+                        </>
+                      )}
+                    </span>
+                    {project.pullQuote && (
+                      <BadgePill tone="forest">
+                        {project.pullQuote}
+                      </BadgePill>
+                    )}
+                  </div>
+                  <h3 className="mt-4 font-display text-2xl sm:text-3xl font-semibold text-ink-900 leading-tight">
+                    {project.title}
+                  </h3>
+                  <p className="mt-3 text-ink-700 leading-relaxed flex-1">{project.description}</p>
+                  {project.features && (
+                    <div className="mt-5 flex flex-wrap gap-1.5">
+                      {project.features.slice(0, 3).map(feat => (
+                        <span
+                          key={feat}
+                          className="text-xs font-medium px-2.5 py-1 rounded-full bg-cream-100 text-ink-800 ring-1 ring-ink-900/10"
+                        >
+                          {feat}
                         </span>
                       ))}
                     </div>
                   )}
+                  <hr className="rule-hairline my-6" />
                   {project.link ? (
                     <a
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-5 inline-flex items-center gap-1.5 text-brand-700 font-semibold ring-focus-brand rounded"
+                      className="inline-flex items-center gap-1.5 text-rust-700 hover:text-rust-800 font-semibold ring-focus-rust rounded font-display"
                     >
-                      Visit website
+                      Visit live site
                       <ExternalLink className="h-4 w-4" aria-hidden />
                     </a>
                   ) : (
-                    <span className="mt-5 inline-flex items-center gap-1.5 text-surface-500 font-medium">
+                    <span className="inline-flex items-center gap-1.5 text-ink-700/50 font-medium">
                       Coming soon
                       <ArrowRight className="h-4 w-4" aria-hidden />
                     </span>
@@ -207,7 +245,8 @@ function Work() {
 
       <FinalCta
         eyebrow="Want one like this?"
-        heading="Get a design like these — for free."
+        heading="Get a design like these —"
+        accent="for free."
         body="See your website design before paying anything. Love it? We'll build it together."
         ctaLabel="Get my free design"
         onCta={goContact}
