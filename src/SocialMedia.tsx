@@ -5,6 +5,7 @@ import {
   Instagram,
   Facebook,
   Music2,
+  Youtube,
   MapPin,
   CheckCircle2,
   ArrowRight,
@@ -52,20 +53,32 @@ const DELUXE_FEATURES = [
   'Reels + short-form video included',
 ]
 
-type PlatformKind = 'tiktok' | 'instagram' | 'facebook'
+type PlatformKind = 'tiktok' | 'instagram' | 'facebook' | 'youtube'
 
 const PLATFORM_LABEL: Record<PlatformKind, string> = {
   tiktok: 'TikTok',
   instagram: 'Instagram',
   facebook: 'Facebook',
+  youtube: 'YouTube',
 }
 
 const CLIENT_ACCOUNTS: ReadonlyArray<{
   /** Display name shown on the card */
   name: string
   note: string
+  /** Optional headline stat — rendered as a prominent badge on the card */
+  stat?: string
   platforms: ReadonlyArray<{ kind: PlatformKind; url: string }>
 }> = [
+  {
+    name: 'Told History',
+    note: 'Our flagship account — viral history shorts on TikTok and YouTube.',
+    stat: '21k+ followers',
+    platforms: [
+      { kind: 'tiktok', url: 'https://www.tiktok.com/@told.history' },
+      { kind: 'youtube', url: 'https://www.youtube.com/@told.history' },
+    ],
+  },
   {
     name: 'Luxury Makeover',
     note: 'Started at 0 followers a few months ago — growing fast.',
@@ -298,6 +311,11 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
                       {account.name}
                     </p>
                   </div>
+                  {account.stat && (
+                    <span className="shrink-0 inline-flex items-center rounded-full bg-rust-500 text-white px-2.5 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-rust">
+                      {account.stat}
+                    </span>
+                  )}
                 </div>
                 <p className="mt-3 text-sm text-cream-100/80 leading-relaxed flex-1">
                   {account.note}
@@ -310,7 +328,9 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
                         ? Music2
                         : platform.kind === 'instagram'
                           ? Instagram
-                          : Facebook
+                          : platform.kind === 'youtube'
+                            ? Youtube
+                            : Facebook
                     return (
                       <a
                         key={platform.kind}
