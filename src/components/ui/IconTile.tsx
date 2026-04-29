@@ -30,7 +30,7 @@ const IconTile: React.FC<IconTileProps> = ({
   ...rest
 }) => (
   <div
-    className={`inline-flex items-center justify-center ${toneMap[tone]} ${sizeMap[size]} ${className}`}
+    className={`inline-flex items-center justify-center transition-transform duration-300 ease-premium motion-safe:group-hover:scale-110 motion-safe:group-hover:-rotate-3 ${toneMap[tone]} ${sizeMap[size]} ${className}`}
     {...rest}
   >
     {children}

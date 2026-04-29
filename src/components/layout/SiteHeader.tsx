@@ -1,6 +1,8 @@
 import React from 'react'
 import { Menu, X, ArrowRight } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import Container from '../ui/Container'
+import { editorialEase } from '../../lib/motion'
 
 export type NavigateFn = (page: string, scrollTo?: string) => void
 
@@ -33,8 +35,10 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
   const [isScrolled, setIsScrolled] = React.useState(false)
   const drawerRef = React.useRef<HTMLDivElement>(null)
 
+  const reduced = useReducedMotion()
+
   React.useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 8)
+    const onScroll = () => setIsScrolled(window.scrollY > 24)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -79,7 +83,11 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
         }`}
       >
         <Container size="lg">
-          <div className="flex h-16 items-center justify-between">
+          <div
+            className={`flex items-center justify-between transition-[height] duration-500 ease-premium ${
+              isScrolled ? 'h-14' : 'h-16'
+            }`}
+          >
             <button
               onClick={() => go('home')}
               className="ring-focus-rust rounded-lg"
@@ -111,10 +119,10 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
               })}
               <button
                 onClick={() => go('contact')}
-                className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-5 py-2 text-sm font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300 ease-premium"
+                className="group ml-2 inline-flex items-center gap-1.5 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-5 py-2 text-sm font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300 ease-premium"
               >
                 Free Design
-                <ArrowRight className="h-4 w-4" aria-hidden />
+                <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
               </button>
             </div>
 
@@ -158,21 +166,32 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
             </button>
           </div>
           <nav className="flex flex-col gap-1 p-4" aria-label="Mobile navigation">
-            {NAV_LINKS.map(link => (
-              <button
-                key={link.page}
-                onClick={() => go(link.page)}
-                className="text-left font-display text-2xl py-3 px-3 rounded-lg text-ink-800 hover:bg-cream-100 hover:text-ink-900 transition-colors ring-focus-rust"
-              >
-                {link.label}
-              </button>
-            ))}
+            <AnimatePresence>
+              {isMenuOpen &&
+                NAV_LINKS.map((link, i) => (
+                  <motion.button
+                    key={link.page}
+                    onClick={() => go(link.page)}
+                    className="text-left font-display text-2xl py-3 px-3 rounded-lg text-ink-800 hover:bg-cream-100 hover:text-ink-900 transition-colors ring-focus-rust"
+                    initial={reduced ? false : { opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 24 }}
+                    transition={{
+                      duration: 0.32,
+                      delay: reduced ? 0 : 0.05 + i * 0.05,
+                      ease: editorialEase as unknown as number[],
+                    }}
+                  >
+                    {link.label}
+                  </motion.button>
+                ))}
+            </AnimatePresence>
             <button
               onClick={() => go('contact')}
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-8 py-4 font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+              className="group mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-8 py-4 font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
             >
               GET MY FREE DESIGN NOW!
-              <ArrowRight className="h-5 w-5" aria-hidden />
+              <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
             </button>
           </nav>
         </div>

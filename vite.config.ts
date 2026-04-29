@@ -21,6 +21,7 @@ export default defineConfig({
           vendor: ['react', 'react-dom'],
           ui: ['lucide-react'],
           forms: ['@formspree/react'],
+          motion: ['framer-motion'],
         },
         // Optimize asset naming for better caching
         assetFileNames: (assetInfo) => {

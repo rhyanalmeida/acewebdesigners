@@ -11,6 +11,8 @@ import {
   ArrowRight,
 } from 'lucide-react'
 
+import { motion } from 'framer-motion'
+
 import {
   Section,
   Eyebrow,
@@ -24,7 +26,9 @@ import {
   FinalCta,
   PhoneCta,
   TrustStack,
+  Magnetic,
 } from './components/ui'
+import { fadeUpHero } from './lib/motion'
 
 const VALUES = [
   { Icon: Target, title: 'Results-driven', desc: 'We focus on delivering measurable results that help your business grow.' },
@@ -41,10 +45,10 @@ const EXPERTISE = [
 ]
 
 const STATS = [
-  { v: '100+', l: 'Websites launched' },
-  { v: '5.0★', l: 'Google rating' },
-  { v: '15+', l: 'Industries served' },
-  { v: '1–3wk', l: 'Avg. delivery' },
+  { v: 'Many', l: 'Websites launched' },
+  { v: 'Happy', l: 'Social media clients' },
+  { v: '100%', l: 'Satisfaction rate' },
+  { v: '1–7d', l: 'Avg. delivery' },
 ]
 
 function AboutUs() {
@@ -69,47 +73,68 @@ function AboutUs() {
       <Section tone="mesh" padding="lg">
         <hr className="rule-hairline mb-12 sm:mb-14" />
         <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
-          <div data-reveal="up">
-            <Eyebrow tone="brand">About us</Eyebrow>
-            <GradientHeading
-              level={1}
-              size="display"
-              className="mt-6"
-              accent="Rhyan & Valerie"
-            >
-              Meet
-            </GradientHeading>
-            <p className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl">
-              Your partners in creating exceptional digital experiences. We design websites that are beautiful, fast, and built to grow your business.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-4">
-              <button
-                onClick={goContact}
-                className="inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-7 py-3.5 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } } }}
+          >
+            <motion.div variants={fadeUpHero}>
+              <Eyebrow tone="brand">About us</Eyebrow>
+            </motion.div>
+            <motion.div variants={fadeUpHero}>
+              <GradientHeading
+                level={1}
+                size="display"
+                className="mt-6"
+                accent="Rhyan & Valerie"
+                accentUnderline
               >
-                Get my free design
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </button>
-            </div>
-            <div className="mt-8">
+                Meet
+              </GradientHeading>
+            </motion.div>
+            <motion.p
+              className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl"
+              variants={fadeUpHero}
+            >
+              Your partners in creating exceptional digital experiences. We design websites that are beautiful, fast, and built to grow your business.
+            </motion.p>
+            <motion.div className="mt-9 flex flex-wrap items-center gap-4" variants={fadeUpHero}>
+              <Magnetic strength={6}>
+                <button
+                  onClick={goContact}
+                  className="group inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-7 py-3.5 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+                >
+                  Get my free design
+                  <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
+                </button>
+              </Magnetic>
+            </motion.div>
+            <motion.div className="mt-8" variants={fadeUpHero}>
               <PhoneCta />
-            </div>
-          </div>
-          <div data-reveal="right" className="relative max-w-md mx-auto lg:ml-auto w-full">
+            </motion.div>
+          </motion.div>
+          <motion.div
+            className="relative max-w-md mx-auto lg:ml-auto w-full"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="absolute -inset-3 bg-rust-100/60 rounded-xl3 -z-10" aria-hidden />
-            <img
-              src="/rhyan.jpg"
-              alt="Rhyan, lead developer at Ace Web Designers"
-              className="relative rounded-xl3 shadow-lift w-full h-[420px] object-cover ring-1 ring-ink-900/10"
-              loading="lazy"
-              decoding="async"
-            />
+            <div className="relative rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 shadow-lift">
+              <img
+                src="/rhyan.jpg"
+                alt="Rhyan, lead developer at Ace Web Designers"
+                className="block w-full h-[420px] object-cover motion-safe:animate-ken-burns"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
             <span className="absolute bottom-4 left-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-50/95 backdrop-blur-sm ring-1 ring-ink-900/10 text-xs">
               <span className="label-mono text-ink-700">Rhyan</span>
               <span className="text-ink-700/60">·</span>
               <span className="text-ink-800">Lead Developer</span>
             </span>
-          </div>
+          </motion.div>
         </div>
       </Section>
 

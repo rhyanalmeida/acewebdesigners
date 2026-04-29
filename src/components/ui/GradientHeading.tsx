@@ -1,4 +1,5 @@
 import React from 'react'
+import HandUnderline from './HandUnderline'
 
 type Level = 1 | 2 | 3 | 4
 type Size = 'sm' | 'md' | 'lg' | 'xl' | 'display'
@@ -11,6 +12,8 @@ interface GradientHeadingProps extends React.HTMLAttributes<HTMLHeadingElement> 
   /** Italic accent phrase — rendered as Fraunces italic in rust */
   accent?: React.ReactNode
   accentPlacement?: 'inline' | 'after' | 'before'
+  /** Draws a hand-drawn underline beneath the accent on scroll-into-view */
+  accentUnderline?: boolean
 }
 
 const sizeMap: Record<Size, string> = {
@@ -42,13 +45,21 @@ const GradientHeading: React.FC<GradientHeadingProps> = ({
   tone = 'default',
   accent,
   accentPlacement = 'inline',
+  accentUnderline = false,
   className = '',
   children,
   ...rest
 }) => {
   const Tag = (`h${level}`) as React.ElementType
   const accentEl = accent ? (
-    <span className={`text-editorial-italic ${accentToneMap[tone]}`}>{accent}</span>
+    <span className={`relative inline-block text-editorial-italic ${accentToneMap[tone]}`}>
+      {accent}
+      {accentUnderline && (
+        <span className="absolute -bottom-1 left-0 right-0 h-2 pointer-events-none" aria-hidden="true">
+          <HandUnderline color={tone === 'inverted' ? '#E68A5C' : '#C04E1A'} />
+        </span>
+      )}
+    </span>
   ) : null
 
   return (

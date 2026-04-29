@@ -23,10 +23,10 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
           </p>
           <button
             onClick={() => onNavigate('contact')}
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-6 py-3 text-sm font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-6 py-3 text-sm font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
           >
             Get a free design
-            <ArrowRight className="h-4 w-4" aria-hidden />
+            <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
           </button>
         </div>
 
@@ -44,7 +44,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
               <li key={l.page}>
                 <button
                   onClick={() => onNavigate(l.page)}
-                  className="text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-rust rounded font-display"
+                  className="nav-underline text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-rust rounded font-display"
                 >
                   {l.label}
                 </button>

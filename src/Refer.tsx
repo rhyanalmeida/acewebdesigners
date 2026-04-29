@@ -9,6 +9,8 @@ import {
   ArrowRight,
 } from 'lucide-react'
 
+import { motion } from 'framer-motion'
+
 import {
   Section,
   Eyebrow,
@@ -24,6 +26,7 @@ import {
   Textarea,
   TrustStack,
 } from './components/ui'
+import { fadeUpHero } from './lib/motion'
 
 const YOU_GET = [
   '$200 cash reward when your referral completes their website',
@@ -65,10 +68,15 @@ function Refer() {
       <div className="min-h-screen bg-cream-50">
         <Section tone="default" padding="xl" containerSize="md" className="pt-24">
           <Card tone="default" padding="xl" rounded="xl3" className="text-center">
-            <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-forest-50 text-forest-700 ring-1 ring-forest-100">
+            <motion.div
+              className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-forest-50 text-forest-700 ring-1 ring-forest-100"
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
+            >
               <CheckCircle2 className="h-8 w-8" aria-hidden />
-            </div>
-            <GradientHeading level={1} size="lg" className="mt-6" accent="for your referral!">
+            </motion.div>
+            <GradientHeading level={1} size="lg" className="mt-6" accent="for your referral!" accentUnderline>
               Thank you
             </GradientHeading>
             <p className="mt-5 text-lg text-ink-700">
@@ -92,26 +100,37 @@ function Refer() {
         {/* HERO */}
         <Section tone="mesh" padding="lg">
           <hr className="rule-hairline mb-12 sm:mb-14" />
-          <div className="text-center max-w-3xl mx-auto" data-reveal="up">
-            <Eyebrow tone="brand">
-              <Gift className="h-3.5 w-3.5" aria-hidden />
-              Referral program
-            </Eyebrow>
-            <GradientHeading level={1} size="display" className="mt-6" accent="earn $200">
-              Refer a client,
-            </GradientHeading>
-            <p className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed">
+          <motion.div
+            className="text-center max-w-3xl mx-auto"
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } } }}
+          >
+            <motion.div variants={fadeUpHero}>
+              <Eyebrow tone="brand">
+                <Gift className="h-3.5 w-3.5" aria-hidden />
+                Referral program
+              </Eyebrow>
+            </motion.div>
+            <motion.div variants={fadeUpHero}>
+              <GradientHeading level={1} size="display" className="mt-6" accent="earn $200" accentUnderline>
+                Refer a client,
+              </GradientHeading>
+            </motion.div>
+            <motion.p className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed" variants={fadeUpHero}>
               Know someone who needs a professional website? Refer them and earn{' '}
               <span className="text-editorial-italic text-rust-600">$200</span> when they complete their project.
-            </p>
-            <Card tone="default" padding="lg" rounded="xl2" className="mt-9 inline-flex flex-col items-center max-w-sm mx-auto">
-              <span className="label-mono text-ink-700/70">Cash reward</span>
-              <div className="mt-1 flex items-baseline gap-1 text-ink-900">
-                <span className="font-display text-7xl font-semibold tracking-tight">$200</span>
-              </div>
-              <p className="text-ink-700/80 text-sm mt-1">per successful referral</p>
-            </Card>
-          </div>
+            </motion.p>
+            <motion.div variants={fadeUpHero}>
+              <Card tone="default" padding="lg" rounded="xl2" className="mt-9 inline-flex flex-col items-center max-w-sm mx-auto">
+                <span className="label-mono text-ink-700/70">Cash reward</span>
+                <div className="mt-1 flex items-baseline gap-1 text-ink-900">
+                  <span className="font-display text-7xl font-semibold tracking-tight">$200</span>
+                </div>
+                <p className="text-ink-700/80 text-sm mt-1">per successful referral</p>
+              </Card>
+            </motion.div>
+          </motion.div>
         </Section>
 
         {/* HOW IT WORKS */}
@@ -249,14 +268,21 @@ function Refer() {
                 </div>
               </fieldset>
 
-              <button
+              <motion.button
                 type="submit"
                 disabled={state.submitting}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold py-4 px-6 shadow-glow-rust magnetic-btn ring-focus-rust disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-300"
+                whileTap={{ scale: 0.98 }}
+                className="group w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold py-4 px-6 shadow-glow-rust magnetic-btn ring-focus-rust disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-300"
               >
+                {state.submitting && (
+                  <span
+                    aria-hidden
+                    className="inline-block h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin"
+                  />
+                )}
                 {state.submitting ? 'Submitting...' : 'Submit referral'}
-                <ArrowRight className="h-5 w-5" aria-hidden />
-              </button>
+                {!state.submitting && <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />}
+              </motion.button>
             </form>
           </Card>
         </Section>

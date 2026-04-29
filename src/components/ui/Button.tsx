@@ -16,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseClasses =
-  'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-300 ease-premium disabled:opacity-50 disabled:cursor-not-allowed ring-focus-rust'
+  'group inline-flex items-center justify-center font-semibold rounded-full transition-all duration-300 ease-premium disabled:opacity-50 disabled:cursor-not-allowed ring-focus-rust'
 
 const variantClasses: Record<Variant, string> = {
   // Editorial primary — ink-on-cream filled pill
@@ -82,7 +82,9 @@ const Button: React.FC<ButtonProps> = ({
       )}
       {Icon && iconPosition === 'left' && !loading && <Icon className="w-5 h-5 mr-2" />}
       {children}
-      {Icon && iconPosition === 'right' && !loading && <Icon className="w-5 h-5 ml-2" />}
+      {Icon && iconPosition === 'right' && !loading && (
+        <Icon className="w-5 h-5 ml-2 icon-nudge" />
+      )}
     </button>
   )
 }

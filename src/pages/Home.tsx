@@ -16,6 +16,8 @@ import {
   Minus,
 } from 'lucide-react'
 
+import { motion } from 'framer-motion'
+
 import {
   Container,
   Section,
@@ -34,7 +36,10 @@ import {
   PhoneCta,
   TestimonialEditorial,
   RotatingText,
+  Magnetic,
+  CursorHalo,
 } from '../components/ui'
+import { fadeUpHero } from '../lib/motion'
 
 import type { NavigateFn } from '../components/layout'
 
@@ -114,10 +119,10 @@ const PERFORMANCE = [
 ]
 
 const STATS = [
-  { v: '100+', l: 'Websites launched', s: 'Across 15+ industries' },
-  { v: '5.0★', l: 'Google rating', s: 'From 100+ clients' },
-  { v: '1–3wk', l: 'Average delivery', s: 'Same-day option available' },
-  { v: '100%', l: 'See before you pay', s: 'Free mockup, no obligation' },
+  { v: 'Many', l: 'Websites launched', s: 'Across multiple industries' },
+  { v: 'Happy', l: 'Social media clients', s: 'Real results, real growth' },
+  { v: '1–7d', l: 'Average delivery', s: 'Same-day option available' },
+  { v: '100%', l: 'Satisfaction rate', s: 'See before you pay — free mockup' },
 ]
 
 const ROTATING_WORDS = [
@@ -214,40 +219,58 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
     <>
       {/* HERO — editorial cream paper, single-col, type-led */}
       <section className="relative isolate overflow-hidden bg-cream-50 text-ink-900 bg-paper-noise" aria-label="Hero">
+        <CursorHalo />
         <Container size="lg" className="relative z-10 pt-20 pb-16 sm:pt-24 sm:pb-20 lg:pt-28 lg:pb-24">
-          <div className="text-center max-w-4xl mx-auto" data-reveal="up">
-            <Eyebrow tone="brand">
-              <Star className="h-3.5 w-3.5 fill-current" aria-hidden />
-              Trusted by 100+ small businesses nationwide
-            </Eyebrow>
-            <GradientHeading
-              level={1}
-              size="display"
-              className="mt-6"
-              accent={<RotatingText words={ROTATING_WORDS} intervalMs={2200} />}
-            >
-              Beautiful websites for
-            </GradientHeading>
-            <p className="mt-7 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-2xl mx-auto">
-              We design websites that look incredible and turn visitors into customers — and you only pay if you love what we build first.
-            </p>
-
-            <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <button
-                onClick={() => onNavigate('contact')}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 magnetic-btn attention-ring ring-focus-rust transition-colors duration-300"
+          <motion.div
+            className="text-center max-w-4xl mx-auto"
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } } }}
+          >
+            <motion.div variants={fadeUpHero}>
+              <Eyebrow tone="brand">
+                <Star className="h-3.5 w-3.5 fill-current" aria-hidden />
+                Trusted by 100+ small businesses nationwide
+              </Eyebrow>
+            </motion.div>
+            <motion.div variants={fadeUpHero}>
+              <GradientHeading
+                level={1}
+                size="display"
+                className="mt-6"
+                accent={<RotatingText words={ROTATING_WORDS} intervalMs={2200} />}
               >
-                Get my free design
-                <ArrowRight className="h-5 w-5 transition-transform duration-300 ease-premium group-hover:translate-x-0.5" aria-hidden />
-              </button>
+                Beautiful websites for
+              </GradientHeading>
+            </motion.div>
+            <motion.p
+              className="mt-7 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-2xl mx-auto"
+              variants={fadeUpHero}
+            >
+              We design websites that look incredible and turn visitors into customers — and you only pay if you love what we build first.
+            </motion.p>
+
+            <motion.div
+              className="mt-9 flex flex-col sm:flex-row gap-3 justify-center items-center"
+              variants={fadeUpHero}
+            >
+              <Magnetic strength={6}>
+                <button
+                  onClick={() => onNavigate('contact')}
+                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 magnetic-btn attention-ring ring-focus-rust transition-colors duration-300"
+                >
+                  Get my free design
+                  <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
+                </button>
+              </Magnetic>
               <button
                 onClick={() => onNavigate('work')}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-cream-100 hover:bg-cream-200 text-ink-900 font-semibold text-base sm:text-lg px-7 py-4 ring-1 ring-ink-900/15 transition-colors duration-300 ease-premium ring-focus-rust"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-cream-100 hover:bg-cream-200 text-ink-900 font-semibold text-base sm:text-lg px-7 py-4 ring-1 ring-ink-900/15 transition-colors duration-300 ease-premium ring-focus-rust"
               >
                 See our work
-                <ChevronRight className="h-5 w-5" aria-hidden />
+                <ChevronRight className="h-5 w-5 icon-nudge" aria-hidden />
               </button>
-            </div>
+            </motion.div>
 
             <div className="mt-8 flex flex-col items-center gap-3">
               <span className="label-num">
@@ -262,7 +285,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             <div className="mt-12 flex justify-center">
               <TrustStack />
             </div>
-          </div>
+          </motion.div>
         </Container>
         <hr className="rule-hairline" />
       </section>

@@ -177,6 +177,51 @@
     animation: marquee 30s linear infinite;
   }
   .marquee-track:hover { animation-play-state: paused; }
+
+  /* Nav link underline — left-anchored, draws on hover/active */
+  .nav-underline {
+    position: relative;
+  }
+  .nav-underline::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1.5px;
+    background-color: currentColor;
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .nav-underline:hover::after,
+  .nav-underline:focus-visible::after,
+  .nav-underline.is-active::after {
+    transform: scaleX(1);
+  }
+
+  /* Group hover: nudge child icon by 4px on parent hover */
+  .group:hover .icon-nudge,
+  .group:focus-visible .icon-nudge {
+    transform: translateX(4px);
+  }
+  .icon-nudge {
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  /* Visually hidden but readable by screen readers + crawlers */
+  .sr-only-keep {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 /* ---------- SCROLL REVEAL (paired with useScrollReveal hook) ---------- */
@@ -230,8 +275,16 @@
     scroll-behavior: auto !important;
   }
   [data-reveal],
-  [data-reveal-stagger-child] {
+  [data-reveal-stagger-child],
+  [data-motion] {
     opacity: 1 !important;
+    transform: none !important;
+  }
+  .nav-underline::after {
+    transition-duration: 0.01ms !important;
+  }
+  .icon-nudge,
+  .group:hover .icon-nudge {
     transform: none !important;
   }
 }

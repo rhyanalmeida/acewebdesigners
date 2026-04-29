@@ -1,4 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { editorialEase } from './lib/motion'
 
 import Contact from './Contact'
 import AboutUs from './AboutUs'
@@ -122,15 +124,38 @@ function App() {
   }
 
   const isBare = BARE_PAGES.includes(currentPage)
+  const reduced = useReducedMotion()
+  const firstRenderRef = React.useRef(true)
+  React.useEffect(() => {
+    firstRenderRef.current = false
+  }, [])
+
+  const PageWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (reduced) return <>{children}</>
+    return (
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={currentPage}
+          initial={firstRenderRef.current ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.24, ease: editorialEase as unknown as number[] }}
+          style={{ willChange: 'transform, opacity' }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    )
+  }
 
   // Landing/refer/legal pages render their own chrome — return them raw.
   if (isBare) {
-    return <>{renderPage()}</>
+    return <PageWrapper>{renderPage()}</PageWrapper>
   }
 
   return (
     <PageShell onNavigate={handleNavigate} currentPage={currentPage}>
-      {renderPage()}
+      <PageWrapper>{renderPage()}</PageWrapper>
     </PageShell>
   )
 }

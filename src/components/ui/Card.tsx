@@ -56,7 +56,7 @@ const Card: React.FC<CardProps> = ({
         ${roundedMap[rounded]}
         ${toneMap[tone]}
         ${paddingMap[padding]}
-        ${interactive ? 'transition-[transform,box-shadow,border-color] duration-500 ease-premium hover:-translate-y-1 hover:shadow-lift hover:ring-ink-900/20' : ''}
+        ${interactive ? 'group transition-[transform,box-shadow,border-color] duration-500 ease-premium motion-safe:hover:-translate-y-1 hover:shadow-lift hover:ring-ink-900/20' : ''}
         ${shine ? 'premium-card-shine' : ''}
         ${className}
       `}

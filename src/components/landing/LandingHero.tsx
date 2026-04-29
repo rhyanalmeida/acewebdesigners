@@ -1,10 +1,14 @@
 import React from 'react'
 import { Star, ArrowRight, Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
 import Container from '../ui/Container'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 import BadgePill from '../ui/BadgePill'
 import PhoneCta from '../ui/PhoneCta'
+import Magnetic from '../ui/Magnetic'
+import CursorHalo from '../ui/CursorHalo'
+import { fadeUpHero } from '../../lib/motion'
 
 interface LandingHeroProps {
   eyebrow?: string
@@ -34,45 +38,64 @@ const LandingHero: React.FC<LandingHeroProps> = ({
   ratingLabel = 'Rated 5.0 / 5 on Google',
 }) => (
   <section className="relative isolate overflow-hidden bg-cream-50 text-ink-900 bg-paper-noise">
+    <CursorHalo />
     <Container size="lg" className="relative z-10 py-20 sm:py-24 lg:py-28">
       <hr className="rule-hairline mb-12 sm:mb-14" />
       <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
-        <div data-reveal="up" className="text-center lg:text-left">
-          <Eyebrow tone="brand">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            {eyebrow}
-          </Eyebrow>
+        <motion.div
+          className="text-center lg:text-left"
+          initial="hidden"
+          animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } } }}
+        >
+          <motion.div variants={fadeUpHero}>
+            <Eyebrow tone="brand">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              {eyebrow}
+            </Eyebrow>
+          </motion.div>
 
-          <GradientHeading
-            level={1}
-            size="display"
-            className="mt-6"
-            accent={accent}
+          <motion.div variants={fadeUpHero}>
+            <GradientHeading
+              level={1}
+              size="display"
+              className="mt-6"
+              accent={accent}
+              accentUnderline={Boolean(accent)}
+            >
+              {headline}
+            </GradientHeading>
+          </motion.div>
+
+          <motion.p
+            className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl mx-auto lg:mx-0"
+            variants={fadeUpHero}
           >
-            {headline}
-          </GradientHeading>
-
-          <p className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl mx-auto lg:mx-0">
             {sub}
-          </p>
+          </motion.p>
 
           {urgencyText && (
-            <div className="mt-6 inline-flex">
+            <motion.div className="mt-6 inline-flex" variants={fadeUpHero}>
               <BadgePill tone="brand" glow>
                 {urgencyText}
               </BadgePill>
-            </div>
+            </motion.div>
           )}
 
-          <div className="mt-9 flex flex-col sm:flex-row gap-3 items-center sm:items-start lg:items-start justify-center lg:justify-start">
-            <button
-              onClick={onCta}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
-            >
-              {ctaLabel}
-              <ArrowRight className="h-5 w-5" aria-hidden />
-            </button>
-          </div>
+          <motion.div
+            className="mt-9 flex flex-col sm:flex-row gap-3 items-center sm:items-start lg:items-start justify-center lg:justify-start"
+            variants={fadeUpHero}
+          >
+            <Magnetic strength={6}>
+              <button
+                onClick={onCta}
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+              >
+                {ctaLabel}
+                <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
+              </button>
+            </Magnetic>
+          </motion.div>
 
           <div className="mt-6 flex items-center justify-center lg:justify-start gap-3 text-sm text-ink-700">
             <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${rating} out of 5 stars`}>
@@ -88,13 +111,18 @@ const LandingHero: React.FC<LandingHeroProps> = ({
           </div>
 
           <hr className="rule-hairline my-8 max-w-sm lg:mx-0 mx-auto" />
-          <div className="flex justify-center lg:justify-start">
+          <motion.div className="flex justify-center lg:justify-start" variants={fadeUpHero}>
             <PhoneCta showLabels={false} />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {videoSrc && (
-          <div data-reveal="right" className="relative">
+          <motion.div
+            className="relative"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="absolute -inset-3 bg-rust-100/60 rounded-xl3 -z-10" aria-hidden />
             <div className="relative rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 shadow-lift bg-cream-100">
               <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
@@ -108,7 +136,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </Container>
