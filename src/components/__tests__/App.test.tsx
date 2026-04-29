@@ -20,6 +20,7 @@ describe('App routing + chrome', () => {
     render(<App />)
     expect(screen.getAllByRole('button', { name: /About Us/i }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('button', { name: /^Services$/i }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: /Social Media/i }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('button', { name: /Our Work/i }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('button', { name: /^Contact$/i }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('button', { name: /Refer & Earn/i }).length).toBeGreaterThan(0)
@@ -104,6 +105,22 @@ describe('App routing + chrome', () => {
     expect(screen.getAllByText(/^\$1,500$/).length).toBeGreaterThan(0)
     // The highlighted tier ribbon ("Most popular")
     expect(screen.getByText(/Most popular/i)).toBeInTheDocument()
+    // Monthly hosting is part of the price reveal (Unit 1 of the SMM rollout).
+    expect(screen.getByText(/\$15\/month hosting/i)).toBeInTheDocument()
+    expect(screen.getByText(/\$30\/month hosting/i)).toBeInTheDocument()
+    expect(screen.getByText(/\$45\/month hosting/i)).toBeInTheDocument()
+  })
+
+  it('routes /socialmedia to the Social Media page with both packages and combo deal', () => {
+    setPath('/socialmedia')
+    render(<App />)
+    // Standard ($30/wk) + Deluxe ($99/wk) prices
+    expect(screen.getByText(/^\$30$/)).toBeInTheDocument()
+    expect(screen.getByText(/^\$99$/)).toBeInTheDocument()
+    // Combo deal — both reduced rates and the $250 website discount surface
+    expect(screen.getAllByText(/\$250 off/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/\$25\/wk/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/\$84\/wk/i).length).toBeGreaterThan(0)
   })
 })
 
