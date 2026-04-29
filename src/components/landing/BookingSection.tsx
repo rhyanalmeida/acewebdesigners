@@ -63,7 +63,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
         tone="muted"
         padding="lg"
         containerSize="md"
-        ref={setRef as unknown as React.Ref<HTMLElement>}
+        ref={setRef}
         className="scroll-mt-24"
       >
         <div className="text-center">

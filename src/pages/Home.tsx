@@ -33,7 +33,6 @@ import {
   TrustStack,
   PhoneCta,
   TestimonialEditorial,
-  LiveProof,
 } from '../components/ui'
 
 import type { NavigateFn } from '../components/layout'
@@ -203,7 +202,6 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
       <section className="relative isolate overflow-hidden bg-cream-50 text-ink-900 bg-paper-noise" aria-label="Hero">
         <Container size="lg" className="relative z-10 pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-40 lg:pb-32">
           <div className="text-center max-w-4xl mx-auto" data-reveal="up">
-            <LiveProof className="mb-8" />
             <Eyebrow tone="brand">
               <Star className="h-3.5 w-3.5 fill-current" aria-hidden />
               Trusted by 100+ small businesses nationwide

@@ -5,7 +5,6 @@ import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 import BadgePill from '../ui/BadgePill'
 import PhoneCta from '../ui/PhoneCta'
-import LiveProof from '../ui/LiveProof'
 
 interface LandingHeroProps {
   eyebrow?: string
@@ -39,8 +38,6 @@ const LandingHero: React.FC<LandingHeroProps> = ({
       <hr className="rule-hairline mb-12 sm:mb-14" />
       <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
         <div data-reveal="up" className="text-center lg:text-left">
-          <LiveProof className="mb-6" />
-
           <Eyebrow tone="brand">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {eyebrow}

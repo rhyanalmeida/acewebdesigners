@@ -32,25 +32,37 @@ const paddingMap: Record<SectionPadding, string> = {
   xl:   'py-24 sm:py-32 lg:py-40',
 }
 
-const Section: React.FC<SectionProps> = ({
-  tone = 'default',
-  padding = 'lg',
-  containerSize = 'lg',
-  bare = false,
-  as: Tag = 'section',
-  className = '',
-  children,
-  ...rest
-}) => {
-  const Component = Tag as React.ElementType
-  return (
-    <Component
-      className={`relative ${toneMap[tone]} ${paddingMap[padding]} ${className}`}
-      {...rest}
-    >
-      {bare ? children : <Container size={containerSize}>{children}</Container>}
-    </Component>
-  )
-}
+// forwardRef so callers (BookingSection's scrollToBooking flow on the landing
+// pages) can attach a ref to the underlying DOM element. Without forwardRef
+// the ref prop is silently dropped by React and the scroll-to-booking CTA
+// silently no-ops.
+const Section = React.forwardRef<HTMLElement, SectionProps>(
+  (
+    {
+      tone = 'default',
+      padding = 'lg',
+      containerSize = 'lg',
+      bare = false,
+      as: Tag = 'section',
+      className = '',
+      children,
+      ...rest
+    },
+    ref,
+  ) => {
+    const Component = Tag as React.ElementType
+    return (
+      <Component
+        ref={ref}
+        className={`relative ${toneMap[tone]} ${paddingMap[padding]} ${className}`}
+        {...rest}
+      >
+        {bare ? children : <Container size={containerSize}>{children}</Container>}
+      </Component>
+    )
+  },
+)
+
+Section.displayName = 'Section'
 
 export default Section
