@@ -7,6 +7,7 @@ import Services from './Services'
 import Landing from './Landing'
 import LandingContractors from './LandingContractors'
 import Refer from './Refer'
+import SocialMedia from './SocialMedia'
 import PrivacyPolicy from './PrivacyPolicy'
 import PrivacyPolicyPage from './PrivacyPolicyPage'
 import TermsOfService from './TermsOfService'
@@ -22,6 +23,7 @@ type PageKey =
   | 'work'
   | 'contact'
   | 'refer'
+  | 'socialmedia'
   | 'landing'
   | 'contractorlanding'
   | 'privacy'
@@ -43,6 +45,7 @@ function App() {
       if (path.includes('/contractorlanding')) setCurrentPage('contractorlanding')
       else if (path.includes('/landing')) setCurrentPage('landing')
       else if (path.includes('/refer')) setCurrentPage('refer')
+      else if (path.includes('/socialmedia')) setCurrentPage('socialmedia')
       else if (path.includes('/privacypolicy')) setCurrentPage('privacypolicy')
       else if (path.includes('/termsofservice')) setCurrentPage('termsofservice')
     }
@@ -98,6 +101,8 @@ function App() {
         return <LandingContractors />
       case 'refer':
         return <Refer />
+      case 'socialmedia':
+        return <SocialMedia />
       case 'privacy':
         return <PrivacyPolicy />
       case 'privacypolicy':

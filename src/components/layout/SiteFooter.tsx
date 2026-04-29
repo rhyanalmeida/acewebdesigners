@@ -37,6 +37,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
               { label: 'Home', page: 'home' },
               { label: 'About Us', page: 'about' },
               { label: 'Services', page: 'services' },
+              { label: 'Social Media', page: 'socialmedia' },
               { label: 'Our Work', page: 'work' },
               { label: 'Refer & Earn', page: 'refer' },
             ].map(l => (

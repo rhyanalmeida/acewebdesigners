@@ -13,6 +13,7 @@ const NAV_LINKS: Array<{ label: string; page: string }> = [
   { label: 'Home', page: 'home' },
   { label: 'About Us', page: 'about' },
   { label: 'Services', page: 'services' },
+  { label: 'Social Media', page: 'socialmedia' },
   { label: 'Our Work', page: 'work' },
   { label: 'Contact', page: 'contact' },
   { label: 'Refer & Earn', page: 'refer' },
