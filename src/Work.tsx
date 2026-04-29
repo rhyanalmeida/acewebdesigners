@@ -24,6 +24,16 @@ interface Project {
 
 const PROJECTS: Project[] = [
   {
+    title: 'Told History',
+    category: 'E-commerce',
+    description: 'An e-commerce store backed by a 21k+ follower social audience. History-themed shorts on TikTok and YouTube drive traffic into the storefront for branded merch and curated content.',
+    image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    link: 'https://toldhistory.com',
+    technologies: ['React', 'Tailwind CSS', 'E-commerce'],
+    features: ['Online Store', 'Secure Payments', 'Mobile Responsive'],
+    pullQuote: '21k+ followers driving traffic.',
+  },
+  {
     title: 'Hot Pot One',
     category: 'Restaurant',
     description: 'A modern, user-friendly website featuring an intuitive menu system, online ordering capabilities, and seamless mobile experience.',
