@@ -33,6 +33,7 @@ import {
   TrustStack,
   PhoneCta,
   TestimonialEditorial,
+  RotatingText,
 } from '../components/ui'
 
 import type { NavigateFn } from '../components/layout'
@@ -119,6 +120,16 @@ const STATS = [
   { v: '100%', l: 'See before you pay', s: 'Free mockup, no obligation' },
 ]
 
+const ROTATING_WORDS = [
+  'small business',
+  'contractors',
+  'restaurants',
+  'painters',
+  'electricians',
+  'plumbers',
+  'realtors',
+]
+
 const PRICING = [
   {
     tier: 'Basic',
@@ -203,7 +214,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
     <>
       {/* HERO — editorial cream paper, single-col, type-led */}
       <section className="relative isolate overflow-hidden bg-cream-50 text-ink-900 bg-paper-noise" aria-label="Hero">
-        <Container size="lg" className="relative z-10 pt-28 pb-20 sm:pt-36 sm:pb-28 lg:pt-40 lg:pb-32">
+        <Container size="lg" className="relative z-10 pt-20 pb-16 sm:pt-24 sm:pb-20 lg:pt-28 lg:pb-24">
           <div className="text-center max-w-4xl mx-auto" data-reveal="up">
             <Eyebrow tone="brand">
               <Star className="h-3.5 w-3.5 fill-current" aria-hidden />
@@ -213,7 +224,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
               level={1}
               size="display"
               className="mt-6"
-              accent="small business"
+              accent={<RotatingText words={ROTATING_WORDS} intervalMs={2200} />}
             >
               Beautiful websites for
             </GradientHeading>
@@ -224,10 +235,10 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             <div className="mt-9 flex flex-col sm:flex-row gap-3 justify-center items-center">
               <button
                 onClick={() => onNavigate('contact')}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 magnetic-btn attention-ring ring-focus-rust transition-colors duration-300"
               >
                 Get my free design
-                <ArrowRight className="h-5 w-5" aria-hidden />
+                <ArrowRight className="h-5 w-5 transition-transform duration-300 ease-premium group-hover:translate-x-0.5" aria-hidden />
               </button>
               <button
                 onClick={() => onNavigate('work')}

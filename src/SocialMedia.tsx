@@ -61,20 +61,21 @@ const PLATFORM_LABEL: Record<PlatformKind, string> = {
 }
 
 const CLIENT_ACCOUNTS: ReadonlyArray<{
-  handle: string
+  /** Display name shown on the card */
+  name: string
   note: string
   platforms: ReadonlyArray<{ kind: PlatformKind; url: string }>
 }> = [
   {
-    handle: 'luxurymakeover',
+    name: 'Luxury Makeover',
     note: 'Started at 0 followers a few months ago — growing fast.',
     platforms: [
-      { kind: 'tiktok', url: 'https://www.tiktok.com/@luxurymakeover' },
-      { kind: 'instagram', url: 'https://www.instagram.com/luxurymakeover' },
+      { kind: 'tiktok', url: 'https://www.tiktok.com/@luxurymakeover_official' },
+      { kind: 'instagram', url: 'https://www.instagram.com/luxurymakeover_ig' },
     ],
   },
   {
-    handle: '911localplumbing',
+    name: '911 Local Plumbing',
     note: 'Built from scratch — generating real plumbing calls.',
     platforms: [
       { kind: 'tiktok', url: 'https://www.tiktok.com/@911localplumbing' },
@@ -82,7 +83,7 @@ const CLIENT_ACCOUNTS: ReadonlyArray<{
     ],
   },
   {
-    handle: 'conucotakeout',
+    name: 'Conuco Restaurant Takeout',
     note: 'Established restaurant — steady growth.',
     platforms: [
       { kind: 'instagram', url: 'https://www.instagram.com/conucotakeout' },
@@ -90,7 +91,7 @@ const CLIENT_ACCOUNTS: ReadonlyArray<{
     ],
   },
   {
-    handle: 'oliverscafema',
+    name: "Oliver's Cafe",
     note: 'Selected social posts for the cafe.',
     platforms: [
       { kind: 'instagram', url: 'https://www.instagram.com/oliverscafema' },
@@ -284,7 +285,7 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
           <div data-reveal="up" className="grid gap-4 sm:grid-cols-2">
             {CLIENT_ACCOUNTS.map(account => (
               <Card
-                key={account.handle}
+                key={account.name}
                 tone="inverted"
                 padding="lg"
                 rounded="xl2"
@@ -292,9 +293,9 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="label-mono text-cream-100/55">Account</span>
+                    <span className="label-mono text-cream-100/55">Client</span>
                     <p className="mt-1 font-display text-lg sm:text-xl font-semibold text-cream-50">
-                      @{account.handle}
+                      {account.name}
                     </p>
                   </div>
                 </div>
