@@ -123,6 +123,7 @@ const PRICING = [
   {
     tier: 'Basic',
     price: '$200',
+    priceSub: '+ $15/month hosting & support',
     description: 'A polished one-page site for small businesses just getting started.',
     features: [
       'One-page site, mobile responsive',
@@ -135,6 +136,7 @@ const PRICING = [
   {
     tier: 'Standard',
     price: '$1,000',
+    priceSub: '+ $30/month hosting & support',
     description: 'A multi-page site that tells your full story and converts visitors.',
     features: [
       'Up to 5 pages, fully responsive',
@@ -148,6 +150,7 @@ const PRICING = [
   {
     tier: 'E-commerce',
     price: '$1,500',
+    priceSub: '+ $45/month hosting & support',
     description: 'A full online store or booking flow with secure payments.',
     features: [
       'Online store or booking system',
@@ -270,6 +273,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             <PriceCard
               tier={p.tier}
               price={p.price}
+              priceSub={p.priceSub}
               description={p.description}
               features={[...p.features]}
               highlight={'highlight' in p ? p.highlight : false}

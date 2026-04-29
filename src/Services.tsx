@@ -49,7 +49,7 @@ const PACKAGES: Pkg[] = [
   {
     name: 'E-commerce Website',
     price: '$1,500',
-    monthly: '50',
+    monthly: '45',
     description: 'Complete e-commerce solution for businesses ready to sell online.',
     features: [
       'Full e-commerce setup',
@@ -128,12 +128,12 @@ function Services() {
             <PriceCard
               tier={pkg.name}
               price={pkg.price}
+              priceSub={`+ $${pkg.monthly}/month hosting & support`}
               description={pkg.description}
               features={pkg.features}
               highlight={pkg.popular ?? false}
               ctaLabel="Get my free design"
               onCta={() => handleGetStarted(pkg)}
-              footnote={`+ $${pkg.monthly}/month hosting & support`}
             />
           )}
         />

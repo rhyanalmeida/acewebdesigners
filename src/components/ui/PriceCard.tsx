@@ -4,6 +4,8 @@ import { Check } from 'lucide-react'
 export interface PriceCardProps {
   tier: string
   price: string
+  /** Optional small line under the big price, e.g. "+ $15/month hosting" */
+  priceSub?: string
   description?: string
   features: string[]
   highlight?: boolean
@@ -17,6 +19,7 @@ export interface PriceCardProps {
 const PriceCard: React.FC<PriceCardProps> = ({
   tier,
   price,
+  priceSub,
   description,
   features,
   highlight = false,
@@ -54,6 +57,12 @@ const PriceCard: React.FC<PriceCardProps> = ({
           {price}
         </span>
       </div>
+
+      {priceSub && (
+        <p className={`mt-1.5 text-sm ${highlight ? 'text-cream-100/70' : 'text-ink-700/75'}`}>
+          {priceSub}
+        </p>
+      )}
 
       {description && (
         <p className={`mt-3 text-base leading-relaxed ${highlight ? 'text-cream-100/80' : 'text-ink-700'}`}>
