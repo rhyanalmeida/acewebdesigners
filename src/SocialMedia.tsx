@@ -8,9 +8,10 @@ import {
   MapPin,
   CheckCircle2,
   ArrowRight,
-  Star,
   Repeat,
   Camera,
+  ExternalLink,
+  TrendingUp,
 } from 'lucide-react'
 
 import {
@@ -39,7 +40,6 @@ const STANDARD_FEATURES = [
   'Instagram + Facebook + TikTok',
   'Caption + hashtag research',
   'Monthly content calendar',
-  '1 round of revisions per post',
   'Reels + carousels included',
 ]
 
@@ -49,8 +49,54 @@ const DELUXE_FEATURES = [
   'Google Business Profile posts',
   'Custom graphics + branded templates',
   'Priority response (same-day)',
-  'Monthly performance report',
   'Reels + short-form video included',
+]
+
+type PlatformKind = 'tiktok' | 'instagram' | 'facebook'
+
+const PLATFORM_LABEL: Record<PlatformKind, string> = {
+  tiktok: 'TikTok',
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+}
+
+const CLIENT_ACCOUNTS: ReadonlyArray<{
+  handle: string
+  note: string
+  platforms: ReadonlyArray<{ kind: PlatformKind; url: string }>
+}> = [
+  {
+    handle: 'luxurymakeover',
+    note: 'Started at 0 followers a few months ago — growing fast.',
+    platforms: [
+      { kind: 'tiktok', url: 'https://www.tiktok.com/@luxurymakeover' },
+      { kind: 'instagram', url: 'https://www.instagram.com/luxurymakeover' },
+    ],
+  },
+  {
+    handle: '911localplumbing',
+    note: 'Built from scratch — generating real plumbing calls.',
+    platforms: [
+      { kind: 'tiktok', url: 'https://www.tiktok.com/@911localplumbing' },
+      { kind: 'instagram', url: 'https://www.instagram.com/911localplumbing' },
+    ],
+  },
+  {
+    handle: 'conucotakeout',
+    note: 'Established restaurant — steady growth.',
+    platforms: [
+      { kind: 'instagram', url: 'https://www.instagram.com/conucotakeout' },
+      { kind: 'facebook', url: 'https://www.facebook.com/conucotakeout' },
+    ],
+  },
+  {
+    handle: 'oliverscafema',
+    note: 'Selected social posts for the cafe.',
+    platforms: [
+      { kind: 'instagram', url: 'https://www.instagram.com/oliverscafema' },
+      { kind: 'facebook', url: 'https://www.facebook.com/oliverscafema' },
+    ],
+  },
 ]
 
 const PROCESS = [
@@ -80,7 +126,7 @@ const FAQS = [
   {
     question: "What if I don't like the posts?",
     answer:
-      "Tell us. Every post on Standard gets one round of revisions before it goes live; Deluxe gets unlimited revisions on the first 5 posts of every month. We'd rather rework a caption than ship something off-brand.",
+      "Tell us. We'll rework anything that doesn't feel right — captions, graphics, tone, whatever. We'd rather get it perfect than ship something off-brand.",
   },
   {
     question: 'Can I cancel anytime?',
@@ -207,6 +253,80 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
               <MapPin className="h-4 w-4 text-forest-700" aria-hidden /> Google Business Profile
               <span className="label-mono text-ink-700/55 ml-1">Deluxe only</span>
             </span>
+          </div>
+        </div>
+      </Section>
+
+      {/* PROOF — $20K + client accounts */}
+      <Section id="proof" tone="inverted" padding="lg">
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.2fr]">
+          <div data-reveal="up">
+            <Eyebrow tone="inverted">
+              <TrendingUp className="h-3.5 w-3.5" aria-hidden />
+              Real numbers
+            </Eyebrow>
+            <GradientHeading
+              level={2}
+              size="xl"
+              tone="inverted"
+              className="mt-5"
+              accent="for our clients"
+            >
+              We&rsquo;ve already brought in{' '}
+              <span className="text-editorial-italic text-rust-300">$20,000+</span>{' '}
+            </GradientHeading>
+            <p className="mt-6 text-cream-100/80 text-base sm:text-lg leading-relaxed max-w-md">
+              Posts that turn into calls, jobs, and orders. Here are accounts we manage today —
+              click through and see for yourself.
+            </p>
+          </div>
+
+          <div data-reveal="up" className="grid gap-4 sm:grid-cols-2">
+            {CLIENT_ACCOUNTS.map(account => (
+              <Card
+                key={account.handle}
+                tone="inverted"
+                padding="lg"
+                rounded="xl2"
+                className="flex flex-col"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="label-mono text-cream-100/55">Account</span>
+                    <p className="mt-1 font-display text-lg sm:text-xl font-semibold text-cream-50">
+                      @{account.handle}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-3 text-sm text-cream-100/80 leading-relaxed flex-1">
+                  {account.note}
+                </p>
+                <hr className="border-cream-50/15 my-4" />
+                <div className="flex flex-wrap items-center gap-2">
+                  {account.platforms.map(platform => {
+                    const Icon =
+                      platform.kind === 'tiktok'
+                        ? Music2
+                        : platform.kind === 'instagram'
+                          ? Instagram
+                          : Facebook
+                    return (
+                      <a
+                        key={platform.kind}
+                        href={platform.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-cream-50/10 hover:bg-cream-50/20 ring-1 ring-cream-50/15 px-3 py-1.5 text-xs font-medium text-cream-50 transition-colors duration-200 ring-focus-rust"
+                      >
+                        <Icon className="h-3.5 w-3.5 text-rust-300" aria-hidden />
+                        {PLATFORM_LABEL[platform.kind]}
+                        <ExternalLink className="h-3 w-3 text-cream-100/55" aria-hidden />
+                      </a>
+                    )
+                  })}
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
       </Section>
