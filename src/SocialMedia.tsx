@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import {
   Sparkles,
   Calendar,
@@ -31,6 +31,7 @@ import {
   FinalCta,
 } from './components/ui'
 import { LandingFaq } from './components/landing'
+import { SeoMeta, serviceLd, organizationLd, breadcrumbForPath } from './seo'
 
 interface SocialMediaProps {
   // page is rendered inside PageShell; nav handled by SiteHeader/Footer
@@ -168,19 +169,22 @@ const goContact = (data?: { budget?: string; message?: string }) => {
 }
 
 const SocialMedia: React.FC<SocialMediaProps> = () => {
-  useEffect(() => {
-    document.title = 'Social Media Management for Local Business | Ace Web Designers'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Done-for-you social media posts for small business — IG, Facebook, TikTok, and Google Business Profile. Try one week free, no card required. Bundle with a website and save $250.',
-      )
-    }
-  }, [])
-
   return (
     <>
+      <SeoMeta
+        path="/socialmedia"
+        jsonLd={[
+          organizationLd(),
+          serviceLd({
+            name: 'Social Media Management for Small Business',
+            description:
+              'Done-for-you social posting on Instagram, Facebook, TikTok, and Google Business Profile. Standard $30/wk or Deluxe $99/wk. First week free.',
+            serviceType: 'Social media management',
+            url: 'https://acewebdesigners.com/socialmedia',
+          }),
+          breadcrumbForPath('/socialmedia')!,
+        ]}
+      />
       {/* HERO */}
       <PageHero
         eyebrow="Social media that works"
@@ -202,7 +206,7 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
         <div className="mt-10 flex justify-center">
           <TrustStack
             items={[
-              { icon: 'star', label: '5.0 on Google', sub: '100+ reviews' },
+              { icon: 'star', label: '5.0 on Google' },
               { icon: 'shield', label: 'No card on file' },
               { icon: 'clock', label: 'Cancel anytime' },
             ]}
@@ -469,7 +473,7 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
                 <s.Icon />
               </IconTile>
               <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{s.title}</h3>
-              <p className="mt-2 text-ink-700 leading-relaxed">{s.desc}</p>
+              <p className="mt-2 text-ink-800 leading-relaxed">{s.desc}</p>
             </>
           )}
         />

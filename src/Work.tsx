@@ -10,6 +10,7 @@ import {
   FinalCta,
   TrustStack,
 } from './components/ui'
+import { SeoMeta, organizationLd, breadcrumbForPath } from './seo'
 
 interface Project {
   title: string
@@ -87,17 +88,6 @@ function Work() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
 
-  React.useEffect(() => {
-    document.title = 'Our Work | Web Design Portfolio in Leominster'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Explore our web design and development portfolio. View our latest projects and see how we help businesses in Leominster achieve their digital goals.'
-      )
-    }
-  }, [])
-
   const categories = useMemo(() => ['All', ...Array.from(new Set(PROJECTS.map(p => p.category)))], [])
 
   const filtered = useMemo(() => {
@@ -119,6 +109,7 @@ function Work() {
 
   return (
     <>
+      <SeoMeta path="/work" jsonLd={[organizationLd(), breadcrumbForPath('/work')!]} />
       <PageHero
         eyebrow="Our portfolio"
         eyebrowIcon={Trophy}
@@ -216,7 +207,7 @@ function Work() {
                   <h3 className="mt-4 font-display text-2xl sm:text-3xl font-semibold text-ink-900 leading-tight">
                     {project.title}
                   </h3>
-                  <p className="mt-3 text-ink-700 leading-relaxed flex-1">{project.description}</p>
+                  <p className="mt-3 text-ink-800 leading-relaxed flex-1">{project.description}</p>
                   {project.features && (
                     <div className="mt-5 flex flex-wrap gap-1.5">
                       {project.features.slice(0, 3).map(feat => (

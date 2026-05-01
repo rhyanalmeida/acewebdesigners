@@ -1,14 +1,15 @@
 import React from 'react'
 import { MousePointer2 } from 'lucide-react'
+import { SeoMeta } from './seo'
 
 function TermsOfService() {
   React.useEffect(() => {
-    document.title = 'Terms of Service | Ace Web Designers'
     window.scrollTo(0, 0)
   }, [])
 
   return (
     <div className="min-h-screen bg-surface-50 text-surface-900">
+      <SeoMeta path="/termsofservice" />
       {/* Header */}
       <header className="bg-white/85 backdrop-blur-md border-b border-surface-200">
         <nav className="max-w-5xl mx-auto px-4 py-4">
@@ -148,7 +149,7 @@ function TermsOfService() {
             <p>© {new Date().getFullYear()} Ace Web Designers. All rights reserved.</p>
             <div className="mt-4 space-x-4">
               <button
-                onClick={() => (window.location.href = '/privacypolicy')}
+                onClick={() => (window.location.href = '/privacy')}
                 className="hover:text-white transition-colors"
               >
                 Privacy Policy

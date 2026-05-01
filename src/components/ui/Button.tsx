@@ -31,11 +31,11 @@ const variantClasses: Record<Variant, string> = {
   secondary:
     'bg-cream-100 text-ink-900 ring-1 ring-ink-900/15 hover:bg-cream-200 shadow-soft',
   outline:
-    'border-2 border-ink-900/20 text-ink-900 hover:border-rust-500 hover:text-rust-700 hover:bg-rust-50',
+    'border-2 border-ink-900/20 text-ink-900 hover:border-rust-500 hover:text-rust-700 hover:bg-rust-50 hover:-translate-y-0.5 hover:shadow-soft',
   ghost:
-    'text-ink-800 hover:text-rust-700 hover:bg-rust-50',
+    'text-ink-800 hover:text-rust-700 hover:bg-rust-50 hover:shadow-soft',
   link:
-    'text-rust-700 underline-offset-4 hover:underline px-0 py-0 rounded-none shadow-none',
+    'nav-underline text-rust-700 hover:text-rust-800 px-0 py-0 rounded-none shadow-none',
   inverted:
     'bg-cream-50 text-ink-900 hover:bg-cream-100 shadow-soft hover:shadow-lift',
 }

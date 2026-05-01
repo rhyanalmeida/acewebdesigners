@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useForm, ValidationError } from '@formspree/react'
 import {
   Gift,
@@ -27,6 +27,7 @@ import {
   TrustStack,
 } from './components/ui'
 import { fadeUpHero } from './lib/motion'
+import { SeoMeta, organizationLd, breadcrumbForPath } from './seo'
 
 const YOU_GET = [
   '$200 cash reward when your referral completes their website',
@@ -49,17 +50,6 @@ const HOW_STEPS = [
 function Refer() {
   // PRESERVED: same Formspree form ID — submissions go to the same endpoint.
   const [state, handleSubmit] = useForm('xvgbobpv')
-
-  useEffect(() => {
-    document.title = 'Refer a Client & Earn $200 | Ace Web Designers'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Refer a client to Ace Web Designers and earn $200 when they complete their website project. Help grow businesses while earning rewards!'
-      )
-    }
-  }, [])
 
   if (state.succeeded) {
     const referralName =
@@ -96,6 +86,7 @@ function Refer() {
 
   return (
     <div className="min-h-screen bg-cream-50 text-ink-900">
+      <SeoMeta path="/refer" jsonLd={[organizationLd(), breadcrumbForPath('/refer')!]} />
       <main id="main">
         {/* HERO */}
         <Section tone="mesh" padding="lg">
@@ -117,7 +108,7 @@ function Refer() {
                 Refer a client,
               </GradientHeading>
             </motion.div>
-            <motion.p className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed" variants={fadeUpHero}>
+            <motion.p className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed" variants={fadeUpHero}>
               Know someone who needs a professional website? Refer them and earn{' '}
               <span className="text-editorial-italic text-rust-600">$200</span> when they complete their project.
             </motion.p>
@@ -152,7 +143,7 @@ function Refer() {
                   <step.Icon />
                 </IconTile>
                 <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{step.title}</h3>
-                <p className="mt-2 text-ink-700 leading-relaxed">{step.desc}</p>
+                <p className="mt-2 text-ink-800 leading-relaxed">{step.desc}</p>
               </>
             )}
           />

@@ -1,1 +1,5 @@
+# 301 from the dropped /privacypolicy alias to the canonical /privacy.
+/privacypolicy /privacy 301
+
+# SPA fallback — keep last so it doesn't shadow specific rules above.
 /* /index.html 200

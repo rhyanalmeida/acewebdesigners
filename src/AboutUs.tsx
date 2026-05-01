@@ -29,6 +29,7 @@ import {
   Magnetic,
 } from './components/ui'
 import { fadeUpHero } from './lib/motion'
+import { SeoMeta, organizationLd, localBusinessLd, breadcrumbForPath } from './seo'
 
 const VALUES = [
   { Icon: Target, title: 'Results-driven', desc: 'We focus on delivering measurable results that help your business grow.' },
@@ -52,23 +53,16 @@ const STATS = [
 ]
 
 function AboutUs() {
-  React.useEffect(() => {
-    document.title = 'About Our Web Design Team | Expert Developers Nationwide'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Meet our experienced web design and development team. We specialize in creating custom digital solutions that drive business growth and user engagement for companies nationwide.'
-      )
-    }
-  }, [])
-
   const goContact = () => {
     window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'contact' } }))
   }
 
   return (
     <>
+      <SeoMeta
+        path="/about"
+        jsonLd={[organizationLd(), localBusinessLd(), breadcrumbForPath('/about')!]}
+      />
       {/* HERO — editorial 2-col with owner photo */}
       <Section tone="mesh" padding="lg">
         <hr className="rule-hairline mb-12 sm:mb-14" />
@@ -93,7 +87,7 @@ function AboutUs() {
               </GradientHeading>
             </motion.div>
             <motion.p
-              className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl"
+              className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed max-w-xl"
               variants={fadeUpHero}
             >
               Your partners in creating exceptional digital experiences. We design websites that are beautiful, fast, and built to grow your business.
@@ -221,7 +215,7 @@ function AboutUs() {
                 <v.Icon />
               </IconTile>
               <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{v.title}</h3>
-              <p className="mt-2 text-ink-700 leading-relaxed">{v.desc}</p>
+              <p className="mt-2 text-ink-800 leading-relaxed">{v.desc}</p>
             </Card>
           )}
         />
@@ -254,7 +248,7 @@ function AboutUs() {
           <GradientHeading level={2} size="lg" className="mt-5" accent="we&rsquo;ll reply within hours">
             Ready to start? —
           </GradientHeading>
-          <p className="mt-5 text-ink-700 leading-relaxed max-w-xl">
+          <p className="mt-5 text-ink-800 leading-relaxed max-w-xl">
             Reach out and we&rsquo;ll send a free homepage design within 24 hours, often same day. Based in Leominster, MA — serving small businesses nationwide.
           </p>
           <hr className="rule-hairline my-8" />

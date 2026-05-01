@@ -18,6 +18,7 @@ import {
   BookingSection,
   LandingFaq,
 } from './components/landing'
+import { SeoMeta, organizationLd, localBusinessLd, serviceLd, breadcrumbForPath } from './seo'
 
 const EXAMPLES = [
   {
@@ -74,15 +75,6 @@ function Landing() {
   }, [])
 
   useEffect(() => {
-    document.title = 'Free Website Design for Your Business | Limited Time Offer'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Get a free website design for your business. No obligation, no hidden fees. Limited time offer - only 10 spots available!'
-      )
-    }
-
     const urlParams = new URLSearchParams(window.location.search)
     if (!urlParams.has('source')) {
       urlParams.append('source', 'landing')
@@ -114,6 +106,21 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-cream-50 text-ink-900">
+      <SeoMeta
+        path="/landing"
+        jsonLd={[
+          organizationLd(),
+          localBusinessLd(),
+          serviceLd({
+            name: 'Free Website Design for Small Business',
+            description:
+              'Professional small business websites with a free homepage design first. Pay only if you love it.',
+            serviceType: 'Web design for small business',
+            url: 'https://acewebdesigners.com/landing',
+          }),
+          breadcrumbForPath('/landing')!,
+        ]}
+      />
       <main id="main">
         <LandingHero
           eyebrow="Free design — pay only if you love it"

@@ -1,20 +1,11 @@
 import React from 'react'
 import { Shield, Mail, Phone, MapPin } from 'lucide-react'
+import { SeoMeta } from './seo'
 
 function PrivacyPolicy() {
-  React.useEffect(() => {
-    document.title = 'Privacy Policy | Ace Web Designers'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Privacy Policy for Ace Web Designers. Learn how we collect, use, and protect your personal information when you use our web design services.'
-      )
-    }
-  }, [])
-
   return (
     <div className="bg-surface-50">
+      <SeoMeta path="/privacy" />
       <div className="max-w-3xl mx-auto px-4 py-16 sm:py-20">
         <div className="bg-white rounded-xl3 shadow-soft ring-1 ring-surface-200 p-8 md:p-12">
           {/* Header */}

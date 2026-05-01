@@ -13,11 +13,12 @@ import {
   TrustStack,
   FinalCta,
 } from './components/ui'
+import { SeoMeta, organizationLd, localBusinessLd, breadcrumbForPath } from './seo'
 
 const REVIEW_STATS = [
-  { v: '5.0', l: 'Average rating', s: 'From 100+ verified reviews' },
-  { v: '100+', l: 'Happy clients', s: 'Businesses nationwide' },
-  { v: '95%', l: 'Success rate', s: 'Clients see increased results' },
+  { v: '5.0', l: 'Google rating', s: 'From verified reviews' },
+  { v: 'Local', l: 'Leominster, MA', s: 'Serving owners nationwide' },
+  { v: 'Free', l: 'Design first', s: 'Pay only if you love it' },
   { v: '100%', l: 'Satisfaction', s: 'Money-back guarantee' },
 ]
 
@@ -52,23 +53,16 @@ const WHY_CHOOSE = [
 ]
 
 function Reviews() {
-  useEffect(() => {
-    document.title = 'Client Reviews & Testimonials | Ace Web Designers'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Read real client reviews and testimonials from businesses who trusted Ace Web Designers with their website projects. See the results we deliver!'
-      )
-    }
-  }, [])
-
   const goContact = () => {
     window.location.href = '/#contact'
   }
 
   return (
     <>
+      <SeoMeta
+        path="/reviews"
+        jsonLd={[organizationLd(), localBusinessLd(), breadcrumbForPath('/reviews')!]}
+      />
       <PageHero
         eyebrow={<><Star className="h-3.5 w-3.5 fill-current" aria-hidden />Client reviews</>}
         headline="What our"
@@ -120,7 +114,7 @@ function Reviews() {
         <SectionHeading
           eyebrow={<><Star className="h-3.5 w-3.5 fill-current" aria-hidden />Live from Google</>}
           eyebrowTone="forest"
-          heading="100+ verified reviews,"
+          heading="Verified reviews,"
           accent="straight from Google"
           sub="Updated automatically — see what our clients are saying right now."
         />
@@ -151,7 +145,7 @@ function Reviews() {
                   <h3 className="font-display text-xl font-semibold text-ink-900">{r.industry}</h3>
                   <p className="mt-3 font-display text-5xl font-semibold text-rust-600">{r.avg}</p>
                   <p className="label-mono text-ink-700/70">{r.metric}</p>
-                  <p className="mt-3 text-ink-700 leading-relaxed">{r.desc}</p>
+                  <p className="mt-3 text-ink-800 leading-relaxed">{r.desc}</p>
                 </div>
               </div>
             </Card>
@@ -178,7 +172,7 @@ function Reviews() {
                 <w.Icon />
               </IconTile>
               <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{w.title}</h3>
-              <p className="mt-2 text-ink-700 leading-relaxed">{w.desc}</p>
+              <p className="mt-2 text-ink-800 leading-relaxed">{w.desc}</p>
             </>
           )}
         />

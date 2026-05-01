@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Calendar } from 'lucide-react'
 
 import { BookingWidget } from './components/BookingWidget'
@@ -9,8 +9,10 @@ import {
   PageHero,
   SectionHeading,
   PhoneCta,
+  Reveal,
   TrustStack,
 } from './components/ui'
+import { SeoMeta, organizationLd, localBusinessLd, breadcrumbForPath } from './seo'
 
 interface ContactProps {
   initialData?: {
@@ -27,19 +29,12 @@ const labelForBudget = (budget?: string) => {
 }
 
 function Contact({ initialData }: ContactProps) {
-  useEffect(() => {
-    document.title = 'Schedule a Consultation | Web Design Services Nationwide'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Schedule a free consultation with our web design team. Book a time to discuss your project needs and learn how we can help grow your online presence.'
-      )
-    }
-  }, [initialData])
-
   return (
     <>
+      <SeoMeta
+        path="/contact"
+        jsonLd={[organizationLd(), localBusinessLd(), breadcrumbForPath('/contact')!]}
+      />
       <PageHero
         eyebrow="Free consultation"
         eyebrowIcon={Calendar}
@@ -54,7 +49,7 @@ function Contact({ initialData }: ContactProps) {
             items={[
               { icon: 'shield', label: 'No credit card required' },
               { icon: 'clock', label: 'No obligation' },
-              { icon: 'star', label: '5.0 on Google', sub: '100+ reviews' },
+              { icon: 'star', label: '5.0 on Google' },
             ]}
           />
         </div>
@@ -65,7 +60,8 @@ function Contact({ initialData }: ContactProps) {
 
       {/* BOOKING WIDGET */}
       <Section tone="muted" padding="md" containerSize="md" className="-mt-10">
-        <Card tone="default" padding="xl" rounded="xl3" className="shadow-lift">
+        <Reveal variant="up">
+          <Card tone="default" padding="xl" rounded="xl3" className="shadow-lift">
           <div className="text-center">
             <span className="label-mono text-rust-700">Schedule</span>
             <h2 className="mt-3 font-display text-3xl sm:text-4xl font-semibold text-ink-900 leading-tight">
@@ -98,27 +94,32 @@ function Contact({ initialData }: ContactProps) {
           <p className="mt-6 max-w-xl mx-auto text-sm text-ink-800 bg-cream-100 border-l-4 border-rust-500 rounded-xl p-4 text-left">
             <strong className="text-rust-700">Please show up!</strong> We&rsquo;re real people who block time for you. Thanks!
           </p>
-        </Card>
+          </Card>
+        </Reveal>
       </Section>
 
       {/* ALTERNATIVE CONTACT */}
       <Section tone="default" padding="lg" containerSize="md">
-        <SectionHeading
-          eyebrow="Other ways to reach us"
-          heading="Prefer another"
-          accent="way to connect?"
-          sub="Call, text, or email — we usually reply within hours."
-          maxWidth="max-w-none"
-        />
+        <Reveal variant="up">
+          <SectionHeading
+            eyebrow="Other ways to reach us"
+            heading="Prefer another"
+            accent="way to connect?"
+            sub="Call, text, or email — we usually reply within hours."
+            maxWidth="max-w-none"
+          />
+        </Reveal>
 
-        <Card tone="default" padding="xl" rounded="xl3" className="mt-12">
-          <PhoneCta />
-          <hr className="rule-hairline my-7" />
-          <p className="text-sm text-ink-700">
-            Based in Leominster, MA — serving small businesses{' '}
-            <span className="text-editorial-italic text-rust-600">nationwide</span>.
-          </p>
-        </Card>
+        <Reveal variant="up" delay={100}>
+          <Card tone="default" padding="xl" rounded="xl3" className="mt-12">
+            <PhoneCta />
+            <hr className="rule-hairline my-7" />
+            <p className="text-sm text-ink-700">
+              Based in Leominster, MA — serving small businesses{' '}
+              <span className="text-editorial-italic text-rust-600">nationwide</span>.
+            </p>
+          </Card>
+        </Reveal>
       </Section>
     </>
   )

@@ -8,8 +8,10 @@ import {
   SectionHeading,
   StaggerGrid,
   PriceCard,
+  Reveal,
   TrustStack,
 } from './components/ui'
+import { SeoMeta, organizationLd, serviceLd, breadcrumbForPath } from './seo'
 
 interface Pkg {
   name: string
@@ -76,17 +78,6 @@ const COMPARE_FEATURES: Array<{ label: string; basic: boolean; standard: boolean
 ]
 
 function Services() {
-  React.useEffect(() => {
-    document.title = 'Our Services | Web Design & Development in Leominster'
-    const metaDescription = document.querySelector('meta[name="description"]')
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        'content',
-        'Explore our professional web design and development services in Leominster, MA. From quick launch websites to full e-commerce solutions, we have the perfect package for your business.'
-      )
-    }
-  }, [])
-
   // PRESERVED: same custom event dispatch that App.tsx listens for.
   const handleGetStarted = (pkg: Pkg) => {
     const event = new CustomEvent('navigate', {
@@ -103,6 +94,20 @@ function Services() {
 
   return (
     <>
+      <SeoMeta
+        path="/services"
+        jsonLd={[
+          organizationLd(),
+          serviceLd({
+            name: 'Web Design + Social Media Services',
+            description:
+              'Websites from $200, hosting from $15/mo, social media management from $30/wk. Free design and free trial week.',
+            serviceType: 'Web design and social media management',
+            url: 'https://acewebdesigners.com/services',
+          }),
+          breadcrumbForPath('/services')!,
+        ]}
+      />
       <PageHero
         eyebrow="Our packages"
         eyebrowIcon={Sparkles}
@@ -141,13 +146,15 @@ function Services() {
 
       {/* COMPARISON TABLE — editorial */}
       <Section tone="muted" padding="lg" containerSize="lg">
-        <SectionHeading
-          eyebrow="Compare"
-          heading="Which package is"
-          accent="best for you"
-        />
+        <Reveal variant="up">
+          <SectionHeading
+            eyebrow="Compare"
+            heading="Which package is"
+            accent="best for you"
+          />
+        </Reveal>
 
-        <div className="mt-12 overflow-x-auto rounded-xl3 ring-1 ring-ink-900/10 bg-cream-50">
+        <Reveal variant="up" delay={120} className="mt-12 overflow-x-auto rounded-xl3 ring-1 ring-ink-900/10 bg-cream-50">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-ink-900/10">
@@ -181,7 +188,7 @@ function Services() {
               ))}
             </tbody>
           </table>
-        </div>
+        </Reveal>
       </Section>
     </>
   )
