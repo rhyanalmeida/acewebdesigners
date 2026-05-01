@@ -33,6 +33,10 @@ interface MetaUserData {
   ph?: string[]
   fn?: string[]
   ln?: string[]
+  ct?: string[]
+  st?: string[]
+  zp?: string[]
+  country?: string[]
   external_id?: string[]
   fbc?: string
   fbp?: string
@@ -221,6 +225,17 @@ export default async (req: Request): Promise<Response> => {
   const firstName = cap(pick(body, 'first_name', 'contact.first_name'), 64).trim().toLowerCase()
   const lastName = cap(pick(body, 'last_name', 'contact.last_name'), 64).trim().toLowerCase()
   const contactId = cap(pick(body, 'contact_id', 'contact.id'), 128).trim()
+  // Address fields lift Meta match-quality from ~50% (email+phone) to ~80%+.
+  // GHL contacts capture these from the booking form and address autocomplete.
+  const city = cap(pick(body, 'city', 'contact.city', 'contact.address.city'), 64).trim().toLowerCase().replace(/\s+/g, '')
+  const state = cap(pick(body, 'state', 'contact.state', 'contact.address.state'), 32).trim().toLowerCase().replace(/\s+/g, '')
+  const zipRaw = cap(pick(body, 'postal_code', 'zip', 'contact.postalCode', 'contact.zip', 'contact.address.postalCode'), 16)
+  // Meta wants 5-digit US zip or first 3 of postal — keep digits/letters only, lowercase.
+  const zip = zipRaw.replace(/[^a-z0-9]/gi, '').toLowerCase()
+  const countryRaw = cap(pick(body, 'country', 'contact.country', 'contact.address.country'), 8).trim().toLowerCase()
+  // Normalize to ISO 3166-1 alpha-2 — Meta accepts "us" but most GHL contacts
+  // already send "US"/"USA". Map common forms; fall back to first two chars.
+  const country = countryRaw === 'usa' || countryRaw === 'united states' ? 'us' : countryRaw.slice(0, 2)
 
   // --- Attribution (captured on landing page, stored as GHL custom fields) ---
   let fbc = pick(body, 'fbc', 'customData.fbc', 'contact.fbc', 'customFields.fbc')
@@ -299,6 +314,10 @@ export default async (req: Request): Promise<Response> => {
   if (phone) userData.ph = [sha256(phone)]
   if (firstName) userData.fn = [sha256(firstName)]
   if (lastName) userData.ln = [sha256(lastName)]
+  if (city) userData.ct = [sha256(city)]
+  if (state) userData.st = [sha256(state)]
+  if (zip) userData.zp = [sha256(zip)]
+  if (country) userData.country = [sha256(country)]
   if (contactId) userData.external_id = [sha256(contactId)]
 
   // fbc/fbp MUST NOT be hashed

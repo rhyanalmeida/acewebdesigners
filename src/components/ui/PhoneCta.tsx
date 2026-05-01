@@ -1,5 +1,6 @@
 import React from 'react'
 import { Phone, Mail } from 'lucide-react'
+import { trackPhoneClick } from '../../utils/pixelTracking'
 
 export interface PhoneCtaProps {
   phone?: string
@@ -8,6 +9,8 @@ export interface PhoneCtaProps {
   variant?: 'inline' | 'stacked'
   tone?: 'default' | 'inverted'
   showLabels?: boolean
+  /** Where this CTA appears — passed to Meta as the click source for attribution. */
+  source?: string
   className?: string
 }
 
@@ -15,10 +18,11 @@ const formatPhoneHref = (phone: string) => `tel:+1${phone.replace(/[^\d]/g, '')}
 
 const PhoneCta: React.FC<PhoneCtaProps> = ({
   phone = '(774) 446-7375',
-  email = 'support@acewebdesigners.com',
+  email = 'hello@acewebdesigners.com',
   variant = 'inline',
   tone = 'default',
   showLabels = true,
+  source = 'unknown',
   className = '',
 }) => {
   const isDark = tone === 'inverted'
@@ -35,6 +39,7 @@ const PhoneCta: React.FC<PhoneCtaProps> = ({
     >
       <a
         href={formatPhoneHref(phone)}
+        onClick={() => trackPhoneClick(source)}
         className={`group inline-flex items-center gap-2.5 ring-focus-rust rounded ${baseLink} transition-colors duration-200 ease-premium`}
         aria-label={`Call ${phone}`}
       >

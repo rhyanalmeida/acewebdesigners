@@ -183,6 +183,30 @@ export function trackBookingComplete(
 }
 
 /**
+ * Track a phone-call click as a client-side audience signal only.
+ *
+ * Architecture note: Meta `Lead` and all offline conversions flow exclusively
+ * through GoHighLevel (the booking form → GHL contact → workflow webhook →
+ * `ghl-capi.ts` → Meta CAPI). Phone clicks happen outside GHL, so we
+ * intentionally do NOT fire `Lead` here — that would double-count when the
+ * caller also books, and it would create offline conversions outside the
+ * canonical GHL pipeline. We fire only a custom `PhoneClick` event so Meta can
+ * use it for retargeting / lookalike audiences without polluting Lead totals.
+ *
+ * If a call turns into a real lead, the operator adds the contact in GHL and
+ * the existing workflow fires the proper CAPI Lead event from the GHL bridge.
+ */
+export function trackPhoneClick(
+  source: 'home' | 'main_landing' | 'contractor' | 'contact' | 'about' | 'social' | 'work' | 'reviews' | 'header' | 'footer' | string,
+): void {
+  trackCustomEvent('PhoneClick', {
+    content_name: 'Phone Call Click',
+    content_category: 'Phone Signal',
+    source,
+  })
+}
+
+/**
  * Initialize contractor-specific pixel
  * This is called on the contractor landing page to load their separate pixel
  */
