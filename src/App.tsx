@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { HelmetProvider } from 'react-helmet-async'
 import { editorialEase } from './lib/motion'
 
 import Contact from './Contact'
@@ -11,12 +12,13 @@ import LandingContractors from './LandingContractors'
 import Refer from './Refer'
 import SocialMedia from './SocialMedia'
 import PrivacyPolicy from './PrivacyPolicy'
-import PrivacyPolicyPage from './PrivacyPolicyPage'
 import TermsOfService from './TermsOfService'
 import Home from './pages/Home'
 
 import { PageShell } from './components/layout'
+import { CookieNotice } from './components/ui'
 import { useScrollReveal } from './hooks/useScrollReveal'
+import { trackEvent, trackViewContent } from './utils/pixelTracking'
 
 type PageKey =
   | 'home'
@@ -29,11 +31,10 @@ type PageKey =
   | 'landing'
   | 'contractorlanding'
   | 'privacy'
-  | 'privacypolicy'
   | 'termsofservice'
 
 /** Pages that should render without the standard header/footer/sticky CTA chrome. */
-const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'refer', 'privacypolicy', 'termsofservice']
+const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'refer', 'termsofservice']
 
 function App() {
   const [currentPage, setCurrentPage] = React.useState<PageKey>('home')
@@ -44,12 +45,20 @@ function App() {
   useEffect(() => {
     const detectFromPath = () => {
       const path = window.location.pathname.toLowerCase().replace(/\/$/, '')
+      // Order matters: longer / more specific paths first so "/contractorlanding"
+      // doesn't get caught by "/landing", and "/socialmedia" doesn't get caught
+      // by "/services". Default falls through to 'home'.
       if (path.includes('/contractorlanding')) setCurrentPage('contractorlanding')
       else if (path.includes('/landing')) setCurrentPage('landing')
-      else if (path.includes('/refer')) setCurrentPage('refer')
       else if (path.includes('/socialmedia')) setCurrentPage('socialmedia')
-      else if (path.includes('/privacypolicy')) setCurrentPage('privacypolicy')
+      else if (path.includes('/services')) setCurrentPage('services')
+      else if (path.includes('/about')) setCurrentPage('about')
+      else if (path.includes('/work')) setCurrentPage('work')
+      else if (path.includes('/reviews')) setCurrentPage('reviews')
+      else if (path.includes('/contact')) setCurrentPage('contact')
+      else if (path.includes('/refer')) setCurrentPage('refer')
       else if (path.includes('/termsofservice')) setCurrentPage('termsofservice')
+      else if (path.includes('/privacy')) setCurrentPage('privacy')
     }
     detectFromPath()
 
@@ -87,6 +96,27 @@ function App() {
   // Single shared scroll-reveal observer; re-runs when page changes so newly mounted DOM is observed.
   useScrollReveal(currentPage)
 
+  // SPA route → Meta Pixel PageView + ViewContent. The initial PageView fires
+  // from index.html on first paint; this keeps Meta in sync with subsequent
+  // client-side route changes. Landing/contractorlanding fire their own
+  // ViewContent (with attribution) in their mount effects, so skip those here.
+  useEffect(() => {
+    if (currentPage === 'landing' || currentPage === 'contractorlanding') return
+    trackEvent('PageView')
+    const viewContentMap: Partial<Record<PageKey, [string, string, string]>> = {
+      home: ['Home', 'Home', 'general'],
+      about: ['About', 'About', 'general'],
+      services: ['Services', 'Services', 'general'],
+      work: ['Our Work', 'Portfolio', 'general'],
+      reviews: ['Reviews', 'Reviews', 'general'],
+      contact: ['Contact', 'Contact', 'general'],
+      socialmedia: ['Social Media', 'Social Media Services', 'social_media'],
+      refer: ['Refer & Earn', 'Referral', 'general'],
+    }
+    const args = viewContentMap[currentPage]
+    if (args) trackViewContent(args[0], args[1], args[2])
+  }, [currentPage])
+
   const renderPage = () => {
     switch (currentPage) {
       case 'contact':
@@ -107,8 +137,6 @@ function App() {
         return <SocialMedia />
       case 'privacy':
         return <PrivacyPolicy />
-      case 'privacypolicy':
-        return <PrivacyPolicyPage />
       case 'termsofservice':
         return <TermsOfService />
       case 'home':
@@ -150,13 +178,21 @@ function App() {
 
   // Landing/refer/legal pages render their own chrome — return them raw.
   if (isBare) {
-    return <PageWrapper>{renderPage()}</PageWrapper>
+    return (
+      <HelmetProvider>
+        <PageWrapper>{renderPage()}</PageWrapper>
+        <CookieNotice />
+      </HelmetProvider>
+    )
   }
 
   return (
-    <PageShell onNavigate={handleNavigate} currentPage={currentPage}>
-      <PageWrapper>{renderPage()}</PageWrapper>
-    </PageShell>
+    <HelmetProvider>
+      <PageShell onNavigate={handleNavigate} currentPage={currentPage}>
+        <PageWrapper>{renderPage()}</PageWrapper>
+      </PageShell>
+      <CookieNotice />
+    </HelmetProvider>
   )
 }
 
