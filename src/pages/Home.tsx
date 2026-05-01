@@ -42,6 +42,7 @@ import {
 import { fadeUpHero } from '../lib/motion'
 
 import type { NavigateFn } from '../components/layout'
+import { SeoMeta, organizationLd, localBusinessLd, faqPageLd } from '../seo'
 
 interface HomeProps {
   onNavigate: NavigateFn
@@ -103,12 +104,12 @@ const FAQS = [
 ]
 
 const INDUSTRIES = [
-  { name: 'Restaurants & Food Service', icon: '🍽️', desc: 'Online ordering, menu displays, and reservation booking.', count: '15+ projects' },
-  { name: 'Construction', icon: '🏗️', desc: 'Project portfolios, service listings, lead generation.', count: '20+ projects' },
-  { name: 'Healthcare Practices', icon: '⚕️', desc: 'Appointment scheduling, service info, patient portals.', count: '12+ projects' },
-  { name: 'Professional Services', icon: '💼', desc: 'Service showcases, testimonials, consultation booking.', count: '25+ projects' },
-  { name: 'Retail & E-commerce', icon: '🛍️', desc: 'Online stores, inventory, secure payments.', count: '18+ projects' },
-  { name: 'Fitness Studios', icon: '💪', desc: 'Class scheduling, memberships, training programs.', count: '10+ projects' },
+  { name: 'Restaurants & Food Service', icon: '🍽️', desc: 'Online ordering, menu displays, and reservation booking.' },
+  { name: 'Construction', icon: '🏗️', desc: 'Project portfolios, service listings, lead generation.' },
+  { name: 'Healthcare Practices', icon: '⚕️', desc: 'Appointment scheduling, service info, patient portals.' },
+  { name: 'Professional Services', icon: '💼', desc: 'Service showcases, testimonials, consultation booking.' },
+  { name: 'Retail & E-commerce', icon: '🛍️', desc: 'Online stores, inventory, secure payments.' },
+  { name: 'Fitness Studios', icon: '💪', desc: 'Class scheduling, memberships, training programs.' },
 ]
 
 const PERFORMANCE = [
@@ -217,6 +218,14 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
 
   return (
     <>
+      <SeoMeta
+        path="/"
+        jsonLd={[
+          organizationLd(),
+          localBusinessLd(),
+          faqPageLd(FAQS.map(f => ({ question: f.q, answer: f.a }))),
+        ]}
+      />
       {/* HERO — editorial cream paper, single-col, type-led */}
       <section className="relative isolate overflow-hidden bg-cream-50 text-ink-900 bg-paper-noise" aria-label="Hero">
         <CursorHalo />
@@ -230,7 +239,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             <motion.div variants={fadeUpHero}>
               <Eyebrow tone="brand">
                 <Star className="h-3.5 w-3.5 fill-current" aria-hidden />
-                Trusted by 100+ small businesses nationwide
+                Trusted by small businesses nationwide
               </Eyebrow>
             </motion.div>
             <motion.div variants={fadeUpHero}>
@@ -244,7 +253,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
               </GradientHeading>
             </motion.div>
             <motion.p
-              className="mt-7 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-2xl mx-auto"
+              className="mt-7 text-lg sm:text-xl text-ink-800 leading-relaxed max-w-2xl mx-auto"
               variants={fadeUpHero}
             >
               We design websites that look incredible and turn visitors into customers — and you only pay if you love what we build first.
@@ -349,8 +358,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
                 <span className="text-4xl shrink-0" aria-hidden>{ind.icon}</span>
                 <div>
                   <h3 className="font-display text-xl font-semibold text-ink-900">{ind.name}</h3>
-                  <p className="mt-2 text-ink-700 leading-relaxed">{ind.desc}</p>
-                  <BadgePill tone="brand" className="mt-4">{ind.count}</BadgePill>
+                  <p className="mt-2 text-ink-800 leading-relaxed">{ind.desc}</p>
                 </div>
               </div>
             </Card>
@@ -384,7 +392,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
                   </span>
                 </div>
                 <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{step.title}</h3>
-                <p className="mt-2 text-ink-700 leading-relaxed">{step.desc}</p>
+                <p className="mt-2 text-ink-800 leading-relaxed">{step.desc}</p>
                 <BadgePill tone="neutral" className="mt-4">
                   <Clock className="h-3 w-3" aria-hidden />
                   {step.duration}
@@ -574,7 +582,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
                   className={`grid transition-[grid-template-rows] duration-500 ease-premium ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
                 >
                   <div className="overflow-hidden">
-                    <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-ink-700 leading-relaxed">{faq.a}</div>
+                    <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-ink-800 leading-relaxed">{faq.a}</div>
                   </div>
                 </div>
               </div>

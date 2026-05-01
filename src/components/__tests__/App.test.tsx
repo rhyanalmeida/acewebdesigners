@@ -93,7 +93,7 @@ describe('App routing + chrome', () => {
   it('renders SiteFooter contact info on standard pages', () => {
     render(<App />)
     // PhoneCta in the home hero plus SiteFooter both render these links — assert at least one of each.
-    expect(screen.getAllByRole('link', { name: /support@acewebdesigners\.com/i }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('link', { name: /hello@acewebdesigners\.com/i }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('link', { name: /\(774\) 446-7375/i }).length).toBeGreaterThan(0)
   })
 

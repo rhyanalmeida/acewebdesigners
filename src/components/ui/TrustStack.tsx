@@ -15,9 +15,9 @@ export interface TrustStackProps {
 }
 
 const DEFAULT_ITEMS: TrustStackItem[] = [
-  { icon: 'star',     label: '5.0 on Google',         sub: '100+ reviews' },
-  { icon: 'sparkles', label: '100+ websites launched' },
+  { icon: 'star',     label: '5.0 on Google' },
   { icon: 'shield',   label: 'No payment until you love it' },
+  { icon: 'sparkles', label: 'Built for small businesses' },
   { icon: 'clock',    label: 'Same-day launch available' },
 ]
 

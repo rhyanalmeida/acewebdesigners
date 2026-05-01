@@ -1,6 +1,7 @@
 import React from 'react'
 import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
 import Container from '../ui/Container'
+import Logo from '../ui/Logo'
 import { NavigateFn } from './SiteHeader'
 
 interface SiteFooterProps {
@@ -13,10 +14,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
     <Container size="lg">
       <div className="grid gap-12 py-16 md:grid-cols-12">
         <div className="md:col-span-5">
-          <span className="flex items-baseline text-cream-50">
-            <span className="font-display text-3xl font-semibold tracking-tight">Ace</span>
-            <span className="ml-2 label-mono text-cream-100/60">Web Designers</span>
-          </span>
+          <Logo tone="inverted" size="lg" />
           <p className="mt-6 max-w-md text-base text-cream-100/70 leading-relaxed">
             Beautiful websites, built for small business. Based in Leominster, MA — serving owners
             <span className="text-editorial-italic text-rust-300"> nationwide</span>.
@@ -58,11 +56,11 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
           <ul className="mt-5 space-y-3 text-sm">
             <li>
               <a
-                href="mailto:support@acewebdesigners.com"
+                href="mailto:hello@acewebdesigners.com"
                 className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-rust rounded"
               >
                 <Mail className="h-4 w-4 text-rust-300" aria-hidden />
-                support@acewebdesigners.com
+                hello@acewebdesigners.com
               </a>
             </li>
             <li>

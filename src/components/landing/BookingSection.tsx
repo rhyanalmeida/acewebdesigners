@@ -20,6 +20,10 @@ interface BookingSectionProps {
   conversionType?: string
   trackerId?: string
   reminder?: React.ReactNode
+  /** 3-bullet "what to expect on the call" block rendered above the calendar. */
+  whatToExpect?: string[]
+  /** Soft scarcity microcopy rendered just above the calendar (no numbers). */
+  scarcityNote?: React.ReactNode
 }
 
 /**
@@ -43,6 +47,8 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
       conversionType,
       trackerId,
       reminder,
+      whatToExpect,
+      scarcityNote,
     },
     forwardedRef
   ) => {
@@ -77,7 +83,37 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
           </div>
         </div>
 
-        <div className="mt-10 rounded-xl3 bg-cream-50 shadow-lift ring-1 ring-ink-900/10 p-3 sm:p-6 md:p-10">
+        {whatToExpect && whatToExpect.length > 0 && (
+          <div className="mt-10 mx-auto max-w-3xl">
+            <div className="rounded-xl2 bg-cream-50 ring-1 ring-ink-900/10 p-5 sm:p-6 shadow-soft">
+              <p className="label-mono text-ink-700/70 text-center">What to expect on the call</p>
+              <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+                {whatToExpect.map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm sm:text-base text-ink-800 leading-relaxed"
+                  >
+                    <span
+                      aria-hidden
+                      className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rust-500 text-white text-xs font-semibold"
+                    >
+                      {i + 1}
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {scarcityNote && (
+          <p className="mt-6 text-center text-sm text-ink-700/80 max-w-2xl mx-auto">
+            {scarcityNote}
+          </p>
+        )}
+
+        <div className="mt-8 rounded-xl3 bg-cream-50 shadow-lift ring-1 ring-ink-900/10 p-3 sm:p-6 md:p-10">
           <BookingWidget
             calendarConfig={calendarConfig}
             onBookingComplete={onBookingComplete}

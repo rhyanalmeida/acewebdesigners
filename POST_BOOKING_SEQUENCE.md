@@ -94,7 +94,7 @@ Looking forward to our chat!
 [DESIGNER_NAME]
 Ace Web Designers
 (774) 315-1951
-support@acewebdesigners.com
+hello@acewebdesigners.com
 ```
 
 ### Template 2: 24-Hour Reminder

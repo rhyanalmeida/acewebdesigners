@@ -50,7 +50,7 @@ const ProcessSteps: React.FC<ProcessStepsProps> = ({
               {String(i + 1).padStart(2, '0')}
             </span>
             <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{step.title}</h3>
-            <p className="mt-2 text-ink-700 leading-relaxed">{step.description}</p>
+            <p className="mt-2 text-ink-800 leading-relaxed">{step.description}</p>
           </li>
         ))}
       </ol>

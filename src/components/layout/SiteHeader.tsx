@@ -2,6 +2,7 @@ import React from 'react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import Container from '../ui/Container'
+import Logo from '../ui/Logo'
 import { editorialEase } from '../../lib/motion'
 
 export type NavigateFn = (page: string, scrollTo?: string) => void
@@ -20,15 +21,6 @@ const NAV_LINKS: Array<{ label: string; page: string }> = [
   { label: 'Contact', page: 'contact' },
   { label: 'Refer & Earn', page: 'refer' },
 ]
-
-const Logo: React.FC<{ tone?: 'default' | 'inverted' }> = ({ tone = 'default' }) => (
-  <span className={`flex items-baseline ${tone === 'inverted' ? 'text-cream-50' : 'text-ink-900'}`}>
-    <span className="font-display text-2xl font-semibold tracking-tight">Ace</span>
-    <span className={`ml-1.5 label-mono ${tone === 'inverted' ? 'text-cream-100/60' : 'text-ink-700/70'}`}>
-      Web Designers
-    </span>
-  </span>
-)
 
 const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false)

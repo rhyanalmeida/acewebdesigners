@@ -18,6 +18,8 @@ interface LandingHeroProps {
   urgencyText?: string
   ctaLabel: string
   onCta: () => void
+  /** Microcopy directly under the primary CTA — e.g. "No card. No commitment." */
+  riskReversal?: React.ReactNode
   videoSrc?: string
   videoTitle?: string
   rating?: number
@@ -32,6 +34,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
   urgencyText,
   ctaLabel,
   onCta,
+  riskReversal,
   videoSrc,
   videoTitle = 'Hero video',
   rating = 5,
@@ -68,7 +71,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
           </motion.div>
 
           <motion.p
-            className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed max-w-xl mx-auto lg:mx-0"
+            className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed max-w-xl mx-auto lg:mx-0"
             variants={fadeUpHero}
           >
             {sub}
@@ -96,6 +99,15 @@ const LandingHero: React.FC<LandingHeroProps> = ({
               </button>
             </Magnetic>
           </motion.div>
+
+          {riskReversal && (
+            <motion.p
+              className="mt-3 text-sm text-ink-700/80 text-center lg:text-left"
+              variants={fadeUpHero}
+            >
+              {riskReversal}
+            </motion.p>
+          )}
 
           <div className="mt-6 flex items-center justify-center lg:justify-start gap-3 text-sm text-ink-700">
             <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${rating} out of 5 stars`}>

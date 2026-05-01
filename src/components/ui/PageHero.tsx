@@ -71,7 +71,7 @@ const PageHero: React.FC<PageHeroProps> = ({
           </motion.div>
           {sub && (
             <motion.p
-              className="mt-6 text-lg sm:text-xl text-ink-700 leading-relaxed"
+              className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed"
               {...item(0.18)}
             >
               {sub}

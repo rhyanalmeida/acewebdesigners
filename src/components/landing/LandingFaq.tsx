@@ -68,7 +68,7 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
                 className={`grid transition-[grid-template-rows] duration-500 ease-premium ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
               >
                 <div className="overflow-hidden">
-                  <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-ink-700 leading-relaxed">
+                  <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-ink-800 leading-relaxed">
                     {item.answer}
                   </div>
                 </div>

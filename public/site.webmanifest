@@ -3,12 +3,12 @@
   "short_name": "Ace Web",
   "icons": [
     {
-      "src": "https://i.ibb.co/Jjr9HCP7/Ace-Web-Designers-Favicon.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://i.ibb.co/Jjr9HCP7/Ace-Web-Designers-Favicon.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }

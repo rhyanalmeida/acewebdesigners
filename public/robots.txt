@@ -1,47 +1,30 @@
 User-agent: *
 Allow: /
 
-# Disallow search and admin areas
-Disallow: /search
+# Disallow admin/private areas only — DO NOT block query strings
+# (we use ?source= and ?fbclid= for ad attribution).
 Disallow: /admin/
 Disallow: /private/
-Disallow: /*.json$
-Disallow: /*?*
 Disallow: /api/
+Disallow: /.netlify/
 
-# Allow important directories
-Allow: /assets/
-Allow: /images/
-Allow: /css/
-Allow: /js/
-
-# Specific bot instructions
+# Major search engines — explicit allow + light crawl-delay
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
 
+# Social previews
 User-agent: facebookexternalhit
 Allow: /
 
 User-agent: Twitterbot
 Allow: /
 
-# Block bad bots
-User-agent: AhrefsBot
-Disallow: /
+User-agent: LinkedInBot
+Allow: /
 
-User-agent: MJ12bot
-Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-# Sitemap location
-Sitemap: https://www.acewebdesigners.com/sitemap.xml
-
-# Host directive
-Host: https://www.acewebdesigners.com
+# Sitemap
+Sitemap: https://acewebdesigners.com/sitemap.xml
