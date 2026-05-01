@@ -8,7 +8,7 @@
 // Required env (from .env.local — gitignored):
 //   META_ADS_TOKEN          System User token with ads_management permission
 //   META_AD_ACCOUNT_ID      e.g. act_1234567890123456 (with the act_ prefix)
-//   META_DATASET_ID         the contractor pixel/dataset id (default: 1548487516424971)
+//   META_DATASET_ID         the contractor pixel/dataset id (default: 4230021860577001)
 
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -98,7 +98,7 @@ async function findAdSetByName(adAccount, name) {
 
 async function setup() {
   const adAccount = process.env.META_AD_ACCOUNT_ID
-  const datasetId = process.env.META_DATASET_ID || '1548487516424971'
+  const datasetId = process.env.META_DATASET_ID || '4230021860577001'
 
   console.log(`[setup] ad account: ${adAccount}`)
   console.log(`[setup] dataset:    ${datasetId}`)

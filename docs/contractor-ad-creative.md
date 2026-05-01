@@ -134,5 +134,5 @@ Once you have a winning ad and want to scale to $100+/day, duplicate the ad set 
 - Campaign ID: `120241554190170259`
 - Ad set ID: `120241554191670259`
 - Ad account: `act_553999801104558` (Ace Web Designers)
-- Pixel/dataset: `1548487516424971` (where CAPI Lead/CompleteRegistration/Purchase land at ~8.4 EMQ)
+- Pixel/dataset: `4230021860577001` (where CAPI Lead/CompleteRegistration/Purchase land at ~8.4 EMQ)
 - All scripts to manage: `scripts/meta-ads-setup.mjs` (create/update/teardown), `scripts/meta-ads-status.mjs` (health check)

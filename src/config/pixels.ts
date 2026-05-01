@@ -32,7 +32,7 @@ export const MAIN_PIXEL: PixelConfig = {
  * Loaded dynamically only on the contractor landing page
  */
 export const CONTRACTOR_PIXEL: PixelConfig = {
-  pixelId: '1548487516424971',
+  pixelId: '4230021860577001',
   name: 'Contractor Pixel',
   description: 'Tracks contractor leads from Facebook ads - separate from main pixel',
 }

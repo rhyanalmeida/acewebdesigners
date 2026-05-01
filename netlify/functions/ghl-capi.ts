@@ -23,7 +23,7 @@ import crypto from 'node:crypto'
 import { getStore } from '@netlify/blobs'
 
 const META_CAPI_TOKEN = process.env.META_CAPI_TOKEN || ''
-const META_PIXEL_ID = process.env.META_PIXEL_ID || '1548487516424971'
+const META_PIXEL_ID = process.env.META_PIXEL_ID || '4230021860577001'
 const META_API_VERSION = 'v21.0'
 
 type EventAction = 'lead' | 'show' | 'purchase'

@@ -9,7 +9,7 @@ This site runs Facebook/Instagram ads only. There is no Google Ads, no GA4. Ever
 | Pixel | ID | Where it loads |
 |---|---|---|
 | Main pixel | `1703925480259996` | `index.html` (every page except `/contractorlanding`) |
-| Contractor pixel | `1548487516424971` | `LandingContractors.tsx` (loaded dynamically; main pixel is suppressed on this route to avoid double-firing) |
+| Contractor pixel | `4230021860577001` | `LandingContractors.tsx` (loaded dynamically; main pixel is suppressed on this route to avoid double-firing) |
 
 The contractor pixel is also the `META_PIXEL_ID` used by `ghl-capi.ts` for server-side events. If you ever switch the CAPI dataset to the main pixel, set `META_PIXEL_ID` in Netlify env.
 

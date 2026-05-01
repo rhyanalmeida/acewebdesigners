@@ -115,34 +115,56 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
   // Handle booking completion detection via postMessage
   const handleMessage = useCallback(
     (event: MessageEvent) => {
-      // Only process messages from LeadConnector/GoHighLevel
-      if (
-        !event.origin.includes('leadconnectorhq.com') &&
-        !event.origin.includes('msgsndr.com')
-      ) {
-        return
+      // Diagnostic: log EVERY postMessage so we can capture the actual shapes
+      // GHL sends, including ones rejected by the origin filter. The earlier
+      // detection logic only logged AFTER the origin check passed, which made
+      // it impossible to tell whether a missing detection was an origin issue
+      // or a payload-shape issue. Toggle off later when stable.
+      const fromGhl =
+        event.origin.includes('leadconnectorhq.com') ||
+        event.origin.includes('msgsndr.com')
+      console.log(
+        `🔬 postMessage origin=${event.origin} fromGhl=${fromGhl}`,
+        event.data,
+      )
+
+      // Stash to a window-global ring buffer so we can dump after a booking
+      // attempt: `JSON.stringify(window.__bookingWidgetMessages, null, 2)`.
+      try {
+        const w = window as unknown as { __bookingWidgetMessages?: unknown[] }
+        if (!w.__bookingWidgetMessages) w.__bookingWidgetMessages = []
+        w.__bookingWidgetMessages.push({
+          ts: Date.now(),
+          origin: event.origin,
+          data: event.data,
+        })
+        if (w.__bookingWidgetMessages.length > 200) w.__bookingWidgetMessages.shift()
+      } catch {
+        /* ignore */
       }
 
-      console.log('🎯 LeadConnector message detected:', event.data)
+      // Only process messages from LeadConnector/GoHighLevel
+      if (!fromGhl) return
 
       let isBooking = false
+      let matchedPattern = ''
 
       if (event.data && typeof event.data === 'object') {
-        // Check multiple possible event patterns
-        if (
-          event.data.type === 'booking_completed' ||
-          event.data.type === 'appointment_scheduled' ||
-          event.data.event === 'booking_completed' ||
-          event.data.event === 'appointment_scheduled' ||
-          event.data.type === 'form_submitted' ||
-          event.data.type === 'calendar_booking' ||
-          event.data.event === 'form_submitted' ||
-          event.data.event === 'calendar_booking' ||
-          event.data.message?.type === 'booking_completed' ||
-          (event.data.action && event.data.action.includes('book'))
-        ) {
-          isBooking = true
+        // Check multiple possible event patterns. Tag which one matched so we
+        // can see in the console log what triggered the booking flow (or didn't).
+        const d = event.data as Record<string, unknown> & {
+          message?: { type?: string }
         }
+        if (d.type === 'booking_completed') { isBooking = true; matchedPattern = 'type=booking_completed' }
+        else if (d.type === 'appointment_scheduled') { isBooking = true; matchedPattern = 'type=appointment_scheduled' }
+        else if (d.event === 'booking_completed') { isBooking = true; matchedPattern = 'event=booking_completed' }
+        else if (d.event === 'appointment_scheduled') { isBooking = true; matchedPattern = 'event=appointment_scheduled' }
+        else if (d.type === 'form_submitted') { isBooking = true; matchedPattern = 'type=form_submitted' }
+        else if (d.type === 'calendar_booking') { isBooking = true; matchedPattern = 'type=calendar_booking' }
+        else if (d.event === 'form_submitted') { isBooking = true; matchedPattern = 'event=form_submitted' }
+        else if (d.event === 'calendar_booking') { isBooking = true; matchedPattern = 'event=calendar_booking' }
+        else if (d.message?.type === 'booking_completed') { isBooking = true; matchedPattern = 'message.type=booking_completed' }
+        else if (typeof d.action === 'string' && d.action.includes('book')) { isBooking = true; matchedPattern = `action~book (${d.action})` }
       }
 
       // Also check string messages
@@ -156,10 +178,12 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
         ) {
           console.log('🔍 Possible booking message (string):', event.data)
           isBooking = true
+          matchedPattern = `string-includes (${event.data.slice(0, 80)})`
         }
       }
 
       if (isBooking) {
+        console.log(`✅ Booking detected via pattern: ${matchedPattern}`)
         // Push attribution to server-side stash so the CAPI function can merge
         // fbc/fbp/event_id when the GHL webhook fires shortly after. Email and
         // contact_id are best-effort — postMessage shape varies by GHL widget
