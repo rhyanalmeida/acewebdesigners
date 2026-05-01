@@ -73,32 +73,16 @@
       Small Business Web Design Company USA | Professional Website Development Nationwide | Ace Web
       Designers
     </title>
-    <meta
-      name="title"
-      content="Small Business Web Design Company USA | Professional Website Development Nationwide | Ace Web Designers"
-    />
-    <meta
-      name="description"
-      content="#1 small business web design company serving all 50 states. Custom websites, e-commerce solutions, SEO optimization & digital marketing for small business owners. Get a professional website that converts visitors into customers. Free design mockup included!"
-    />
-    <meta
-      name="keywords"
-      content="small business web design, small business website development, affordable web design for small businesses, small business SEO services, small business digital marketing, custom small business websites, small business website designer nationwide, small business web development USA, small business online presence solutions, professional small business websites, small business web design company, small business website builder, small business marketing agency, small business web optimization services"
-    />
+    <!-- Per-route description / robots / canonical are provided by SeoMeta
+         (react-helmet-async). Static <meta name="description"> and friends
+         used to live here but were duplicating the dynamic ones, and the
+         static one was winning the crawler's "first match" lookup. Title is
+         kept above (Helmet replaces document.title cleanly per route). -->
     <meta name="author" content="Rhyan Almeida - Ace Web Designers" />
     <meta
-      name="robots"
-      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+      name="keywords"
+      content="small business web design, small business website development, affordable web design for small businesses, small business SEO services, small business digital marketing, custom small business websites, small business website designer nationwide, small business web development USA"
     />
-    <meta
-      name="googlebot"
-      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
-    />
-    <meta
-      name="bingbot"
-      content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
-    />
-    <link rel="canonical" href="https://www.acewebdesigners.com/" />
 
     <!-- Enhanced SEO Meta Tags -->
     <meta name="rating" content="general" />
@@ -565,63 +549,28 @@
       }
     </script>
 
-    <!-- Open Graph / Facebook - Enhanced -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.acewebdesigners.com/" />
-    <meta
-      property="og:title"
-      content="Small Business Web Design Company USA | Professional Website Development Nationwide | Ace Web Designers"
-    />
-    <meta
-      property="og:description"
-      content="#1 small business web design company serving all 50 states. Custom websites, e-commerce solutions, SEO optimization & digital marketing for small business owners. Get a professional website that converts visitors into customers. Free design mockup included!"
-    />
+    <!-- Open Graph + Twitter cards are provided per-route by SeoMeta.
+         Sitewide constants (locale, site name, image, social handles) live
+         here so social scrapers that don't run JS still get something. -->
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Ace Web Designers" />
     <meta property="og:image" content="https://acewebdesigners.com/logo.png" />
-    <meta
-      property="og:image:secure_url"
-      content="https://acewebdesigners.com/logo.png"
-    />
+    <meta property="og:image:secure_url" content="https://acewebdesigners.com/logo.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Ace Web Designers - #1 Small Business Web Design Company USA"
+      content="Ace Web Designers - small business websites + social media"
     />
     <meta property="og:image:type" content="image/png" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:site_name" content="Ace Web Designers" />
-    <meta property="og:updated_time" content="2024-12-17T00:00:00Z" />
-    <meta property="article:modified_time" content="2024-12-17T00:00:00Z" />
-    <meta property="article:published_time" content="2023-01-01T00:00:00Z" />
-    <meta property="article:section" content="Web Design Services" />
-    <meta property="article:tag" content="small business web design" />
-    <meta property="article:tag" content="website development" />
-    <meta property="article:tag" content="SEO optimization" />
-    <meta property="article:tag" content="digital marketing" />
     <meta property="business:contact_data:street_address" content="Leominster" />
     <meta property="business:contact_data:locality" content="Leominster" />
     <meta property="business:contact_data:region" content="MA" />
     <meta property="business:contact_data:postal_code" content="01453" />
     <meta property="business:contact_data:country_name" content="United States" />
 
-    <!-- Twitter Cards - Enhanced -->
-    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@acewebdesigners" />
     <meta name="twitter:creator" content="@acewebdesigners" />
-    <meta name="twitter:url" content="https://www.acewebdesigners.com/" />
-    <meta
-      name="twitter:title"
-      content="Small Business Web Design Company USA | Professional Website Development Nationwide"
-    />
-    <meta
-      name="twitter:description"
-      content="#1 small business web design company serving all 50 states. Custom websites, e-commerce solutions, SEO optimization & digital marketing. Free design mockup included!"
-    />
-    <meta name="twitter:image" content="https://acewebdesigners.com/logo.png" />
-    <meta
-      name="twitter:image:alt"
-      content="Ace Web Designers - #1 Small Business Web Design Company USA"
-    />
     <meta name="twitter:label1" content="Service Area" />
     <meta name="twitter:data1" content="All 50 States" />
     <meta name="twitter:label2" content="Specialization" />
