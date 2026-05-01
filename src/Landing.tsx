@@ -8,6 +8,7 @@ import {
   trackBookingComplete,
   setupTestingFunctions,
 } from './utils/pixelTracking'
+import { initAttribution, getAttribution } from './utils/attribution'
 import { useScrollReveal } from './hooks/useScrollReveal'
 
 import {
@@ -70,11 +71,25 @@ function Landing() {
   const bookingFormRef = useRef<HTMLElement>(null)
 
   const handleBookingComplete = useCallback(() => {
-    console.log('✅ Main Landing booking detected!')
-    trackBookingComplete('main')
+    // Pull the same event_id we stamped into the GHL booking iframe URL on
+    // mount; the GHL workflow webhook -> ghl-capi.ts will hash this same id
+    // into its CAPI payload so Meta dedupes the browser pixel event with the
+    // server-side CAPI event. This was missing from main landing prior to
+    // 2026-05-01 — only contractor landing was passing event_id.
+    const { event_id } = getAttribution()
+    console.log(`✅ Main Landing booking detected! event_id=${event_id}`)
+    trackBookingComplete('main', undefined, event_id)
   }, [])
 
   useEffect(() => {
+    // Init attribution (event_id, fbc, fbp, fbclid) — must happen on mount so
+    // the booking iframe URL gets stamped with the right customField params
+    // and the same event_id is later available in handleBookingComplete.
+    const attribution = initAttribution()
+    console.log(
+      `🎯 Main attribution: event_id=${attribution.event_id} fbclid=${attribution.fbclid || 'none'}`,
+    )
+
     const urlParams = new URLSearchParams(window.location.search)
     if (!urlParams.has('source')) {
       urlParams.append('source', 'landing')

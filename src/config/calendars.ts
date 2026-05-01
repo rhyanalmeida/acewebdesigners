@@ -50,19 +50,9 @@ export const CONTRACTOR_CALENDAR: CalendarConfig = {
 }
 
 /**
- * Calendly configuration for Contact page
- * This uses Calendly instead of LeadConnector
- */
-export const CALENDLY_CONFIG = {
-  url: 'https://calendly.com/rhyanalmeida31/30min',
-  name: 'Calendly Booking',
-  minHeight: 700,
-}
-
-/**
  * Get calendar config by page type
  */
-export function getCalendarConfig(pageType: 'main' | 'contractor' | 'contact'): CalendarConfig {
+export function getCalendarConfig(pageType: 'main' | 'contractor'): CalendarConfig {
   switch (pageType) {
     case 'contractor':
       return CONTRACTOR_CALENDAR

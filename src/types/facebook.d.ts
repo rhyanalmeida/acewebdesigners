@@ -51,19 +51,13 @@ declare global {
   interface Window {
     fbq: FacebookPixelFunction
     _fbq: FacebookPixelFunction
-    Calendly?: {
-      initInlineWidget?: (options: unknown) => void
-      initPopupWidget?: (options: unknown) => void
-      closePopupWidget?: () => void
-    }
     leadConnectorBooking?: {
       onComplete?: (...args: unknown[]) => void
     }
     testContractorPixel?: () => void
     testMainPixel?: () => void
-    testCalendlyTracking?: () => void
-    testFacebookDirectly?: () => boolean
-    checkPixelStatus?: () => { pixel: boolean; calendly: boolean }
+    /** Ring buffer of every postMessage seen by BookingWidget — for diagnostics */
+    __bookingWidgetMessages?: Array<{ ts: number; origin: string; data: unknown }>
   }
 }
 

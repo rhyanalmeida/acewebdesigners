@@ -169,10 +169,21 @@ export default async (req: Request): Promise<Response> => {
       headers: { 'Content-Type': 'application/json' },
     })
 
-  // Opt-in shared-secret auth: only enforced when GHL_WEBHOOK_SECRET is set.
-  // Add the matching secret to each GHL webhook action's custom-data row
-  // (key=`secret`, value=<your secret>) OR send as `x-ghl-secret` header.
-  // While unset (default), endpoint stays open — same as today.
+  // Shared-secret auth.
+  //
+  // SECURITY GAP: while GHL_WEBHOOK_SECRET is unset in Netlify env, this
+  // endpoint accepts ANY POST. An attacker who guesses the URL can forge
+  // Lead/Show/Purchase events into the Meta dataset, polluting attribution.
+  // A loud warning fires on every unauthenticated request so the gap is
+  // visible in Netlify function logs.
+  //
+  // PROPER ROLLOUT (do in this order to avoid breaking production):
+  //   1. Generate a strong secret (32+ random bytes, hex- or base64-encoded)
+  //   2. Add the secret to EVERY GHL workflow action that POSTs here, as
+  //      either an `x-ghl-secret` header OR a `secret` field in custom-data
+  //   3. Add `GHL_WEBHOOK_SECRET=<the-secret>` to Netlify env
+  //   4. Trigger a redeploy — auth becomes enforced; un-secreted POSTs 401
+  // See docs/META_ADS.md "Webhook authentication" for the runbook.
   const expectedSecret = process.env.GHL_WEBHOOK_SECRET
   if (expectedSecret) {
     const headerSecret = req.headers.get('x-ghl-secret') || ''
@@ -185,6 +196,14 @@ export default async (req: Request): Promise<Response> => {
       console.warn('[ghl-capi] auth failed — missing or wrong secret')
       return json(401, { ok: false, error: 'unauthorized' })
     }
+  } else {
+    // Fail-open today, but make the gap loudly visible in logs so it's
+    // grep-able and shows up in monitoring dashboards.
+    console.warn(
+      '[ghl-capi] ⚠ GHL_WEBHOOK_SECRET unset — endpoint is OPEN. ' +
+        'Anyone with this URL can forge conversion events. ' +
+        'See docs/META_ADS.md "Webhook authentication" for the rollout.',
+    )
   }
 
   if (req.method !== 'POST') {
