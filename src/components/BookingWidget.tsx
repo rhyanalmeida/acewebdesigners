@@ -52,6 +52,13 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
   const [loadingTimedOut, setLoadingTimedOut] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
 
+  // Runtime canary refs: track GHL postMessage volume so we can warn loudly if
+  // the matcher is silently missing the booking event (e.g. GHL changes their
+  // payload shape again). Mutable counters — useRef, NOT useState, since we
+  // don't want re-renders on every postMessage.
+  const ghlMessageCount = useRef(0)
+  const bookingDetectedRef = useRef(false)
+
   // Inject attribution (event_id, fbc, fbp, fbclid) into the GHL iframe URL so
   // GHL captures them as custom fields on the contact. These flow through to
   // the server-side Meta CAPI call, enabling dedup with the client-side Pixel.
@@ -146,6 +153,9 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
       // Only process messages from LeadConnector/GoHighLevel
       if (!fromGhl) return
 
+      // Runtime canary: count GHL traffic so we can detect a stale matcher.
+      ghlMessageCount.current += 1
+
       let isBooking = false
       let matchedPattern = ''
       let arrayPayload: Record<string, unknown> | undefined
@@ -197,6 +207,7 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
       }
 
       if (isBooking) {
+        bookingDetectedRef.current = true
         console.log(`✅ Booking detected via pattern: ${matchedPattern}`)
         // Push attribution to server-side stash so the CAPI function can merge
         // fbc/fbp/event_id when the GHL webhook fires shortly after. Email and
@@ -218,6 +229,30 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
           console.log('✅ Booking detected! Calling onBookingComplete callback.')
           onBookingComplete()
         }
+      }
+
+      // Runtime canary: if we've seen a lot of GHL traffic with no booking
+      // detected, the matcher is likely stale (GHL changed payload shape).
+      // Normal flow generates 5-8 GHL messages (fetch-query-params, fetch-
+      // sticky-contacts, several setHeight, set-sticky-contacts, msgsndr-
+      // booking-complete). 15 means heavy interaction without a hit — strong
+      // signal the booking pattern was missed. Fire exactly once per page
+      // view by flipping the same ref the booking path uses.
+      if (ghlMessageCount.current >= 15 && !bookingDetectedRef.current) {
+        const lastMessages = (
+          (window as unknown as { __bookingWidgetMessages?: unknown[] })
+            .__bookingWidgetMessages || []
+        ).slice(-5)
+        console.warn(
+          `[BookingWidget] ⚠ received ${ghlMessageCount.current} GHL messages but no booking detected — matcher may be out of date. Last 5 messages:`,
+          lastMessages,
+        )
+        window.dispatchEvent(
+          new CustomEvent('awd:booking-matcher-stale', {
+            detail: { count: ghlMessageCount.current, lastMessages },
+          }),
+        )
+        bookingDetectedRef.current = true
       }
     },
     [onBookingComplete]
