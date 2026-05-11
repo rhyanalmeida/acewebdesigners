@@ -148,8 +148,22 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
 
       let isBooking = false
       let matchedPattern = ''
+      let arrayPayload: Record<string, unknown> | undefined
 
-      if (event.data && typeof event.data === 'object') {
+      // GHL's actual booking-complete signal is an array tuple, not an object:
+      //   ["msgsndr-booking-complete", { fingerprint, calendarId }]
+      // Array.isArray must be checked BEFORE the object branch since arrays
+      // pass `typeof === 'object'` but have no .type/.event keys to match.
+      if (Array.isArray(event.data)) {
+        const [evName, payload] = event.data as [unknown, unknown]
+        if (typeof evName === 'string' && /booking[-_]?complete|appointment[-_.]?scheduled/i.test(evName)) {
+          isBooking = true
+          matchedPattern = `array-event=${evName}`
+          if (payload && typeof payload === 'object') {
+            arrayPayload = payload as Record<string, unknown>
+          }
+        }
+      } else if (event.data && typeof event.data === 'object') {
         // Check multiple possible event patterns. Tag which one matched so we
         // can see in the console log what triggered the booking flow (or didn't).
         const d = event.data as Record<string, unknown> & {
@@ -188,14 +202,16 @@ export const BookingWidget: React.FC<BookingWidgetProps> = ({
         // fbc/fbp/event_id when the GHL webhook fires shortly after. Email and
         // contact_id are best-effort — postMessage shape varies by GHL widget
         // version; the server falls back to ip+ua correlation if missing.
-        const data = (event.data || {}) as Record<string, unknown>
+        // For array-format messages, the second tuple element is the payload.
+        const data = (arrayPayload || event.data || {}) as Record<string, unknown>
         const contact = (data.contact || (data.message as Record<string, unknown> | undefined)?.contact || {}) as Record<string, unknown>
         const email =
           (typeof contact.email === 'string' ? contact.email : '') ||
           (typeof data.email === 'string' ? data.email : '')
         const contact_id =
           (typeof contact.id === 'string' ? contact.id : '') ||
-          (typeof data.contactId === 'string' ? data.contactId : '')
+          (typeof data.contactId === 'string' ? data.contactId : '') ||
+          (typeof data.fingerprint === 'string' ? data.fingerprint : '')
         stashAttribution({ email, contact_id })
 
         if (onBookingComplete) {
