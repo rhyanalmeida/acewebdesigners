@@ -183,6 +183,40 @@ After updating, redeploy and verify with a Test Event submission that the new ID
 
 ---
 
+## GHL postMessage shapes observed in the wild
+
+(Date: 2026-05-10. Captured from a live booking on `/contractorlanding` with the diagnostic logging in `BookingWidget.tsx` and the `window.__bookingWidgetMessages` ring buffer.)
+
+The GHL booking iframe at `api.leadconnectorhq.com/widget/booking/<calendar-id>` emits these postMessages on a typical successful booking, in roughly this order:
+
+| # | origin | data shape | meaning |
+|---|--------|-----------|---------|
+| 1 | `https://api.leadconnectorhq.com` | `["fetch-query-params", "", "<locationId>"]` | iframe asks parent for query params |
+| 2 | `https://api.leadconnectorhq.com` | `["fetch-sticky-contacts", "<locationId>"]` | asks for cached contact info |
+| 3 | `https://api.leadconnectorhq.com` | `["highlevel.setHeight", { height, id }]` | iframe resize (fires multiple times during interactions) |
+| 4 | `https://api.leadconnectorhq.com` | `["set-sticky-contacts", "_ud", "<JSON-string of contact>"]` | contact info written back to parent |
+| 5 | `https://api.leadconnectorhq.com` | `["set-sticky-contacts", "embedded_iframe_undefined", null, "<locationId>", "<fingerprint>"]` | session/fingerprint binding |
+| 6 | **`https://api.leadconnectorhq.com`** | **`["msgsndr-booking-complete", { fingerprint, calendarId }]`** | **THE booking-complete signal — array tuple, NOT an object** |
+
+Critical: every shape is an `Array`, never an `{ event: ..., type: ... }` object as one might assume from the documentation/examples. Commit `d5df39f` fixed a silent matcher bug where the array tuple in row 6 was being skipped because the matcher only inspected object-shaped `event.data`.
+
+### How to re-verify after a GHL widget update
+
+If GHL silently changes the message shape, our pixel will silently stop firing `Lead` events. To re-verify:
+
+1. Launch the persistent CDP browser: `node scripts/browser-launch.mjs https://acewebdesigners.com/contractorlanding`
+2. Open DevTools → Console.
+3. Submit a real test booking (use a unique email like `audit-YYYY-MM-DD@test.acewebdesigners.com`).
+4. After "Your booking is confirmed!", in the console run `JSON.stringify(window.__bookingWidgetMessages, null, 2)` and find the tuple whose first element looks like a booking-completion event.
+5. Compare to the matcher in `src/components/BookingWidget.tsx` (the `Array.isArray(event.data)` branch around lines 157-165). If the shape changed (e.g. `msgsndr-booking-completed` instead of `msgsndr-booking-complete`, or a different event name entirely), update the regex in the matcher.
+6. Cross-check Meta Events Manager → Test Events for the new `Lead` event.
+
+### What to do when the runtime canary fires
+
+If you see `[BookingWidget] ⚠ received N GHL messages but no booking detected` in the browser console (added in B4), follow the re-verify procedure above — it almost certainly means GHL changed the event name or payload shape.
+
+---
+
 ## Files of record
 
 - `src/config/pixels.ts` — pixel IDs.
