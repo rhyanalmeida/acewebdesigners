@@ -45,24 +45,40 @@ Deno.serve(async (req: Request) => {
     return undefined
   }
 
-  const ghlContactId = pick('contact_id', 'contactId', 'ghl_contact_id')
+  const apptIdIn = pick('appointment_id', 'appt_id', 'our_appointment_id')
+  const ghlContactId = pick('ghl_contact_id', 'contactId', 'contact_id')
+  const email = (pick('email', 'contact_email') || '').toLowerCase()
   const supa = admin()
 
-  // Best-effort: map back to our appointment/contact via the stored GHL contact id.
+  // Link the message back to our customer. Priority: our appointment_id (echoed
+  // by the GHL workflow) → email → most recent appointment for that contact.
   let contactId: string | undefined
   let appointmentId: string | undefined
-  if (ghlContactId) {
-    const { data } = await supa
-      .from('appointments')
-      .select('id, contact_id')
-      .eq('ghl_contact_id', ghlContactId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+
+  if (apptIdIn) {
+    const { data } = await supa.from('appointments').select('id, contact_id').eq('id', apptIdIn).maybeSingle()
     const row = data as { id: string; contact_id: string } | null
     if (row) {
       appointmentId = row.id
       contactId = row.contact_id
+    }
+  }
+  if (!contactId && email) {
+    const { data: c } = await supa.from('contacts').select('id').eq('email', email).maybeSingle()
+    const crow = c as { id: string } | null
+    if (crow) {
+      contactId = crow.id
+      if (!appointmentId) {
+        const { data: a } = await supa
+          .from('appointments')
+          .select('id')
+          .eq('contact_id', crow.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        const arow = a as { id: string } | null
+        if (arow) appointmentId = arow.id
+      }
     }
   }
 

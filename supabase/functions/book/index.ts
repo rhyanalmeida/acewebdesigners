@@ -59,6 +59,7 @@ interface BookBody {
   eventId?: string
   eventSourceUrl?: string
   notes?: string
+  test?: boolean // routes CAPI to Test Events + skips GHL/messaging (never pollutes live data)
 }
 
 Deno.serve(async (req: Request) => {
@@ -186,6 +187,8 @@ Deno.serve(async (req: Request) => {
       customData: utm,
       contactId,
       appointmentId,
+      // Test bookings route to Meta Test Events only — never counted as live.
+      testEventCode: b.test ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined,
     })
   } catch (err) {
     console.error('[book] CAPI Lead failed (booking kept)', err)
@@ -208,8 +211,14 @@ Deno.serve(async (req: Request) => {
   }
 
   // ── 6) GHL messaging relay (best-effort, isolated) ────────────────────────────
-  try {
-    const ghl = await pushBooking({
+  // Fires the GHL workflow (Inbound Webhook) so it sends confirmations/reminders.
+  // We pass appointmentId so GHL can echo it back to ghl-webhook for tracking.
+  // Skipped for test bookings so we never text/email real people during testing.
+  if (!b.test) try {
+    await pushBooking({
+      appointmentId,
+      contactId,
+      eventId,
       email,
       phone: b.phone,
       firstName,
@@ -223,12 +232,6 @@ Deno.serve(async (req: Request) => {
       tz,
       title: calendar === 'contractor' ? 'Free Design Meeting' : 'Discovery Call',
     })
-    if (ghl.contactId || ghl.appointmentId) {
-      await supa
-        .from('appointments')
-        .update({ ghl_contact_id: ghl.contactId ?? null, ghl_appointment_id: ghl.appointmentId ?? null })
-        .eq('id', appointmentId)
-    }
   } catch (err) {
     console.error('[book] ghl relay failed (booking kept)', err)
   }

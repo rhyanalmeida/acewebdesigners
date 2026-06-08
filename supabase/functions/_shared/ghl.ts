@@ -1,38 +1,28 @@
 /**
  * GoHighLevel relay — the ONE deliberate, isolated GHL tie.
  *
- * GHL is no longer the CRM, booking system, or conversion sender. It is kept
- * only as a messaging engine: we upsert the contact and create an appointment
- * via the GHL API so the EXISTING "Appointment Created" workflow fires its
- * confirmation email + appointment-relative reminders + internal notification.
+ * GHL is no longer the CRM, booking system, or conversion sender. It's kept only
+ * as the messaging engine (its A2P SMS, email, voicemail drops, workflows). On a
+ * booking, we POST to a GHL workflow's **Inbound Webhook** trigger so that
+ * workflow fires confirmations/reminders/follow-ups using all your GHL tools.
  *
- * IMPORTANT: the CAPI action must be removed from that GHL workflow — CAPI is
- * ours now (see _shared/meta.ts); leaving GHL's would double-fire.
+ * We pass our own `appointment_id` in the payload; the GHL workflow echoes it
+ * back to our `ghl-webhook` on each send, so every message is tracked against
+ * the exact customer on the admin page (cross-platform linkage).
  *
- * Everything here is best-effort and behind this one module: it no-ops when
- * GHL_API_TOKEN is unset and never throws into the booking flow, so it can be
- * swapped for Resend/Twilio later without touching the core.
+ * No-ops when GHL_INBOUND_WEBHOOK_URL is unset; never throws into booking.
  */
 
 import { formatInTimeZone } from 'npm:date-fns-tz@3'
 
-const GHL_BASE = 'https://services.leadconnectorhq.com'
-const GHL_VERSION = '2021-04-15'
-
 export function ghlConfigured(): boolean {
-  return Boolean(Deno.env.get('GHL_API_TOKEN') && Deno.env.get('GHL_LOCATION_ID'))
-}
-
-function headers(): HeadersInit {
-  return {
-    Authorization: `Bearer ${Deno.env.get('GHL_API_TOKEN')}`,
-    Version: GHL_VERSION,
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  }
+  return Boolean(Deno.env.get('GHL_INBOUND_WEBHOOK_URL'))
 }
 
 export interface GhlBookingInput {
+  appointmentId: string
+  contactId: string
+  eventId: string
   email?: string
   phone?: string
   firstName?: string
@@ -41,77 +31,47 @@ export interface GhlBookingInput {
   state?: string
   zip?: string
   country?: string
-  startISO: string // UTC
+  startISO: string
   endISO: string
   tz: string
   title?: string
 }
 
-export interface GhlResult {
-  contactId?: string
-  appointmentId?: string
-}
-
-/** Upsert contact + create appointment in GHL to trigger its messaging workflow. */
-export async function pushBooking(input: GhlBookingInput): Promise<GhlResult> {
-  if (!ghlConfigured()) return {}
-  const locationId = Deno.env.get('GHL_LOCATION_ID')!
-  const calendarId = Deno.env.get('GHL_CALENDAR_ID')
-
-  const result: GhlResult = {}
+/** Fire the GHL workflow (Inbound Webhook trigger) so it sends messages. */
+export async function pushBooking(input: GhlBookingInput): Promise<void> {
+  const url = Deno.env.get('GHL_INBOUND_WEBHOOK_URL')
+  if (!url) return
   try {
-    // 1) Upsert contact (matches on email/phone within the location).
-    const upsertResp = await fetch(`${GHL_BASE}/contacts/upsert`, {
+    const startLocal = formatInTimeZone(new Date(input.startISO), input.tz, "EEEE, MMMM d 'at' h:mm a zzz")
+    const resp = await fetch(url, {
       method: 'POST',
-      headers: headers(),
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        locationId,
-        email: input.email,
-        phone: input.phone,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        city: input.city,
-        state: input.state,
-        postalCode: input.zip,
+        // our identifiers — GHL stores/echoes these for cross-platform tracking
+        appointment_id: input.appointmentId,
+        our_contact_id: input.contactId,
+        event_id: input.eventId,
+        // contact (GHL inbound-webhook trigger can create/update the contact)
+        first_name: input.firstName ?? '',
+        last_name: input.lastName ?? '',
+        full_name: `${input.firstName ?? ''} ${input.lastName ?? ''}`.trim(),
+        email: input.email ?? '',
+        phone: input.phone ?? '',
+        city: input.city ?? '',
+        state: input.state ?? '',
+        postal_code: input.zip ?? '',
         country: input.country || 'US',
-      }),
-    })
-    if (!upsertResp.ok) {
-      console.error('[ghl] contact upsert failed', upsertResp.status, (await upsertResp.text()).slice(0, 200))
-      return result
-    }
-    const upserted = (await upsertResp.json()) as { contact?: { id?: string }; id?: string }
-    result.contactId = upserted.contact?.id ?? upserted.id
-    if (!result.contactId || !calendarId) return result
-
-    // 2) Create appointment → fires "Appointment Created" workflow.
-    // GHL wants local times with offset, not a Z-suffixed UTC instant.
-    const fmt = "yyyy-MM-dd'T'HH:mm:ssXXX"
-    const apptResp = await fetch(`${GHL_BASE}/calendars/events/appointments`, {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify({
-        calendarId,
-        locationId,
-        contactId: result.contactId,
-        startTime: formatInTimeZone(new Date(input.startISO), input.tz, fmt),
-        endTime: formatInTimeZone(new Date(input.endISO), input.tz, fmt),
+        // appointment
+        appointment_start: input.startISO,
+        appointment_end: input.endISO,
+        appointment_local: startLocal,
+        timezone: input.tz,
         title: input.title ?? 'Free Design Meeting',
-        appointmentStatus: 'confirmed',
-        ignoreDateRange: true,
-        toNotify: true,
       }),
     })
-    if (!apptResp.ok) {
-      console.error('[ghl] appointment create failed', apptResp.status, (await apptResp.text()).slice(0, 200))
-      return result
-    }
-    const appt = (await apptResp.json()) as { id?: string; appointment?: { id?: string } }
-    result.appointmentId = appt.id ?? appt.appointment?.id
-    console.log(`[ghl] pushed contact=${result.contactId} appt=${result.appointmentId}`)
-    return result
+    if (!resp.ok) console.error('[ghl] inbound webhook failed', resp.status, (await resp.text()).slice(0, 200))
+    else console.log(`[ghl] booking sent to GHL workflow appt=${input.appointmentId}`)
   } catch (err) {
     console.error('[ghl] pushBooking error', err)
-    return result
   }
 }

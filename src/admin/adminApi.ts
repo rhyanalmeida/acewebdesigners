@@ -12,14 +12,37 @@ export interface AdminHealth {
   google: boolean
   stripe: boolean
 }
-export interface AdminStats {
-  leads: number
-  upcoming: number
+export interface Warning {
+  level: 'error' | 'warn' | 'info'
+  message: string
+  fix: string
+}
+export interface Segment {
+  bookings: number
   showed: number
   purchased: number
+  revenue: number
   mrr: number
+  showRate: number
+  closeRate: number
+}
+export interface Overall extends Segment {
+  leads: number
   capiSent: number
   capiError: number
+}
+export interface WebsiteSeg extends Segment {
+  leads: number
+}
+export interface CampaignRow {
+  campaign: string
+  leads: number
+  purchased: number
+  revenue: number
+}
+export interface SocialSeg extends Segment {
+  leads: number
+  byCampaign: CampaignRow[]
 }
 export interface ApptContact {
   email?: string
@@ -33,8 +56,6 @@ export interface ApptContact {
 export interface Appt {
   id: string
   start_ts: string
-  end_ts: string
-  tz: string
   status: string
   calendar: string
   value?: number | null
@@ -45,9 +66,8 @@ export interface Appt {
   purchased_at?: string | null
   resulted_at?: string | null
   resulted_by?: string | null
-  gcal_event_id?: string | null
-  ghl_appointment_id?: string | null
   notes?: string | null
+  isSocial?: boolean
   contacts?: ApptContact | null
 }
 export interface CapiEvent {
@@ -63,11 +83,13 @@ export interface GhlMessage {
   message_type?: string | null
   status?: string | null
   received_at: string
-  ghl_contact_id?: string | null
 }
 export interface AdminData {
   health: AdminHealth
-  stats: AdminStats
+  warnings: Warning[]
+  overall: Overall
+  website: WebsiteSeg
+  social: SocialSeg
   appointments: Appt[]
   capiEvents: CapiEvent[]
   ghlMessages: GhlMessage[]
