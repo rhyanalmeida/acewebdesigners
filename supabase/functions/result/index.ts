@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
     ...loaded.base,
     eventName: 'CompleteRegistration',
     eventId: `cr_${b.appointmentId}`,
-    actionSource: 'website',
+    actionSource: 'system_generated', // offline: showed up on a call / marked in CRM
     customData: loaded.utm,
   })
 
@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
       ...loaded.base,
       eventName: 'Purchase',
       eventId: `purchase_${b.appointmentId}`,
-      actionSource: 'website',
+      actionSource: 'system_generated', // offline: closed on a call / in the CRM
       value: upfront,
       currency: 'USD',
       customData: {
