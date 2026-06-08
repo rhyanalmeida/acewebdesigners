@@ -19,30 +19,48 @@ const dateTime = (iso: string) =>
 
 // ── login gate ──────────────────────────────────────────────────────────────────
 const LoginCard: React.FC = () => {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('hello@acewebdesigners.com')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
   const [sent, setSent] = useState(false)
   const [err, setErr] = useState('')
-  const send = async (e: React.FormEvent) => {
+
+  const signIn = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErr('')
+    setBusy(true)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) setErr(error.message)
+    setBusy(false)
+  }
+  const magicLink = async () => {
     setErr('')
     const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/admin` } })
     if (error) setErr(error.message)
     else setSent(true)
   }
+
+  const inputCls = 'w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none'
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
       <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
         <h1 className="text-xl font-semibold text-gray-900">Ace Admin</h1>
         <p className="mt-1 text-sm text-gray-500">Access is restricted to authorized accounts.</p>
-        {sent ? (
-          <p className="mt-4 text-gray-600">Check <strong>{email}</strong> for your sign-in link.</p>
-        ) : (
-          <form onSubmit={send} className="mt-4 space-y-3">
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@acewebdesigners.com" className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none" />
-            <button type="submit" className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">Email me a sign-in link</button>
-            {err && <p className="text-sm text-red-600">{err}</p>}
-          </form>
-        )}
+        <form onSubmit={signIn} className="mt-4 space-y-3">
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" autoComplete="username" className={inputCls} />
+          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" autoComplete="current-password" className={inputCls} />
+          <button type="submit" disabled={busy} className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+          {err && <p className="text-sm text-red-600">{err}</p>}
+        </form>
+        <div className="mt-4 border-t border-gray-100 pt-4 text-center">
+          {sent ? (
+            <p className="text-sm text-gray-600">Check <strong>{email}</strong> for a sign-in link.</p>
+          ) : (
+            <button type="button" onClick={magicLink} className="text-sm text-blue-600 hover:underline">Email me a sign-in link instead</button>
+          )}
+        </div>
       </div>
     </div>
   )
