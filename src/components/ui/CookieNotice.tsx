@@ -3,11 +3,7 @@ import { X } from 'lucide-react'
 
 const STORAGE_KEY = 'awd_cookie_consent_v1'
 
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void
-  }
-}
+// `window.fbq` is declared in src/types/facebook.d.ts (single source of truth).
 
 /**
  * Minimal first-visit cookie disclosure.

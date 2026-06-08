@@ -1,57 +1,48 @@
 /**
  * Calendar Configuration
- * 
- * Centralized configuration for all booking calendars used across the site.
- * This allows easy management of different calendars for different landing pages.
- * 
- * IMPORTANT: Keep the contractor landing page calendar SEPARATE from the main site calendar.
+ *
+ * Identifies the two booking calendars used across the site. Booking is now
+ * handled by our own Supabase-backed scheduler (see components/scheduler), so a
+ * calendar is just a logical id + display config — the `calendar` discriminator
+ * tells the `slots`/`book` Edge Functions which availability set + Meta dataset
+ * to use. (The old GoHighLevel iframe URLs are gone.)
+ *
+ * IMPORTANT: keep the contractor calendar SEPARATE from the main calendar.
  */
 
 export interface CalendarConfig {
-  /** Unique identifier for the calendar */
+  /** Logical id */
   id: string
-  /** The booking widget URL */
-  url: string
-  /** Display name for the calendar */
+  /** Which availability set + Meta dataset the scheduler uses */
+  calendar: 'main' | 'contractor'
+  /** Display name */
   name: string
-  /** Unique iframe ID (must be unique per page) */
-  iframeId: string
-  /** Minimum height for the widget */
+  /** Minimum height for the widget container (px) */
   minHeight: number
-  /** Mobile minimum height */
+  /** Mobile minimum height (px) */
   mobileMinHeight: number
 }
 
-/**
- * Main site calendar - used for general business inquiries
- * This is the default calendar for the main Landing page and Contact page
- */
+/** Main site calendar — general business inquiries (main Landing + Contact). */
 export const MAIN_CALENDAR: CalendarConfig = {
-  id: 'mdd2ImGj9qnzPZxQciNF',
-  url: 'https://api.leadconnectorhq.com/widget/booking/mdd2ImGj9qnzPZxQciNF',
+  id: 'main',
+  calendar: 'main',
   name: 'Main Site Booking',
-  iframeId: 'mdd2ImGj9qnzPZxQciNF_1769694054880',
-  minHeight: 800,
-  mobileMinHeight: 900,
+  minHeight: 720,
+  mobileMinHeight: 720,
 }
 
-/**
- * Contractor landing page calendar — "Contractors - Free Design Meeting" in GHL.
- * Separate from MAIN_CALENDAR. Triggers the contractor appointment workflow,
- * which forwards events to /.netlify/functions/ghl-capi for Meta CAPI dedup.
- */
+/** Contractor landing calendar — "Free Design Meeting". Drives the contractor
+ *  Meta dataset (4230021860577001) and the GHL messaging workflow. */
 export const CONTRACTOR_CALENDAR: CalendarConfig = {
-  id: 'MseWjwAf3rDlJRoj1p75',
-  url: 'https://api.leadconnectorhq.com/widget/booking/MseWjwAf3rDlJRoj1p75',
+  id: 'contractor',
+  calendar: 'contractor',
   name: 'Contractor Booking',
-  iframeId: 'contractor-booking-widget',
-  minHeight: 800,
-  mobileMinHeight: 900,
+  minHeight: 720,
+  mobileMinHeight: 720,
 }
 
-/**
- * Get calendar config by page type
- */
+/** Get calendar config by page type */
 export function getCalendarConfig(pageType: 'main' | 'contractor'): CalendarConfig {
   switch (pageType) {
     case 'contractor':

@@ -1,0 +1,40 @@
+# Supabase CLI config for acewebdesigners.
+# Link with:  supabase link --project-ref dwsmrruzufqpopdzlszw
+# Deploy fns: supabase functions deploy <name>
+# Push DB:    supabase db push
+
+project_id = "acewebdesigners"
+
+# ── Edge Functions ────────────────────────────────────────────────────────────
+# Public endpoints called by the booking form. They do their own validation and
+# do not require a Supabase auth JWT — but the gateway still requires the anon
+# apikey header, which supabase-js attaches automatically.
+[functions.slots]
+verify_jwt = false
+
+[functions.book]
+verify_jwt = false
+
+# Stripe calls this with its own signature; verified inside the function.
+[functions.stripe-webhook]
+verify_jwt = false
+
+# Creates a Stripe Checkout session for a deposit. Public (returns a hosted URL).
+[functions.create-checkout]
+verify_jwt = false
+
+# Internal CAPI test/manual endpoint — guarded by CAPI_INTERNAL_SECRET, not JWT.
+[functions.capi]
+verify_jwt = false
+
+# GHL workflow posts here when it sends a message — guarded by GHL_WEBHOOK_SECRET.
+[functions.ghl-webhook]
+verify_jwt = false
+
+# Admin-only (requires a Supabase auth session + allow-listed ADMIN_EMAILS,
+# checked inside via requireAdmin). Dashboard data + the result action.
+[functions.admin-data]
+verify_jwt = true
+
+[functions.result]
+verify_jwt = true

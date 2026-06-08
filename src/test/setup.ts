@@ -50,9 +50,9 @@ Object.defineProperty(window, 'scrollTo', {
 
 // Mock localStorage
 const localStorageMock = {
-  getItem: (key: string) => null,
-  setItem: (key: string, value: string) => {},
-  removeItem: (key: string) => {},
+  getItem: (_key: string) => null,
+  setItem: (_key: string, _value: string) => {},
+  removeItem: (_key: string) => {},
   clear: () => {},
 }
 Object.defineProperty(window, 'localStorage', {
@@ -81,7 +81,7 @@ fbqMock.push = fbqMock
 ;(window as unknown as { fbq: FbqFn }).fbq = fbqMock
 ;(window as unknown as { _fbq: FbqFn })._fbq = fbqMock
 
-// Mock fetch (attribution-stash uses it; tests shouldn't hit real network)
+// Mock fetch (tests shouldn't hit real network)
 if (!globalThis.fetch) {
   globalThis.fetch = (() => Promise.resolve(new Response('{}', { status: 200 }))) as typeof fetch
 }

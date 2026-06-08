@@ -1,14 +1,9 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 
 import { MAIN_CALENDAR } from './config/calendars'
 import { LandingFooter } from './components/ui'
 import { MAIN_PIXEL } from './config/pixels'
-import {
-  trackViewContent,
-  trackBookingComplete,
-  setupTestingFunctions,
-} from './utils/pixelTracking'
-import { initAttribution, getAttribution } from './utils/attribution'
+import { trackViewContent } from './utils/pixelTracking'
 import { useScrollReveal } from './hooks/useScrollReveal'
 
 import {
@@ -70,26 +65,7 @@ const FAQS = [
 function Landing() {
   const bookingFormRef = useRef<HTMLElement>(null)
 
-  const handleBookingComplete = useCallback(() => {
-    // Pull the same event_id we stamped into the GHL booking iframe URL on
-    // mount; the GHL workflow webhook -> ghl-capi.ts will hash this same id
-    // into its CAPI payload so Meta dedupes the browser pixel event with the
-    // server-side CAPI event. This was missing from main landing prior to
-    // 2026-05-01 — only contractor landing was passing event_id.
-    const { event_id } = getAttribution()
-    console.log(`✅ Main Landing booking detected! event_id=${event_id}`)
-    trackBookingComplete('main', undefined, event_id)
-  }, [])
-
   useEffect(() => {
-    // Init attribution (event_id, fbc, fbp, fbclid) — must happen on mount so
-    // the booking iframe URL gets stamped with the right customField params
-    // and the same event_id is later available in handleBookingComplete.
-    const attribution = initAttribution()
-    console.log(
-      `🎯 Main attribution: event_id=${attribution.event_id} fbclid=${attribution.fbclid || 'none'}`,
-    )
-
     const urlParams = new URLSearchParams(window.location.search)
     if (!urlParams.has('source')) {
       urlParams.append('source', 'landing')
@@ -109,8 +85,6 @@ function Landing() {
 
     console.log(`✅ LeadConnector booking widget loaded on Main Landing page`)
     console.log(`📅 Using calendar: ${MAIN_CALENDAR.name}`)
-
-    setupTestingFunctions('main')
   }, [])
 
   useScrollReveal('landing')
@@ -181,7 +155,6 @@ function Landing() {
           sub="Pick a 15-minute slot that works for you. We'll cover your goals and have a free homepage mockup in your inbox within 48 hours."
           calendarConfig={MAIN_CALENDAR}
           containerId="landing-form-container"
-          onBookingComplete={handleBookingComplete}
           conversionType="free_design_landing"
           trackerId="landing-conversion-tracker"
           reminder={

@@ -1,11 +1,17 @@
 /**
  * Facebook Pixel Tracking Utility
- * 
- * Provides type-safe, centralized functions for Facebook Pixel tracking.
- * This eliminates code duplication and provides consistent event tracking.
+ *
+ * Type-safe, centralized helpers for the BROWSER pixel: audience signals
+ * (PageView / ViewContent / PhoneClick) plus the booking `Lead`.
+ *
+ * `Lead` is dual-fired for best match + redundancy: the browser fires it with an
+ * `event_id` (see trackLead) and our `book` Edge Function fires the SAME
+ * `event_id` to the Conversions API server-side — Meta dedupes the pair. The
+ * server is the source of truth (hashed PII, fbc/fbp); the browser event just
+ * speeds up matching. CompleteRegistration / Purchase are server-only.
  */
 
-import { MAIN_PIXEL, CONTRACTOR_PIXEL, type PixelConfig } from '../config/pixels'
+import { CONTRACTOR_PIXEL } from '../config/pixels'
 
 // Import types (these are declared globally in types/facebook.d.ts)
 type TrackEventOptions = {
@@ -45,25 +51,16 @@ export function initializePixel(pixelId: string): void {
 
 /**
  * Track a standard Facebook event.
- * Pass eventId to dedupe with a matching server-side CAPI event.
  */
-export function trackEvent(
-  eventName: string,
-  options?: TrackEventOptions,
-  eventId?: string
-): void {
+export function trackEvent(eventName: string, options?: TrackEventOptions): void {
   if (!isPixelLoaded()) {
     console.warn('⚠️ Facebook Pixel not loaded. Cannot track event:', eventName)
     return
   }
 
   try {
-    if (eventId) {
-      window.fbq('track', eventName, options, { eventID: eventId })
-    } else {
-      window.fbq('track', eventName, options)
-    }
-    console.log(`✅ Facebook Pixel: ${eventName} tracked`, options, eventId ? `(eventID=${eventId})` : '')
+    window.fbq('track', eventName, options)
+    console.log(`✅ Facebook Pixel: ${eventName} tracked`, options)
   } catch (error) {
     console.error('❌ Error tracking event:', eventName, error)
   }
@@ -71,27 +68,39 @@ export function trackEvent(
 
 /**
  * Track a custom Facebook event.
- * Pass eventId to dedupe with a matching server-side CAPI event.
  */
-export function trackCustomEvent(
-  eventName: string,
-  options?: TrackEventOptions,
-  eventId?: string
-): void {
+export function trackCustomEvent(eventName: string, options?: TrackEventOptions): void {
   if (!isPixelLoaded()) {
     console.warn('⚠️ Facebook Pixel not loaded. Cannot track custom event:', eventName)
     return
   }
 
   try {
-    if (eventId) {
-      window.fbq('trackCustom', eventName, options, { eventID: eventId })
-    } else {
-      window.fbq('trackCustom', eventName, options)
-    }
-    console.log(`✅ Facebook Pixel: Custom event ${eventName} tracked`, options, eventId ? `(eventID=${eventId})` : '')
+    window.fbq('trackCustom', eventName, options)
+    console.log(`✅ Facebook Pixel: Custom event ${eventName} tracked`, options)
   } catch (error) {
     console.error('❌ Error tracking custom event:', eventName, error)
+  }
+}
+
+/**
+ * Track the booking `Lead` on the browser pixel with a shared `event_id`.
+ *
+ * The same `event_id` is sent server-side by the `book` Edge Function's CAPI
+ * call, so Meta dedupes the browser + server Lead into one conversion. Pass a
+ * stable id (e.g. crypto.randomUUID()) and use the identical value in the
+ * `book` request body.
+ */
+export function trackLead(eventId: string, options?: TrackEventOptions): void {
+  if (!isPixelLoaded()) {
+    console.warn('⚠️ Facebook Pixel not loaded. Cannot track Lead.')
+    return
+  }
+  try {
+    window.fbq('track', 'Lead', options ?? {}, { eventID: eventId })
+    console.log(`✅ Facebook Pixel: Lead tracked (event_id=${eventId})`)
+  } catch (error) {
+    console.error('❌ Error tracking Lead:', error)
   }
 }
 
@@ -107,94 +116,17 @@ export function trackViewContent(contentName: string, contentCategory: string, c
 }
 
 /**
- * Track Lead event (for form submissions / bookings).
- * Pass eventId for CAPI dedup.
- */
-export function trackLead(
-  contentName: string,
-  contentCategory: string,
-  eventId?: string
-): void {
-  trackEvent(
-    'Lead',
-    {
-      content_name: contentName,
-      content_category: contentCategory,
-    },
-    eventId
-  )
-}
-
-/**
- * Track CompleteRegistration event (for completed bookings).
- * Pass eventId for CAPI dedup.
- */
-export function trackCompleteRegistration(
-  contentName: string,
-  contentCategory: string,
-  value: number = 0,
-  eventId?: string
-): void {
-  trackEvent(
-    'CompleteRegistration',
-    {
-      content_name: contentName,
-      content_category: contentCategory,
-      currency: 'USD',
-      value,
-    },
-    eventId
-  )
-}
-
-/**
- * Track booking completion with all relevant events.
- * Pass eventId to dedupe these client-side events with the server-side
- * Meta CAPI call that fires from the GHL webhook.
- */
-export function trackBookingComplete(
-  source: 'main' | 'contractor',
-  additionalData?: TrackEventOptions,
-  eventId?: string
-): void {
-  const config = source === 'contractor' ? CONTRACTOR_PIXEL : MAIN_PIXEL
-  const contentName = source === 'contractor' ? 'Contractor Booking' : 'Main Landing Booking'
-  const contentCategory = source === 'contractor' ? 'Contractor Consultation' : 'Website Consultation'
-
-  console.log(`✅ ${config.name}: Booking detected!`)
-
-  trackCompleteRegistration(contentName, contentCategory, 0, eventId)
-  trackLead(contentName, contentCategory, eventId)
-
-  const customEventName = source === 'contractor' ? 'ContractorBookingComplete' : 'MainLandingBookingComplete'
-  trackCustomEvent(
-    customEventName,
-    {
-      content_name: contentName,
-      content_category: contentCategory,
-      currency: 'USD',
-      value: 0,
-      ...additionalData,
-    },
-    eventId
-  )
-
-  console.log(`✅ ${config.name}: All booking events sent`)
-}
-
-/**
  * Track a phone-call click as a client-side audience signal only.
  *
- * Architecture note: Meta `Lead` and all offline conversions flow exclusively
- * through GoHighLevel (the booking form → GHL contact → workflow webhook →
- * `ghl-capi.ts` → Meta CAPI). Phone clicks happen outside GHL, so we
- * intentionally do NOT fire `Lead` here — that would double-count when the
- * caller also books, and it would create offline conversions outside the
- * canonical GHL pipeline. We fire only a custom `PhoneClick` event so Meta can
- * use it for retargeting / lookalike audiences without polluting Lead totals.
+ * Architecture note: Meta `Lead` and all conversions flow exclusively through
+ * GoHighLevel's native Facebook Conversions API workflow action (booking form →
+ * GHL contact → workflow → Meta CAPI; GHL hashes the PII). Phone clicks happen
+ * outside GHL, so we intentionally do NOT fire `Lead` here — that would
+ * double-count when the caller also books. We fire only a custom `PhoneClick`
+ * event so Meta can use it for retargeting / lookalike audiences.
  *
- * If a call turns into a real lead, the operator adds the contact in GHL and
- * the existing workflow fires the proper CAPI Lead event from the GHL bridge.
+ * If a call turns into a real lead, the operator adds the contact in GHL and the
+ * workflow fires the proper CAPI Lead event.
  */
 export function trackPhoneClick(
   source: 'home' | 'main_landing' | 'contractor' | 'contact' | 'about' | 'social' | 'work' | 'reviews' | 'header' | 'footer' | string,
@@ -240,31 +172,4 @@ export function initializeContractorPixel(): void {
 
   // Initialize contractor pixel
   initializePixel(CONTRACTOR_PIXEL.pixelId)
-}
-
-/**
- * Create testing functions for the window object (for debugging)
- */
-export function setupTestingFunctions(source: 'main' | 'contractor'): void {
-  if (typeof window === 'undefined') return
-
-  const config = source === 'contractor' ? CONTRACTOR_PIXEL : MAIN_PIXEL
-  const testFnName = source === 'contractor' ? 'testContractorPixel' : 'testMainPixel'
-
-  ;(window as unknown as Record<string, unknown>)[testFnName] = () => {
-    console.log('🧪 Manual pixel test triggered')
-
-    if (!isPixelLoaded()) {
-      console.error('❌ Facebook Pixel not loaded')
-      alert('Facebook Pixel not loaded!')
-      return
-    }
-
-    trackCompleteRegistration(`TEST ${config.name}`, 'Test Consultation', 0)
-    console.log(`✅ Test event sent to ${config.name} (${config.pixelId})`)
-    alert('Test event sent! Check Meta Events Manager.')
-  }
-
-  console.log('🧪 Testing commands available:')
-  console.log(`  - ${testFnName}() - Manually test Facebook Pixel (browser)`)
 }

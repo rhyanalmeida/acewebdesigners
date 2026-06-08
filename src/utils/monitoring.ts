@@ -187,7 +187,7 @@ class SecurityMonitor {
     // Monitor for potential XSS attempts in form inputs
     const forms = document.querySelectorAll('form')
     forms.forEach(form => {
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', (_event) => {
         const formData = new FormData(form)
         const suspiciousPatterns = [
           /<script/i,

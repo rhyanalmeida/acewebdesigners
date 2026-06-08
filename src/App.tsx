@@ -15,6 +15,9 @@ import PrivacyPolicy from './PrivacyPolicy'
 import TermsOfService from './TermsOfService'
 import Home from './pages/Home'
 
+// Admin dashboard is lazy-loaded so it never ships in the landing-page bundles.
+const AdminDashboard = React.lazy(() => import('./admin/AdminDashboard'))
+
 import { PageShell } from './components/layout'
 import { CookieNotice } from './components/ui'
 import { useScrollReveal } from './hooks/useScrollReveal'
@@ -32,9 +35,10 @@ type PageKey =
   | 'contractorlanding'
   | 'privacy'
   | 'termsofservice'
+  | 'admin'
 
 /** Pages that should render without the standard header/footer/sticky CTA chrome. */
-const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'refer', 'termsofservice']
+const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'refer', 'termsofservice', 'admin']
 
 function App() {
   const [currentPage, setCurrentPage] = React.useState<PageKey>('home')
@@ -48,7 +52,8 @@ function App() {
       // Order matters: longer / more specific paths first so "/contractorlanding"
       // doesn't get caught by "/landing", and "/socialmedia" doesn't get caught
       // by "/services". Default falls through to 'home'.
-      if (path.includes('/contractorlanding')) setCurrentPage('contractorlanding')
+      if (path.includes('/admin')) setCurrentPage('admin')
+      else if (path.includes('/contractorlanding')) setCurrentPage('contractorlanding')
       else if (path.includes('/landing')) setCurrentPage('landing')
       else if (path.includes('/socialmedia')) setCurrentPage('socialmedia')
       else if (path.includes('/services')) setCurrentPage('services')
@@ -101,7 +106,7 @@ function App() {
   // client-side route changes. Landing/contractorlanding fire their own
   // ViewContent (with attribution) in their mount effects, so skip those here.
   useEffect(() => {
-    if (currentPage === 'landing' || currentPage === 'contractorlanding') return
+    if (currentPage === 'landing' || currentPage === 'contractorlanding' || currentPage === 'admin') return
     trackEvent('PageView')
     const viewContentMap: Partial<Record<PageKey, [string, string, string]>> = {
       home: ['Home', 'Home', 'general'],
@@ -139,6 +144,12 @@ function App() {
         return <PrivacyPolicy />
       case 'termsofservice':
         return <TermsOfService />
+      case 'admin':
+        return (
+          <React.Suspense fallback={<div className="p-10 text-center text-gray-500">Loading…</div>}>
+            <AdminDashboard />
+          </React.Suspense>
+        )
       case 'home':
       default:
         return (

@@ -1,21 +1,17 @@
 /**
- * Client-side attribution capture for Meta CAPI deduplication.
+ * Facebook ad-click attribution capture.
  *
- * Captures fbclid / _fbc / _fbp on the landing page and generates a stable
- * event_id stored in sessionStorage. The event_id is passed to two places:
- *   1. The GHL booking iframe as a URL param → GHL captures it as a custom
- *      field → GHL webhook forwards it to our Netlify function → Meta CAPI
- *   2. The client-side Pixel 'Lead' event when booking completes
+ * Our booking form is now same-origin (no cross-origin GHL iframe), so it can
+ * read this page's Meta cookies directly. `getAttribution()` returns the click
+ * identifiers to POST to the `book` Edge Function, which forwards them to Meta's
+ * Conversions API (server-side) alongside the browser pixel's matching event_id.
  *
- * Matching event_ids let Meta dedupe the Pixel event and the CAPI event.
+ *  - `fbclid` — appended by Facebook to the ad-landing URL.
+ *  - `fbc` / `fbp` — the browser-only Meta cookies. `fbc` is reconstructed from
+ *    `fbclid` when the `_fbc` cookie isn't set yet.
  */
 
-const SS_KEY = 'awd_attribution'
-const FBC_COOKIE = '_fbc'
-const FBP_COOKIE = '_fbp'
-
 export interface Attribution {
-  event_id: string
   fbc: string
   fbp: string
   fbclid: string
@@ -27,141 +23,10 @@ function getCookie(name: string): string {
   return match ? decodeURIComponent(match[1]) : ''
 }
 
-function uuid(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
-  }
-  // RFC4122 v4 fallback for environments without crypto.randomUUID
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
-
-function readStored(): Attribution | null {
-  if (typeof window === 'undefined') return null
-  try {
-    const raw = sessionStorage.getItem(SS_KEY)
-    return raw ? (JSON.parse(raw) as Attribution) : null
-  } catch {
-    return null
-  }
-}
-
-function writeStored(a: Attribution): void {
-  if (typeof window === 'undefined') return
-  try {
-    sessionStorage.setItem(SS_KEY, JSON.stringify(a))
-  } catch {
-    // sessionStorage may be blocked (private browsing, 3p cookies off) — ignore
-  }
-}
-
-/**
- * Initialize attribution for this session. Idempotent — safe to call on every mount.
- * Runs once per session and caches the result. Subsequent calls refresh fbp/fbc
- * from cookies (they may be set by the Pixel after this first ran).
- */
-export function initAttribution(): Attribution {
-  if (typeof window === 'undefined') {
-    return { event_id: '', fbc: '', fbp: '', fbclid: '' }
-  }
-
-  const existing = readStored()
-  if (existing) {
-    // Pixel may have set _fbp after our first run — refresh from cookie.
-    const freshFbp = getCookie(FBP_COOKIE)
-    if (freshFbp && freshFbp !== existing.fbp) {
-      existing.fbp = freshFbp
-      writeStored(existing)
-    }
-    return existing
-  }
-
-  const url = new URL(window.location.href)
-  const fbclid = url.searchParams.get('fbclid') || ''
-  const cookieFbc = getCookie(FBC_COOKIE)
-  const fbc = cookieFbc || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : '')
-
-  const attribution: Attribution = {
-    event_id: uuid(),
-    fbc,
-    fbp: getCookie(FBP_COOKIE),
-    fbclid,
-  }
-  writeStored(attribution)
-  return attribution
-}
-
-/** Read current attribution. Calls initAttribution to ensure it's populated. */
 export function getAttribution(): Attribution {
-  return initAttribution()
-}
-
-/**
- * GHL custom-field IDs for the contractor location (A2zlaOOL5JLn883XGWWl).
- * The widget's `customField[<id>]=<value>` URL param requires the field's
- * internal ID, NOT the field's unique key name. Tested 2026-04-25: the
- * `customField[fbc]=...` form did NOT populate the contact (custom fields
- * remained empty). The ID form below does.
- *
- * If these IDs change (e.g. fields recreated), retrieve current ones via:
- *   GET https://backend.leadconnectorhq.com/locations/A2zlaOOL5JLn883XGWWl/customFields/search?documentType=field&model=contact
- */
-const GHL_CUSTOM_FIELD_IDS = {
-  fbc: 'klWCXR25U9P8TkpsEc2t',
-  fbp: 'vSm5ey4ntRn3l1Q9Yx6w',
-  event_id: 'FEeWp7qaPpd34Nn57bI4',
-  fbclid: 'J3QRxlV4Ufjchj8VN8MV',
-} as const
-
-/**
- * Push attribution to the server-side stash so the CAPI function can merge
- * fbc/fbp/event_id into the offline conversion event when GHL's workflow
- * webhook fires moments later.
- *
- * Fire-and-forget — failures here MUST NOT block the booking flow.
- * Pass email and/or contact_id when available (varies by GHL postMessage
- * payload). When absent, the server falls back to ip+ua correlation.
- */
-export function stashAttribution(opts: { email?: string; contact_id?: string } = {}): void {
-  const a = getAttribution()
-  if (!a.event_id && !a.fbc && !a.fbp && !a.fbclid) return
-  try {
-    fetch('/.netlify/functions/attribution-stash', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: opts.email,
-        contact_id: opts.contact_id,
-        fbc: a.fbc,
-        fbp: a.fbp,
-        event_id: a.event_id,
-        fbclid: a.fbclid,
-      }),
-      keepalive: true,
-    }).catch(() => {})
-  } catch {
-    // never propagate
-  }
-}
-
-/**
- * Append attribution fields as query params to a GHL booking widget URL.
- *
- * `fbclid` is also kept as a bare param because Facebook puts it there on ad
- * clicks and GHL's attribution capture reads it from the URL.
- */
-export function appendAttributionToUrl(baseUrl: string): string {
-  const a = getAttribution()
-  const u = new URL(baseUrl)
-  if (a.event_id) u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.event_id}]`, a.event_id)
-  if (a.fbc) u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.fbc}]`, a.fbc)
-  if (a.fbp) u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.fbp}]`, a.fbp)
-  if (a.fbclid) {
-    u.searchParams.set(`customField[${GHL_CUSTOM_FIELD_IDS.fbclid}]`, a.fbclid)
-    u.searchParams.set('fbclid', a.fbclid)
-  }
-  return u.toString()
+  if (typeof window === 'undefined') return { fbc: '', fbp: '', fbclid: '' }
+  const fbclid = new URL(window.location.href).searchParams.get('fbclid') || ''
+  const fbc = getCookie('_fbc') || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : '')
+  const fbp = getCookie('_fbp')
+  return { fbc, fbp, fbclid }
 }

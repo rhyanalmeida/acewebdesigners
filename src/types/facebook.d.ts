@@ -40,6 +40,7 @@ interface FacebookPixelFunction {
     eventOptions?: FacebookPixelEventOptions
   ): void
   (command: 'set', property: string, value: unknown): void
+  (command: 'consent', action: 'grant' | 'revoke'): void
   callMethod?: (...args: unknown[]) => void
   queue: unknown[]
   push: (...args: unknown[]) => void
@@ -51,13 +52,6 @@ declare global {
   interface Window {
     fbq: FacebookPixelFunction
     _fbq: FacebookPixelFunction
-    leadConnectorBooking?: {
-      onComplete?: (...args: unknown[]) => void
-    }
-    testContractorPixel?: () => void
-    testMainPixel?: () => void
-    /** Ring buffer of every postMessage seen by BookingWidget — for diagnostics */
-    __bookingWidgetMessages?: Array<{ ts: number; origin: string; data: unknown }>
   }
 }
 

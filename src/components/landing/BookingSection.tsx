@@ -15,7 +15,6 @@ interface BookingSectionProps {
   sub?: React.ReactNode
   calendarConfig: CalendarConfig
   containerId: string
-  onBookingComplete: () => void
   /** Hidden tracker element (preserves existing data-conversion-type attribute). */
   conversionType?: string
   trackerId?: string
@@ -28,10 +27,10 @@ interface BookingSectionProps {
 
 /**
  * Editorial-styled wrapper around BookingWidget.
- * BookingWidget itself is rendered with EXACTLY the same props as the
- * existing landing pages — calendar config, container ID, booking
- * completion callback. No iframe, postMessage, or attribution behavior
- * is changed; only the surrounding markup.
+ * BookingWidget itself is rendered with the same props as the existing
+ * landing pages — calendar config and container ID. Conversions are
+ * server-side via GHL, so there's no booking-completion callback here;
+ * this wrapper only adds the surrounding markup.
  */
 const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
   (
@@ -43,7 +42,6 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
       sub,
       calendarConfig,
       containerId,
-      onBookingComplete,
       conversionType,
       trackerId,
       reminder,
@@ -116,7 +114,6 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
         <div className="mt-8 rounded-xl3 bg-cream-50 shadow-lift ring-1 ring-ink-900/10 p-3 sm:p-6 md:p-10">
           <BookingWidget
             calendarConfig={calendarConfig}
-            onBookingComplete={onBookingComplete}
             containerId={containerId}
           />
         </div>

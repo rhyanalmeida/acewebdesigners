@@ -33,9 +33,8 @@ import {
 import { LandingFaq } from './components/landing'
 import { SeoMeta, serviceLd, organizationLd, breadcrumbForPath } from './seo'
 
-interface SocialMediaProps {
-  // page is rendered inside PageShell; nav handled by SiteHeader/Footer
-}
+// page is rendered inside PageShell; nav handled by SiteHeader/Footer
+type SocialMediaProps = Record<string, never>
 
 const STANDARD_FEATURES = [
   '3-5 hand-crafted posts per week',

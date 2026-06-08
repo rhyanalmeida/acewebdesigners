@@ -4,13 +4,7 @@ import { LandingFooter } from './components/ui'
 
 import { CONTRACTOR_CALENDAR } from './config/calendars'
 import { CONTRACTOR_PIXEL } from './config/pixels'
-import {
-  initializeContractorPixel,
-  trackViewContent,
-  trackBookingComplete,
-  setupTestingFunctions,
-} from './utils/pixelTracking'
-import { initAttribution, getAttribution } from './utils/attribution'
+import { initializeContractorPixel, trackViewContent } from './utils/pixelTracking'
 import { useScrollReveal } from './hooks/useScrollReveal'
 
 import {
@@ -177,18 +171,7 @@ const FAQS = [
 function LandingContractors() {
   const bookingFormRef = useRef<HTMLElement>(null)
 
-  const handleBookingComplete = useCallback(() => {
-    const { event_id } = getAttribution()
-    console.log(`✅ Contractor booking detected! event_id=${event_id}`)
-    trackBookingComplete('contractor', undefined, event_id)
-  }, [])
-
   useEffect(() => {
-    const attribution = initAttribution()
-    console.log(
-      `🎯 Attribution: event_id=${attribution.event_id} fbclid=${attribution.fbclid || 'none'} fbc=${attribution.fbc ? 'set' : 'none'} fbp=${attribution.fbp ? 'set' : 'none'}`
-    )
-
     const urlParams = new URLSearchParams(window.location.search)
     if (!urlParams.has('source')) {
       urlParams.append('source', 'landing-contractors')
@@ -210,8 +193,6 @@ function LandingContractors() {
     console.log(`✅ ${CONTRACTOR_PIXEL.name} (${CONTRACTOR_PIXEL.pixelId}): Initialized and tracking`)
     console.log(`✅ LeadConnector booking widget loaded on Contractor Landing page`)
     console.log(`📅 Using calendar: ${CONTRACTOR_CALENDAR.name}`)
-
-    setupTestingFunctions('contractor')
   }, [])
 
   useScrollReveal('contractorlanding')
@@ -429,7 +410,6 @@ function LandingContractors() {
           sub="Pick a 15-minute slot. We'll cover your business, jobs, and service area, then send a free homepage mockup AND a sample social post within 24 hours."
           calendarConfig={CONTRACTOR_CALENDAR}
           containerId="landing-contractors-form-container"
-          onBookingComplete={handleBookingComplete}
           conversionType="free_design_contractors"
           trackerId="contractor-conversion-tracker"
           whatToExpect={[
