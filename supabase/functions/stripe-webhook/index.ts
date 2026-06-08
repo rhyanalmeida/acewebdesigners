@@ -54,7 +54,7 @@ Deno.serve(async (req: Request) => {
           ...loaded.base,
           eventName: 'Purchase',
           eventId: `purchase_${appointmentId}`,
-          actionSource: 'system_generated',
+          actionSource: 'website',
           value: amount,
           currency,
           customData: { ...loaded.utm, stripe_session: session.id },

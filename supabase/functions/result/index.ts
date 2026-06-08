@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
     ...loaded.base,
     eventName: 'CompleteRegistration',
     eventId: `cr_${b.appointmentId}`,
-    actionSource: 'system_generated',
+    actionSource: 'website',
     customData: loaded.utm,
   })
 
@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
       ...loaded.base,
       eventName: 'Purchase',
       eventId: `purchase_${b.appointmentId}`,
-      actionSource: 'system_generated',
+      actionSource: 'website',
       value: upfront,
       currency: 'USD',
       customData: {

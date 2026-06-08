@@ -83,10 +83,12 @@ function datasetId(dataset: Dataset): string {
   return id || '4230021860577001' // contractor fallback
 }
 
-function defaultActionSource(name: CapiEventName): 'website' | 'system_generated' {
-  // Lead happens on the site (booking submit) → keep `website` so it dedupes
-  // against the browser pixel. Show/Purchase are CRM/system-generated.
-  return name === 'Lead' ? 'website' : 'system_generated'
+function defaultActionSource(_name: CapiEventName): 'website' | 'system_generated' {
+  // Whole funnel is anchored to the website lead (same fbc/fbp), so we use
+  // `website` for every event: consistent attribution, dedupes with the browser
+  // pixel, AND it's visible in the Website Test Events channel (the `system_generated`
+  // value is accepted by Meta but not shown in the test UI's channels).
+  return 'website'
 }
 
 interface MetaUserData {
