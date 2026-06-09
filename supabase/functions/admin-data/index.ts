@@ -97,7 +97,7 @@ Deno.serve(async (req: Request) => {
       )
       .order('start_ts', { ascending: false })
       .limit(500),
-    supa.from('capi_events').select('event_id, event_name, status, value, sent_at').order('sent_at', { ascending: false }).limit(50),
+    supa.from('capi_events').select('event_id, event_name, action_source, status, value, meta_response, sent_at').order('sent_at', { ascending: false }).limit(50),
     supa.from('ghl_messages').select('*').order('received_at', { ascending: false }).limit(50),
   ])
 
@@ -147,7 +147,11 @@ Deno.serve(async (req: Request) => {
     website: { leads, ...all },
     social: { leads: social.bookings, showed: social.showed, purchased: social.purchased, revenue: social.revenue, mrr: social.mrr, showRate: social.showRate, closeRate: social.closeRate, byCampaign: [...campaigns.values()].sort((a, b) => b.leads - a.leads) },
     appointments: appts.map((a) => ({ ...a, isSocial: isSocial(a) })),
-    capiEvents: capiEventsRes.data ?? [],
+    capiEvents: (capiEventsRes.data ?? []).map((e) => {
+      const mr = (e as { meta_response?: { events_received?: number } }).meta_response
+      const { meta_response: _drop, ...rest } = e as Record<string, unknown>
+      return { ...rest, events_received: typeof mr?.events_received === 'number' ? mr.events_received : null }
+    }),
     ghlMessages: ghlMessagesRes.data ?? [],
   })
 })

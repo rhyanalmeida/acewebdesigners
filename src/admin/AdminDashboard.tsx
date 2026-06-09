@@ -311,12 +311,22 @@ const AdminDashboard: React.FC = () => {
               <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Recent CAPI events</h2>
               <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm">
                 {data.capiEvents.length === 0 ? <p className="text-gray-400">None yet.</p> : (
-                  <ul className="divide-y divide-gray-100">{data.capiEvents.map((e) => (
+                  <ul className="divide-y divide-gray-100">{data.capiEvents.map((e) => {
+                    const offline = e.action_source === 'system_generated'
+                    const accepted = e.status === 'sent' && e.events_received === 1
+                    return (
                     <li key={e.event_id} className="flex items-center justify-between py-1.5">
-                      <span className="text-gray-700">{e.event_name}{e.value ? ` · ${usd(e.value)}` : ''}</span>
-                      <span className="flex items-center gap-2 text-xs"><span className={e.status === 'sent' ? 'text-green-600' : e.status === 'error' ? 'text-red-600' : 'text-gray-400'}>{e.status}</span><span className="text-gray-400">{dateTime(e.sent_at)}</span></span>
+                      <span className="text-gray-700">{e.event_name}{e.value ? ` · ${usd(e.value)}` : ''}
+                        <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${offline ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'}`}>{offline ? 'offline' : 'website'}</span>
+                      </span>
+                      <span className="flex items-center gap-2 text-xs">
+                        {accepted && <span className="text-green-600" title={`Meta confirmed: events_received ${e.events_received}`}>✓ Meta got it</span>}
+                        <span className={e.status === 'sent' ? 'text-green-600' : e.status === 'error' ? 'text-red-600' : 'text-gray-400'}>{e.status}</span>
+                        <span className="text-gray-400">{dateTime(e.sent_at)}</span>
+                      </span>
                     </li>
-                  ))}</ul>
+                    )
+                  })}</ul>
                 )}
               </div>
             </section>

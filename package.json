@@ -16,7 +16,9 @@
     "meta-ads:status": "node scripts/meta-ads-status.mjs",
     "meta-ads:tighten": "node scripts/meta-ads-setup.mjs --update-targeting",
     "meta-ads:create-ad": "node scripts/meta-ads-create-ad.mjs",
-    "meta-ads:teardown": "node scripts/meta-ads-setup.mjs --delete"
+    "meta-ads:teardown": "node scripts/meta-ads-setup.mjs --delete",
+    "capi:prove-offline": "node scripts/prove-offline-capi.mjs",
+    "capi:verify-offline": "node scripts/verify-offline-capi.mjs"
   },
   "dependencies": {
     "@formspree/react": "^2.5.1",

@@ -62,16 +62,30 @@ Meta CAPI · Google Calendar · Stripe · GHL (messaging only)
 attribution: `cr_<appt>` (CompleteRegistration) and `purchase_<appt>` (Purchase) are derived from
 the appointment id, so the result form and Stripe webhook can't double-count.
 
-**Admin dashboard:** `/admin` (lazy route in `App.tsx`). Supabase magic-link login; the email must
-be in `ADMIN_EMAILS`. Shows integration health, stats (leads/upcoming/showed/purchased/MRR,
-CAPI sent/error), every appointment with a **Result** action (Showed / No-Show / Purchase with
-upfront + recurring $ + plan), and recent CAPI + GHL-message logs.
+**`action_source` split** (`_shared/meta.ts`, `defaultActionSource`): `Lead` →
+`'website'` (it happens on the booking submit, so it dedupes with the browser pixel and renders in
+Test Events). `CompleteRegistration` (Showed) and `Purchase` (closed) → `'system_generated'` —
+they happen **offline** (on a call / in the CRM). Offline events are still received and attributed
+to ads via matched PII (email/phone/fbc), but they **do NOT appear in the Test Events channel UI** —
+verify them in Events Manager → live Activity, or in `/admin`. Don't "fix" their absence from Test
+Events by flipping them to `'website'`; the offline classification is intentional.
+
+**Admin dashboard:** `/admin` (lazy route in `App.tsx`). Supabase **email + password** login
+(`signInWithPassword`), with a magic-link fallback ("Email me a sign-in link instead"); the email
+must be in `ADMIN_EMAILS`. Three tabs: **Overview** (whole-business KPIs + setup warnings +
+integration health), **Website** (booking funnel + every appointment with a **Result** action —
+Showed / No-Show / Purchase with upfront + recurring $ + plan — + CAPI log), and **Social Media**
+(paid FB/IG-attributed funnel + per-campaign breakdown). Stats cover leads/upcoming/showed/
+purchased/MRR and CAPI sent/error; recent CAPI + GHL-message logs are shown. A "book test mode" is
+available for end-to-end checks.
 
 ## Status
 
-Code is complete and **builds/lints/tests green**. It is **not deployed or verified end-to-end
-yet** — that needs the Supabase access token + secrets (below) and the verification run. Until a
-real server `Lead` shows in Test Events, treat the live pipeline as unproven.
+**Deployed + verified live (2026-06-09).** All Edge functions respond; `slots` returns real
+availability; booking + offline CAPI work end-to-end — real `Lead`, `CompleteRegistration`, and
+`Purchase` rows show `sent` in `capi_events` (Meta returned `events_received: 1`). Re-prove offline
+acceptance anytime: `npm run capi:prove-offline` (direct to Meta) or `npm run capi:verify-offline`
+(through the deployed `capi` endpoint). builds/lints/tests green.
 
 ---
 
@@ -132,9 +146,10 @@ with the service-account email, "Make changes to events". `slots` queries freeBu
    (a) browser + server `Lead` share one `event_id` and Meta dedupes, (b) rows in
    `contacts`+`appointments`, (c) Google Calendar event created, (d) GHL confirmation fires (and
    shows in `/admin` if the GHL webhook is wired).
-4. **Result form:** in `/admin`, mark the appointment **Showed** → `CompleteRegistration`;
-   then **Purchase** with upfront + recurring → `Purchase` (value = upfront, recurring/LTV in
-   custom_data) in Test Events.
+4. **Result form:** in `/admin` (Website tab), mark the appointment **Showed** →
+   `CompleteRegistration`; then **Purchase** with upfront + recurring → `Purchase` (value = upfront,
+   recurring/LTV in custom_data). These are `system_generated` (offline) so they **won't show in
+   Test Events** — confirm them in Events Manager → live Activity and in the `/admin` CAPI log.
 5. **Stripe (optional):** run a test Checkout → `stripe-webhook` → `Purchase` (deduped).
 6. **Regression:** `npm run build`, `npm run lint`, `npm run test`; no `leadconnectorhq` in the
    client except the isolated GHL relay/messaging references.

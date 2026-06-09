@@ -73,8 +73,10 @@ export interface Appt {
 export interface CapiEvent {
   event_id: string
   event_name: string
+  action_source?: string | null
   status: string
   value?: number | null
+  events_received?: number | null
   sent_at: string
 }
 export interface GhlMessage {
