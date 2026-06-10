@@ -58,7 +58,28 @@ Deno.serve(async (req: Request) => {
           value: amount,
           currency,
           customData: { ...loaded.utm, stripe_session: session.id },
+          // Test bookings stay test-coded end-to-end.
+          testEventCode: loaded.isTest ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined,
         })
+      } else {
+        // No identity → no event fired. Record the failure so the admin
+        // dashboard surfaces it instead of losing the conversion silently.
+        console.error('[stripe-webhook] identity load failed — recording error row', appointmentId)
+        const errRow = {
+          event_id: `purchase_${appointmentId}`,
+          event_name: 'Purchase',
+          action_source: 'system_generated',
+          appointment_id: appointmentId,
+          value: amount,
+          status: 'error',
+          meta_response: { error: 'identity load failed (appointment/contact missing)', stripe_session: session.id },
+        }
+        const { error: insErr } = await supa.from('capi_events').insert(errRow)
+        // 23503: appointment row truly missing → keep the audit row without the FK.
+        // 23505: already claimed → leave the existing row alone.
+        if (insErr && (insErr as { code?: string }).code === '23503') {
+          await supa.from('capi_events').insert({ ...errRow, appointment_id: null })
+        }
       }
     }
   }

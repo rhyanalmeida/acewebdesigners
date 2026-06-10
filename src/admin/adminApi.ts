@@ -67,6 +67,7 @@ export interface Appt {
   resulted_at?: string | null
   resulted_by?: string | null
   notes?: string | null
+  is_test?: boolean
   isSocial?: boolean
   contacts?: ApptContact | null
 }
@@ -77,7 +78,29 @@ export interface CapiEvent {
   status: string
   value?: number | null
   events_received?: number | null
+  error_message?: string | null
+  is_test?: boolean
+  appointment_id?: string | null
   sent_at: string
+}
+/** Per-event-type CAPI rollup (Lead / Showed→CompleteRegistration / Purchase). */
+export interface ServerEventStat {
+  sent: number
+  error: number
+  pending: number
+  lastAt: string | null
+}
+export interface ServerEvents {
+  lead: ServerEventStat
+  completeRegistration: ServerEventStat
+  purchase: ServerEventStat
+}
+/** Outcome of one sendCapiEvent call, as returned by `result` / `capi`. */
+export interface CapiOutcome {
+  ok: boolean
+  status: number
+  deduped?: boolean
+  error?: string
 }
 export interface GhlMessage {
   id: string
@@ -92,6 +115,7 @@ export interface AdminData {
   overall: Overall
   website: WebsiteSeg
   social: SocialSeg
+  serverEvents?: ServerEvents // optional: old function payloads omit it
   appointments: Appt[]
   capiEvents: CapiEvent[]
   ghlMessages: GhlMessage[]
@@ -133,10 +157,27 @@ export interface ResultPayload {
   notes?: string
 }
 
-export async function submitResult(payload: ResultPayload): Promise<void> {
-  const { error } = await supabase.functions.invoke('result', { body: payload })
+export interface ResultResponse {
+  ok: boolean
+  result: ResultKind
+  capi: 'none' | { completeRegistration?: CapiOutcome; purchase?: CapiOutcome }
+}
+
+export async function submitResult(payload: ResultPayload): Promise<ResultResponse> {
+  const { data, error } = await supabase.functions.invoke('result', { body: payload })
   if (error) {
     const { message } = await errorMessage(error, 'Could not save result')
     throw new Error(message)
   }
+  return data as ResultResponse
+}
+
+/** Re-fire a failed/pending CAPI event from its stored attribution. */
+export async function retryCapiEvent(eventId: string): Promise<CapiOutcome> {
+  const { data, error } = await supabase.functions.invoke('capi', { body: { retryEventId: eventId } })
+  if (error) {
+    const { message } = await errorMessage(error, 'Retry failed')
+    throw new Error(message)
+  }
+  return data as CapiOutcome
 }

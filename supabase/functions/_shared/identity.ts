@@ -31,6 +31,7 @@ interface ApptIdentityRow {
   client_ip: string | null
   client_user_agent: string | null
   utm: Record<string, string> | null
+  is_test: boolean | null
   contacts: ContactRow | ContactRow[] | null
 }
 
@@ -60,6 +61,8 @@ export type IdentityBase = Pick<
 export interface LoadedIdentity {
   calendar: 'main' | 'contractor'
   utm: Record<string, string>
+  /** Booked via test mode — downstream events must carry a test code too. */
+  isTest: boolean
   base: IdentityBase
 }
 
@@ -67,7 +70,7 @@ export async function loadAppointmentIdentity(appointmentId: string): Promise<Lo
   const { data, error } = await admin()
     .from('appointments')
     .select(
-      'id, contact_id, calendar, event_source_url, client_ip, client_user_agent, utm, ' +
+      'id, contact_id, calendar, event_source_url, client_ip, client_user_agent, utm, is_test, ' +
         'contacts:contact_id ( email, phone, first_name, last_name, city, state, zip, country, fbc, fbp, fbclid )',
     )
     .eq('id', appointmentId)
@@ -81,6 +84,7 @@ export async function loadAppointmentIdentity(appointmentId: string): Promise<Lo
   return {
     calendar: appt.calendar as 'main' | 'contractor',
     utm: (appt.utm ?? {}) as Record<string, string>,
+    isTest: appt.is_test === true,
     base: {
       dataset: appt.calendar as 'main' | 'contractor',
       eventSourceUrl: (appt.event_source_url as string) || undefined,

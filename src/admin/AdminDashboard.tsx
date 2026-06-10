@@ -10,7 +10,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { CheckCircle2, XCircle, AlertTriangle, Info, RefreshCw, LogOut, Globe, Share2, LayoutDashboard } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
-import { fetchAdminData, submitResult, type AdminData, type Appt, type ResultKind, type Warning } from './adminApi'
+import {
+  fetchAdminData, submitResult, retryCapiEvent,
+  type AdminData, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat, type Warning,
+} from './adminApi'
 
 const usd = (n: number | null | undefined) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(n) || 0)
@@ -124,7 +127,40 @@ const Funnel: React.FC<{ bookings: number; showed: number; purchased: number; sh
 
 const statusBadge = (s: string) => ({ booked: 'bg-blue-100 text-blue-800', showed: 'bg-green-100 text-green-800', no_show: 'bg-red-100 text-red-700', cancelled: 'bg-gray-100 text-gray-500' }[s] ?? 'bg-gray-100 text-gray-600')
 
+const TestBadge: React.FC = () => (
+  <span className="ml-1.5 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500" title="Test booking — excluded from stats and live Meta data">TEST</span>
+)
+
+// ── Meta server-event cards (Lead / Showed / Purchase) ─────────────────────────
+const ServerEventCard: React.FC<{ title: string; sub: string; s: ServerEventStat }> = ({ title, sub, s }) => (
+  <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <p className="text-sm font-semibold text-gray-700">{title}</p>
+    <p className="text-xs text-gray-400">{sub}</p>
+    <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+      <span><span className="text-2xl font-bold text-green-700">{s.sent}</span> <span className="text-sm text-gray-500">sent</span></span>
+      {s.error > 0 && <span className="text-sm font-semibold text-red-600">{s.error} failed</span>}
+      {s.pending > 0 && <span className="text-sm font-semibold text-amber-600">{s.pending} pending</span>}
+    </div>
+    <p className="mt-1 text-xs text-gray-400">{s.lastAt ? `Last: ${dateTime(s.lastAt)}` : 'None yet'}</p>
+  </div>
+)
+
 // ── result modal ──────────────────────────────────────────────────────────────────
+/** One "did Meta take it?" line in the post-save confirmation. */
+const OutcomeLine: React.FC<{ label: string; o?: CapiOutcome }> = ({ label, o }) => {
+  if (!o) return null
+  const ok = o.ok
+  return (
+    <div className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm ${ok ? 'border-green-200 bg-green-50 text-green-800' : 'border-red-200 bg-red-50 text-red-800'}`}>
+      {ok ? <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> : <XCircle size={16} className="mt-0.5 shrink-0" />}
+      <span>
+        <span className="font-medium">{label}</span>{' — '}
+        {ok ? (o.deduped ? 'already sent to Meta (deduped)' : 'sent to Meta') : `failed${o.error ? `: ${o.error}` : ''} · retry it from the CAPI log`}
+      </span>
+    </div>
+  )
+}
+
 const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => void }> = ({ appt, onClose, onSaved }) => {
   const [kind, setKind] = useState<ResultKind>('showed')
   const [upfront, setUpfront] = useState('')
@@ -134,10 +170,11 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
   const [notes, setNotes] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
+  const [outcome, setOutcome] = useState<ResultResponse | null>(null)
   const save = async () => {
     setBusy(true); setErr('')
     try {
-      await submitResult({
+      const res = await submitResult({
         appointmentId: appt.id, result: kind,
         upfront: kind === 'purchase' ? Number(upfront) || 0 : undefined,
         recurring: kind === 'purchase' ? Number(recurring) || 0 : undefined,
@@ -145,16 +182,46 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
         plan: kind === 'purchase' ? plan : undefined,
         notes: notes || undefined,
       })
-      onSaved()
+      setOutcome(res)
     } catch (e) { setErr(e instanceof Error ? e.message : 'Failed') } finally { setBusy(false) }
   }
   const name = `${appt.contacts?.first_name ?? ''} ${appt.contacts?.last_name ?? ''}`.trim() || appt.contacts?.email || 'Lead'
   const inputCls = 'mt-1 w-full rounded-lg border border-gray-300 px-3 py-2'
+
+  // Post-save: show what actually happened with Meta, then refresh on Done.
+  if (outcome) {
+    const capi = outcome.capi
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onSaved}>
+        <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <h3 className="text-lg font-semibold text-gray-900">Result saved</h3>
+          <p className="text-sm text-gray-500">{name} · {dateTime(appt.start_ts)}</p>
+          <div className="mt-4 space-y-2">
+            {capi === 'none' ? (
+              <div className="flex items-start gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                <Info size={16} className="mt-0.5 shrink-0" /> Saved — no Meta event needed for a no-show.
+              </div>
+            ) : (
+              <>
+                <OutcomeLine label="Showed → CompleteRegistration" o={capi.completeRegistration} />
+                <OutcomeLine label="Purchase" o={capi.purchase} />
+              </>
+            )}
+            {appt.is_test && <p className="text-xs text-gray-400">Test booking — events were sent to Meta Test Events only.</p>}
+          </div>
+          <div className="mt-5 flex justify-end">
+            <button type="button" onClick={onSaved} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">Done</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-lg font-semibold text-gray-900">Result meeting</h3>
-        <p className="text-sm text-gray-500">{name} · {dateTime(appt.start_ts)}</p>
+        <p className="text-sm text-gray-500">{name} · {dateTime(appt.start_ts)}{appt.is_test && <TestBadge />}</p>
         <div className="mt-4 grid grid-cols-3 gap-2">
           {(['showed', 'no_show', 'purchase'] as ResultKind[]).map((k) => (
             <button key={k} type="button" onClick={() => setKind(k)} className={`rounded-lg border px-3 py-2 text-sm font-medium capitalize ${kind === k ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-300 text-gray-600'}`}>{k === 'no_show' ? 'No-show' : k}</button>
@@ -208,6 +275,23 @@ const AdminDashboard: React.FC = () => {
     setLoading(true); setLoadErr('')
     try { setData(await fetchAdminData()) } catch (e) { setLoadErr(e instanceof Error ? e.message : 'Failed to load') } finally { setLoading(false) }
   }, [])
+
+  // per-row retry of failed/pending CAPI events
+  const [retrying, setRetrying] = useState<string | null>(null)
+  const [retryErr, setRetryErr] = useState<Record<string, string>>({})
+  const retry = useCallback(async (eventId: string) => {
+    setRetrying(eventId)
+    setRetryErr((prev) => ({ ...prev, [eventId]: '' }))
+    try {
+      const o = await retryCapiEvent(eventId)
+      if (!o.ok) setRetryErr((prev) => ({ ...prev, [eventId]: o.error || 'Meta rejected the event' }))
+    } catch (e) {
+      setRetryErr((prev) => ({ ...prev, [eventId]: e instanceof Error ? e.message : 'Retry failed' }))
+    } finally {
+      setRetrying(null)
+      load()
+    }
+  }, [load])
 
   useEffect(() => { if (session) load() }, [session, load])
 
@@ -297,7 +381,7 @@ const AdminDashboard: React.FC = () => {
                           <div className="text-xs text-gray-500">{a.contacts?.email}{a.contacts?.phone ? ` · ${a.contacts.phone}` : ''}</div>
                         </td>
                         <td className="px-4 py-2">{a.isSocial ? <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">Paid social</span> : <span className="text-xs text-gray-400">Direct</span>}</td>
-                        <td className="px-4 py-2"><span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(a.status)}`}>{a.status}</span></td>
+                        <td className="px-4 py-2"><span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadge(a.status)}`}>{a.status}</span>{a.is_test && <TestBadge />}</td>
                         <td className="px-4 py-2 text-gray-600">{a.purchased_at ? <span className="text-green-700">{usd(a.upfront_value)}{a.recurring_value ? ` + ${usd(a.recurring_value)}/${a.recurring_interval === 'annual' ? 'yr' : 'mo'}` : ''}</span> : '—'}</td>
                         <td className="px-4 py-2 text-right"><button onClick={() => setResulting(a)} className="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-50">Result</button></td>
                       </tr>
@@ -307,6 +391,16 @@ const AdminDashboard: React.FC = () => {
                 </table>
               </div>
             </section>
+            {data.serverEvents && (
+              <section>
+                <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Meta server events</h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <ServerEventCard title="Lead" sub="booking submitted" s={data.serverEvents.lead} />
+                  <ServerEventCard title="Showed" sub="CompleteRegistration · offline" s={data.serverEvents.completeRegistration} />
+                  <ServerEventCard title="Purchase" sub="closed + value · offline" s={data.serverEvents.purchase} />
+                </div>
+              </section>
+            )}
             <section>
               <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Recent CAPI events</h2>
               <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm">
@@ -314,19 +408,54 @@ const AdminDashboard: React.FC = () => {
                   <ul className="divide-y divide-gray-100">{data.capiEvents.map((e) => {
                     const offline = e.action_source === 'system_generated'
                     const accepted = e.status === 'sent' && e.events_received === 1
+                    const unconfirmed = e.status === 'sent' && e.events_received !== 1
+                    const canRetry = e.status !== 'sent' && Boolean(e.appointment_id)
+                    const rowErr = retryErr[e.event_id] || e.error_message
                     return (
-                    <li key={e.event_id} className="flex items-center justify-between py-1.5">
-                      <span className="text-gray-700">{e.event_name}{e.value ? ` · ${usd(e.value)}` : ''}
-                        <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${offline ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'}`}>{offline ? 'offline' : 'website'}</span>
-                      </span>
-                      <span className="flex items-center gap-2 text-xs">
-                        {accepted && <span className="text-green-600" title={`Meta confirmed: events_received ${e.events_received}`}>✓ Meta got it</span>}
-                        <span className={e.status === 'sent' ? 'text-green-600' : e.status === 'error' ? 'text-red-600' : 'text-gray-400'}>{e.status}</span>
-                        <span className="text-gray-400">{dateTime(e.sent_at)}</span>
-                      </span>
+                    <li key={e.event_id} className="py-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-700">{e.event_name}{e.value ? ` · ${usd(e.value)}` : ''}
+                          <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${offline ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'}`}>{offline ? 'offline' : 'website'}</span>
+                          {e.is_test && <TestBadge />}
+                        </span>
+                        <span className="flex items-center gap-2 text-xs">
+                          {accepted && <span className="text-green-600" title={`Meta confirmed: events_received ${e.events_received}`}>✓ Meta got it</span>}
+                          {unconfirmed && <span className="text-amber-600" title="Sent, but Meta did not confirm events_received — check Events Manager">⚠ unconfirmed</span>}
+                          <span
+                            className={e.status === 'sent' ? 'text-green-600' : e.status === 'error' ? 'text-red-600' : 'text-amber-600'}
+                            title={e.status === 'pending' ? 'Claimed but no Meta response — retry if it persists' : undefined}
+                          >{e.status}</span>
+                          <span className="text-gray-400">{dateTime(e.sent_at)}</span>
+                          {canRetry && (
+                            <button
+                              type="button"
+                              onClick={() => retry(e.event_id)}
+                              disabled={retrying === e.event_id}
+                              className="rounded-md border border-gray-300 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                            >{retrying === e.event_id ? 'Retrying…' : 'Retry'}</button>
+                          )}
+                        </span>
+                      </div>
+                      {rowErr && <p className="mt-0.5 truncate text-xs text-red-600" title={rowErr}>{rowErr}</p>}
                     </li>
                     )
                   })}</ul>
+                )}
+              </div>
+            </section>
+            <section>
+              <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Recent messages (GHL)</h2>
+              <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm">
+                {data.ghlMessages.length === 0 ? <p className="text-gray-400">None yet.</p> : (
+                  <ul className="divide-y divide-gray-100">{data.ghlMessages.map((m) => (
+                    <li key={m.id} className="flex items-center justify-between py-1.5">
+                      <span className="capitalize text-gray-700">{m.channel || 'message'}{m.message_type ? ` · ${m.message_type}` : ''}</span>
+                      <span className="flex items-center gap-2 text-xs">
+                        <span className={/sent|deliver/i.test(m.status ?? '') ? 'text-green-600' : /fail|error/i.test(m.status ?? '') ? 'text-red-600' : 'text-gray-400'}>{m.status || '—'}</span>
+                        <span className="text-gray-400">{dateTime(m.received_at)}</span>
+                      </span>
+                    </li>
+                  ))}</ul>
                 )}
               </div>
             </section>

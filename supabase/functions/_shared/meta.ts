@@ -171,6 +171,7 @@ export async function sendCapiEvent(input: CapiInput): Promise<CapiResult> {
     appointment_id: input.appointmentId ?? null,
     value: input.eventName === 'Purchase' ? (input.value ?? null) : null,
     status: 'pending',
+    is_test: Boolean(input.testEventCode),
   }
   const { error: claimErr } = await supa.from('capi_events').insert(claim)
   if (claimErr) {
@@ -196,7 +197,10 @@ export async function sendCapiEvent(input: CapiInput): Promise<CapiResult> {
   // 2) Build + send payload.
   const eventTime = Math.floor(Date.now() / 1000)
   const userData = await buildUserData(input, eventTime * 1000)
-  const testEventCode = input.testEventCode || Deno.env.get('META_TEST_EVENT_CODE') || ''
+  // ONLY explicit test paths (book test mode, the capi endpoint, retries of test
+  // events) may set a test code. Never fall back to the env secret here — that
+  // would route every LIVE conversion to Test Events and exclude it from ads.
+  const testEventCode = input.testEventCode ?? ''
 
   const customData: Record<string, unknown> = {
     currency: input.currency || 'USD',
@@ -233,7 +237,7 @@ export async function sendCapiEvent(input: CapiInput): Promise<CapiResult> {
     // 3) Record outcome (best-effort).
     await supa
       .from('capi_events')
-      .update({ status: resp.ok ? 'sent' : 'error', meta_response: parsed })
+      .update({ status: resp.ok ? 'sent' : 'error', meta_response: parsed, sent_at: new Date().toISOString() })
       .eq('event_id', input.eventId)
 
     if (!resp.ok) {
@@ -245,7 +249,10 @@ export async function sendCapiEvent(input: CapiInput): Promise<CapiResult> {
     )
     return { ok: true, status: 200, metaResponse: parsed }
   } catch (err) {
-    await supa.from('capi_events').update({ status: 'error', meta_response: { error: String(err) } }).eq('event_id', input.eventId)
+    await supa
+      .from('capi_events')
+      .update({ status: 'error', meta_response: { error: String(err) }, sent_at: new Date().toISOString() })
+      .eq('event_id', input.eventId)
     console.error('[capi] fetch failed', err)
     return { ok: false, status: 502, error: String(err) }
   }

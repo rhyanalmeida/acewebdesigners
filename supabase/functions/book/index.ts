@@ -145,6 +145,7 @@ Deno.serve(async (req: Request) => {
       tz,
       status: 'booked',
       event_id: eventId,
+      is_test: b.test === true,
       notes: b.notes ?? null,
       client_ip: clientIp ?? null,
       client_user_agent: clientUa ?? null,
@@ -194,8 +195,8 @@ Deno.serve(async (req: Request) => {
     console.error('[book] CAPI Lead failed (booking kept)', err)
   }
 
-  // ── 5) Google Calendar (best-effort) ──────────────────────────────────────────
-  try {
+  // ── 5) Google Calendar (best-effort; skipped for test bookings) ───────────────
+  if (!b.test) try {
     const gcalId = await createEvent({
       calendar,
       summary: `Meeting — ${firstName} ${lastName}`.trim(),

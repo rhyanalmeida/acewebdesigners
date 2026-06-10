@@ -52,6 +52,8 @@ Deno.serve(async (req: Request) => {
 
   const now = new Date().toISOString()
   const baseUpdate = { result_notes: b.notes ?? null, resulted_at: now, resulted_by: adminUser.email }
+  // Results on a TEST booking stay test-coded — they must never count as live.
+  const testCode = loaded.isTest ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined
 
   // ── No-Show: status only ────────────────────────────────────────────────────
   if (b.result === 'no_show') {
@@ -68,6 +70,7 @@ Deno.serve(async (req: Request) => {
     eventId: `cr_${b.appointmentId}`,
     actionSource: 'system_generated', // offline: showed up on a call / marked in CRM
     customData: loaded.utm,
+    testEventCode: testCode,
   })
 
   // ── Purchase → upfront value + recurring/plan/LTV in custom_data ─────────────
@@ -104,6 +107,7 @@ Deno.serve(async (req: Request) => {
         predicted_ltv: predictedLtv,
         ...(b.plan ? { content_name: b.plan } : {}),
       },
+      testEventCode: testCode,
     })
   }
 

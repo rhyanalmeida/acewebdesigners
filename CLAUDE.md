@@ -47,7 +47,7 @@ Supabase Edge Functions (supabase/functions, Deno)
   book           validate → upsert contact → insert appointment → CAPI Lead → GCal event → GHL relay
   result         admin: No-Show / Showed / Purchase → CAPI CompleteRegistration / Purchase
   admin-data     admin: dashboard payload (health + stats + lists)
-  capi           guarded manual/test CAPI endpoint (verification)
+  capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
   create-checkout / stripe-webhook   Stripe deposit → Purchase CAPI
   ghl-webhook    logs GHL messaging sends (visibility)
   _shared/*      meta.ts (CAPI engine), google.ts, ghl.ts, availability.ts, identity.ts, adminAuth.ts
@@ -62,6 +62,12 @@ Meta CAPI · Google Calendar · Stripe · GHL (messaging only)
 attribution: `cr_<appt>` (CompleteRegistration) and `purchase_<appt>` (Purchase) are derived from
 the appointment id, so the result form and Stripe webhook can't double-count.
 
+**Test mode:** booking with `test: true` flags the appointment + its `capi_events` rows `is_test`,
+routes every downstream event (Lead AND later CR/Purchase/Stripe) to Meta **Test Events**, skips
+GCal + GHL, and is excluded from all `/admin` stats (badged `TEST` in lists). `META_TEST_EVENT_CODE`
+is read **only** by explicit test paths — `meta.ts` never falls back to it for live events (a prior
+footgun: keeping the secret set would have test-routed all production conversions).
+
 **`action_source` split** (`_shared/meta.ts`, `defaultActionSource`): `Lead` →
 `'website'` (it happens on the booking submit, so it dedupes with the browser pixel and renders in
 Test Events). `CompleteRegistration` (Showed) and `Purchase` (closed) → `'system_generated'` —
@@ -73,19 +79,25 @@ Events by flipping them to `'website'`; the offline classification is intentiona
 **Admin dashboard:** `/admin` (lazy route in `App.tsx`). Supabase **email + password** login
 (`signInWithPassword`), with a magic-link fallback ("Email me a sign-in link instead"); the email
 must be in `ADMIN_EMAILS`. Three tabs: **Overview** (whole-business KPIs + setup warnings +
-integration health), **Website** (booking funnel + every appointment with a **Result** action —
-Showed / No-Show / Purchase with upfront + recurring $ + plan — + CAPI log), and **Social Media**
-(paid FB/IG-attributed funnel + per-campaign breakdown). Stats cover leads/upcoming/showed/
-purchased/MRR and CAPI sent/error; recent CAPI + GHL-message logs are shown. A "book test mode" is
-available for end-to-end checks.
+integration health), **Website** (booking funnel, appointments with a **Result** action —
+Showed / No-Show / Purchase with upfront + recurring $ + plan — a **Meta server events** panel
+(Lead / Showed / Purchase cards: sent · failed · pending · last event), the CAPI log, and recent
+GHL messages), and **Social Media** (paid FB/IG-attributed funnel + per-campaign breakdown).
+The Result modal confirms per-event Meta acceptance after saving; the CAPI log shows
+`✓ Meta got it` (events_received=1) / `⚠ unconfirmed`, error messages, `test` badges, and a
+**Retry** button that re-fires failed/pending events from stored attribution (`capi` fn,
+`{ retryEventId }`, admin JWT). Stats exclude `is_test` rows.
 
 ## Status
 
-**Deployed + verified live (2026-06-09).** All Edge functions respond; `slots` returns real
-availability; booking + offline CAPI work end-to-end — real `Lead`, `CompleteRegistration`, and
-`Purchase` rows show `sent` in `capi_events` (Meta returned `events_received: 1`). Re-prove offline
-acceptance anytime: `npm run capi:prove-offline` (direct to Meta) or `npm run capi:verify-offline`
-(through the deployed `capi` endpoint). builds/lints/tests green.
+**Verified live 2026-06-09; CAPI-hardening pass 2026-06-10 — code complete, deploy pending auth.**
+The 06-10 pass: removed the META_TEST_EVENT_CODE live-event fallback, added `is_test` flagging
+end-to-end (migration `0003_is_test.sql`), Stripe-webhook error rows on identity-load failure,
+admin retry mode on `capi`, and the dashboard upgrades above. Build/lint/tests + `deno check`
+green; `capi:prove-offline` re-passed (events_received: 1 both events). **Still to run** (needs
+`SUPABASE_ACCESS_TOKEN` / `npx supabase login`): `npx supabase db push`, then deploy
+`book result stripe-webhook capi admin-data`, then `npm run capi:verify-offline` + a `test:true`
+booking end-to-end.
 
 ---
 
