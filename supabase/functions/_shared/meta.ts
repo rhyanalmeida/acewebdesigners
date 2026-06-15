@@ -18,7 +18,7 @@ import { admin } from './supabaseAdmin.ts'
 
 const META_API_VERSION = 'v21.0'
 
-export type CapiEventName = 'Lead' | 'CompleteRegistration' | 'Purchase'
+export type CapiEventName = 'Lead' | 'Schedule' | 'CompleteRegistration' | 'Purchase'
 export type Dataset = 'contractor' | 'main'
 
 export interface CapiInput {
@@ -84,12 +84,13 @@ function datasetId(dataset: Dataset): string {
 }
 
 function defaultActionSource(name: CapiEventName): 'website' | 'system_generated' {
-  // Lead happens on the website (booking submit) → 'website' (dedupes with the
-  // browser pixel). CompleteRegistration (showed) and Purchase (closed) happen
-  // OFFLINE — on a call / in the CRM → 'system_generated'. Offline events are
-  // received + attributed to ads via matched PII (email/phone/fbc); they just
-  // don't render in the Test Events channel UI (verify them in live Activity / admin).
-  return name === 'Lead' ? 'website' : 'system_generated'
+  // Lead (gate form) and Schedule (slot booked) happen on the website → 'website'
+  // (each dedupes with its matching browser pixel event). CompleteRegistration
+  // (showed) and Purchase (closed) happen OFFLINE — on a call / in the CRM →
+  // 'system_generated'. Offline events are received + attributed to ads via
+  // matched PII (email/phone/fbc); they just don't render in the Test Events
+  // channel UI (verify them in live Activity / admin).
+  return name === 'Lead' || name === 'Schedule' ? 'website' : 'system_generated'
 }
 
 interface MetaUserData {

@@ -394,8 +394,9 @@ const AdminDashboard: React.FC = () => {
             {data.serverEvents && (
               <section>
                 <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">Meta server events</h2>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <ServerEventCard title="Lead" sub="booking submitted" s={data.serverEvents.lead} />
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <ServerEventCard title="Lead" sub="gate form submitted" s={data.serverEvents.lead} />
+                  <ServerEventCard title="Booked" sub="Schedule · slot picked" s={data.serverEvents.schedule} />
                   <ServerEventCard title="Showed" sub="CompleteRegistration · offline" s={data.serverEvents.completeRegistration} />
                   <ServerEventCard title="Purchase" sub="closed + value · offline" s={data.serverEvents.purchase} />
                 </div>

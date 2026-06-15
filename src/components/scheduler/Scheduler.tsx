@@ -1,14 +1,17 @@
 /**
  * Scheduler — our own booking widget (replaces the GoHighLevel iframe).
  *
- * Flow: fetch open slots from the `slots` Edge Function → pick a day → pick a
- * time → fill the short form → submit to the `book` Edge Function. On submit we
- * fire the browser pixel `Lead` with an event_id and send the SAME event_id to
- * the server (book → CAPI), so Meta dedupes the pair.
+ * Funnel (each step = one Meta event at its logical UX moment):
+ *   1. Gate form (name/email/phone + hidden attribution) → `Lead`
+ *      (browser pixel + `lead` Edge Function share one event_id → Meta dedupes)
+ *   2. Pick a day + time → confirm → `Schedule`
+ *      (browser pixel + `book` Edge Function share one event_id → Meta dedupes)
+ *   3. Admin results the meeting later → CompleteRegistration / Purchase (offline)
  *
- * Times are returned as UTC instants and rendered in the visitor's own
- * timezone. Identity (email/phone/address) + Meta click ids (fbc/fbp/fbclid)
- * are posted to the server for Conversions API match quality.
+ * Times are returned as UTC instants and rendered in the visitor's own timezone.
+ * Identity (email/phone) + Meta click ids (fbc/fbp/fbclid) + first-touch UTM/ad
+ * context are captured once at the gate step and reused for the booking, so both
+ * website events match as well as each other.
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -16,7 +19,7 @@ import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/style.css'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 import { getAttribution } from '../../utils/attribution'
-import { trackLead } from '../../utils/pixelTracking'
+import { trackLead, trackSchedule } from '../../utils/pixelTracking'
 
 interface Slot {
   startISO: string
@@ -51,15 +54,20 @@ function formatLongDate(iso: string): string {
   })
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 interface FormState {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   phone: string
-  city: string
-  state: string
-  zip: string
 }
-const EMPTY_FORM: FormState = { name: '', email: '', phone: '', city: '', state: '', zip: '' }
+const EMPTY_FORM: FormState = { firstName: '', lastName: '', email: '', phone: '' }
+
+const newEventId = (prefix: string) =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`
 
 export const Scheduler: React.FC<SchedulerProps> = ({
   calendar,
@@ -69,15 +77,24 @@ export const Scheduler: React.FC<SchedulerProps> = ({
   minHeight = 600,
   onBooked,
 }) => {
+  // funnel step
+  const [step, setStep] = useState<'lead' | 'calendar' | 'done'>('lead')
+
+  // identity (collected once at the gate step)
+  const [form, setForm] = useState<FormState>(EMPTY_FORM)
+  const [leadEventId, setLeadEventId] = useState<string>('')
+  const [leadSubmitting, setLeadSubmitting] = useState(false)
+  const [leadError, setLeadError] = useState('')
+
+  // calendar
   const [slots, setSlots] = useState<Slot[]>([])
   const [businessTz, setBusinessTz] = useState('America/New_York')
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [selectedDay, setSelectedDay] = useState<Date | undefined>()
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
-  const [form, setForm] = useState<FormState>(EMPTY_FORM)
-  const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState('')
+  const [booking, setBooking] = useState(false)
+  const [bookError, setBookError] = useState('')
   const [confirmed, setConfirmed] = useState<Slot | null>(null)
 
   const visitorTz = useMemo(
@@ -102,6 +119,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
     }
   }, [calendar])
 
+  // Pre-load slots in the background while the visitor fills the gate form.
   useEffect(() => {
     if (!isSupabaseConfigured) {
       setLoading(false)
@@ -135,88 +153,133 @@ export const Scheduler: React.FC<SchedulerProps> = ({
     return d
   }, [])
 
-  const handleSubmit = useCallback(
+  const setField = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  // ── Step 1: gate form → Lead ────────────────────────────────────────────────
+  const handleLeadSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
-      if (!selectedSlot) return
-      setSubmitError('')
-      if (!form.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-        setSubmitError('Please enter your name and a valid email.')
+      setLeadError('')
+      if (!form.firstName.trim() || !form.lastName.trim()) {
+        setLeadError('Please enter your first and last name.')
         return
       }
-      setSubmitting(true)
+      if (!EMAIL_RE.test(form.email)) {
+        setLeadError('Please enter a valid email.')
+        return
+      }
+      if (form.phone.replace(/[^0-9]/g, '').length < 7) {
+        setLeadError('Please enter a valid phone number.')
+        return
+      }
+      setLeadSubmitting(true)
 
-      // Dual-fire Lead: browser pixel + server CAPI share this event_id.
-      const eventId =
-        typeof crypto !== 'undefined' && 'randomUUID' in crypto
-          ? crypto.randomUUID()
-          : `lead_${Date.now()}_${Math.random().toString(16).slice(2)}`
+      // One Lead event_id per session: browser pixel + `lead` fn share it → dedupe.
+      const eventId = leadEventId || newEventId('lead')
+      if (!leadEventId) setLeadEventId(eventId)
       const attr = getAttribution()
       trackLead(eventId, { content_name: calendarName ?? `${calendar} booking` })
 
       try {
-        const { data, error } = await supabase.functions.invoke('book', {
+        const { error } = await supabase.functions.invoke('lead', {
           body: {
             calendar,
-            startISO: selectedSlot.startISO,
-            endISO: selectedSlot.endISO,
-            tz: businessTz,
-            name: form.name,
+            firstName: form.firstName,
+            lastName: form.lastName,
             email: form.email,
             phone: form.phone,
-            city: form.city,
-            state: form.state,
-            zip: form.zip,
             country: 'US',
             fbc: attr.fbc,
             fbp: attr.fbp,
             fbclid: attr.fbclid,
             eventId,
             eventSourceUrl: window.location.href,
+            landingUrl: attr.landingUrl,
+            utm: attr.utm,
           },
         })
-
-        if (error) {
-          // Pull status + message off the underlying Response when present.
-          let status = 0
-          let msg = 'Something went wrong booking that slot. Please try again.'
-          const ctx = (error as { context?: Response }).context
-          if (ctx) {
-            status = ctx.status
-            try {
-              const j = (await ctx.json()) as { error?: string }
-              if (j?.error) msg = j.error
-            } catch {
-              /* ignore */
-            }
-          }
-          if (status === 409) {
-            // Slot taken between load and submit — refresh and let them re-pick.
-            await loadSlots()
-            setSelectedSlot(null)
-          }
-          setSubmitError(msg)
-          return
-        }
-
-        const result = data as { appointmentId: string; startISO: string }
-        setConfirmed(selectedSlot)
-        onBooked?.({ appointmentId: result.appointmentId, startISO: result.startISO })
+        if (error) console.error('[Scheduler] lead capture error (continuing to calendar)', error)
       } catch (err) {
-        console.error('[Scheduler] book failed', err)
-        setSubmitError('Something went wrong booking that slot. Please try again.')
+        // Don't block the funnel on a lead-capture hiccup — let them book.
+        console.error('[Scheduler] lead invoke failed (continuing to calendar)', err)
       } finally {
-        setSubmitting(false)
+        setLeadSubmitting(false)
+        setStep('calendar')
       }
     },
-    [selectedSlot, form, calendar, calendarName, businessTz, loadSlots, onBooked],
+    [form, leadEventId, calendar, calendarName],
   )
 
-  const setField = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }))
+  // ── Step 2: confirm slot → Schedule + booking ───────────────────────────────
+  const handleBook = useCallback(async () => {
+    if (!selectedSlot) return
+    setBookError('')
+    setBooking(true)
+
+    // Schedule event_id: browser pixel + `book` fn share it → dedupe.
+    const eventId = newEventId('schedule')
+    const attr = getAttribution()
+    trackSchedule(eventId, { content_name: calendarName ?? `${calendar} booking` })
+
+    try {
+      const { data, error } = await supabase.functions.invoke('book', {
+        body: {
+          calendar,
+          startISO: selectedSlot.startISO,
+          endISO: selectedSlot.endISO,
+          tz: businessTz,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+          country: 'US',
+          fbc: attr.fbc,
+          fbp: attr.fbp,
+          fbclid: attr.fbclid,
+          eventId,
+          eventSourceUrl: window.location.href,
+          landingUrl: attr.landingUrl,
+          utm: attr.utm,
+        },
+      })
+
+      if (error) {
+        let status = 0
+        let msg = 'Something went wrong booking that slot. Please try again.'
+        const ctx = (error as { context?: Response }).context
+        if (ctx) {
+          status = ctx.status
+          try {
+            const j = (await ctx.json()) as { error?: string }
+            if (j?.error) msg = j.error
+          } catch {
+            /* ignore */
+          }
+        }
+        if (status === 409) {
+          // Slot taken between load and submit — refresh and let them re-pick.
+          await loadSlots()
+          setSelectedSlot(null)
+        }
+        setBookError(msg)
+        return
+      }
+
+      const result = data as { appointmentId: string; startISO: string }
+      setConfirmed(selectedSlot)
+      setStep('done')
+      onBooked?.({ appointmentId: result.appointmentId, startISO: result.startISO })
+    } catch (err) {
+      console.error('[Scheduler] book failed', err)
+      setBookError('Something went wrong booking that slot. Please try again.')
+    } finally {
+      setBooking(false)
+    }
+  }, [selectedSlot, form, calendar, calendarName, businessTz, loadSlots, onBooked])
 
   // ── confirmation ──────────────────────────────────────────────────────────────
-  if (confirmed) {
+  if (step === 'done' && confirmed) {
     return (
       <div id={containerId} className={`booking-widget-container ${className}`} style={{ minHeight }}>
         <div className="rounded-2xl bg-cream-50 ring-1 ring-ink-900/10 p-8 text-center shadow-soft">
@@ -238,7 +301,40 @@ export const Scheduler: React.FC<SchedulerProps> = ({
     )
   }
 
-  // ── unavailable / fallback ──────────────────────────────────────────────────────
+  // ── Step 1: gate form ───────────────────────────────────────────────────────
+  if (step === 'lead') {
+    return (
+      <div id={containerId} className={`booking-widget-container ${className}`} style={{ minHeight }}>
+        <div className="mx-auto max-w-md rounded-2xl bg-cream-50 p-6 ring-1 ring-ink-900/10 shadow-soft">
+          <p className="mb-1 text-sm font-semibold text-ink-800">Let's get you scheduled</p>
+          <p className="mb-4 text-sm text-ink-700/70">Enter your details, then pick a time that works for you.</p>
+          <form onSubmit={handleLeadSubmit}>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <input required value={form.firstName} onChange={setField('firstName')} placeholder="First name *" className={inputClass} autoComplete="given-name" />
+                <input required value={form.lastName} onChange={setField('lastName')} placeholder="Last name *" className={inputClass} autoComplete="family-name" />
+              </div>
+              <input required type="email" value={form.email} onChange={setField('email')} placeholder="Email *" className={inputClass} autoComplete="email" />
+              <input required type="tel" value={form.phone} onChange={setField('phone')} placeholder="Phone *" className={inputClass} autoComplete="tel" />
+            </div>
+
+            {leadError && <p className="mt-3 text-sm text-red-600">{leadError}</p>}
+
+            <button
+              type="submit"
+              disabled={leadSubmitting}
+              className="mt-4 w-full rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+            >
+              {leadSubmitting ? 'One moment…' : 'Next — pick a time'}
+            </button>
+            <p className="mt-3 text-center text-xs text-ink-700/60">Prefer to talk? Call {PHONE_DISPLAY}.</p>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  // ── unavailable / fallback (calendar step only) ──────────────────────────────
   if (loadError) {
     return (
       <div id={containerId} className={`booking-widget-container ${className}`} style={{ minHeight }}>
@@ -258,7 +354,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
     )
   }
 
-  // ── main ────────────────────────────────────────────────────────────────────────
+  // ── Step 2: calendar ──────────────────────────────────────────────────────────
   return (
     <div id={containerId} className={`booking-widget-container ${className}`} style={{ minHeight }}>
       {loading ? (
@@ -286,7 +382,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
             <p className="mt-2 text-xs text-ink-700/70">Times shown in your timezone ({visitorTz}).</p>
           </div>
 
-          {/* Right: times + form */}
+          {/* Right: times → confirm */}
           <div className="rounded-2xl bg-cream-50 p-4 ring-1 ring-ink-900/10">
             {!selectedDay ? (
               <p className="flex h-full items-center justify-center text-center text-ink-700/70">
@@ -315,9 +411,9 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                 )}
               </>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-ink-800">3. Your details</p>
+                  <p className="text-sm font-semibold text-ink-800">3. Confirm</p>
                   <button
                     type="button"
                     onClick={() => setSelectedSlot(null)}
@@ -329,31 +425,22 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                 <p className="mb-4 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800">
                   {formatLongDate(selectedSlot.startISO)} at <strong>{formatTime(selectedSlot.startISO)}</strong>
                 </p>
+                <p className="mb-4 text-sm text-ink-700">
+                  Booking as <strong>{form.firstName} {form.lastName}</strong> ({form.email}).
+                </p>
 
-                <div className="space-y-3">
-                  <input required value={form.name} onChange={setField('name')} placeholder="Full name *" className={inputClass} autoComplete="name" />
-                  <input required type="email" value={form.email} onChange={setField('email')} placeholder="Email *" className={inputClass} autoComplete="email" />
-                  <input type="tel" value={form.phone} onChange={setField('phone')} placeholder="Phone" className={inputClass} autoComplete="tel" />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input value={form.city} onChange={setField('city')} placeholder="City" className={inputClass} autoComplete="address-level2" />
-                    <input value={form.state} onChange={setField('state')} placeholder="State" className={inputClass} autoComplete="address-level1" />
-                  </div>
-                  <input value={form.zip} onChange={setField('zip')} placeholder="ZIP" className={inputClass} autoComplete="postal-code" />
-                </div>
-
-                {submitError && <p className="mt-3 text-sm text-red-600">{submitError}</p>}
+                {bookError && <p className="mb-3 text-sm text-red-600">{bookError}</p>}
 
                 <button
-                  type="submit"
-                  disabled={submitting}
-                  className="mt-4 w-full rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                  type="button"
+                  onClick={handleBook}
+                  disabled={booking}
+                  className="w-full rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
                 >
-                  {submitting ? 'Booking…' : 'Confirm booking'}
+                  {booking ? 'Booking…' : 'Confirm booking'}
                 </button>
-                <p className="mt-3 text-center text-xs text-ink-700/60">
-                  Prefer to talk? Call {PHONE_DISPLAY}.
-                </p>
-              </form>
+                <p className="mt-3 text-center text-xs text-ink-700/60">Prefer to talk? Call {PHONE_DISPLAY}.</p>
+              </div>
             )}
           </div>
         </div>

@@ -50,14 +50,15 @@ interface CapiRollupRow {
   is_test: boolean | null
 }
 
-/** Per-event-type CAPI rollup (non-test only): Lead / CompleteRegistration / Purchase. */
+/** Per-event-type CAPI rollup (non-test only): Lead / Schedule / CompleteRegistration / Purchase. */
 function rollupServerEvents(rows: CapiRollupRow[]) {
   const blank = () => ({ sent: 0, error: 0, pending: 0, lastAt: null as string | null })
-  const out = { lead: blank(), completeRegistration: blank(), purchase: blank() }
+  const out = { lead: blank(), schedule: blank(), completeRegistration: blank(), purchase: blank() }
   for (const r of rows) {
     if (r.is_test) continue
     const bucket =
       r.event_name === 'Lead' ? out.lead :
+      r.event_name === 'Schedule' ? out.schedule :
       r.event_name === 'CompleteRegistration' ? out.completeRegistration :
       r.event_name === 'Purchase' ? out.purchase : null
     if (!bucket) continue
@@ -133,8 +134,8 @@ Deno.serve(async (req: Request) => {
   const availabilityRows = availRes.count ?? 0
   const capiRollup = (capiRollupRes.data ?? []) as CapiRollupRow[]
   const serverEvents = rollupServerEvents(capiRollup)
-  const capiSent = serverEvents.lead.sent + serverEvents.completeRegistration.sent + serverEvents.purchase.sent
-  const capiError = serverEvents.lead.error + serverEvents.completeRegistration.error + serverEvents.purchase.error
+  const capiSent = serverEvents.lead.sent + serverEvents.schedule.sent + serverEvents.completeRegistration.sent + serverEvents.purchase.sent
+  const capiError = serverEvents.lead.error + serverEvents.schedule.error + serverEvents.completeRegistration.error + serverEvents.purchase.error
   const appts = (apptRes.data ?? []) as unknown as ApptRow[]
   const realAppts = appts.filter((a) => !a.is_test) // stats exclude test bookings
 

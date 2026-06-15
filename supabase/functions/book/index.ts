@@ -3,9 +3,10 @@
  *
  * Flow (booking is committed before external sinks so none can lose it):
  *   1. validate input + slot
- *   2. upsert contact (by email) with Meta attribution
+ *   2. upsert contact (by email) with durable Meta attribution
  *   3. insert appointment (DB unique index prevents double-booking)
- *   4. fire server CAPI Lead (same event_id as the browser pixel → Meta dedupes)
+ *   4. fire server CAPI Schedule (same event_id as the browser pixel → Meta dedupes;
+ *      the Lead already fired at the gate-form step via the `lead` function)
  *   5. create Google Calendar event (best-effort)
  *   6. push to GHL to fire its messaging workflow (best-effort, isolated)
  *
@@ -20,24 +21,10 @@ import { admin } from '../_shared/supabaseAdmin.ts'
 import { sendCapiEvent } from '../_shared/meta.ts'
 import { createEvent } from '../_shared/google.ts'
 import { pushBooking } from '../_shared/ghl.ts'
+import { upsertContact } from '../_shared/contacts.ts'
+import { mergeAttribution, parseAttribution } from '../_shared/attribution.ts'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-/** Extract utm_* params from the landing URL (for Meta custom_data + reporting). */
-function parseUtm(url?: string): Record<string, string> {
-  const out: Record<string, string> = {}
-  if (!url) return out
-  try {
-    const sp = new URL(url).searchParams
-    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
-      const v = sp.get(k)
-      if (v) out[k] = v.slice(0, 256)
-    }
-  } catch {
-    /* ignore bad URL */
-  }
-  return out
-}
 
 interface BookBody {
   calendar?: string
@@ -58,6 +45,8 @@ interface BookBody {
   fbclid?: string
   eventId?: string
   eventSourceUrl?: string
+  landingUrl?: string
+  utm?: Record<string, string> // client-captured first-touch attribution
   notes?: string
   test?: boolean // routes CAPI to Test Events + skips GHL/messaging (never pollutes live data)
 }
@@ -106,32 +95,28 @@ Deno.serve(async (req: Request) => {
     req.headers.get('x-real-ip') ||
     undefined
   const clientUa = req.headers.get('user-agent') ?? undefined
-  const utm = parseUtm(b.eventSourceUrl)
+  const landingUrl = b.landingUrl || b.eventSourceUrl
+  const utm = mergeAttribution(b.utm, parseAttribution(landingUrl))
 
-  // ── 2) upsert contact ─────────────────────────────────────────────────────────
-  const contactRow = {
+  // ── 2) upsert contact (durable attribution; idempotent with the lead step) ────
+  const contactId = await upsertContact(supa, {
     email,
-    phone: b.phone ?? null,
-    first_name: firstName || null,
-    last_name: lastName || null,
-    city: b.city ?? null,
-    state: b.state ?? null,
-    zip: b.zip ?? null,
-    country: b.country ?? 'US',
-    fbc: b.fbc ?? null,
-    fbp: b.fbp ?? null,
-    fbclid: b.fbclid ?? null,
-  }
-  const { data: contact, error: contactErr } = await supa
-    .from('contacts')
-    .upsert(contactRow, { onConflict: 'email' })
-    .select('id')
-    .single()
-  if (contactErr || !contact) {
-    console.error('[book] contact upsert failed', contactErr?.message)
-    return json({ error: 'could not save contact' }, 500)
-  }
-  const contactId = contact.id as string
+    phone: b.phone,
+    firstName,
+    lastName,
+    city: b.city,
+    state: b.state,
+    zip: b.zip,
+    country: b.country,
+    fbc: b.fbc,
+    fbp: b.fbp,
+    fbclid: b.fbclid,
+    clientIp,
+    clientUserAgent: clientUa,
+    landingUrl,
+    utm,
+  })
+  if (!contactId) return json({ error: 'could not save contact' }, 500)
 
   // ── 3) insert appointment (unique index guards double-booking) ────────────────
   const eventId = b.eventId || crypto.randomUUID()
@@ -163,10 +148,11 @@ Deno.serve(async (req: Request) => {
   }
   const appointmentId = appt.id as string
 
-  // ── 4) CAPI Lead (same event_id as the browser pixel → Meta dedupes) ──────────
+  // ── 4) CAPI Schedule (same event_id as the browser pixel → Meta dedupes) ──────
+  // The `Lead` already fired at the gate-form step; booking a slot is `Schedule`.
   try {
     await sendCapiEvent({
-      eventName: 'Lead',
+      eventName: 'Schedule',
       eventId,
       dataset: calendar,
       actionSource: 'website',

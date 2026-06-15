@@ -84,24 +84,34 @@ export function trackCustomEvent(eventName: string, options?: TrackEventOptions)
 }
 
 /**
- * Track the booking `Lead` on the browser pixel with a shared `event_id`.
+ * Track a standard event on the browser pixel with a shared `event_id`.
  *
- * The same `event_id` is sent server-side by the `book` Edge Function's CAPI
- * call, so Meta dedupes the browser + server Lead into one conversion. Pass a
- * stable id (e.g. crypto.randomUUID()) and use the identical value in the
- * `book` request body.
+ * The same `event_id` is sent server-side by our Edge Functions' CAPI call, so
+ * Meta dedupes the browser + server event into one conversion. Pass a stable id
+ * (e.g. crypto.randomUUID()) and use the identical value in the matching request
+ * body (`lead` for Lead, `book` for Schedule).
  */
-export function trackLead(eventId: string, options?: TrackEventOptions): void {
+export function trackDedupedEvent(name: string, eventId: string, options?: TrackEventOptions): void {
   if (!isPixelLoaded()) {
-    console.warn('⚠️ Facebook Pixel not loaded. Cannot track Lead.')
+    console.warn(`⚠️ Facebook Pixel not loaded. Cannot track ${name}.`)
     return
   }
   try {
-    window.fbq('track', 'Lead', options ?? {}, { eventID: eventId })
-    console.log(`✅ Facebook Pixel: Lead tracked (event_id=${eventId})`)
+    window.fbq('track', name, options ?? {}, { eventID: eventId })
+    console.log(`✅ Facebook Pixel: ${name} tracked (event_id=${eventId})`)
   } catch (error) {
-    console.error('❌ Error tracking Lead:', error)
+    console.error(`❌ Error tracking ${name}:`, error)
   }
+}
+
+/** Lead — fired at the gate-form step; deduped with the `lead` function's CAPI Lead. */
+export function trackLead(eventId: string, options?: TrackEventOptions): void {
+  trackDedupedEvent('Lead', eventId, options)
+}
+
+/** Schedule — fired when a slot is booked; deduped with the `book` function's CAPI Schedule. */
+export function trackSchedule(eventId: string, options?: TrackEventOptions): void {
+  trackDedupedEvent('Schedule', eventId, options)
 }
 
 /**
@@ -118,15 +128,10 @@ export function trackViewContent(contentName: string, contentCategory: string, c
 /**
  * Track a phone-call click as a client-side audience signal only.
  *
- * Architecture note: Meta `Lead` and all conversions flow exclusively through
- * GoHighLevel's native Facebook Conversions API workflow action (booking form →
- * GHL contact → workflow → Meta CAPI; GHL hashes the PII). Phone clicks happen
- * outside GHL, so we intentionally do NOT fire `Lead` here — that would
- * double-count when the caller also books. We fire only a custom `PhoneClick`
- * event so Meta can use it for retargeting / lookalike audiences.
- *
- * If a call turns into a real lead, the operator adds the contact in GHL and the
- * workflow fires the proper CAPI Lead event.
+ * Conversions (Lead/Schedule/CompleteRegistration/Purchase) flow through our own
+ * server-side Conversions API. Phone clicks aren't a booking, so we intentionally
+ * do NOT fire a conversion here — that would double-count when the caller also
+ * books. We fire only a custom `PhoneClick` event for retargeting / lookalikes.
  */
 export function trackPhoneClick(
   source: 'home' | 'main_landing' | 'contractor' | 'contact' | 'about' | 'social' | 'work' | 'reviews' | 'header' | 'footer' | string,

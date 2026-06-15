@@ -12,6 +12,10 @@ project_id = "acewebdesigners"
 [functions.slots]
 verify_jwt = false
 
+# Gate-form lead capture (fires CAPI Lead + persists attribution). Public like book.
+[functions.lead]
+verify_jwt = false
+
 [functions.book]
 verify_jwt = false
 

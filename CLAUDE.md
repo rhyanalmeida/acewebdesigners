@@ -39,28 +39,42 @@ and Edge secrets — never re-literal them in components. **No secrets in client
 
 ```
 React (Netlify)
-  scheduler UI (src/components/scheduler) + browser pixel (PageView/ViewContent + Lead w/ event_id)
+  scheduler UI (src/components/scheduler): gate form → Lead, then calendar → Schedule
+  + browser pixel (PageView/ViewContent + Lead/Schedule w/ shared event_id)
         │  VITE_SUPABASE_URL / ANON_KEY
         ▼
 Supabase Edge Functions (supabase/functions, Deno)
   slots          open slots = availability − booked − Google busy
-  book           validate → upsert contact → insert appointment → CAPI Lead → GCal event → GHL relay
+  lead           gate-form step: upsert contact (durable attribution) → CAPI Lead
+  book           validate → upsert contact → insert appointment → CAPI Schedule → GCal event → GHL relay
   result         admin: No-Show / Showed / Purchase → CAPI CompleteRegistration / Purchase
   admin-data     admin: dashboard payload (health + stats + lists)
   capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
   create-checkout / stripe-webhook   Stripe deposit → Purchase CAPI
   ghl-webhook    logs GHL messaging sends (visibility)
-  _shared/*      meta.ts (CAPI engine), google.ts, ghl.ts, availability.ts, identity.ts, adminAuth.ts
+  _shared/*      meta.ts (CAPI engine), contacts.ts (upsert), attribution.ts (utm/ad-id parse),
+                 google.ts, ghl.ts, availability.ts, identity.ts, adminAuth.ts
         ▼
 Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages
         ▼ external sinks
 Meta CAPI · Google Calendar · Stripe · GHL (messaging only)
 ```
 
-**Dedup model:** the browser fires `Lead` with an `event_id` (`trackLead`), and `book` fires the
-**same `event_id`** server-side → Meta dedupes. Post-meeting events reuse the lead's stored
-attribution: `cr_<appt>` (CompleteRegistration) and `purchase_<appt>` (Purchase) are derived from
-the appointment id, so the result form and Stripe webhook can't double-count.
+**Funnel + dedup model:** four events, each at its logical moment:
+`Lead` (gate form) → `Schedule` (slot booked) → `CompleteRegistration` (Showed) → `Purchase` (closed).
+The two website events are dual-fired and deduped by a shared `event_id`: the browser fires `Lead`
+(`trackLead`) and the `lead` fn fires the same id; the browser fires `Schedule` (`trackSchedule`)
+and `book` fires the same id. Post-meeting events reuse the lead's stored attribution: `cr_<appt>`
+(CompleteRegistration) and `purchase_<appt>` (Purchase) derive from the appointment id, so the
+result form and Stripe webhook can't double-count.
+
+**Attribution durability:** the `contacts` row is the durable attribution record — it holds
+fbc/fbp/fbclid AND client_ip/client_user_agent/landing_url/utm (jsonb). The `utm` jsonb captures the
+Ads Manager URL template (`utm_source/medium/campaign/content` + `campaign_id/adset_id/ad_id`).
+First-touch params are persisted client-side to `sessionStorage` (`getAttribution`) so SPA nav can't
+drop them. `lead`/`book` write it (shared `contacts.ts` + `attribution.ts`); every downstream event
+replays it. Match *quality* comes from user_data (email/phone/fbc/fbp/ip/ua); the ad ids are
+attribution context, sent in custom_data.
 
 **Test mode:** booking with `test: true` flags the appointment + its `capi_events` rows `is_test`,
 routes every downstream event (Lead AND later CR/Purchase/Stripe) to Meta **Test Events**, skips
@@ -68,9 +82,9 @@ GCal + GHL, and is excluded from all `/admin` stats (badged `TEST` in lists). `M
 is read **only** by explicit test paths — `meta.ts` never falls back to it for live events (a prior
 footgun: keeping the secret set would have test-routed all production conversions).
 
-**`action_source` split** (`_shared/meta.ts`, `defaultActionSource`): `Lead` →
-`'website'` (it happens on the booking submit, so it dedupes with the browser pixel and renders in
-Test Events). `CompleteRegistration` (Showed) and `Purchase` (closed) → `'system_generated'` —
+**`action_source` split** (`_shared/meta.ts`, `defaultActionSource`): `Lead` (gate form) and
+`Schedule` (slot booked) → `'website'` (they happen on the site, dedupe with the browser pixel, and
+render in Test Events). `CompleteRegistration` (Showed) and `Purchase` (closed) → `'system_generated'` —
 they happen **offline** (on a call / in the CRM). Offline events are still received and attributed
 to ads via matched PII (email/phone/fbc), but they **do NOT appear in the Test Events channel UI** —
 verify them in Events Manager → live Activity, or in `/admin`. Don't "fix" their absence from Test
@@ -81,8 +95,8 @@ Events by flipping them to `'website'`; the offline classification is intentiona
 must be in `ADMIN_EMAILS`. Three tabs: **Overview** (whole-business KPIs + setup warnings +
 integration health), **Website** (booking funnel, appointments with a **Result** action —
 Showed / No-Show / Purchase with upfront + recurring $ + plan — a **Meta server events** panel
-(Lead / Showed / Purchase cards: sent · failed · pending · last event), the CAPI log, and recent
-GHL messages), and **Social Media** (paid FB/IG-attributed funnel + per-campaign breakdown).
+(Lead / Booked / Showed / Purchase cards: sent · failed · pending · last event), the CAPI log, and
+recent GHL messages), and **Social Media** (paid FB/IG-attributed funnel + per-campaign breakdown).
 The Result modal confirms per-event Meta acceptance after saving; the CAPI log shows
 `✓ Meta got it` (events_received=1) / `⚠ unconfirmed`, error messages, `test` badges, and a
 **Retry** button that re-fires failed/pending events from stored attribution (`capi` fn,
@@ -90,14 +104,19 @@ The Result modal confirms per-event Meta acceptance after saving; the CAPI log s
 
 ## Status
 
-**Verified live 2026-06-09; CAPI-hardening pass 2026-06-10 — code complete, deploy pending auth.**
-The 06-10 pass: removed the META_TEST_EVENT_CODE live-event fallback, added `is_test` flagging
-end-to-end (migration `0003_is_test.sql`), Stripe-webhook error rows on identity-load failure,
-admin retry mode on `capi`, and the dashboard upgrades above. Build/lint/tests + `deno check`
-green; `capi:prove-offline` re-passed (events_received: 1 both events). **Still to run** (needs
-`SUPABASE_ACCESS_TOKEN` / `npx supabase login`): `npx supabase db push`, then deploy
-`book result stripe-webhook capi admin-data`, then `npm run capi:verify-offline` + a `test:true`
-booking end-to-end.
+**Funnel-split pass 2026-06-15 — code complete, deploy pending.** Split the entangled
+booking-Lead into a clean four-step funnel (Lead at the gate form → Schedule at booking →
+CompleteRegistration → Purchase); added the `lead` Edge Function, shared `contacts.ts` +
+`attribution.ts`, durable contact attribution (migration `0004_contact_attribution.sql`:
+client_ip/client_user_agent/landing_url/utm), first-touch UTM capture, and a "Booked" admin card.
+Builds on the un-deployed 06-10 hardening pass (`0003_is_test.sql`, META_TEST_EVENT_CODE live
+fallback removed, admin retry on `capi`). Build + lint + 14 tests green (Deno not installed locally
+— `deno check` runs at deploy). **Still to run** (auth is wired via the saved `SUPABASE_ACCESS_TOKEN`
+user env var): `npx supabase db push` (applies `0003` + `0004`), then deploy
+`lead book result stripe-webhook capi admin-data`, redeploy the Netlify site, then a `test:true`
+end-to-end (Lead + Schedule rows) + mark Showed/Purchase. Ads: repoint the ad set's optimization
+event toward `Schedule` once volume accrues. Set the ad URL template in Ads Manager:
+`utm_source=Facebook&utm_medium={{adset.name}}&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&campaign_id={{campaign.id}}&adset_id={{adset.id}}&ad_id={{ad.id}}`.
 
 ---
 

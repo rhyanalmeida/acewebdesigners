@@ -92,6 +92,7 @@ export interface ServerEventStat {
 }
 export interface ServerEvents {
   lead: ServerEventStat
+  schedule: ServerEventStat
   completeRegistration: ServerEventStat
   purchase: ServerEventStat
 }
