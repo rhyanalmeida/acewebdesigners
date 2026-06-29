@@ -173,6 +173,25 @@ export async function submitResult(payload: ResultPayload): Promise<ResultRespon
   return data as ResultResponse
 }
 
+/**
+ * Create a Stripe Checkout link for a booked appointment's deposit/payment.
+ * Returns a hosted Stripe URL to send the client; on payment the
+ * `stripe-webhook` fires the deduped Purchase CAPI automatically.
+ */
+export async function createPaymentLink(payload: {
+  appointmentId: string
+  amount: number
+  description?: string
+}): Promise<{ url: string }> {
+  const { data, error } = await supabase.functions.invoke('create-checkout', { body: payload })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not create payment link')
+    throw new Error(message)
+  }
+  if (!data?.url) throw new Error('No checkout URL returned')
+  return data as { url: string }
+}
+
 /** Re-fire a failed/pending CAPI event from its stored attribution. */
 export async function retryCapiEvent(eventId: string): Promise<CapiOutcome> {
   const { data, error } = await supabase.functions.invoke('capi', { body: { retryEventId: eventId } })
