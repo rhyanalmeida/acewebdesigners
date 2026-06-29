@@ -146,8 +146,9 @@ const WebsiteSocialCombo: React.FC<WebsiteSocialComboProps> = ({
         Most contractors take the combo
       </BadgePill>
       <p className="text-cream-100/85 leading-relaxed">
-        Website + Standard social runs <span className="text-cream-50 font-semibold">$30/wk</span>{' '}
-        on top of your site. First week of posts free — same risk reversal as the design.
+        Most contractors add social on top of their site so neither channel goes quiet.{' '}
+        <span className="text-cream-50 font-semibold">First week of posts free</span> — same risk
+        reversal as the design. We'll tailor a plan to your trade on the call.
       </p>
       <Magnetic strength={6}>
         <button

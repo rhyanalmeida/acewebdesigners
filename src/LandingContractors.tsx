@@ -27,10 +27,9 @@ import {
   Reveal,
   IconTile,
   BadgePill,
-  SectionHeading,
   Magnetic,
 } from './components/ui'
-import { Check, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
 
 const EXAMPLES = [
   {
@@ -108,28 +107,6 @@ const PAIN_POINTS = [
   },
 ]
 
-const PRICING_COMPACT = [
-  {
-    tier: 'Basic',
-    price: '$200',
-    monthly: '$15',
-    bullets: ['One-page site', 'Mobile + SEO ready', 'Hosting + SSL'],
-  },
-  {
-    tier: 'Standard',
-    price: '$1,000',
-    monthly: '$30',
-    bullets: ['Up to 5 pages', 'Custom copy', 'Contact form + Maps'],
-    highlight: true,
-  },
-  {
-    tier: 'E-commerce',
-    price: '$1,500',
-    monthly: '$45',
-    bullets: ['Online store / booking', 'Secure payments', 'Inventory + admin'],
-  },
-] as const
-
 const FAQS = [
   {
     question: 'How fast can I really get online?',
@@ -142,9 +119,9 @@ const FAQS = [
       'Yes. We design your homepage at no cost, and we throw in a sample social post too. Pay only if you love it. No catch, no card on file.',
   },
   {
-    question: 'How much for the website + social combo?',
+    question: 'What does it cost?',
     answer:
-      'Websites start at $200 (Basic), $1,000 (Standard), or $1,500 (E-commerce). Add Standard social media management at $30/wk or Deluxe at $99/wk. First week of posts is free, just like the design.',
+      "There's no cost to find out — the homepage design and your first week of social posts are free. If you love it, we'll walk you through simple, contractor-friendly options on the call and tailor a plan to your trade. No card on file, no pressure.",
   },
   {
     question: "What if I'm too busy to manage social myself?",
@@ -334,73 +311,6 @@ function LandingContractors() {
           benefits={BENEFITS}
           columns={2}
         />
-
-        {/* COMPACT PRICING — websites + combo note */}
-        <Section tone="muted" padding="lg">
-          <SectionHeading
-            eyebrow="Pricing"
-            heading="Simple,"
-            accent="no surprises"
-            sub="Free design first — pay only if you love it. Add social management at $30/wk (Standard) or $99/wk (Deluxe)."
-          />
-          <div className="mt-12 grid gap-4 md:grid-cols-3 max-w-5xl mx-auto">
-            {PRICING_COMPACT.map(p => {
-              const isHighlight = 'highlight' in p && p.highlight
-              return (
-                <div
-                  key={p.tier}
-                  className={`relative flex flex-col rounded-xl2 p-6 ring-1 transition-all duration-500 ease-premium ${
-                    isHighlight
-                      ? 'bg-ink-900 text-cream-50 ring-ink-900'
-                      : 'bg-cream-50 text-ink-900 ring-ink-900/10 hover:ring-ink-900/20'
-                  }`}
-                >
-                  {isHighlight && (
-                    <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-rust-500 text-white px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
-                      Most popular
-                    </span>
-                  )}
-                  <span className={`label-mono ${isHighlight ? 'text-cream-100/65' : 'text-ink-700/70'}`}>
-                    {p.tier}
-                  </span>
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className={`font-display text-4xl font-semibold tracking-tight ${isHighlight ? 'text-cream-50' : 'text-ink-900'}`}>
-                      {p.price}
-                    </span>
-                  </div>
-                  <p className={`mt-1 text-xs ${isHighlight ? 'text-cream-100/65' : 'text-ink-700/70'}`}>
-                    + {p.monthly}/mo hosting
-                  </p>
-                  <ul className="mt-4 space-y-1.5 flex-1">
-                    {p.bullets.map(b => (
-                      <li key={b} className="flex items-start gap-2 text-sm">
-                        <Check
-                          className={`h-4 w-4 mt-0.5 shrink-0 ${isHighlight ? 'text-rust-300' : 'text-rust-600'}`}
-                          aria-hidden
-                        />
-                        <span className={isHighlight ? 'text-cream-100/90' : 'text-ink-800'}>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )
-            })}
-          </div>
-          <div className="mt-8 max-w-3xl mx-auto rounded-xl2 bg-cream-50 ring-1 ring-ink-900/10 p-5 sm:p-6 text-center shadow-soft">
-            <BadgePill tone="brand">
-              Add-on
-            </BadgePill>
-            <p className="mt-3 text-base sm:text-lg text-ink-800 leading-relaxed">
-              <strong>Social media management</strong> from <strong>$30/wk</strong> (Standard) or{' '}
-              <strong>$99/wk</strong> (Deluxe). Daily posting, jobsite reels, Google Business
-              Profile on Deluxe. <span className="text-ink-700/70">First week free.</span>
-            </p>
-          </div>
-          <p className="mt-6 text-center text-sm text-ink-700/70 max-w-xl mx-auto">
-            Each tier includes hosting, mobile responsiveness, and basic SEO. Add-ons (e-commerce,
-            booking, blog) at $200 each.
-          </p>
-        </Section>
 
         <BookingSection
           ref={bookingFormRef}
