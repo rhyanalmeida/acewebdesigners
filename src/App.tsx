@@ -19,7 +19,6 @@ import Home from './pages/Home'
 const AdminDashboard = React.lazy(() => import('./admin/AdminDashboard'))
 
 import { PageShell } from './components/layout'
-import { CookieNotice } from './components/ui'
 import { useScrollReveal } from './hooks/useScrollReveal'
 import { trackEvent, trackViewContent } from './utils/pixelTracking'
 
@@ -192,7 +191,6 @@ function App() {
     return (
       <HelmetProvider>
         <PageWrapper>{renderPage()}</PageWrapper>
-        <CookieNotice />
       </HelmetProvider>
     )
   }
@@ -202,7 +200,6 @@ function App() {
       <PageShell onNavigate={handleNavigate} currentPage={currentPage}>
         <PageWrapper>{renderPage()}</PageWrapper>
       </PageShell>
-      <CookieNotice />
     </HelmetProvider>
   )
 }
