@@ -12,6 +12,7 @@
 import Stripe from 'npm:stripe@17.0.0'
 import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
+import { sendGhlSms } from '../_shared/ghl.ts'
 
 Deno.serve(async (req: Request) => {
   const pre = handlePreflight(req)
@@ -28,6 +29,8 @@ Deno.serve(async (req: Request) => {
     description?: string
     successUrl?: string
     cancelUrl?: string
+    /** When true, auto-text the link to the contact via GHL (no copy-paste). */
+    send?: boolean
   }
   try {
     b = await req.json()
@@ -38,8 +41,13 @@ Deno.serve(async (req: Request) => {
     return json({ error: 'appointmentId and a positive amount are required' }, 400)
   }
 
-  const { data: appt } = await admin().from('appointments').select('id').eq('id', b.appointmentId).maybeSingle()
+  const { data: appt } = await admin()
+    .from('appointments')
+    .select('id, contacts:contact_id ( first_name, email, phone )')
+    .eq('id', b.appointmentId)
+    .maybeSingle()
   if (!appt) return json({ error: 'appointment not found' }, 404)
+  const contact = (appt as { contacts?: { first_name?: string; email?: string; phone?: string } }).contacts
 
   const stripe = new Stripe(key, { httpClient: Stripe.createFetchHttpClient() })
   const origin = req.headers.get('origin') || 'https://acewebdesigners.com'
@@ -61,7 +69,23 @@ Deno.serve(async (req: Request) => {
       success_url: b.successUrl || `${origin}/?paid=1`,
       cancel_url: b.cancelUrl || `${origin}/?canceled=1`,
     })
-    return json({ url: session.url })
+
+    // Optional: auto-text the link to the client via GHL (no copy-paste).
+    let sent = false
+    let sendError: string | undefined
+    if (b.send && session.url) {
+      if (!contact?.phone && !contact?.email) {
+        sendError = 'no phone or email on file'
+      } else {
+        const hi = contact?.first_name ? `Hi ${contact.first_name}, ` : 'Hi, '
+        const message = `${hi}here's your secure payment link from Ace Web Designers: ${session.url}`
+        const res = await sendGhlSms({ email: contact?.email, phone: contact?.phone, message })
+        sent = res.sent
+        sendError = res.error
+      }
+    }
+
+    return json({ url: session.url, sent, sendError })
   } catch (err) {
     console.error('[create-checkout] stripe error', err)
     return json({ error: 'could not create checkout session' }, 502)

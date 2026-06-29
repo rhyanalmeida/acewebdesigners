@@ -182,14 +182,16 @@ export async function createPaymentLink(payload: {
   appointmentId: string
   amount: number
   description?: string
-}): Promise<{ url: string }> {
+  /** When true, the link is auto-texted to the client via GHL. */
+  send?: boolean
+}): Promise<{ url: string; sent: boolean; sendError?: string }> {
   const { data, error } = await supabase.functions.invoke('create-checkout', { body: payload })
   if (error) {
     const { message } = await errorMessage(error, 'Could not create payment link')
     throw new Error(message)
   }
   if (!data?.url) throw new Error('No checkout URL returned')
-  return data as { url: string }
+  return data as { url: string; sent: boolean; sendError?: string }
 }
 
 /** Re-fire a failed/pending CAPI event from its stored attribution. */

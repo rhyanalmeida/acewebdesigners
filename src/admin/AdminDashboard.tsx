@@ -400,17 +400,22 @@ const PaymentLinkModal: React.FC<{ appt: Appt; onClose: () => void }> = ({ appt,
   const [description, setDescription] = useState('Deposit — Ace Web Designers')
   const [creating, setCreating] = useState(false)
   const [url, setUrl] = useState('')
+  const [sent, setSent] = useState(false)
+  const [sendError, setSendError] = useState<string | undefined>()
   const [err, setErr] = useState('')
   const [copied, setCopied] = useState(false)
+  const hasPhone = Boolean(appt.contacts?.phone)
 
-  const create = async () => {
+  const create = async (send: boolean) => {
     setErr('')
     const amt = Number(amount)
     if (!(amt > 0)) { setErr('Enter an amount greater than 0.'); return }
     setCreating(true)
     try {
-      const res = await createPaymentLink({ appointmentId: appt.id, amount: amt, description: description.trim() || undefined })
+      const res = await createPaymentLink({ appointmentId: appt.id, amount: amt, description: description.trim() || undefined, send })
       setUrl(res.url)
+      setSent(res.sent)
+      setSendError(res.sendError)
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Could not create link')
     } finally {
@@ -426,13 +431,19 @@ const PaymentLinkModal: React.FC<{ appt: Appt; onClose: () => void }> = ({ appt,
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4" onClick={onClose}>
       <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-1 flex items-center gap-2"><Link2 className="text-indigo-500" size={20} /><h3 className="text-lg font-semibold text-slate-900">Send payment link</h3></div>
-        <p className="mb-4 text-sm text-slate-500">{fullName(appt.contacts)}{appt.contacts?.email ? ` · ${appt.contacts.email}` : ''}</p>
+        <p className="mb-4 text-sm text-slate-500">{fullName(appt.contacts)}{appt.contacts?.phone ? ` · ${appt.contacts.phone}` : appt.contacts?.email ? ` · ${appt.contacts.email}` : ''}</p>
 
         {url ? (
           <div className="space-y-3">
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-              Link ready — send it to the client. On payment, the Meta Purchase fires automatically.
-            </div>
+            {sent ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                ✓ Texted to {fullName(appt.contacts)} via GHL. On payment, the Meta Purchase fires automatically.
+              </div>
+            ) : (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                Link ready{sendError ? ` — auto-send didn't go through (${sendError}); copy & send it manually.` : ' — copy & send it to the client.'} On payment, the Meta Purchase fires automatically.
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <input readOnly value={url} className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700" />
               <button onClick={copy} className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"><Copy size={14} /> {copied ? 'Copied' : 'Copy'}</button>
@@ -453,11 +464,17 @@ const PaymentLinkModal: React.FC<{ appt: Appt; onClose: () => void }> = ({ appt,
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
             </label>
             {err && <p className="text-sm text-rose-600">{err}</p>}
-            <div className="flex justify-end gap-2 pt-1">
+            <div className="flex items-center justify-between gap-2 pt-1">
               <button onClick={onClose} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
-              <button onClick={create} disabled={creating} className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
-                {creating ? 'Creating…' : 'Create link'}
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => create(false)} disabled={creating} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60">
+                  {creating ? '…' : 'Just create'}
+                </button>
+                <button onClick={() => create(true)} disabled={creating || !hasPhone} title={hasPhone ? 'Generate the link and text it to the client via GHL' : 'No phone on file — use Just create, then copy'}
+                  className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+                  <Link2 size={14} /> {creating ? 'Working…' : 'Create & text'}
+                </button>
+              </div>
             </div>
           </div>
         )}
