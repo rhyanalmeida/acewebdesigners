@@ -23,9 +23,14 @@ supabase/.temp/
 supabase/.branches/
 
 # Local agent / tooling artifacts (not source)
-.claude/worktrees/
+.claude/
+.claude-flow/
+.playwright-mcp/
 .swarm/
 ruvector.db
+*.tsbuildinfo
+audit/
+SECURITY_AUDIT*.json
 
 # Netlify CI artifacts — must NOT be committed (Linux CI regenerates per build;
 # committing causes EINTEGRITY plugin-install errors and Windows-path leaks)
