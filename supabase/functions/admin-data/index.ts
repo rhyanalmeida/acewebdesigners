@@ -50,8 +50,11 @@ interface CapiRollupRow {
   is_test: boolean | null
 }
 
-/** Per-event-type CAPI rollup (non-test only): Lead / Schedule / CompleteRegistration / Purchase. */
+/** Per-event-type CAPI rollup (non-test only): Lead / Schedule / CompleteRegistration / Purchase.
+ *  Failures only count for 7 days — stale errors stay in the log (retryable) but stop
+ *  driving the warning banner / "N failed" cards forever. */
 function rollupServerEvents(rows: CapiRollupRow[]) {
+  const staleMs = Date.now() - 7 * 24 * 60 * 60 * 1000
   const blank = () => ({ sent: 0, error: 0, pending: 0, lastAt: null as string | null })
   const out = { lead: blank(), schedule: blank(), completeRegistration: blank(), purchase: blank() }
   for (const r of rows) {
@@ -63,7 +66,7 @@ function rollupServerEvents(rows: CapiRollupRow[]) {
       r.event_name === 'Purchase' ? out.purchase : null
     if (!bucket) continue
     if (r.status === 'sent') bucket.sent += 1
-    else if (r.status === 'error') bucket.error += 1
+    else if (r.status === 'error') { if (new Date(r.sent_at).getTime() >= staleMs) bucket.error += 1 }
     else bucket.pending += 1
     if (!bucket.lastAt || r.sent_at > bucket.lastAt) bucket.lastAt = r.sent_at
   }

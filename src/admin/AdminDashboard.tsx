@@ -806,9 +806,9 @@ const AdminDashboard: React.FC = () => {
             <button onClick={() => supabase.auth.signOut()} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm text-slate-700 hover:bg-slate-50"><LogOut size={14} /> <span className="hidden sm:inline">Sign out</span></button>
           </div>
         </div>
-        <div className="mx-auto flex max-w-6xl gap-1 px-3 sm:px-6">
+        <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-3 sm:px-6">
           {tabs.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition ${tab === t.id ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>{t.icon}{t.label}</button>
+            <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-medium transition ${tab === t.id ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>{t.icon}{t.label}</button>
           ))}
         </div>
       </header>
