@@ -34,9 +34,13 @@ export async function computeOpenSlots(opts: {
   calendar: 'main' | 'contractor'
   days?: number
   leadMinutes?: number
+  maxAdvanceMinutes?: number
 }): Promise<{ tz: string; slots: Slot[] }> {
   const days = Math.min(Math.max(opts.days ?? 21, 1), 60)
-  const leadMinutes = opts.leadMinutes ?? 120
+  // Booking window: min 4h notice, max 24h out. `book` validates against these
+  // same slots, so both bounds are enforced server-side too.
+  const leadMinutes = opts.leadMinutes ?? 240
+  const maxAdvanceMinutes = opts.maxAdvanceMinutes ?? 1440
   const supa = admin()
 
   const { data: rules, error } = await supa
@@ -78,6 +82,7 @@ export async function computeOpenSlots(opts: {
 
   const overlapsBusy = (s: number, e: number) => busy.some((b) => s < b.end && e > b.start)
   const earliest = now + leadMinutes * 60_000
+  const latest = now + maxAdvanceMinutes * 60_000
 
   // Enumerate calendar days with UTC date-only arithmetic (DST-safe anchor).
   const slots: Slot[] = []
@@ -105,7 +110,7 @@ export async function computeOpenSlots(opts: {
         const wall = `${ymd} ${pad(Math.floor(m / 60))}:${pad(m % 60)}:00`
         const startMs = fromZonedTime(wall, tz).getTime()
         const endMs = startMs + r.slot_minutes * 60_000
-        if (startMs < earliest) continue
+        if (startMs < earliest || startMs > latest) continue
         if (overlapsBusy(startMs, endMs)) continue
         slots.push({ startISO: new Date(startMs).toISOString(), endISO: new Date(endMs).toISOString() })
       }

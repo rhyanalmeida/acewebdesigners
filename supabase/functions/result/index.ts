@@ -11,7 +11,9 @@
  * Idempotent: event_ids derive from the appointment id, so re-results / Stripe
  * overlaps dedupe in capi_events. Admin-only (requireAdmin).
  *
- * POST { appointmentId, result, upfront?, recurring?, recurringInterval?, plan?, notes? }
+ * POST { appointmentId, result, upfront?, recurring?, recurringInterval?, plan?, notes?, test? }
+ * `test: true` marks the appointment (and its capi_events) is_test, routes this
+ * result's Meta events to Test Events, and skips GHL — for dry-runs on a live booking.
  */
 
 import { handlePreflight, json } from '../_shared/cors.ts'
@@ -19,6 +21,8 @@ import { admin } from '../_shared/supabaseAdmin.ts'
 import { requireAdmin } from '../_shared/adminAuth.ts'
 import { sendCapiEvent } from '../_shared/meta.ts'
 import { loadAppointmentIdentity } from '../_shared/identity.ts'
+import { ghlSyncStage } from '../_shared/ghl.ts'
+import type { GhlAttribution } from '../_shared/ghl.ts'
 
 Deno.serve(async (req: Request) => {
   const pre = handlePreflight(req)
@@ -36,6 +40,7 @@ Deno.serve(async (req: Request) => {
     recurringInterval?: 'monthly' | 'annual' | 'one_time'
     plan?: string
     notes?: string
+    test?: boolean
   }
   try {
     b = await req.json()
@@ -53,7 +58,13 @@ Deno.serve(async (req: Request) => {
   const now = new Date().toISOString()
   const baseUpdate = { result_notes: b.notes ?? null, resulted_at: now, resulted_by: adminUser.email }
   // Results on a TEST booking stay test-coded — they must never count as live.
-  const testCode = loaded.isTest ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined
+  // An admin can also flag a live booking as test at result time (b.test).
+  const isTest = loaded.isTest || b.test === true
+  if (b.test && !loaded.isTest) {
+    await supa.from('appointments').update({ is_test: true }).eq('id', b.appointmentId)
+    await supa.from('capi_events').update({ is_test: true }).eq('appointment_id', b.appointmentId)
+  }
+  const testCode = isTest ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined
 
   // ── No-Show: status only ────────────────────────────────────────────────────
   if (b.result === 'no_show') {
@@ -72,6 +83,33 @@ Deno.serve(async (req: Request) => {
     customData: loaded.utm,
     testEventCode: testCode,
   })
+
+  // Reusable GHL contact identity + base attribution (replayed from the lead).
+  const ghlContact = {
+    email: loaded.base.email,
+    phone: loaded.base.phone,
+    firstName: loaded.base.firstName,
+    lastName: loaded.base.lastName,
+    city: loaded.base.city,
+    state: loaded.base.state,
+    zip: loaded.base.zip,
+    country: loaded.base.country,
+  }
+  const baseAttr: GhlAttribution = {
+    fbc: loaded.base.fbc,
+    fbp: loaded.base.fbp,
+    fbclid: loaded.base.fbclid,
+    clientIp: loaded.base.clientIpAddress,
+    clientUserAgent: loaded.base.clientUserAgent,
+    utm: loaded.utm,
+  }
+
+  // ── GHL: funnel-showed tag (skipped for test bookings) ───────────────────────
+  if (!isTest) try {
+    await ghlSyncStage({ stage: 'showed', ...ghlContact, attribution: baseAttr })
+  } catch (err) {
+    console.error('[result] ghl showed sync failed', err)
+  }
 
   // ── Purchase → upfront value + recurring/plan/LTV in custom_data ─────────────
   if (b.result === 'purchase') {
@@ -109,6 +147,23 @@ Deno.serve(async (req: Request) => {
       },
       testEventCode: testCode,
     })
+
+    // ── GHL: funnel-purchased tag + deal value/plan custom fields ──────────────
+    if (!isTest) try {
+      await ghlSyncStage({
+        stage: 'purchased',
+        ...ghlContact,
+        attribution: {
+          ...baseAttr,
+          dealValue: upfront,
+          recurringValue: recurring,
+          recurringInterval: interval,
+          planName: b.plan,
+        },
+      })
+    } catch (err) {
+      console.error('[result] ghl purchased sync failed', err)
+    }
   }
 
   return json({ ok: true, result: b.result, capi })

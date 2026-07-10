@@ -110,6 +110,19 @@ export interface GhlMessage {
   status?: string | null
   received_at: string
 }
+export interface AdminContact {
+  id: string
+  first_name?: string | null
+  last_name?: string | null
+  email?: string | null
+  phone?: string | null
+  city?: string | null
+  state?: string | null
+  created_at: string
+  fbclid?: string | null
+  landing_url?: string | null
+  utm?: Record<string, string> | null
+}
 export interface AdminData {
   health: AdminHealth
   warnings: Warning[]
@@ -120,6 +133,7 @@ export interface AdminData {
   appointments: Appt[]
   capiEvents: CapiEvent[]
   ghlMessages: GhlMessage[]
+  contactsList?: AdminContact[] // optional: old function payloads omit it
 }
 
 async function errorMessage(error: unknown, fallback: string): Promise<{ status: number; message: string }> {
@@ -156,6 +170,8 @@ export interface ResultPayload {
   recurringInterval?: 'monthly' | 'annual' | 'one_time'
   plan?: string
   notes?: string
+  /** Mark the appointment as a test: Meta events go to Test Events, stats exclude it. */
+  test?: boolean
 }
 
 export interface ResultResponse {
@@ -192,6 +208,16 @@ export async function createPaymentLink(payload: {
   }
   if (!data?.url) throw new Error('No checkout URL returned')
   return data as { url: string; sent: boolean; sendError?: string }
+}
+
+/** Permanently delete all test appointments + test CAPI rows (contacts are kept). */
+export async function discardTestData(): Promise<{ deletedCapiEvents: number; deletedAppointments: number }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', { body: { action: 'discardTests' } })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not discard test data')
+    throw new Error(message)
+  }
+  return data as { deletedCapiEvents: number; deletedAppointments: number }
 }
 
 /** Re-fire a failed/pending CAPI event from its stored attribution. */

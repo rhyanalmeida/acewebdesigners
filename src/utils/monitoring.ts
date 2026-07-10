@@ -158,6 +158,7 @@ class PerformanceMonitor {
 
 class SecurityMonitor {
   private events: SecurityEvent[] = []
+  private devtoolsPollTimer: ReturnType<typeof setInterval> | null = null
 
   constructor() {
     this.setupCSPViolationReporting()
@@ -250,8 +251,8 @@ class SecurityMonitor {
     const devtools = { open: false, orientation: null }
     const threshold = 160
 
-    setInterval(() => {
-      if (window.outerHeight - window.innerHeight > threshold || 
+    this.devtoolsPollTimer = setInterval(() => {
+      if (window.outerHeight - window.innerHeight > threshold ||
           window.outerWidth - window.innerWidth > threshold) {
         if (!devtools.open) {
           devtools.open = true
@@ -269,6 +270,13 @@ class SecurityMonitor {
         devtools.open = false
       }
     }, 500)
+  }
+
+  disconnect() {
+    if (this.devtoolsPollTimer) {
+      clearInterval(this.devtoolsPollTimer)
+      this.devtoolsPollTimer = null
+    }
   }
 
   private logSecurityEvent(event: SecurityEvent) {
@@ -399,4 +407,5 @@ export const measureUserTiming = (name: string, startMark?: string, endMark?: st
 // Cleanup function
 export const cleanupMonitoring = () => {
   performanceMonitor.disconnect()
+  securityMonitor.disconnect()
 }

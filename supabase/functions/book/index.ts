@@ -2,9 +2,9 @@
  * `book` — create a booking. The orchestrator that replaces GHL's calendar.
  *
  * Flow (booking is committed before external sinks so none can lose it):
- *   1. validate input + slot
+ *   1. validate input + verify the slot against live availability (server picks end_ts)
  *   2. upsert contact (by email) with durable Meta attribution
- *   3. insert appointment (DB unique index prevents double-booking)
+ *   3. insert appointment (DB overlap-exclusion constraint prevents double-booking)
  *   4. fire server CAPI Schedule (same event_id as the browser pixel → Meta dedupes;
  *      the Lead already fired at the gate-form step via the `lead` function)
  *   5. create Google Calendar event (best-effort)
@@ -18,11 +18,12 @@
 
 import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
+import { computeOpenSlots } from '../_shared/availability.ts'
 import { sendCapiEvent } from '../_shared/meta.ts'
 import { createEvent } from '../_shared/google.ts'
-import { pushBooking } from '../_shared/ghl.ts'
+import { createGhlAppointment, ghlSyncStage, pushLegacyBooking } from '../_shared/ghl.ts'
 import { upsertContact } from '../_shared/contacts.ts'
-import { mergeAttribution, parseAttribution } from '../_shared/attribution.ts'
+import { mergeAttribution, parseAttribution, withDefaultAdIds } from '../_shared/attribution.ts'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -69,12 +70,27 @@ Deno.serve(async (req: Request) => {
   const email = (b.email ?? '').trim().toLowerCase()
   if (!EMAIL_RE.test(email)) return json({ error: 'valid email required' }, 400)
   const startMs = b.startISO ? Date.parse(b.startISO) : NaN
-  const endMs = b.endISO ? Date.parse(b.endISO) : NaN
-  if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) {
-    return json({ error: 'valid startISO/endISO required' }, 400)
-  }
+  if (!Number.isFinite(startMs)) return json({ error: 'valid startISO required' }, 400)
   if (startMs < Date.now()) return json({ error: 'slot is in the past' }, 400)
   const tz = b.tz || 'America/New_York'
+  const startISO = new Date(startMs).toISOString()
+
+  // Validate the requested start against LIVE open slots and take the slot's end
+  // from the server — never trust the client's endISO. This rejects off-grid,
+  // out-of-window, inside-lead-time, or already-busy times before we touch the
+  // DB. (The DB overlap-exclusion constraint is still the hard race backstop.)
+  let endISO: string
+  try {
+    const { slots } = await computeOpenSlots({ calendar })
+    const match = slots.find((s) => s.startISO === startISO)
+    if (!match) {
+      return json({ error: 'That time is no longer available — please pick another slot.' }, 409)
+    }
+    endISO = match.endISO
+  } catch (err) {
+    console.error('[book] slot validation failed', err)
+    return json({ error: 'could not verify availability' }, 500)
+  }
 
   // name: prefer explicit first/last, else split combined
   let firstName = (b.firstName ?? '').trim()
@@ -85,8 +101,6 @@ Deno.serve(async (req: Request) => {
     lastName = parts.join(' ')
   }
 
-  const startISO = new Date(startMs).toISOString()
-  const endISO = new Date(endMs).toISOString()
   const supa = admin()
 
   // client identity for match quality
@@ -96,7 +110,7 @@ Deno.serve(async (req: Request) => {
     undefined
   const clientUa = req.headers.get('user-agent') ?? undefined
   const landingUrl = b.landingUrl || b.eventSourceUrl
-  const utm = mergeAttribution(b.utm, parseAttribution(landingUrl))
+  const utm = withDefaultAdIds(mergeAttribution(b.utm, parseAttribution(landingUrl)), landingUrl)
 
   // ── 2) upsert contact (durable attribution; idempotent with the lead step) ────
   const contactId = await upsertContact(supa, {
@@ -118,7 +132,7 @@ Deno.serve(async (req: Request) => {
   })
   if (!contactId) return json({ error: 'could not save contact' }, 500)
 
-  // ── 3) insert appointment (unique index guards double-booking) ────────────────
+  // ── 3) insert appointment (overlap-exclusion constraint guards double-booking) ─
   const eventId = b.eventId || crypto.randomUUID()
   const { data: appt, error: apptErr } = await supa
     .from('appointments')
@@ -140,7 +154,10 @@ Deno.serve(async (req: Request) => {
     .select('id')
     .single()
   if (apptErr) {
-    if ((apptErr as { code?: string }).code === '23505') {
+    // 23505 = unique_violation (legacy index); 23P01 = exclusion_violation
+    // (the appointments_no_overlap range constraint). Both mean the slot's gone.
+    const code = (apptErr as { code?: string }).code
+    if (code === '23505' || code === '23P01') {
       return json({ error: 'That time was just booked — please pick another slot.' }, 409)
     }
     console.error('[book] appointment insert failed', apptErr.message)
@@ -197,12 +214,28 @@ Deno.serve(async (req: Request) => {
     console.error('[book] gcal create failed (booking kept)', err)
   }
 
-  // ── 6) GHL messaging relay (best-effort, isolated) ────────────────────────────
-  // Fires the GHL workflow (Inbound Webhook) so it sends confirmations/reminders.
-  // We pass appointmentId so GHL can echo it back to ghl-webhook for tracking.
-  // Skipped for test bookings so we never text/email real people during testing.
+  // ── 6) GHL relay (best-effort, isolated; skipped for test bookings) ───────────
+  // (a) upsert the enriched contact + funnel-booked tag, (b) create a real GHL
+  // appointment so GHL-native Appointment-Created + reminder workflows fire, and
+  // (c) the legacy inbound-webhook (behind GHL_LEGACY_WEBHOOK) so existing
+  // confirmations/reminders never lapse during cutover.
+  const title = calendar === 'contractor' ? 'Free Design Meeting' : 'Discovery Call'
   if (!b.test) try {
-    await pushBooking({
+    const ghlContactId = await ghlSyncStage({
+      stage: 'booked',
+      email,
+      phone: b.phone,
+      firstName,
+      lastName,
+      city: b.city,
+      state: b.state,
+      zip: b.zip,
+      country: b.country,
+      attribution: { fbc: b.fbc, fbp: b.fbp, fbclid: b.fbclid, clientIp, clientUserAgent: clientUa, landingUrl, utm },
+    })
+    if (ghlContactId) await createGhlAppointment({ contactId: ghlContactId, startISO, endISO, title })
+    // We pass appointmentId so GHL can echo it back to ghl-webhook for tracking.
+    await pushLegacyBooking({
       appointmentId,
       contactId,
       eventId,
@@ -217,7 +250,7 @@ Deno.serve(async (req: Request) => {
       startISO,
       endISO,
       tz,
-      title: calendar === 'contractor' ? 'Free Design Meeting' : 'Discovery Call',
+      title,
     })
   } catch (err) {
     console.error('[book] ghl relay failed (booking kept)', err)

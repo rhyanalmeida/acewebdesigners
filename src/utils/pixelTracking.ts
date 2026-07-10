@@ -11,7 +11,7 @@
  * speeds up matching. CompleteRegistration / Purchase are server-only.
  */
 
-import { CONTRACTOR_PIXEL } from '../config/pixels'
+import { CONTRACTOR_PIXEL, RESTAURANT_PIXEL } from '../config/pixels'
 
 // Import types (these are declared globally in types/facebook.d.ts)
 type TrackEventOptions = {
@@ -144,37 +144,50 @@ export function trackPhoneClick(
 }
 
 /**
- * Initialize contractor-specific pixel
- * This is called on the contractor landing page to load their separate pixel
+ * Ensure the Meta Pixel SDK (fbevents.js) is present. index.html loads it on
+ * every page, but isolated-funnel pages call this defensively before init'ing
+ * their own pixel in case they're hit before the global snippet runs.
+ */
+function ensureFbqSdk(): void {
+  if (typeof window === 'undefined' || window.fbq) return
+
+  const f = window as unknown as Record<string, unknown>
+  const n = (f.fbq = function (...args: unknown[]) {
+    const fbq = n as unknown as { callMethod?: (...args: unknown[]) => void; queue: unknown[] }
+    if (fbq.callMethod) {
+      fbq.callMethod(...args)
+    } else {
+      fbq.queue.push(args)
+    }
+  }) as unknown as typeof window.fbq
+
+  if (!f._fbq) f._fbq = n as unknown as typeof window._fbq
+  ;(n as unknown as { push: typeof Array.prototype.push }).push = (n as unknown as unknown[]).push.bind(n)
+  ;(n as unknown as { loaded: boolean }).loaded = true
+  ;(n as unknown as { version: string }).version = '2.0'
+  ;(n as unknown as { queue: unknown[] }).queue = []
+
+  const t = document.createElement('script')
+  t.async = true
+  t.src = 'https://connect.facebook.net/en_US/fbevents.js'
+  const s = document.getElementsByTagName('script')[0]
+  s.parentNode?.insertBefore(t, s)
+}
+
+/**
+ * Initialize the contractor-specific pixel (its own isolated funnel).
+ * index.html skips the main pixel on /contractorlanding so only this one fires.
  */
 export function initializeContractorPixel(): void {
-  if (typeof window === 'undefined') return
-
-  // Load Facebook Pixel SDK if not already loaded
-  if (!window.fbq) {
-    const f = window as unknown as Record<string, unknown>
-    const n = (f.fbq = function (...args: unknown[]) {
-      const fbq = n as unknown as { callMethod?: (...args: unknown[]) => void; queue: unknown[] }
-      if (fbq.callMethod) {
-        fbq.callMethod(...args)
-      } else {
-        fbq.queue.push(args)
-      }
-    }) as unknown as typeof window.fbq
-
-    if (!f._fbq) f._fbq = n as unknown as typeof window._fbq
-    ;(n as unknown as { push: typeof Array.prototype.push }).push = (n as unknown as unknown[]).push.bind(n)
-    ;(n as unknown as { loaded: boolean }).loaded = true
-    ;(n as unknown as { version: string }).version = '2.0'
-    ;(n as unknown as { queue: unknown[] }).queue = []
-
-    const t = document.createElement('script')
-    t.async = true
-    t.src = 'https://connect.facebook.net/en_US/fbevents.js'
-    const s = document.getElementsByTagName('script')[0]
-    s.parentNode?.insertBefore(t, s)
-  }
-
-  // Initialize contractor pixel
+  ensureFbqSdk()
   initializePixel(CONTRACTOR_PIXEL.pixelId)
+}
+
+/**
+ * Initialize the restaurant-specific pixel (its own isolated funnel).
+ * index.html skips the main pixel on /buildyoursite so only this one fires.
+ */
+export function initializeRestaurantPixel(): void {
+  ensureFbqSdk()
+  initializePixel(RESTAURANT_PIXEL.pixelId)
 }

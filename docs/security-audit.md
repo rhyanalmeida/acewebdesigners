@@ -4,6 +4,17 @@
 **Scope:** Migration of Meta Conversions API from browser to Netlify function
 **Reviewer:** Automated code review
 
+> **✅ RESOLVED / SUPERSEDED (2026-06-01).** Every finding below is moot. Conversions migrated to
+> GoHighLevel's native "Meta Conversion API" workflow action (GHL hashes PII + posts to Meta itself),
+> and the entire custom surface this audit covered was **deleted**:
+> - `src/utils/facebookConversions.ts` (CRITICAL-1, LOW-1, LOW-2's client side) — deleted; no client-side CAPI call, no `VITE_FB_ACCESS_TOKEN`, no `window.testOfflineConversion`.
+> - `netlify/functions/ghl-capi.ts` (HIGH-1 unauthenticated endpoint, HIGH-2 input validation, LOW-2 response reflection) — deleted; there is no server function to attack, so the fail-open auth gap no longer exists.
+> - `src/utils/attribution.ts` `event_id` / dedup (MEDIUM-1) — reduced to a ~25-line `appendAttributionToUrl()` shim; no `event_id` is generated anywhere, so the client/server format-drift is gone (single conversion source = no dedup needed).
+>
+> No `GHL_WEBHOOK_SECRET` / body-validation work is required. The findings are retained below as a
+> historical record of the architecture that was removed. Current design: `CLAUDE.md` → "Architecture
+> — GHL native CAPI"; `docs/META_ADS.md`.
+
 ## Summary
 
 The migration to the server-side Netlify function (`netlify/functions/ghl-capi.ts`) is well-implemented — PII is SHA-256 hashed, `fbc`/`fbp` are correctly left unhashed, dedup uses the client-provided `event_id`, and no hardcoded `EAA...` token exists in the repository. However, **the pre-migration client-side CAPI module was never deleted** and is still imported and executed from `Landing.tsx`, which re-introduces the exact risks the migration was meant to eliminate (token exposure in the client bundle, duplicate events, bypass of the server hashing).

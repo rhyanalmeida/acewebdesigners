@@ -19,7 +19,7 @@ import { admin } from './supabaseAdmin.ts'
 const META_API_VERSION = 'v21.0'
 
 export type CapiEventName = 'Lead' | 'Schedule' | 'CompleteRegistration' | 'Purchase'
-export type Dataset = 'contractor' | 'main'
+export type Dataset = 'contractor' | 'main' | 'restaurant'
 
 export interface CapiInput {
   eventName: CapiEventName
@@ -76,11 +76,13 @@ const normPhone = (v: string) => v.replace(/[^0-9]/g, '') // digits only, no "+"
 const cap = (s: string, n = 256) => (typeof s === 'string' ? s.slice(0, n) : '')
 
 function datasetId(dataset: Dataset): string {
-  const id =
-    dataset === 'main'
-      ? Deno.env.get('META_DATASET_ID_MAIN')
-      : Deno.env.get('META_DATASET_ID')
-  return id || '4230021860577001' // contractor fallback
+  // IMPORTANT: only the CONTRACTOR dataset keeps a hardcoded fallback. main and
+  // restaurant return '' when unset so a missing secret fails the send loudly
+  // (recorded as an error row, visible in /admin) instead of silently routing
+  // those events into the contractor pixel — which would corrupt its data.
+  if (dataset === 'main') return Deno.env.get('META_DATASET_ID_MAIN') || ''
+  if (dataset === 'restaurant') return Deno.env.get('META_DATASET_ID_RESTAURANT') || ''
+  return Deno.env.get('META_DATASET_ID') || '4230021860577001' // contractor fallback
 }
 
 function defaultActionSource(name: CapiEventName): 'website' | 'system_generated' {

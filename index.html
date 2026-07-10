@@ -577,13 +577,13 @@
     <meta name="twitter:data2" content="Small Business Web Design" />
 
     <link rel="manifest" href="/site.webmanifest" />
-    <script src="https://link.msgsndr.com/js/form_embed.js" type="text/javascript"></script>
     <script src="https://player.vimeo.com/api/player.js" async></script>
 
     <!-- Meta Pixel Code -->
-    <!-- The main-site pixel is skipped on /contractorlanding — that page loads
-         the contractor pixel (4230021860577001) in LandingContractors.tsx so we
-         don't double-fire events to two pixels on the same page. -->
+    <!-- The main-site pixel is skipped on /contractorlanding AND /buildyoursite —
+         those pages each load their OWN pixel (contractor in LandingContractors.tsx,
+         restaurant in BuildYourSite.tsx) so we don't double-fire events to two
+         pixels on the same page. Each ad funnel is fully isolated to one pixel. -->
     <script>
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return
@@ -601,7 +601,7 @@
         s = b.getElementsByTagName(e)[0]
         s.parentNode.insertBefore(t, s)
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
-      if (!/\/contractorlanding(\/|$|\?)/i.test(window.location.pathname + window.location.search)) {
+      if (!/\/(contractorlanding|buildyoursite)(\/|$|\?)/i.test(window.location.pathname + window.location.search)) {
         fbq('init', '1703925480259996')
         fbq('track', 'PageView')
       }

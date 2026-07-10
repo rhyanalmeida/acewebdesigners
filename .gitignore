@@ -44,3 +44,4 @@ creative/
 *.njsproj
 *.sln
 *.sw?
+.playwright-mcp/

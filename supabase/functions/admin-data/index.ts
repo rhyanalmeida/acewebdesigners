@@ -111,9 +111,24 @@ Deno.serve(async (req: Request) => {
   if (!adminUser) return json({ error: 'unauthorized' }, 401)
 
   const supa = admin()
+
+  // ── maintenance action: purge all test data (capi rows first — FK on appointments)
+  let body: { action?: string } = {}
+  try {
+    body = await req.json()
+  } catch {
+    /* plain dashboard fetch has no body */
+  }
+  if (body.action === 'discardTests') {
+    const capiDel = await supa.from('capi_events').delete({ count: 'exact' }).eq('is_test', true)
+    if (capiDel.error) return json({ error: capiDel.error.message }, 500)
+    const apptDel = await supa.from('appointments').delete({ count: 'exact' }).eq('is_test', true)
+    if (apptDel.error) return json({ error: apptDel.error.message }, 500)
+    return json({ ok: true, deletedCapiEvents: capiDel.count ?? 0, deletedAppointments: apptDel.count ?? 0 })
+  }
   // NOTE: test bookings still upsert a contacts row (FK), so the Leads count can
   // drift slightly until cleaned (scripts/clean-booking.mjs).
-  const [leadsRes, availRes, capiRollupRes, apptRes, capiEventsRes, ghlMessagesRes] = await Promise.all([
+  const [leadsRes, availRes, capiRollupRes, apptRes, capiEventsRes, ghlMessagesRes, contactsRes] = await Promise.all([
     supa.from('contacts').select('*', { count: 'exact', head: true }),
     supa.from('availability').select('*', { count: 'exact', head: true }).eq('active', true),
     supa.from('capi_events').select('event_name, status, sent_at, is_test').order('sent_at', { ascending: false }).limit(5000),
@@ -128,6 +143,11 @@ Deno.serve(async (req: Request) => {
       .limit(500),
     supa.from('capi_events').select('event_id, event_name, action_source, status, value, meta_response, sent_at, is_test, appointment_id').order('sent_at', { ascending: false }).limit(50),
     supa.from('ghl_messages').select('*').order('received_at', { ascending: false }).limit(50),
+    supa
+      .from('contacts')
+      .select('id, first_name, last_name, email, phone, city, state, created_at, fbclid, landing_url, utm')
+      .order('created_at', { ascending: false })
+      .limit(300),
   ])
 
   const leads = leadsRes.count ?? 0
@@ -196,5 +216,6 @@ Deno.serve(async (req: Request) => {
       }
     }),
     ghlMessages: ghlMessagesRes.data ?? [],
+    contactsList: contactsRes.data ?? [],
   })
 })

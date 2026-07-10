@@ -179,7 +179,6 @@ export const Scheduler: React.FC<SchedulerProps> = ({
       const eventId = leadEventId || newEventId('lead')
       if (!leadEventId) setLeadEventId(eventId)
       const attr = getAttribution()
-      trackLead(eventId, { content_name: calendarName ?? `${calendar} booking` })
 
       try {
         const { error } = await supabase.functions.invoke('lead', {
@@ -199,7 +198,14 @@ export const Scheduler: React.FC<SchedulerProps> = ({
             utm: attr.utm,
           },
         })
-        if (error) console.error('[Scheduler] lead capture error (continuing to calendar)', error)
+        if (error) {
+          console.error('[Scheduler] lead capture error (continuing to calendar)', error)
+        } else {
+          // Fire the browser pixel Lead only AFTER the server Lead succeeds, so the
+          // two share an event_id and Meta dedupes — never an optimistic, unmatched
+          // event for a request that errored.
+          trackLead(eventId, { content_name: calendarName ?? `${calendar} booking` })
+        }
       } catch (err) {
         // Don't block the funnel on a lead-capture hiccup — let them book.
         console.error('[Scheduler] lead invoke failed (continuing to calendar)', err)
@@ -220,7 +226,6 @@ export const Scheduler: React.FC<SchedulerProps> = ({
     // Schedule event_id: browser pixel + `book` fn share it → dedupe.
     const eventId = newEventId('schedule')
     const attr = getAttribution()
-    trackSchedule(eventId, { content_name: calendarName ?? `${calendar} booking` })
 
     try {
       const { data, error } = await supabase.functions.invoke('book', {
@@ -265,6 +270,11 @@ export const Scheduler: React.FC<SchedulerProps> = ({
         setBookError(msg)
         return
       }
+
+      // Fire the browser pixel Schedule only AFTER the booking is confirmed, so it
+      // shares the event_id with the server Schedule (Meta dedupes) and we never
+      // count an optimistic Schedule for a failed/abandoned/double-booked attempt.
+      trackSchedule(eventId, { content_name: calendarName ?? `${calendar} booking` })
 
       const result = data as { appointmentId: string; startISO: string }
       setConfirmed(selectedSlot)

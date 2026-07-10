@@ -38,12 +38,30 @@ export const CONTRACTOR_PIXEL: PixelConfig = {
 }
 
 /**
+ * Restaurant landing page pixel — the self-serve "build your site" funnel.
+ *
+ * A FULLY ISOLATED third funnel: its own pixel/dataset, its own GHL account, its
+ * own ad set — separate from both main and contractor. Loaded dynamically only on
+ * /buildyoursite (index.html skips the main pixel there); its server CAPI dataset
+ * is META_DATASET_ID_RESTAURANT.
+ *
+ * Created 2026-06-29 in the Ace Web Designers business (act_553999801104558).
+ */
+export const RESTAURANT_PIXEL: PixelConfig = {
+  pixelId: '1575254990791923',
+  name: 'Restaurant Builder CAPI',
+  description: 'Tracks restaurant "build your site" leads — separate funnel, pixel, dataset & GHL',
+}
+
+/**
  * Get pixel config by page type
  */
-export function getPixelConfig(pageType: 'main' | 'contractor'): PixelConfig {
+export function getPixelConfig(pageType: 'main' | 'contractor' | 'restaurant'): PixelConfig {
   switch (pageType) {
     case 'contractor':
       return CONTRACTOR_PIXEL
+    case 'restaurant':
+      return RESTAURANT_PIXEL
     case 'main':
     default:
       return MAIN_PIXEL

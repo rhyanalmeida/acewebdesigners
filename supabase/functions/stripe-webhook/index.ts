@@ -12,7 +12,8 @@
 import Stripe from 'npm:stripe@17.0.0'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { sendCapiEvent } from '../_shared/meta.ts'
-import { loadAppointmentIdentity } from '../_shared/identity.ts'
+import { loadAppointmentIdentity, loadContactIdentity } from '../_shared/identity.ts'
+import { ghlSyncStage } from '../_shared/ghl.ts'
 
 const reply = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } })
@@ -37,9 +38,68 @@ Deno.serve(async (req: Request) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const appointmentId = session.metadata?.appointment_id || session.client_reference_id || ''
     const amount = (session.amount_total ?? 0) / 100
     const currency = (session.currency || 'usd').toUpperCase()
+
+    // ── Restaurant self-serve subscription (no appointment) ──────────────────
+    // Tied to a contact via metadata; fire Purchase from the contact's stored
+    // attribution. Dedup key is the subscription id so renewals can't re-fire.
+    if (session.mode === 'subscription' || session.metadata?.kind === 'restaurant_subscription') {
+      const contactId = session.metadata?.contact_id || session.client_reference_id || ''
+      const subId = typeof session.subscription === 'string' ? session.subscription : session.id
+      const plan = session.metadata?.plan || ''
+      const isTest = session.metadata?.is_test === 'true'
+      if (contactId) {
+        const loaded = await loadContactIdentity(contactId)
+        if (loaded) {
+          await sendCapiEvent({
+            ...loaded.base,
+            dataset: 'restaurant', // isolated funnel → restaurant dataset, not main
+            eventName: 'Purchase',
+            eventId: `purchase_sub_${subId}`,
+            actionSource: 'system_generated', // payment closed via Stripe, off the page
+            value: amount,
+            currency,
+            customData: { ...loaded.utm, plan, stripe_session: session.id, subscription: subId },
+            // Test subscriptions route to Meta Test Events only — never counted live.
+            testEventCode: isTest ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined,
+          })
+
+          // GHL: funnel-purchased → onboarding workflow (restaurant GHL account).
+          // Skipped for test subscriptions, exactly like the contractor flow.
+          if (!isTest) try {
+            await ghlSyncStage({
+              stage: 'purchased',
+              funnel: 'restaurant',
+              email: loaded.base.email,
+              phone: loaded.base.phone,
+              firstName: loaded.base.firstName,
+              lastName: loaded.base.lastName,
+              city: loaded.base.city,
+              state: loaded.base.state,
+              zip: loaded.base.zip,
+              country: loaded.base.country,
+              attribution: {
+                fbc: loaded.base.fbc,
+                fbp: loaded.base.fbp,
+                fbclid: loaded.base.fbclid,
+                clientIp: loaded.base.clientIpAddress,
+                clientUserAgent: loaded.base.clientUserAgent,
+                utm: loaded.utm,
+                dealValue: amount,
+              },
+            })
+          } catch (err) {
+            console.error('[stripe-webhook] ghl subscription sync failed', err)
+          }
+        } else {
+          console.error('[stripe-webhook] subscription contact identity load failed', contactId)
+        }
+      }
+      return reply({ received: true })
+    }
+
+    const appointmentId = session.metadata?.appointment_id || session.client_reference_id || ''
 
     if (appointmentId) {
       const supa = admin()
@@ -61,6 +121,33 @@ Deno.serve(async (req: Request) => {
           // Test bookings stay test-coded end-to-end.
           testEventCode: loaded.isTest ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined,
         })
+
+        // GHL: funnel-purchased tag (idempotent with the result-form Purchase;
+        // tags don't double-apply). Skipped for test bookings.
+        if (!loaded.isTest) try {
+          await ghlSyncStage({
+            stage: 'purchased',
+            email: loaded.base.email,
+            phone: loaded.base.phone,
+            firstName: loaded.base.firstName,
+            lastName: loaded.base.lastName,
+            city: loaded.base.city,
+            state: loaded.base.state,
+            zip: loaded.base.zip,
+            country: loaded.base.country,
+            attribution: {
+              fbc: loaded.base.fbc,
+              fbp: loaded.base.fbp,
+              fbclid: loaded.base.fbclid,
+              clientIp: loaded.base.clientIpAddress,
+              clientUserAgent: loaded.base.clientUserAgent,
+              utm: loaded.utm,
+              dealValue: amount,
+            },
+          })
+        } catch (err) {
+          console.error('[stripe-webhook] ghl purchased sync failed', err)
+        }
       } else {
         // No identity → no event fired. Record the failure so the admin
         // dashboard surfaces it instead of losing the conversion silently.

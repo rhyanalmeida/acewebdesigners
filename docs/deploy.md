@@ -38,18 +38,21 @@ We had `@netlify/plugin-emails` installed via the Netlify UI but never used it (
 ## What's deployed
 
 - Site: `acewebdesigners.com` (Netlify project `shimmering-malasada-c66a09`)
-- Functions:
-  - `/.netlify/functions/ghl-capi` — Meta CAPI bridge (receives GHL workflow webhooks, forwards to Meta)
-  - `/.netlify/functions/attribution-stash` — server-side correlation for browser attribution → CAPI merge
+- Functions: **none.** Conversions moved to GHL's native "Meta Conversion API" workflow action
+  (2026-06-01); the old `ghl-capi` / `attribution-stash` functions were deleted.
 - Static assets: Vite build output in `dist/`
 
 ## Smoke test after every deploy
 
+There is no server function to ping. Verify the deploy serves the SPA and the browser pixel still
+fires audiences only:
+
 ```bash
-node -e "fetch('https://acewebdesigners.com/.netlify/functions/ghl-capi', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({event_type:'lead', email:'smoke-' + Date.now() + '@a.com', phone:'+15551234567', first_name:'X', last_name:'Y', contact_id:'smoke', event_id:'smoke-' + Date.now(), event_source_url:'https://acewebdesigners.com/contractorlanding', test_event_code:'TEST35095'})}).then(r => r.json()).then(j => console.log(j))"
+node scripts/audit-production.mjs   # headed Playwright production sanity audit
 ```
 
-Must return `{"ok":true}`. If not, the function broke — roll back via the Netlify UI's deploy history.
+For end-to-end conversion verification (GHL → Meta), see `docs/META_ADS.md` → Verification.
+If the audit fails, roll back via the Netlify UI's deploy history.
 
 ## Rollback any deploy
 

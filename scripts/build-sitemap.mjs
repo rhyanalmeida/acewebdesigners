@@ -22,6 +22,7 @@ const ROUTES = [
   { path: '/services', changefreq: 'weekly', priority: '0.9' },
   { path: '/socialmedia', changefreq: 'weekly', priority: '0.9' },
   { path: '/contractorlanding', changefreq: 'weekly', priority: '0.9' },
+  { path: '/buildyoursite', changefreq: 'weekly', priority: '0.9' },
   { path: '/landing', changefreq: 'weekly', priority: '0.8' },
   { path: '/work', changefreq: 'weekly', priority: '0.8' },
   { path: '/reviews', changefreq: 'weekly', priority: '0.8' },

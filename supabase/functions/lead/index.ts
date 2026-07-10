@@ -19,7 +19,8 @@ import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { sendCapiEvent } from '../_shared/meta.ts'
 import { upsertContact } from '../_shared/contacts.ts'
-import { mergeAttribution, parseAttribution } from '../_shared/attribution.ts'
+import { mergeAttribution, parseAttribution, withDefaultAdIds } from '../_shared/attribution.ts'
+import { ghlSyncStage } from '../_shared/ghl.ts'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -56,8 +57,15 @@ Deno.serve(async (req: Request) => {
     return json({ error: 'invalid JSON' }, 400)
   }
 
-  const calendar = b.calendar === 'main' ? 'main' : b.calendar === 'contractor' ? 'contractor' : null
-  if (!calendar) return json({ error: "calendar must be 'main' or 'contractor'" }, 400)
+  const calendar =
+    b.calendar === 'main'
+      ? 'main'
+      : b.calendar === 'contractor'
+        ? 'contractor'
+        : b.calendar === 'restaurant'
+          ? 'restaurant'
+          : null
+  if (!calendar) return json({ error: "calendar must be 'main', 'contractor', or 'restaurant'" }, 400)
   const email = (b.email ?? '').trim().toLowerCase()
   if (!EMAIL_RE.test(email)) return json({ error: 'valid email required' }, 400)
 
@@ -77,7 +85,7 @@ Deno.serve(async (req: Request) => {
     undefined
   const clientUa = req.headers.get('user-agent') ?? undefined
   const landingUrl = b.landingUrl || b.eventSourceUrl
-  const utm = mergeAttribution(b.utm, parseAttribution(landingUrl))
+  const utm = withDefaultAdIds(mergeAttribution(b.utm, parseAttribution(landingUrl)), landingUrl)
 
   const supa = admin()
   const contactId = await upsertContact(supa, {
@@ -129,6 +137,26 @@ Deno.serve(async (req: Request) => {
     })
   } catch (err) {
     console.error('[lead] CAPI Lead failed (contact kept)', err)
+  }
+
+  // ── GHL: upsert enriched contact + funnel-lead tag (skipped for test) ─────────
+  // Fires whatever GHL workflow is bound to the funnel-lead tag (e.g. nurture).
+  if (!b.test) try {
+    await ghlSyncStage({
+      stage: 'lead',
+      funnel: calendar === 'restaurant' ? 'restaurant' : 'default',
+      email,
+      phone: b.phone,
+      firstName,
+      lastName,
+      city: b.city,
+      state: b.state,
+      zip: b.zip,
+      country: b.country,
+      attribution: { fbc: b.fbc, fbp: b.fbp, fbclid: b.fbclid, clientIp, clientUserAgent: clientUa, landingUrl, utm },
+    })
+  } catch (err) {
+    console.error('[lead] ghl sync failed (lead kept)', err)
   }
 
   return json({ ok: true, contactId })

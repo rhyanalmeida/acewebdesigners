@@ -85,6 +85,13 @@ export const ROUTE_META: Record<string, RouteMeta> = {
     keywords:
       'contractor website design, contractor social media, home service website, construction website, plumber website, electrician website, free contractor website design',
   }),
+  '/buildyoursite': baseMeta('/buildyoursite', {
+    title: 'Build Your Restaurant Website — from $99/mo | Ace Web Designers',
+    description:
+      'Design your restaurant’s website in minutes with a live preview, then go live on a simple monthly plan. Menu, reservations, online ordering — we build, host & update it.',
+    keywords:
+      'restaurant website design, restaurant website builder, menu website, online ordering website, restaurant web design monthly',
+  }),
   '/privacy': baseMeta('/privacy', {
     title: 'Privacy Policy | Ace Web Designers',
     description: 'How Ace Web Designers handles your data — privacy policy and contact details.',

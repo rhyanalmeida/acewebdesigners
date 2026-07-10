@@ -91,24 +91,22 @@
 
 ### Step 4: Verify Facebook Pixel Tracking
 
-**Main Landing Page (Pixel: 1703925480259996):**
-1. Open DevTools → Console
-2. Type: `fbq`
-3. Should show: `function()`
-4. Type: `testFacebookDirectly()`
-5. Check console for: "✅ CompleteRegistration sent"
+The browser pixel fires **audience events only** — PageView, ViewContent, PhoneClick.
+Conversions (Lead / CompleteRegistration / Purchase) are sent server-side by GHL's native
+Meta Conversion API action, NOT by the browser. Verify the browser side like this:
 
-**Contractor Landing Page (Pixel: 4230021860577001):**
-1. Open DevTools → Console
-2. Type: `fbq`
-3. Should show: `function()`
-4. Type: `testContractorPixel()`
-5. Check console for: "✅ Pixel events sent"
+**Main Landing (Pixel `1703925480259996`) / Contractor (Pixel `4230021860577001`):**
+1. Open DevTools → Console, type `window.fbq` → should show `function()`.
+2. Open DevTools → Network, filter `facebook.com/tr`.
+3. Reload → you should see `PageView` and `ViewContent` fire (and `PhoneClick` on a phone-link click).
+4. You should NOT see `Lead` / `CompleteRegistration` from the browser — those come from GHL.
 
 **Expected Result:**
 ✅ Facebook Pixel loaded
-✅ Events fire successfully
+✅ PageView / ViewContent fire (audiences); no browser-side Lead
 ✅ No errors in console
+
+> Verify the actual conversions in **Meta Events Manager → Test Events** — see `docs/META_ADS.md`.
 
 ---
 
@@ -269,16 +267,12 @@ window.fbq
 // Should return: function()
 ```
 
-### Test Facebook Pixel (Main Landing):
+### Verify audience events fire (Network tab):
 ```javascript
-testFacebookDirectly()
-// Should log: "✅ CompleteRegistration sent"
-```
-
-### Test Facebook Pixel (Contractor Landing):
-```javascript
-testContractorPixel()
-// Should log: "✅ Pixel events sent"
+// DevTools → Network → filter "facebook.com/tr", then reload.
+// Expect ev=PageView and ev=ViewContent. There should be NO ev=Lead from the browser —
+// conversions are sent server-side by GHL. (The old testFacebookDirectly() /
+// testContractorPixel() console helpers were removed in the GHL-native migration.)
 ```
 
 ### Check if form_embed.js loaded:
@@ -289,7 +283,7 @@ testContractorPixel()
 
 ### Check iframe loaded:
 ```javascript
-document.getElementById('MseWjwAf3rDlJRoj1p75_1768499231909')
+document.getElementById('contractor-booking-widget')
 // Should return: <iframe> element
 ```
 
@@ -353,7 +347,7 @@ If issues persist after following this guide:
 
 ---
 
-**Last Updated:** January 15, 2026  
+**Last Updated:** June 1, 2026  
 **Calendar Widget:** LeadConnector/GoHighLevel  
 **Calendar ID:** MseWjwAf3rDlJRoj1p75  
-**Iframe ID:** MseWjwAf3rDlJRoj1p75_1768499231909
+**Iframe ID:** contractor-booking-widget

@@ -6,8 +6,11 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
 const API_BASE = 'https://graph.facebook.com/v21.0'
-const CAMPAIGN_NAME = 'Contractor Lead Gen — Free Website Offer'
-const ADSET_NAME = 'Contractors — US — Advantage+ Audience — $20/day'
+// Match by id, not name — names get edited in Ads Manager (the campaign was
+// renamed "Free Website Offer For Contractors (6/1/26)" which broke name-matching).
+const CAMPAIGN_ID = '120241554190170259'
+const ADSET_ID = '120242709687340259'
+const AD_ID = '120242709687350259'
 
 function loadEnvLocal() {
   const here = path.dirname(fileURLToPath(import.meta.url))
@@ -36,15 +39,9 @@ if (!process.env.META_ADS_TOKEN || !process.env.META_AD_ACCOUNT_ID) {
 
 const adAccount = process.env.META_AD_ACCOUNT_ID
 
-const campaigns = (await fb(`/${adAccount}/campaigns?fields=id,name,status,effective_status&limit=200`)).data || []
-const c = campaigns.find((x) => x.name === CAMPAIGN_NAME)
-if (!c) {
-  console.log('Campaign not found. Did you run scripts/meta-ads-setup.mjs?')
-  process.exit(0)
-}
-
-const adsets = (await fb(`/${adAccount}/adsets?fields=id,name,status,effective_status,daily_budget,bid_strategy&limit=200`)).data || []
-const s = adsets.find((x) => x.name === ADSET_NAME)
+const c = await fb(`/${CAMPAIGN_ID}?fields=id,name,status,effective_status`)
+const s = await fb(`/${ADSET_ID}?fields=id,name,status,effective_status,daily_budget,bid_strategy`).catch(() => null)
+const ad = await fb(`/${AD_ID}?fields=id,name,status,effective_status,creative{url_tags}`).catch(() => null)
 
 const insights = await fb(
   `/${c.id}/insights?fields=spend,impressions,clicks,actions,cost_per_action_type&date_preset=last_7d`,
@@ -60,8 +57,14 @@ console.log('Ad set:  ', s?.name || '(none)')
 if (s) {
   console.log('  id:                ', s.id)
   console.log('  status:            ', s.status, `(effective: ${s.effective_status})`)
-  console.log('  daily budget:      ', s.daily_budget ? `$${(Number(s.daily_budget) / 100).toFixed(2)}` : 'n/a')
-  console.log('  bid strategy:      ', s.bid_strategy)
+  console.log('  daily budget:      ', s.daily_budget ? `$${(Number(s.daily_budget) / 100).toFixed(2)}` : 'n/a (campaign budget)')
+  console.log('  bid strategy:      ', s.bid_strategy || 'n/a')
+}
+console.log('Ad:      ', ad?.name || '(none)')
+if (ad) {
+  console.log('  id:                ', ad.id)
+  console.log('  status:            ', ad.status, `(effective: ${ad.effective_status})`)
+  console.log('  UTM url_tags:      ', ad.creative?.url_tags ? 'SET ✓' : 'MISSING — set in Ads Manager → Tracking')
 }
 console.log('Last 7d:')
 console.log('  spend:             ', i.spend ? `$${i.spend}` : '$0.00')

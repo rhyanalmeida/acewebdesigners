@@ -9,6 +9,7 @@ import Work from './Work'
 import Services from './Services'
 import Landing from './Landing'
 import LandingContractors from './LandingContractors'
+import BuildYourSite from './BuildYourSite'
 import Refer from './Refer'
 import SocialMedia from './SocialMedia'
 import PrivacyPolicy from './PrivacyPolicy'
@@ -32,12 +33,13 @@ type PageKey =
   | 'socialmedia'
   | 'landing'
   | 'contractorlanding'
+  | 'buildyoursite'
   | 'privacy'
   | 'termsofservice'
   | 'admin'
 
 /** Pages that should render without the standard header/footer/sticky CTA chrome. */
-const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'refer', 'termsofservice', 'admin']
+const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'buildyoursite', 'refer', 'termsofservice', 'admin']
 
 function App() {
   const [currentPage, setCurrentPage] = React.useState<PageKey>('home')
@@ -53,6 +55,7 @@ function App() {
       // by "/services". Default falls through to 'home'.
       if (path.includes('/admin')) setCurrentPage('admin')
       else if (path.includes('/contractorlanding')) setCurrentPage('contractorlanding')
+      else if (path.includes('/buildyoursite')) setCurrentPage('buildyoursite')
       else if (path.includes('/landing')) setCurrentPage('landing')
       else if (path.includes('/socialmedia')) setCurrentPage('socialmedia')
       else if (path.includes('/services')) setCurrentPage('services')
@@ -105,7 +108,13 @@ function App() {
   // client-side route changes. Landing/contractorlanding fire their own
   // ViewContent (with attribution) in their mount effects, so skip those here.
   useEffect(() => {
-    if (currentPage === 'landing' || currentPage === 'contractorlanding' || currentPage === 'admin') return
+    if (
+      currentPage === 'landing' ||
+      currentPage === 'contractorlanding' ||
+      currentPage === 'buildyoursite' ||
+      currentPage === 'admin'
+    )
+      return
     trackEvent('PageView')
     const viewContentMap: Partial<Record<PageKey, [string, string, string]>> = {
       home: ['Home', 'Home', 'general'],
@@ -135,6 +144,8 @@ function App() {
         return <Landing />
       case 'contractorlanding':
         return <LandingContractors />
+      case 'buildyoursite':
+        return <BuildYourSite />
       case 'refer':
         return <Refer />
       case 'socialmedia':

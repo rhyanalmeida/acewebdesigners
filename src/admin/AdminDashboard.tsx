@@ -16,8 +16,8 @@ import {
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
-  fetchAdminData, submitResult, retryCapiEvent, createPaymentLink,
-  type AdminData, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat,
+  fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData,
+  type AdminData, type AdminContact, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat,
 } from './adminApi'
 
 // ── formatting helpers ────────────────────────────────────────────────────────
@@ -34,9 +34,10 @@ const timeAgo = (iso: string) => {
   const d = h / 24; if (d < 30) return `${Math.floor(d)}d ago`
   return `${Math.floor(d / 30)}mo ago`
 }
-const fullName = (c?: { first_name?: string; last_name?: string; email?: string } | null) =>
+type NameLike = { first_name?: string | null; last_name?: string | null; email?: string | null } | null
+const fullName = (c?: NameLike) =>
   `${c?.first_name ?? ''} ${c?.last_name ?? ''}`.trim() || c?.email || 'Lead'
-const initials = (c?: { first_name?: string; last_name?: string; email?: string } | null) => {
+const initials = (c?: NameLike) => {
   const f = c?.first_name?.[0] ?? c?.email?.[0] ?? '?'
   const l = c?.last_name?.[0] ?? ''
   return (f + l).toUpperCase()
@@ -281,7 +282,7 @@ const ConversionFlow: React.FC<{ se: NonNullable<AdminData['serverEvents']> }> =
 }
 
 // ── appointments ───────────────────────────────────────────────────────────────
-const Avatar: React.FC<{ c?: Appt['contacts'] }> = ({ c }) => (
+const Avatar: React.FC<{ c?: NameLike }> = ({ c }) => (
   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200 text-xs font-bold text-slate-600">{initials(c)}</span>
 )
 
@@ -317,9 +318,14 @@ const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; 
                     </div>
                   </td>
                   <td className="px-4 py-3 align-top">
-                    {a.isSocial
-                      ? <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-violet-200">Paid social</span>
-                      : <span className="text-xs text-slate-400">Direct</span>}
+                    <div className="flex flex-col items-start gap-1">
+                      {a.calendar === 'contractor'
+                        ? <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">Contractor</span>
+                        : <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200">Main site</span>}
+                      {a.isSocial
+                        ? <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-violet-200">Paid social</span>
+                        : <span className="text-xs text-slate-400">Direct</span>}
+                    </div>
                   </td>
                   <td className="px-4 py-3 align-top">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ring-1 ${statusPill(a.status)}`}>{a.status.replace('_', '-')}</span>
@@ -393,6 +399,127 @@ const CapiLog: React.FC<{ data: AdminData; retrying: string | null; retryErr: Re
       )}
     </div>
   )
+
+// ── customer overview ───────────────────────────────────────────────────────────
+type CustomerSeg = 'leads' | 'showed' | 'no_show' | 'purchased'
+
+const STAGE_PILL: Record<string, string> = {
+  lead: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
+  booked: 'bg-sky-50 text-sky-700 ring-sky-200',
+  showed: 'bg-violet-50 text-violet-700 ring-violet-200',
+  'no-show': 'bg-rose-50 text-rose-700 ring-rose-200',
+  purchased: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+}
+
+const LeadsTable: React.FC<{ contacts: AdminContact[]; stageOf: (email?: string | null) => string }> = ({ contacts, stageOf }) => (
+  <div className={`overflow-hidden ${card}`}>
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-slate-200 text-sm">
+        <thead className="bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          <tr>
+            <th className="px-4 py-2.5">Lead</th><th className="px-4 py-2.5">Journey</th>
+            <th className="px-4 py-2.5">Source</th><th className="px-4 py-2.5">Location</th>
+            <th className="px-4 py-2.5">Added</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {contacts.map((c) => {
+            const stage = stageOf(c.email)
+            const social = Boolean(c.fbclid) || /face|insta|fb|ig/.test((c.utm?.utm_source ?? '').toLowerCase())
+            return (
+              <tr key={c.id} className="hover:bg-slate-50/60">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar c={c} />
+                    <div className="min-w-0">
+                      <div className="truncate font-medium text-slate-900">{fullName(c)}</div>
+                      <div className="truncate text-xs text-slate-400">{c.email}{c.phone ? ` · ${c.phone}` : ''}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ring-1 ${STAGE_PILL[stage] ?? STAGE_PILL.lead}`}>{stage}</span>
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  {social
+                    ? <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-violet-200">Paid social</span>
+                    : <span className="text-xs text-slate-400">Direct</span>}
+                </td>
+                <td className="px-4 py-3 align-middle text-xs text-slate-500">{[c.city, c.state].filter(Boolean).join(', ') || '—'}</td>
+                <td className="whitespace-nowrap px-4 py-3 align-middle">
+                  <div className="text-slate-700">{dateTime(c.created_at)}</div>
+                  <div className="text-xs text-slate-400">{timeAgo(c.created_at)}</div>
+                </td>
+              </tr>
+            )
+          })}
+          {contacts.length === 0 && <tr><td colSpan={5} className="px-4 py-12 text-center text-slate-400">No leads yet.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)
+
+const CustomerOverview: React.FC<{ data: AdminData; onResult: (a: Appt) => void; onPaymentLink: (a: Appt) => void }> =
+  ({ data, onResult, onPaymentLink }) => {
+    const [seg, setSeg] = useState<CustomerSeg>('leads')
+    const realAppts = useMemo(() => data.appointments.filter((a) => !a.is_test), [data])
+    const stageOf = useCallback((email?: string | null) => {
+      if (!email) return 'lead'
+      const mine = realAppts.filter((a) => a.contacts?.email === email)
+      if (mine.some((a) => a.purchased_at)) return 'purchased'
+      if (mine.some((a) => a.status === 'showed')) return 'showed'
+      if (mine.some((a) => a.status === 'no_show')) return 'no-show'
+      if (mine.some((a) => a.status === 'booked')) return 'booked'
+      return 'lead'
+    }, [realAppts])
+
+    const contacts = data.contactsList ?? []
+    const showedAppts = useMemo(() => realAppts.filter((a) => a.status === 'showed' || a.purchased_at), [realAppts])
+    const noShowAppts = useMemo(() => realAppts.filter((a) => a.status === 'no_show'), [realAppts])
+    const purchasedAppts = useMemo(() => realAppts.filter((a) => a.purchased_at), [realAppts])
+
+    const segs: { id: CustomerSeg; label: string; count: number; icon: React.ElementType }[] = [
+      { id: 'leads', label: 'Leads', count: data.overall.leads, icon: Users },
+      { id: 'showed', label: 'Showed', count: showedAppts.length, icon: CheckCircle2 },
+      { id: 'no_show', label: 'No-shows', count: noShowAppts.length, icon: XCircle },
+      { id: 'purchased', label: 'Purchased', count: purchasedAppts.length, icon: CircleDollarSign },
+    ]
+
+    return (
+      <>
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Kpi icon={Users} label="Leads" value={data.overall.leads} sub="all contacts captured" accent="indigo" />
+          <Kpi icon={CheckCircle2} label="Showed" value={showedAppts.length} sub={`${data.overall.showRate}% show rate`} accent="violet" />
+          <Kpi icon={XCircle} label="No-shows" value={noShowAppts.length} accent="rose" />
+          <Kpi icon={CircleDollarSign} label="Purchased" value={purchasedAppts.length} sub={`${usd(data.overall.revenue)} upfront`} accent="emerald" />
+        </section>
+        <div className="flex flex-wrap gap-2">
+          {segs.map((s) => {
+            const Icon = s.icon
+            return (
+              <button key={s.id} type="button" onClick={() => setSeg(s.id)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${seg === s.id ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50'}`}>
+                <Icon size={14} />{s.label}
+                <span className={`rounded-full px-1.5 text-xs font-bold ${seg === s.id ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{s.count}</span>
+              </button>
+            )
+          })}
+        </div>
+        {seg === 'leads' ? (
+          data.contactsList
+            ? <LeadsTable contacts={contacts} stageOf={stageOf} />
+            : <div className={`${card} p-6 text-sm text-slate-400`}>Lead list unavailable — redeploy the <code className="rounded bg-slate-100 px-1">admin-data</code> function to enable it.</div>
+        ) : (
+          <AppointmentsTable
+            appts={seg === 'showed' ? showedAppts : seg === 'no_show' ? noShowAppts : purchasedAppts}
+            onResult={onResult} onPaymentLink={onPaymentLink}
+            emptyHint={seg === 'showed' ? 'No meetings marked Showed yet.' : seg === 'no_show' ? 'No no-shows — nice.' : 'No purchases yet.'}
+          />
+        )}
+      </>
+    )
+  }
 
 // ── payment link modal ──────────────────────────────────────────────────────────
 const PaymentLinkModal: React.FC<{ appt: Appt; onClose: () => void }> = ({ appt, onClose }) => {
@@ -502,6 +629,7 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
   const [interval, setIntervalVal] = useState<'monthly' | 'annual' | 'one_time'>('monthly')
   const [plan, setPlan] = useState('')
   const [notes, setNotes] = useState('')
+  const [asTest, setAsTest] = useState(Boolean(appt.is_test))
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [outcome, setOutcome] = useState<ResultResponse | null>(null)
@@ -515,6 +643,7 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
         recurringInterval: kind === 'purchase' ? interval : undefined,
         plan: kind === 'purchase' ? plan : undefined,
         notes: notes || undefined,
+        test: asTest || undefined,
       }))
     } catch (e) { setErr(e instanceof Error ? e.message : 'Failed') } finally { setBusy(false) }
   }
@@ -537,7 +666,7 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
             {capi === 'none' ? (
               <div className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"><Info size={16} className="mt-0.5 shrink-0" /> Saved — no Meta event needed for a no-show.</div>
             ) : (<><OutcomeLine label="Showed → CompleteRegistration" o={capi.completeRegistration} /><OutcomeLine label="Purchase" o={capi.purchase} /></>)}
-            {appt.is_test && <p className="text-xs text-slate-400">Test booking — events were sent to Meta Test Events only.</p>}
+            {(appt.is_test || asTest) && <p className="text-xs text-slate-400">Test booking — events were sent to Meta Test Events only.</p>}
           </div>
           <div className="mt-5 flex justify-end"><button type="button" onClick={onSaved} className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700">Done</button></div>
         </div>
@@ -570,17 +699,21 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
           </div>
         )}
         <label className="mt-3 block text-sm text-slate-600">Notes<textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputCls} /></label>
+        <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+          <input type="checkbox" checked={asTest} disabled={Boolean(appt.is_test)} onChange={(e) => setAsTest(e.target.checked)} className="h-4 w-4 rounded border-slate-300 text-indigo-600" />
+          Test — send to Meta Test Events only & exclude from stats{appt.is_test ? ' (already a test booking)' : ''}
+        </label>
         {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}
         <div className="mt-5 flex justify-end gap-2">
           <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-slate-600 hover:bg-slate-100">Cancel</button>
-          <button type="button" onClick={save} disabled={busy} className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 disabled:opacity-60">{busy ? 'Saving…' : 'Save & send to Meta'}</button>
+          <button type="button" onClick={save} disabled={busy} className="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 disabled:opacity-60">{busy ? 'Saving…' : kind === 'no_show' ? 'Save (no Meta event)' : 'Save & send to Meta'}</button>
         </div>
       </div>
     </div>
   )
 }
 
-type Tab = 'overview' | 'website' | 'social'
+type Tab = 'overview' | 'customers' | 'website' | 'conversions' | 'social'
 
 // ── dashboard ───────────────────────────────────────────────────────────────────
 const AdminDashboard: React.FC = () => {
@@ -607,6 +740,15 @@ const AdminDashboard: React.FC = () => {
     try { setData(await fetchAdminData()); setLoadedAt(Date.now()) }
     catch (e) { setLoadErr(e instanceof Error ? e.message : 'Failed to load') } finally { setLoading(false) }
   }, [])
+
+  const [discarding, setDiscarding] = useState(false)
+  const discardTests = useCallback(async () => {
+    if (!window.confirm('Permanently delete ALL test appointments and their conversion-log rows? (Contacts are kept.)')) return
+    setDiscarding(true)
+    try { await discardTestData(); await load() }
+    catch (e) { setLoadErr(e instanceof Error ? e.message : 'Discard failed') }
+    finally { setDiscarding(false) }
+  }, [load])
 
   const [retrying, setRetrying] = useState<string | null>(null)
   const [retryErr, setRetryErr] = useState<Record<string, string>>({})
@@ -641,7 +783,9 @@ const AdminDashboard: React.FC = () => {
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
+    { id: 'customers', label: 'Customer Overview', icon: <Users size={16} /> },
     { id: 'website', label: 'Website', icon: <Globe size={16} /> },
+    { id: 'conversions', label: 'Conversion Log', icon: <Activity size={16} /> },
     { id: 'social', label: 'Social', icon: <Share2 size={16} /> },
   ]
 
@@ -713,6 +857,16 @@ const AdminDashboard: React.FC = () => {
             </div>
             {data.serverEvents && <ConversionFlow se={data.serverEvents} />}
           </>
+        ) : tab === 'customers' ? (
+          <CustomerOverview data={data} onResult={setResulting} onPaymentLink={setPayLinking} />
+        ) : tab === 'conversions' ? (
+          <>
+            {data.serverEvents && <ConversionFlow se={data.serverEvents} />}
+            <section>
+              <h2 className={`${sectionTitle} mb-2`}>Recent conversion log</h2>
+              <CapiLog data={data} retrying={retrying} retryErr={retryErr} onRetry={retry} />
+            </section>
+          </>
         ) : tab === 'website' ? (
           <>
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -725,13 +879,16 @@ const AdminDashboard: React.FC = () => {
             <section>
               <div className="mb-2 flex items-center justify-between">
                 <h2 className={sectionTitle}>Appointments{needsResult.length > 0 && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700">{needsResult.length} to result</span>}</h2>
-                <button onClick={() => setShowResolved((v) => !v)} className="text-xs font-medium text-indigo-600 hover:underline">{showResolved ? 'Show only un-resulted' : 'Show all'}</button>
+                <div className="flex items-center gap-3">
+                  {websiteAppts.some((a) => a.is_test) && (
+                    <button onClick={discardTests} disabled={discarding} className="text-xs font-medium text-rose-500 hover:underline disabled:opacity-50">
+                      {discarding ? 'Discarding…' : 'Discard test data'}
+                    </button>
+                  )}
+                  <button onClick={() => setShowResolved((v) => !v)} className="text-xs font-medium text-indigo-600 hover:underline">{showResolved ? 'Show only un-resulted' : 'Show all'}</button>
+                </div>
               </div>
               <AppointmentsTable appts={websiteAppts} onResult={setResulting} onPaymentLink={setPayLinking} emptyHint={showResolved ? 'No appointments yet.' : 'Nothing waiting to be resulted. 🎉'} />
-            </section>
-            <section>
-              <h2 className={`${sectionTitle} mb-2`}>Recent conversion log</h2>
-              <CapiLog data={data} retrying={retrying} retryErr={retryErr} onRetry={retry} />
             </section>
             <section>
               <h2 className={`${sectionTitle} mb-2`}>Recent messages (GHL)</h2>

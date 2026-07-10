@@ -6,6 +6,12 @@
 **Last passing GitHub-triggered deploy:** 876912b
 **Branch:** master
 
+> **Resolved — historical.** The CI fix (untrack `.netlify/`, remove `@netlify/plugin-emails`, drop the
+> duplicate site tree) is captured in `docs/deploy.md`. Note this log predates the 2026-06-01 CAPI
+> migration: the `netlify/functions/ghl-capi.ts` + `[functions]` block referenced below as the
+> regression suspect have since been **deleted** (conversions moved to GHL's native action), so the
+> functions-bundling hypotheses (#2) are no longer live concerns. Kept as an investigation record.
+
 ## Evidence Gathered
 
 - Local `npm run build` passes.

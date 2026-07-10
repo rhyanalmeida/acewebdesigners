@@ -66,6 +66,54 @@ export interface LoadedIdentity {
   base: IdentityBase
 }
 
+/**
+ * Load identity straight from a contact (no appointment) — used by the self-serve
+ * restaurant subscription funnel, where the visitor never books a slot. Always the
+ * `main` dataset. We can't know test-mode from a contact, so the caller passes it.
+ */
+export async function loadContactIdentity(contactId: string): Promise<LoadedIdentity | null> {
+  const { data, error } = await admin()
+    .from('contacts')
+    .select(
+      'id, email, phone, first_name, last_name, city, state, zip, country, ' +
+        'fbc, fbp, fbclid, client_ip, client_user_agent, landing_url, utm',
+    )
+    .eq('id', contactId)
+    .single()
+  if (error || !data) return null
+  const c = data as unknown as ContactRow & {
+    id: string
+    client_ip?: string
+    client_user_agent?: string
+    landing_url?: string
+    utm?: Record<string, string> | null
+  }
+  return {
+    calendar: 'main',
+    utm: (c.utm ?? {}) as Record<string, string>,
+    isTest: false,
+    base: {
+      dataset: 'main',
+      eventSourceUrl: c.landing_url || undefined,
+      email: c.email,
+      phone: c.phone,
+      firstName: c.first_name,
+      lastName: c.last_name,
+      city: c.city,
+      state: c.state,
+      zip: c.zip,
+      country: c.country,
+      externalId: c.id,
+      fbc: c.fbc,
+      fbp: c.fbp,
+      fbclid: c.fbclid,
+      clientIpAddress: c.client_ip || undefined,
+      clientUserAgent: c.client_user_agent || undefined,
+      contactId: c.id,
+    },
+  }
+}
+
 export async function loadAppointmentIdentity(appointmentId: string): Promise<LoadedIdentity | null> {
   const { data, error } = await admin()
     .from('appointments')

@@ -61,3 +61,35 @@ export function mergeAttribution(
   }
   return out
 }
+
+/**
+ * The live contractor ad's URL carries only `source=landing-contractors` until
+ * its UTM template is published in Ads Manager, so those clicks would arrive
+ * with no campaign context. When that marker is present and nothing else was
+ * captured, stamp the known ids of the one running ad ("funny hook"). Real UTM
+ * params, once the template is live, are present and win — this then never fires.
+ */
+const CONTRACTOR_AD_DEFAULTS: Record<string, string> = {
+  utm_source: 'Facebook',
+  utm_medium: 'Contractors — US — Advantage+ Audience — $20/day - Copy',
+  utm_campaign: 'Free Website Offer For Contractors (6/1/26)',
+  utm_content: 'funny hook',
+  campaign_id: '120241554190170259',
+  adset_id: '120242709687340259',
+  ad_id: '120242709687350259',
+}
+
+export function withDefaultAdIds(
+  utm: Record<string, string>,
+  landingUrl?: string,
+): Record<string, string> {
+  if (utm.utm_source || utm.campaign_id || utm.ad_id) return utm
+  try {
+    if (landingUrl && new URL(landingUrl).searchParams.get('source') === 'landing-contractors') {
+      return { ...CONTRACTOR_AD_DEFAULTS }
+    }
+  } catch {
+    /* ignore bad URL */
+  }
+  return utm
+}
