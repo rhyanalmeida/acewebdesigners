@@ -128,10 +128,19 @@ token is read live from `%APPDATA%\netlify\Config\config.json` (the CLI rotates 
 to + self-heal of `NETLIFY_AUTH_TOKEN` in `supabase/.env`. Jobs: queued rows + `generating` stalled
 >2h; max 2 per run. Verified live 2026-07-13: forced test booking "Granite State Roofing" →
 https://preview-granite-state-roofing-a50774.netlify.app (deployed, DB stamped, HTTP 200).
-The earlier claude.ai **cloud routine** `trig_01GpLg6F7V7hJAeHzdnTbyGX` is **DISABLED**
-(its embedded Netlify token rotated → 401; left enabled it would claim queued jobs at :07 UTC and
-mark them `failed` before the local builder ran — failed rows are never re-listed). Re-enable only
-with a stable Netlify PAT embedded. The `generate-site` fn below stays deployed but DORMANT (503
+The claude.ai **cloud routine** `trig_01GpLg6F7V7hJAeHzdnTbyGX` ("Build preview websites for new
+bookings", hourly at :07 UTC, model claude-sonnet-5) is enabled as PC-off coverage but is
+**BLOCKED PENDING ONE MANUAL STEP**: the cloud sandbox's default "Trusted" network allowlist blocks
+`*.supabase.co` + `api.netlify.com` (403 `host_not_allowed`), so its runs can't even list the queue
+(verified 2026-07-13 — two runs never claimed a queued job; this is why the local builder was
+created). Fix in claude.ai UI (no API for it): claude.ai/code/routines → routine → edit → click the
+environment ("Default") → settings → Network access = **Custom** → add `*.supabase.co` +
+`api.netlify.com` + check "include default package managers" → Save. The routine itself is fixed:
+it no longer embeds a Netlify token (the embedded one rotated → 401) — it fetches the current token
+at runtime via `site-queue` `{action:'creds'}` (returns the `NETLIFY_AUTH_TOKEN` Edge secret; keep
+that secret synced when the token changes), and it STOPS without claiming jobs on any credential
+failure (never fail-claims over a bad token). Two builders coexist safely: whichever lists a
+`queued` row first claims it; the other skips `generating` rows (<2h). The `generate-site` fn below stays deployed but DORMANT (503
 without `ANTHROPIC_API_KEY`; setting that secret makes `book` also trigger it immediately for
 instant builds — the builder then finds nothing queued).
 NOTE: the /admin Retry button calls `generate-site` (503 while dormant) — to retry a failed

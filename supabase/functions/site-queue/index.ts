@@ -7,6 +7,8 @@
  * SITE_QUEUE_SECRET (dedicated random secret; deliberately NOT the service-role
  * key so the cloud routine can only touch the site-build fields of appointments).
  *
+ * POST { action: 'creds' }  → { netlifyToken }   current NETLIFY_AUTH_TOKEN Edge
+ *   secret, so the cloud routine never embeds a token that can rotate stale.
  * POST { action: 'list' }
  *   → { jobs: [{ appointmentId, businessName, businessType, firstName, city,
  *        state, phone, netlifySiteId }] }
@@ -20,7 +22,7 @@ import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 
 interface Body {
-  action?: 'list' | 'claim' | 'complete' | 'fail'
+  action?: 'creds' | 'list' | 'claim' | 'complete' | 'fail'
   appointmentId?: string
   previewUrl?: string
   netlifySiteId?: string
@@ -41,6 +43,12 @@ Deno.serve(async (req: Request) => {
     b = (await req.json()) as Body
   } catch {
     return json({ error: 'invalid JSON' }, 400)
+  }
+
+  if (b.action === 'creds') {
+    const netlifyToken = Deno.env.get('NETLIFY_AUTH_TOKEN')
+    if (!netlifyToken) return json({ error: 'NETLIFY_AUTH_TOKEN not set' }, 503)
+    return json({ netlifyToken })
   }
 
   const supa = admin()
