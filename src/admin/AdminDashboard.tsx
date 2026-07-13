@@ -306,13 +306,14 @@ const PreviewSiteCell: React.FC<{ appt: Appt }> = ({ appt }) => {
   }
 
   const status = appt.site_status
-  // A run that's been "generating" for >10 min is presumed dead (isolate killed) — offer Retry.
+  // "generating" for >2h means the build crashed (the hourly routine also retakes
+  // such rows automatically) — surface Retry.
   const stalled =
-    status === 'generating' && appt.updated_at && Date.now() - new Date(appt.updated_at).getTime() > 10 * 60 * 1000
+    status === 'generating' && appt.updated_at && Date.now() - new Date(appt.updated_at).getTime() > 2 * 60 * 60 * 1000
 
   if (started || (!stalled && (status === 'queued' || status === 'generating'))) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-sky-200" title="Opus is writing the site — usually live in 1-3 minutes">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-sky-200" title="The site builder picks this up on its hourly run — usually live within the hour">
         <RefreshCw size={11} className="animate-spin" /> Building…
       </span>
     )

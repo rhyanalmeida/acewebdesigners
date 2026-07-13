@@ -119,11 +119,21 @@ Deno.serve(async (req: Request) => {
   const supa = admin()
 
   // ── maintenance action: purge all test data (capi rows first — FK on appointments)
-  let body: { action?: string } = {}
+  let body: { action?: string; appointmentId?: string } = {}
   try {
     body = await req.json()
   } catch {
     /* plain dashboard fetch has no body */
+  }
+  // Re-queue a preview-site build (the hourly Claude routine — or generate-site,
+  // when ANTHROPIC_API_KEY is set — picks queued rows up).
+  if (body.action === 'requeueSite') {
+    if (!body.appointmentId) return json({ error: 'appointmentId required' }, 400)
+    const { error } = await supa
+      .from('appointments')
+      .update({ site_status: 'queued', site_error: null })
+      .eq('id', body.appointmentId)
+    return error ? json({ error: error.message }, 500) : json({ ok: true })
   }
   if (body.action === 'discardTests') {
     const capiDel = await supa.from('capi_events').delete({ count: 'exact' }).eq('is_test', true)

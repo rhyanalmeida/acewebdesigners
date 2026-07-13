@@ -233,13 +233,17 @@ export async function discardTestData(): Promise<{ deletedCapiEvents: number; de
   return data as { deletedCapiEvents: number; deletedAppointments: number }
 }
 
-/** (Re)generate the auto-built preview website for an appointment (admin JWT). */
+/**
+ * Re-queue the auto-built preview website for an appointment. The hourly Claude
+ * routine picks queued rows up (or generate-site fires instantly once
+ * ANTHROPIC_API_KEY is set).
+ */
 export async function retrySiteGeneration(appointmentId: string): Promise<{ ok: boolean }> {
-  const { data, error } = await supabase.functions.invoke('generate-site', {
-    body: { appointmentId, force: true },
+  const { data, error } = await supabase.functions.invoke('admin-data', {
+    body: { action: 'requeueSite', appointmentId },
   })
   if (error) {
-    const { message } = await errorMessage(error, 'Could not start site generation')
+    const { message } = await errorMessage(error, 'Could not re-queue site build')
     throw new Error(message)
   }
   return data as { ok: boolean }
