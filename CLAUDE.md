@@ -113,21 +113,29 @@ CLI: `node scripts/funnel-admin.mjs discard-tests`.
 
 ## Status
 
-**Preview websites now build via a SCHEDULED CLAUDE CODE ROUTINE (2026-07-13, owner's choice —
-subscription usage instead of API tokens).** `book` marks every real booking
-`site_status='queued'`; the claude.ai cloud routine **"Build preview websites for new bookings"**
-(`trig_01GpLg6F7V7hJAeHzdnTbyGX`, hourly at :07 UTC, model claude-opus-4-8, manage at
-https://claude.ai/code/routines) polls the new **`site-queue`** Edge fn (deployed
-`--no-verify-jwt`, auth `x-queue-secret` = `SITE_QUEUE_SECRET` — a narrow secret that can ONLY
-list queued jobs + claim/complete/fail the site fields; in `supabase/.env` + Edge secrets),
-builds the multi-page site itself, deploys to Netlify (zip deploy), and stamps
-`preview_url`/`deployed`. Jobs: queued rows + `generating` stalled >2h; max 2 per run. Sites
-appear up to ~1h after booking (fine — leads book hours ahead). The routine prompt carries
-SITE_QUEUE_SECRET + NETLIFY_AUTH_TOKEN (rotate both if it's ever compromised). The `generate-site`
-fn below stays deployed but DORMANT (503 without `ANTHROPIC_API_KEY`; setting that secret makes
-`book` also trigger it immediately for instant builds — the routine then finds nothing queued).
+**Preview websites build via the LOCAL HOURLY CLAUDE CODE BUILDER (2026-07-13, owner's choice —
+subscription usage instead of API tokens; VERIFIED end-to-end same day).** `book` marks every real
+booking `site_status='queued'`; Windows Task Scheduler task **`AcePreviewSiteBuilder`** (hourly at
+:23 local, first run 2026-07-13 12:23 EDT) runs `scripts/run-preview-builder.ps1` → headless
+`claude -p` (model sonnet) with `scripts/preview-site-builder-prompt.md` — the prompt is **piped
+via stdin** (passing it as an argument truncates it at the first embedded double-quote; that bug
+made the 12:23 scheduled run do nothing — fixed same day). Logs:
+`%LOCALAPPDATA%\ace-preview-builder\builder.log`. The builder polls the **`site-queue`** Edge fn
+(deployed `--no-verify-jwt`, auth `x-queue-secret` = `SITE_QUEUE_SECRET` — a narrow secret that can
+ONLY list queued jobs + claim/complete/fail the site fields; in `supabase/.env` + Edge secrets),
+builds the multi-page site, zip-deploys to Netlify, and stamps `preview_url`/`deployed`. Netlify
+token is read live from `%APPDATA%\netlify\Config\config.json` (the CLI rotates it) with fallback
+to + self-heal of `NETLIFY_AUTH_TOKEN` in `supabase/.env`. Jobs: queued rows + `generating` stalled
+>2h; max 2 per run. Verified live 2026-07-13: forced test booking "Granite State Roofing" →
+https://preview-granite-state-roofing-a50774.netlify.app (deployed, DB stamped, HTTP 200).
+The earlier claude.ai **cloud routine** `trig_01GpLg6F7V7hJAeHzdnTbyGX` is **DISABLED**
+(its embedded Netlify token rotated → 401; left enabled it would claim queued jobs at :07 UTC and
+mark them `failed` before the local builder ran — failed rows are never re-listed). Re-enable only
+with a stable Netlify PAT embedded. The `generate-site` fn below stays deployed but DORMANT (503
+without `ANTHROPIC_API_KEY`; setting that secret makes `book` also trigger it immediately for
+instant builds — the builder then finds nothing queued).
 NOTE: the /admin Retry button calls `generate-site` (503 while dormant) — to retry a failed
-routine build, set the row's `site_status='queued'` via SQL and let the routine take it.
+build, set the row's `site_status='queued'` via SQL and let the hourly builder take it.
 
 **Business name/type on booking + auto-generated preview websites 2026-07-13.** The gate form (both funnels, shared `Scheduler.tsx`) now REQUIRES
 **Business name** + **Type of business** (datalist of ~15 trades, free text allowed) → stored on

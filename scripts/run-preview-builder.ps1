@@ -5,9 +5,11 @@ $ErrorActionPreference = 'Continue'
 $work = Join-Path $env:LOCALAPPDATA 'ace-preview-builder'
 New-Item -ItemType Directory -Force -Path $work | Out-Null
 $log = Join-Path $work 'builder.log'
-$prompt = Get-Content -Raw 'C:\Projects\acewebdesigners\scripts\preview-site-builder-prompt.md'
 Set-Location $work
 "`n===== run $(Get-Date -Format o) =====" | Out-File -Append -Encoding utf8 $log
-& claude -p $prompt --model sonnet --allowedTools "Bash,Read,Write,Edit,Glob,Grep" 2>&1 |
+# Prompt is piped via stdin: passing it as an argument mangles/truncates it at the
+# embedded double quotes (PowerShell native-arg quoting).
+Get-Content -Raw 'C:\Projects\acewebdesigners\scripts\preview-site-builder-prompt.md' |
+  & claude -p --model sonnet --allowedTools "Bash,Read,Write,Edit,Glob,Grep" 2>&1 |
   Out-File -Append -Encoding utf8 $log
 "===== exit $LASTEXITCODE $(Get-Date -Format o) =====" | Out-File -Append -Encoding utf8 $log
