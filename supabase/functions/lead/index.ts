@@ -31,6 +31,8 @@ interface LeadBody {
   name?: string
   email?: string
   phone?: string
+  businessName?: string
+  businessType?: string
   city?: string
   state?: string
   zip?: string
@@ -93,6 +95,8 @@ Deno.serve(async (req: Request) => {
     phone: b.phone,
     firstName,
     lastName,
+    businessName: b.businessName,
+    businessType: b.businessType,
     city: b.city,
     state: b.state,
     zip: b.zip,
@@ -149,6 +153,7 @@ Deno.serve(async (req: Request) => {
       phone: b.phone,
       firstName,
       lastName,
+      businessName: b.businessName,
       city: b.city,
       state: b.state,
       zip: b.zip,

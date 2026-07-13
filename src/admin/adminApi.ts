@@ -11,6 +11,7 @@ export interface AdminHealth {
   ghl: boolean
   google: boolean
   stripe: boolean
+  netlify?: boolean // optional: old function payloads omit it
 }
 export interface Warning {
   level: 'error' | 'warn' | 'info'
@@ -49,10 +50,14 @@ export interface ApptContact {
   phone?: string
   first_name?: string
   last_name?: string
+  business_name?: string
+  business_type?: string
   city?: string
   state?: string
   zip?: string
 }
+
+export type SiteStatus = 'queued' | 'generating' | 'deployed' | 'failed' | 'deleted'
 export interface Appt {
   id: string
   start_ts: string
@@ -69,6 +74,12 @@ export interface Appt {
   notes?: string | null
   is_test?: boolean
   isSocial?: boolean
+  preview_url?: string | null
+  netlify_site_id?: string | null
+  site_status?: SiteStatus | null
+  site_error?: string | null
+  site_generated_at?: string | null
+  updated_at?: string | null
   contacts?: ApptContact | null
 }
 export interface CapiEvent {
@@ -114,6 +125,8 @@ export interface AdminContact {
   id: string
   first_name?: string | null
   last_name?: string | null
+  business_name?: string | null
+  business_type?: string | null
   email?: string | null
   phone?: string | null
   city?: string | null
@@ -218,6 +231,18 @@ export async function discardTestData(): Promise<{ deletedCapiEvents: number; de
     throw new Error(message)
   }
   return data as { deletedCapiEvents: number; deletedAppointments: number }
+}
+
+/** (Re)generate the auto-built preview website for an appointment (admin JWT). */
+export async function retrySiteGeneration(appointmentId: string): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('generate-site', {
+    body: { appointmentId, force: true },
+  })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not start site generation')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
 }
 
 /** Re-fire a failed/pending CAPI event from its stored attribution. */

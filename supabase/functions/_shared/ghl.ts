@@ -146,6 +146,7 @@ export interface GhlStageInput {
   phone?: string
   firstName?: string
   lastName?: string
+  businessName?: string
   city?: string
   state?: string
   zip?: string
@@ -177,6 +178,7 @@ export async function ghlSyncStage(input: GhlStageInput): Promise<string | null>
     if (input.phone) body.phone = input.phone
     if (input.firstName) body.firstName = input.firstName
     if (input.lastName) body.lastName = input.lastName
+    if (input.businessName) body.companyName = input.businessName
     if (input.city) body.city = input.city
     if (input.state) body.state = input.state
     if (input.zip) body.postalCode = input.zip

@@ -24,6 +24,9 @@ import { createEvent } from '../_shared/google.ts'
 import { createGhlAppointment, ghlSyncStage, pushLegacyBooking } from '../_shared/ghl.ts'
 import { upsertContact } from '../_shared/contacts.ts'
 import { mergeAttribution, parseAttribution, withDefaultAdIds } from '../_shared/attribution.ts'
+import { netlifyConfigured } from '../_shared/netlify.ts'
+
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -37,6 +40,8 @@ interface BookBody {
   lastName?: string
   name?: string
   phone?: string
+  businessName?: string
+  businessType?: string
   city?: string
   state?: string
   zip?: string
@@ -118,6 +123,8 @@ Deno.serve(async (req: Request) => {
     phone: b.phone,
     firstName,
     lastName,
+    businessName: b.businessName,
+    businessType: b.businessType,
     city: b.city,
     state: b.state,
     zip: b.zip,
@@ -227,6 +234,7 @@ Deno.serve(async (req: Request) => {
       phone: b.phone,
       firstName,
       lastName,
+      businessName: b.businessName,
       city: b.city,
       state: b.state,
       zip: b.zip,
@@ -254,6 +262,29 @@ Deno.serve(async (req: Request) => {
     })
   } catch (err) {
     console.error('[book] ghl relay failed (booking kept)', err)
+  }
+
+  // ── 7) auto-generate the preview website (fire-and-forget; never blocks) ──────
+  // generate-site does the Opus call + Netlify deploy in its own isolate/budget;
+  // we only queue it. Skipped for test bookings and when keys are unset.
+  if (!b.test && netlifyConfigured() && Deno.env.get('ANTHROPIC_API_KEY')) {
+    try {
+      await supa.from('appointments').update({ site_status: 'queued' }).eq('id', appointmentId)
+      const trigger = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-site`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        },
+        body: JSON.stringify({ appointmentId }),
+      }).then(
+        (r) => r.body?.cancel(),
+        (e) => console.error('[book] generate-site trigger failed', e),
+      )
+      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(trigger)
+    } catch (err) {
+      console.error('[book] generate-site queue failed (booking kept)', err)
+    }
   }
 
   return json({ ok: true, appointmentId, startISO })

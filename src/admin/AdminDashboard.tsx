@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
-  fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData,
+  fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration,
   type AdminData, type AdminContact, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat,
 } from './adminApi'
 
@@ -160,6 +160,7 @@ const HealthBanner: React.FC<{ data: AdminData }> = ({ data }) => {
           <HealthChip label="GHL" ok={data.health.ghl} />
           <HealthChip label="Google" ok={data.health.google} />
           <HealthChip label="Stripe" ok={data.health.stripe} />
+          {data.health.netlify !== undefined && <HealthChip label="Netlify" ok={data.health.netlify} />}
         </div>
       </div>
       {!allOk && (
@@ -286,6 +287,70 @@ const Avatar: React.FC<{ c?: NameLike }> = ({ c }) => (
   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200 text-xs font-bold text-slate-600">{initials(c)}</span>
 )
 
+/** Auto-generated preview website status/actions for one appointment. */
+const PreviewSiteCell: React.FC<{ appt: Appt }> = ({ appt }) => {
+  const [busy, setBusy] = useState(false)
+  const [started, setStarted] = useState(false)
+  const [err, setErr] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  const regenerate = async () => {
+    setBusy(true); setErr('')
+    try { await retrySiteGeneration(appt.id); setStarted(true) }
+    catch (e) { setErr(e instanceof Error ? e.message : 'Failed to start') }
+    finally { setBusy(false) }
+  }
+  const copy = async () => {
+    if (!appt.preview_url) return
+    try { await navigator.clipboard.writeText(appt.preview_url); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { /* clipboard blocked */ }
+  }
+
+  const status = appt.site_status
+  // A run that's been "generating" for >10 min is presumed dead (isolate killed) — offer Retry.
+  const stalled =
+    status === 'generating' && appt.updated_at && Date.now() - new Date(appt.updated_at).getTime() > 10 * 60 * 1000
+
+  if (started || (!stalled && (status === 'queued' || status === 'generating'))) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700 ring-1 ring-sky-200" title="Opus is writing the site — usually live in 1-3 minutes">
+        <RefreshCw size={11} className="animate-spin" /> Building…
+      </span>
+    )
+  }
+  if (status === 'deployed' && appt.preview_url) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <a href={appt.preview_url} target="_blank" rel="noreferrer" title={appt.preview_url}
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2 py-1 text-xs font-medium text-indigo-700 transition hover:bg-indigo-50">
+          <ExternalLink size={12} /> Preview
+        </a>
+        <button type="button" onClick={copy} title="Copy the preview link"
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-600 transition hover:bg-slate-50">
+          <Copy size={12} /> {copied ? 'Copied' : 'Copy'}
+        </button>
+      </span>
+    )
+  }
+  if (status === 'failed' || stalled) {
+    return (
+      <span className="inline-flex flex-col items-start gap-1">
+        <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700 ring-1 ring-rose-200" title={appt.site_error || 'Generation did not finish'}>
+          {stalled ? 'Stalled' : 'Failed'}
+        </span>
+        <button type="button" onClick={regenerate} disabled={busy}
+          className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50">
+          {busy ? 'Starting…' : 'Retry'}
+        </button>
+        {err && <span className="text-[10px] text-rose-600">{err}</span>}
+      </span>
+    )
+  }
+  if (status === 'deleted') {
+    return <span className="text-xs text-slate-400" title="Preview site was removed (no-show)">removed</span>
+  }
+  return <span className="text-slate-300">—</span>
+}
+
 const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; onPaymentLink: (a: Appt) => void; emptyHint?: string }> = ({ appts, onResult, onPaymentLink, emptyHint }) => {
   const now = Date.now()
   return (
@@ -296,6 +361,7 @@ const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; 
             <tr>
               <th className="px-4 py-2.5">When</th><th className="px-4 py-2.5">Lead</th>
               <th className="px-4 py-2.5">Source</th><th className="px-4 py-2.5">Status</th>
+              <th className="px-4 py-2.5">Website</th>
               <th className="px-4 py-2.5">Deal</th><th className="px-4 py-2.5" />
             </tr>
           </thead>
@@ -313,6 +379,12 @@ const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; 
                       <Avatar c={a.contacts} />
                       <div className="min-w-0">
                         <div className="truncate font-medium text-slate-900">{fullName(a.contacts)}</div>
+                        {a.contacts?.business_name && (
+                          <div className="truncate text-xs font-medium text-slate-500">
+                            {a.contacts.business_name}
+                            {a.contacts.business_type ? <span className="font-normal text-slate-400"> · {a.contacts.business_type}</span> : ''}
+                          </div>
+                        )}
                         <div className="truncate text-xs text-slate-400">{a.contacts?.email}{a.contacts?.phone ? ` · ${a.contacts.phone}` : ''}</div>
                       </div>
                     </div>
@@ -331,6 +403,9 @@ const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; 
                     <span className={`rounded-full px-2 py-0.5 text-xs font-semibold capitalize ring-1 ${statusPill(a.status)}`}>{a.status.replace('_', '-')}</span>
                     {a.is_test && <TestBadge />}
                     {needs && <div className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-amber-600"><Clock size={11} /> needs result</div>}
+                  </td>
+                  <td className="px-4 py-3 align-top">
+                    <PreviewSiteCell appt={a} />
                   </td>
                   <td className="px-4 py-3 align-top text-slate-600">
                     {a.purchased_at
@@ -353,7 +428,7 @@ const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; 
                 </tr>
               )
             })}
-            {appts.length === 0 && <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-400">{emptyHint ?? 'No appointments yet.'}</td></tr>}
+            {appts.length === 0 && <tr><td colSpan={7} className="px-4 py-12 text-center text-slate-400">{emptyHint ?? 'No appointments yet.'}</td></tr>}
           </tbody>
         </table>
       </div>
@@ -433,6 +508,12 @@ const LeadsTable: React.FC<{ contacts: AdminContact[]; stageOf: (email?: string 
                     <Avatar c={c} />
                     <div className="min-w-0">
                       <div className="truncate font-medium text-slate-900">{fullName(c)}</div>
+                      {c.business_name && (
+                        <div className="truncate text-xs font-medium text-slate-500">
+                          {c.business_name}
+                          {c.business_type ? <span className="font-normal text-slate-400"> · {c.business_type}</span> : ''}
+                        </div>
+                      )}
                       <div className="truncate text-xs text-slate-400">{c.email}{c.phone ? ` · ${c.phone}` : ''}</div>
                     </div>
                   </div>

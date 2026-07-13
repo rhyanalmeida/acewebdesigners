@@ -23,6 +23,7 @@ import { sendCapiEvent } from '../_shared/meta.ts'
 import { loadAppointmentIdentity } from '../_shared/identity.ts'
 import { ghlSyncStage } from '../_shared/ghl.ts'
 import type { GhlAttribution } from '../_shared/ghl.ts'
+import { deleteNetlifySite } from '../_shared/netlify.ts'
 
 Deno.serve(async (req: Request) => {
   const pre = handlePreflight(req)
@@ -66,9 +67,28 @@ Deno.serve(async (req: Request) => {
   }
   const testCode = isTest ? (Deno.env.get('META_TEST_EVENT_CODE') || 'TEST') : undefined
 
-  // ── No-Show: status only ────────────────────────────────────────────────────
+  // ── No-Show: status only (no Meta event) + delete the preview Netlify site ───
   if (b.result === 'no_show') {
     await supa.from('appointments').update({ status: 'no_show', ...baseUpdate }).eq('id', b.appointmentId)
+    // Best-effort: tear down the auto-generated preview site (runs for test
+    // appointments too, so forced dry-run generations get cleaned up).
+    try {
+      const { data: site } = await supa
+        .from('appointments')
+        .select('netlify_site_id, site_status')
+        .eq('id', b.appointmentId)
+        .single()
+      if (site?.netlify_site_id && site.site_status !== 'deleted') {
+        const del = await deleteNetlifySite(site.netlify_site_id)
+        if (del.ok) {
+          await supa.from('appointments').update({ site_status: 'deleted' }).eq('id', b.appointmentId)
+        } else {
+          console.error('[result] preview site delete failed', del.error)
+        }
+      }
+    } catch (err) {
+      console.error('[result] preview site cleanup failed', err)
+    }
     return json({ ok: true, result: 'no_show', capi: 'none' })
   }
 

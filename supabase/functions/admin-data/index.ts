@@ -11,12 +11,15 @@ import { admin } from '../_shared/supabaseAdmin.ts'
 import { requireAdmin } from '../_shared/adminAuth.ts'
 import { ghlConfigured } from '../_shared/ghl.ts'
 import { googleConfigured } from '../_shared/google.ts'
+import { netlifyConfigured } from '../_shared/netlify.ts'
 
 interface ContactEmbed {
   email?: string
   phone?: string
   first_name?: string
   last_name?: string
+  business_name?: string
+  business_type?: string
   city?: string
   state?: string
   zip?: string
@@ -140,7 +143,8 @@ Deno.serve(async (req: Request) => {
       .select(
         'id, start_ts, status, calendar, value, upfront_value, recurring_value, recurring_interval, ' +
           'plan_name, purchased_at, resulted_at, resulted_by, event_id, notes, utm, created_at, is_test, ' +
-          'contacts:contact_id ( email, phone, first_name, last_name, city, state, zip, fbclid )',
+          'preview_url, netlify_site_id, site_status, site_error, site_generated_at, updated_at, ' +
+          'contacts:contact_id ( email, phone, first_name, last_name, business_name, business_type, city, state, zip, fbclid )',
       )
       .order('start_ts', { ascending: false })
       .limit(500),
@@ -148,7 +152,7 @@ Deno.serve(async (req: Request) => {
     supa.from('ghl_messages').select('*').order('received_at', { ascending: false }).limit(50),
     supa
       .from('contacts')
-      .select('id, first_name, last_name, email, phone, city, state, created_at, fbclid, landing_url, utm')
+      .select('id, first_name, last_name, business_name, business_type, email, phone, city, state, created_at, fbclid, landing_url, utm')
       .order('created_at', { ascending: false })
       .limit(300),
   ])
@@ -167,6 +171,7 @@ Deno.serve(async (req: Request) => {
     ghl: ghlConfigured(),
     google: googleConfigured(),
     stripe: Boolean(Deno.env.get('STRIPE_SECRET_KEY')),
+    netlify: netlifyConfigured(),
   }
 
   // ── actionable setup warnings ──────────────────────────────────────────────
@@ -176,6 +181,7 @@ Deno.serve(async (req: Request) => {
   if (!health.ghl) warnings.push({ level: 'warn', message: 'GHL is not connected — confirmation texts/emails/voicemails will not send.', fix: 'Publish the GHL Inbound Webhook workflow and set GHL_INBOUND_WEBHOOK_URL.' })
   if (!health.google) warnings.push({ level: 'warn', message: 'Google Calendar is not connected — bookings will not appear on your calendar.', fix: 'Add GOOGLE_SERVICE_ACCOUNT_B64 + calendar IDs.' })
   if (!health.stripe) warnings.push({ level: 'info', message: 'Stripe is not connected — you cannot collect deposits online yet.', fix: 'Add STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET when ready.' })
+  if (!health.netlify) warnings.push({ level: 'info', message: 'Netlify is not connected — preview websites are not auto-generated for new bookings.', fix: 'Set NETLIFY_AUTH_TOKEN in Supabase Edge secrets.' })
   if (capiError > 0) warnings.push({ level: 'warn', message: `${capiError} conversion(s) failed to send to Meta.`, fix: 'Check the CAPI log; verify META_CAPI_TOKEN is valid.' })
 
   const socialRows = realAppts.filter(isSocial)

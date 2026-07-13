@@ -59,10 +59,38 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 interface FormState {
   firstName: string
   lastName: string
+  businessName: string
+  businessType: string
   email: string
   phone: string
 }
-const EMPTY_FORM: FormState = { firstName: '', lastName: '', email: '', phone: '' }
+const EMPTY_FORM: FormState = {
+  firstName: '',
+  lastName: '',
+  businessName: '',
+  businessType: '',
+  email: '',
+  phone: '',
+}
+
+/** Common trades for the business-type datalist — free text is still allowed. */
+const BUSINESS_TYPES = [
+  'Roofing',
+  'Plumbing',
+  'HVAC',
+  'Electrical',
+  'Landscaping',
+  'Painting',
+  'Remodeling',
+  'Concrete',
+  'Fencing',
+  'Flooring',
+  'Masonry',
+  'Tree Service',
+  'Garage Doors',
+  'Gutters',
+  'General Contractor',
+]
 
 const newEventId = (prefix: string) =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -165,6 +193,14 @@ export const Scheduler: React.FC<SchedulerProps> = ({
         setLeadError('Please enter your first and last name.')
         return
       }
+      if (!form.businessName.trim()) {
+        setLeadError('Please enter your business name.')
+        return
+      }
+      if (!form.businessType.trim()) {
+        setLeadError('Please enter your type of business (e.g. Roofing, Plumbing).')
+        return
+      }
       if (!EMAIL_RE.test(form.email)) {
         setLeadError('Please enter a valid email.')
         return
@@ -186,6 +222,8 @@ export const Scheduler: React.FC<SchedulerProps> = ({
             calendar,
             firstName: form.firstName,
             lastName: form.lastName,
+            businessName: form.businessName,
+            businessType: form.businessType,
             email: form.email,
             phone: form.phone,
             country: 'US',
@@ -236,6 +274,8 @@ export const Scheduler: React.FC<SchedulerProps> = ({
           tz: businessTz,
           firstName: form.firstName,
           lastName: form.lastName,
+          businessName: form.businessName,
+          businessType: form.businessType,
           email: form.email,
           phone: form.phone,
           country: 'US',
@@ -324,6 +364,20 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                 <input required value={form.firstName} onChange={setField('firstName')} placeholder="First name *" className={inputClass} autoComplete="given-name" />
                 <input required value={form.lastName} onChange={setField('lastName')} placeholder="Last name *" className={inputClass} autoComplete="family-name" />
               </div>
+              <input required value={form.businessName} onChange={setField('businessName')} placeholder="Business name *" className={inputClass} autoComplete="organization" />
+              <input
+                required
+                list="scheduler-business-types"
+                value={form.businessType}
+                onChange={setField('businessType')}
+                placeholder="Type of business (e.g. Roofing) *"
+                className={inputClass}
+              />
+              <datalist id="scheduler-business-types">
+                {BUSINESS_TYPES.map((t) => (
+                  <option key={t} value={t} />
+                ))}
+              </datalist>
               <input required type="email" value={form.email} onChange={setField('email')} placeholder="Email *" className={inputClass} autoComplete="email" />
               <input required type="tel" value={form.phone} onChange={setField('phone')} placeholder="Phone *" className={inputClass} autoComplete="tel" />
             </div>

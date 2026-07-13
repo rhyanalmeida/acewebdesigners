@@ -17,6 +17,8 @@ export interface ContactInput {
   phone?: string
   firstName?: string
   lastName?: string
+  businessName?: string
+  businessType?: string
   city?: string
   state?: string
   zip?: string
@@ -52,6 +54,8 @@ export async function upsertContact(
     phone: input.phone,
     first_name: input.firstName,
     last_name: input.lastName,
+    business_name: input.businessName,
+    business_type: input.businessType,
     city: input.city,
     state: input.state,
     zip: input.zip,
