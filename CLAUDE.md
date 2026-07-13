@@ -113,8 +113,23 @@ CLI: `node scripts/funnel-admin.mjs discard-tests`.
 
 ## Status
 
-**Business name/type on booking + auto-generated preview websites 2026-07-13 — deployed, awaiting
-`ANTHROPIC_API_KEY` secret.** The gate form (both funnels, shared `Scheduler.tsx`) now REQUIRES
+**Preview websites now build via a SCHEDULED CLAUDE CODE ROUTINE (2026-07-13, owner's choice —
+subscription usage instead of API tokens).** `book` marks every real booking
+`site_status='queued'`; the claude.ai cloud routine **"Build preview websites for new bookings"**
+(`trig_01GpLg6F7V7hJAeHzdnTbyGX`, hourly at :07 UTC, model claude-opus-4-8, manage at
+https://claude.ai/code/routines) polls the new **`site-queue`** Edge fn (deployed
+`--no-verify-jwt`, auth `x-queue-secret` = `SITE_QUEUE_SECRET` — a narrow secret that can ONLY
+list queued jobs + claim/complete/fail the site fields; in `supabase/.env` + Edge secrets),
+builds the multi-page site itself, deploys to Netlify (zip deploy), and stamps
+`preview_url`/`deployed`. Jobs: queued rows + `generating` stalled >2h; max 2 per run. Sites
+appear up to ~1h after booking (fine — leads book hours ahead). The routine prompt carries
+SITE_QUEUE_SECRET + NETLIFY_AUTH_TOKEN (rotate both if it's ever compromised). The `generate-site`
+fn below stays deployed but DORMANT (503 without `ANTHROPIC_API_KEY`; setting that secret makes
+`book` also trigger it immediately for instant builds — the routine then finds nothing queued).
+NOTE: the /admin Retry button calls `generate-site` (503 while dormant) — to retry a failed
+routine build, set the row's `site_status='queued'` via SQL and let the routine take it.
+
+**Business name/type on booking + auto-generated preview websites 2026-07-13.** The gate form (both funnels, shared `Scheduler.tsx`) now REQUIRES
 **Business name** + **Type of business** (datalist of ~15 trades, free text allowed) → stored on
 `contacts.business_name/_type` (migration `0006`), synced to GHL as native `companyName`, shown in
 /admin tables. Every real booking auto-builds a **multi-page preview website** (Home / Services /
@@ -130,12 +145,12 @@ Stalled>10min + Retry · removed) + Netlify health chip; **No-Show deletes the N
 blocked. Cost ≈ $1-1.50/booking (~35-55k output tokens). `NETLIFY_AUTH_TOKEN` = the **Netlify CLI
 token of rhyanalmeida31@gmail.com** (the real Netlify account; from `%APPDATA%/netlify/Config/
 config.json`) — set as Edge secret + saved in `supabase/.env`; the hello@ Netlify account is empty,
-its PATs were revoked. **REMAINING:** set `ANTHROPIC_API_KEY` Edge secret (console.anthropic.com —
-generate-site 503s without it; also unlocks the restaurant `generate-copy` fn), then dry-run: test
-appt `d53fc9fb-c74d-4aa2-bf6e-64cbbea4676d` exists — trigger via scratchpad `gen-trigger.mjs`
-(admin-JWT mint like `funnel-admin.mjs`; NOTE the Management-API service_role key does NOT match the
-runtime-injected `SUPABASE_SERVICE_ROLE_KEY`, so external `x-internal-key` calls 401 — book's
-internal trigger is unaffected), verify the 4-page site, mark No-Show (site deleted), discard-tests.
+its PATs were revoked. `ANTHROPIC_API_KEY` is deliberately NOT set (owner chose subscription
+routine over API billing) — generate-site + the restaurant `generate-copy` 503 until it is.
+Gotcha: the Management-API service_role key does NOT match the runtime-injected
+`SUPABASE_SERVICE_ROLE_KEY`, so external `x-internal-key` calls to generate-site 401 — use an
+admin JWT (mint like `funnel-admin.mjs`); book's internal trigger compares the same env var
+against itself and is unaffected.
 
 **Customer Overview + Conversion Log tabs 2026-07-10.** `/admin` gained a **Customer Overview** tab
 (segment picker: Leads / Showed / No-shows / Purchased — leads table with journey-stage badge +

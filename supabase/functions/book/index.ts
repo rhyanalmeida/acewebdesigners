@@ -264,24 +264,28 @@ Deno.serve(async (req: Request) => {
     console.error('[book] ghl relay failed (booking kept)', err)
   }
 
-  // ── 7) auto-generate the preview website (fire-and-forget; never blocks) ──────
-  // generate-site does the Opus call + Netlify deploy in its own isolate/budget;
-  // we only queue it. Skipped for test bookings and when keys are unset.
-  if (!b.test && netlifyConfigured() && Deno.env.get('ANTHROPIC_API_KEY')) {
+  // ── 7) queue the auto-generated preview website (never blocks) ────────────────
+  // Real bookings are marked 'queued'; the scheduled Claude Code routine (hourly,
+  // runs on the owner's subscription) picks them up, writes the multi-page site,
+  // and deploys it to Netlify. If ANTHROPIC_API_KEY is ever set, the generate-site
+  // Edge fn also fires immediately (API path) — the routine skips non-queued rows.
+  if (!b.test && netlifyConfigured()) {
     try {
       await supa.from('appointments').update({ site_status: 'queued' }).eq('id', appointmentId)
-      const trigger = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-site`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-        },
-        body: JSON.stringify({ appointmentId }),
-      }).then(
-        (r) => r.body?.cancel(),
-        (e) => console.error('[book] generate-site trigger failed', e),
-      )
-      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(trigger)
+      if (Deno.env.get('ANTHROPIC_API_KEY')) {
+        const trigger = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-site`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+          },
+          body: JSON.stringify({ appointmentId }),
+        }).then(
+          (r) => r.body?.cancel(),
+          (e) => console.error('[book] generate-site trigger failed', e),
+        )
+        if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(trigger)
+      }
     } catch (err) {
       console.error('[book] generate-site queue failed (booking kept)', err)
     }
