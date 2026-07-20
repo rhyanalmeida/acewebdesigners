@@ -45,10 +45,11 @@ const EXPERTISE = [
   { Icon: Briefcase, label: 'Business strategy' },
 ]
 
+// Verifiable values only — see the note in src/pages/Home.tsx.
 const STATS = [
-  { v: 'Many', l: 'Websites launched' },
-  { v: 'Happy', l: 'Social media clients' },
-  { v: '100%', l: 'Satisfaction rate' },
+  { v: '5.0', l: 'Rated on Google' },
+  { v: '$0', l: 'Due before you see it' },
+  { v: '100%', l: 'Built custom' },
   { v: '1–7d', l: 'Avg. delivery' },
 ]
 

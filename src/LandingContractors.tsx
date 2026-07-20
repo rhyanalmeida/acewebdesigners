@@ -32,30 +32,34 @@ import {
 } from './components/ui'
 import { Star } from 'lucide-react'
 
+// Real client work only. A quote appears ONLY where that client actually left one
+// (see docs/REAL_TESTIMONIALS.md); the others show the work with a plain caption and
+// a live link, which is stronger proof than a quote anyway — it can be checked.
+// Previously two of these carried invented names ('Local Plumbing Co.', 'Trade
+// Specialist') attached to real clients' screenshots.
 const EXAMPLES = [
   {
-    imageUrl: 'https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif',
-    imageAlt: 'Dunn Construction website example — project gallery and quote form',
+    imageUrl: 'https://i.ibb.co/Myx4nrSr/concuo-gif.gif',
+    imageAlt: 'Conuco Takeout website — menu, online ordering and food photography',
     quote:
-      "We were recommended to Rhyan and Valerie by a friend. Within days, we had a professional website that perfectly represented our construction business. We're already getting more leads!",
-    authorName: 'Dunn Construction',
+      'Ace Web Designers built an amazing website for my business! Working with Rhyan and Valerie was a great experience. They delivered a website that truly represents my restaurant.',
+    authorName: 'Pedro Dipre-Rojas — Conuco Takeout',
+    href: 'https://conucotakeout.com/',
     rating: 5 as const,
+  },
+  {
+    imageUrl: 'https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif',
+    imageAlt: 'Dunn Construction website — project gallery and quote form',
+    caption: 'Project gallery, service listings and a quote form that reaches the owner’s phone.',
+    authorName: 'Dunn Construction',
+    href: 'https://dunnconstruction.com/',
   },
   {
     imageUrl: 'https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif',
-    imageAlt: 'Local services website example with bookings and reviews',
-    quote:
-      "Best decision we've made for our business. The team built us a beautiful website that actually generates calls.",
-    authorName: 'Local Plumbing Co.',
-    rating: 5 as const,
-  },
-  {
-    imageUrl: 'https://i.ibb.co/Myx4nrSr/concuo-gif.gif',
-    imageAlt: 'Service business website example — services + lead form',
-    quote:
-      'Fast turnaround, professional design, and our phone hasn\'t stopped ringing since launch. Highly recommend.',
-    authorName: 'Trade Specialist',
-    rating: 5 as const,
+    imageAlt: 'Hot Pot One website — menu system and online ordering',
+    caption: 'Menu system, online ordering and a mobile experience built for a phone in one hand.',
+    authorName: 'Hot Pot One',
+    href: 'https://hotpotone.net/',
   },
 ]
 

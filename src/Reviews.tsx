@@ -22,29 +22,62 @@ const REVIEW_STATS = [
   { v: '100%', l: 'Satisfaction', s: 'Money-back guarantee' },
 ]
 
+// These previously carried invented aggregate statistics — "38% Online Orders",
+// "3.2× More Leads", "52% Bookings", "2.8× Inquiries" — presented as our measured
+// results. We have never measured those. They are replaced with what we actually
+// build, which is verifiable by looking at the live sites on /work.
+// Emoji icons removed: they break the editorial type treatment and read as unfinished.
 const INDUSTRY_RESULTS = [
-  { industry: 'Restaurants & Food', icon: '🍽️', avg: '38%', metric: 'Online Orders', desc: 'Restaurants see significant increases in online ordering and takeout sales.' },
-  { industry: 'Construction', icon: '🏗️', avg: '3.2×', metric: 'More Leads', desc: 'Contractors generate more qualified leads through professional websites.' },
-  { industry: 'Healthcare', icon: '⚕️', avg: '52%', metric: 'Bookings', desc: 'Healthcare practices see more online appointment bookings.' },
-  { industry: 'Professional Services', icon: '💼', avg: '2.8×', metric: 'Inquiries', desc: 'Service businesses receive more qualified client inquiries.' },
+  {
+    industry: 'Restaurants & Food',
+    build: 'Online ordering',
+    desc: 'Menus that stay current, ordering that works on a phone, and photography that sells the food.',
+  },
+  {
+    industry: 'Construction & Trades',
+    build: 'Project galleries',
+    desc: 'Your finished work up front, service areas made obvious, and a quote form that reaches your phone.',
+  },
+  {
+    industry: 'Healthcare',
+    build: 'Appointment booking',
+    desc: 'Clear services, practitioner bios, and booking that does not make a patient call during work hours.',
+  },
+  {
+    industry: 'Professional Services',
+    build: 'Lead capture',
+    desc: 'Credibility first — who you are, who you help, and one obvious way to start a conversation.',
+  },
 ]
 
+// Verbatim Google reviews. Provenance: docs/REAL_TESTIMONIALS.md
+// No `metric` — the reviewers stated no figures, so we print none.
 const FEATURED_QUOTES = [
   {
-    name: 'Mike Chen',
-    business: 'Hot Pot One',
-    city: 'Boston, MA',
-    quote: "Ace created an amazing website for our small restaurant. The ordering system works flawlessly and we've seen a 40% increase in online orders since launch.",
-    metric: '40% more orders',
+    name: 'Pedro Dipre-Rojas',
+    business: 'Conuco Takeout',
+    quote:
+      "Ace Web Designers built an amazing website for my business! Working with Rhyan and Valerie was a great experience. They are super professional and delivered a website that truly represents my restaurant. Their communication is excellent, and this made the process smooth from start to finish.",
   },
   {
-    name: 'John Dunn',
-    business: 'Dunn Construction',
-    city: 'Leominster, MA',
-    quote: "Within days, we had a professional website that perfectly represented our small construction business. We're already getting 3x more leads than before.",
-    metric: '3× qualified leads',
+    name: 'Aaron Brown',
+    quote:
+      'Ryan and his team did an outstanding job on my website. It looks spectacular. He helped me setup DNS settings and protect my customers. Also optimized everything so now I get a TON of leads coming in just with SEO. Blown away by what they accomplished - 10/10',
+  },
+  {
+    name: 'Yolanda Quesada',
+    quote:
+      'I needed website. I saw in Facebook. And felt. I could do great. He did it. And people are going to my website. Thank you. I will continue to work with this company Ace web Designers',
+  },
+  {
+    name: 'Philosophy Try',
+    quote:
+      'I love my philosophy site I highly recommend Valerie and Rhyan, very professional communication and Valerie made my social media explode',
   },
 ]
+
+const GOOGLE_REVIEWS_URL =
+  'https://www.google.com/maps/place/Ace+Web+Designers/@42.0369155,-71.6835355,8z/data=!4m8!3m7!1s0xad742ddaf4fd4307:0xeb30864a6eee77ea!9m1!1b1'
 
 const WHY_CHOOSE = [
   { Icon: CheckCircle2, title: 'Proven results', desc: "We don't just build websites — we build websites that drive measurable ROI.", tone: 'brand' as const },
@@ -100,13 +133,23 @@ function Reviews() {
             <TestimonialEditorial
               quote={t.quote}
               authorName={t.name}
-              business={t.business}
-              city={t.city}
-              result={t.metric}
+              business={'business' in t ? t.business : undefined}
               variant="feature"
             />
           )}
         />
+        <p className="mt-8 text-center text-sm text-ink-700/70">
+          Every quote is a verbatim{' '}
+          <a
+            href={GOOGLE_REVIEWS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-rust-600 underline decoration-rust-300 underline-offset-4 hover:text-rust-700"
+          >
+            Google review
+          </a>
+          . 5.0 average across 6 reviews.
+        </p>
       </Section>
 
       {/* GOOGLE REVIEWS LIVE WIDGET — replicated from Refer.tsx (locationId preserved on Refer too) */}
@@ -138,16 +181,10 @@ function Reviews() {
           delayMs={80}
           keyFn={r => r.industry}
           renderItem={r => (
-            <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
-              <div className="flex items-start gap-5">
-                <span className="text-5xl shrink-0" aria-hidden>{r.icon}</span>
-                <div>
-                  <h3 className="font-display text-xl font-semibold text-ink-900">{r.industry}</h3>
-                  <p className="mt-3 font-display text-5xl font-semibold text-rust-600">{r.avg}</p>
-                  <p className="label-mono text-ink-700/70">{r.metric}</p>
-                  <p className="mt-3 text-ink-800 leading-relaxed">{r.desc}</p>
-                </div>
-              </div>
+            <Card tone="default" padding="lg" rounded="xl2" interactive className="h-full">
+              <p className="label-mono text-ink-700/70">{r.industry}</p>
+              <h3 className="mt-3 font-display text-3xl font-semibold text-ink-900">{r.build}</h3>
+              <p className="mt-3 text-ink-800 leading-relaxed">{r.desc}</p>
             </Card>
           )}
         />

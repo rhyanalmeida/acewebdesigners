@@ -9,8 +9,16 @@ import Reveal from '../ui/Reveal'
 export interface LandingExample {
   imageUrl: string
   imageAlt: string
-  quote: string
-  authorName: string
+  /** Verbatim client quote. Omit when we have no real review for this client —
+   *  the card then shows the work with a plain caption instead. Never pair a
+   *  quote with a business that did not say it. */
+  quote?: string
+  /** Who actually said `quote`. Required whenever `quote` is present. */
+  authorName?: string
+  /** Shown instead of a quote when there is no review for this client. */
+  caption?: string
+  /** Live URL, so the work can be verified rather than just claimed. */
+  href?: string
   rating?: 1 | 2 | 3 | 4 | 5
 }
 
@@ -49,22 +57,44 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
               />
             </div>
             <div className="p-7 flex flex-col flex-1">
-              <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${ex.rating ?? 5} out of 5 stars`}>
-                {Array.from({ length: 5 }).map((_, idx) => (
-                  <Star
-                    key={idx}
-                    className={`h-4 w-4 ${idx < (ex.rating ?? 5) ? 'fill-current' : ''}`}
-                    aria-hidden
-                  />
-                ))}
-              </div>
-              <blockquote className="mt-4 font-display text-lg text-ink-900 leading-snug flex-1">
-                <span className="text-rust-500 text-2xl leading-none mr-0.5 align-[-0.15em] text-editorial-italic">&ldquo;</span>
-                {ex.quote}
-                <span className="text-rust-500 text-2xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
-              </blockquote>
+              {/* Stars only accompany a real review — showing them over a caption
+                  would imply a rating nobody gave. */}
+              {ex.quote && (
+                <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${ex.rating ?? 5} out of 5 stars`}>
+                  {Array.from({ length: 5 }).map((_, idx) => (
+                    <Star
+                      key={idx}
+                      className={`h-4 w-4 ${idx < (ex.rating ?? 5) ? 'fill-current' : ''}`}
+                      aria-hidden
+                    />
+                  ))}
+                </div>
+              )}
+
+              {ex.quote ? (
+                <blockquote className="mt-4 font-display text-lg text-ink-900 leading-snug flex-1">
+                  <span className="text-rust-500 text-2xl leading-none mr-0.5 align-[-0.15em] text-editorial-italic">&ldquo;</span>
+                  {ex.quote}
+                  <span className="text-rust-500 text-2xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
+                </blockquote>
+              ) : (
+                <p className="font-display text-lg text-ink-900 leading-snug flex-1">{ex.caption}</p>
+              )}
+
               <hr className="rule-hairline mt-5 mb-4" />
-              <p className="label-mono text-ink-700">{ex.authorName}</p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="label-mono text-ink-700">{ex.authorName}</p>
+                {ex.href && (
+                  <a
+                    href={ex.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="label-mono text-rust-600 underline decoration-rust-300 underline-offset-4 hover:text-rust-700"
+                  >
+                    Visit site
+                  </a>
+                )}
+              </div>
             </div>
           </Card>
         </div>

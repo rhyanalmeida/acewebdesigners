@@ -50,40 +50,42 @@ interface HomeProps {
   onPendingScrollHandled: () => void
 }
 
+// Verbatim reviews from our Google Business Profile (5.0 · 6 reviews), pulled 2026-07-20.
+// Full set and provenance: docs/REAL_TESTIMONIALS.md
+//
+// Rules for this array:
+//   - Quotes are VERBATIM. Yolanda's broken English stays exactly as written — the
+//     imperfection is what makes it read as real. Do not tidy it.
+//   - No `metric` field. The reviewers did not state figures, so we do not print any.
+//   - No `avatar`. TestimonialEditorial renders an initials monogram instead; a stock
+//     photo standing in for a real client is what got us called fake in the first place.
+//   - Nothing may be attributed to anyone who did not say it.
 const TESTIMONIALS = [
   {
-    name: 'Mike Chen',
-    business: 'Hot Pot One',
-    city: 'Boston, MA',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-    quote: "Ace created an amazing website for our small restaurant. The ordering system works flawlessly and we've seen a 40% increase in online orders since launch.",
-    metric: '40% more orders',
-  },
-  {
-    name: 'Maria Rodriguez',
+    name: 'Pedro Dipre-Rojas',
     business: 'Conuco Takeout',
-    city: 'Worcester, MA',
-    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b647?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-    quote: 'The team understood exactly what we needed. Our site beautifully showcases our food and customers love ordering online.',
-    metric: '35% more takeout',
+    quote:
+      "Ace Web Designers built an amazing website for my business! Working with Rhyan and Valerie was a great experience. They are super professional and delivered a website that truly represents my restaurant. Their communication is excellent, and this made the process smooth from start to finish.",
   },
   {
-    name: 'John Dunn',
-    business: 'Dunn Construction',
-    city: 'Leominster, MA',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-    quote: "Within days, we had a professional website that perfectly represented our small construction business. We're already getting 3x more leads than before.",
-    metric: '3× qualified leads',
+    name: 'Aaron Brown',
+    quote:
+      'Ryan and his team did an outstanding job on my website. It looks spectacular. He helped me setup DNS settings and protect my customers. Also optimized everything so now I get a TON of leads coming in just with SEO. Blown away by what they accomplished - 10/10',
   },
   {
-    name: 'Sarah Thompson',
-    business: 'Thompson Fitness',
-    city: 'Nashua, NH',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
-    quote: 'Professional, fast, and exactly what we needed for our small fitness business. Our new website has helped us book 50% more personal training sessions.',
-    metric: '50% more bookings',
+    name: 'Yolanda Quesada',
+    quote:
+      'I needed website. I saw in Facebook. And felt. I could do great. He did it. And people are going to my website. Thank you. I will continue to work with this company Ace web Designers',
+  },
+  {
+    name: 'Philosophy Try',
+    quote:
+      'I love my philosophy site I highly recommend Valerie and Rhyan, very professional communication and Valerie made my social media explode',
   },
 ]
+
+const GOOGLE_REVIEWS_URL =
+  'https://www.google.com/maps/place/Ace+Web+Designers/@42.0369155,-71.6835355,8z/data=!4m8!3m7!1s0xad742ddaf4fd4307:0xeb30864a6eee77ea!9m1!1b1'
 
 const PROCESS_STEPS = [
   { title: 'Discovery Call', desc: 'We discuss your business goals, target audience, and website requirements in a 15-minute consultation.', duration: '15 minutes', Icon: MessageCircle },
@@ -119,11 +121,14 @@ const PERFORMANCE = [
   { metric: 'SSL', label: 'Security Included', desc: 'Free SSL certificates for all sites', Icon: Lock },
 ]
 
+// Every value here must be verifiable. "Many" and "Happy" previously shipped as the
+// headline numbers, which reads as an unfinished template — and StatBlock's count-up
+// animation cannot even fire on a word. A small true number beats a vague large one.
 const STATS = [
-  { v: 'Many', l: 'Websites launched', s: 'Across multiple industries' },
-  { v: 'Happy', l: 'Social media clients', s: 'Real results, real growth' },
+  { v: '5.0', l: 'Rated on Google', s: 'Across 6 verified reviews' },
   { v: '1–7d', l: 'Average delivery', s: 'Same-day option available' },
-  { v: '100%', l: 'Satisfaction rate', s: 'See before you pay — free mockup' },
+  { v: '$0', l: 'Due before you see it', s: 'We design first — pay only if you love it' },
+  { v: '100%', l: 'Built custom', s: 'No templates, no page builders' },
 ]
 
 const ROTATING_WORDS = [
@@ -444,14 +449,25 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             <TestimonialEditorial
               quote={t.quote}
               authorName={t.name}
-              business={t.business}
-              city={t.city}
-              avatar={t.image}
-              result={t.metric}
+              business={'business' in t ? t.business : undefined}
               variant="compact"
             />
           )}
         />
+        {/* Source the rating instead of asserting it — an unlinked "5.0 on Google"
+            reads as invented, which is exactly the problem we just fixed. */}
+        <p className="mt-8 text-center text-sm text-ink-700/70">
+          Every quote above is a verbatim{' '}
+          <a
+            href={GOOGLE_REVIEWS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-rust-600 underline decoration-rust-300 underline-offset-4 hover:text-rust-700"
+          >
+            Google review
+          </a>
+          . 5.0 average across 6 reviews.
+        </p>
       </Section>
 
       {/* CALCULATOR */}
