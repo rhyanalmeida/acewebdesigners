@@ -1,6 +1,7 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
+import Button from '../ui/Button'
 import { editorialEase } from '../../lib/motion'
 import { NavigateFn } from './SiteHeader'
 
@@ -44,13 +45,10 @@ const MobileStickyCta: React.FC<MobileStickyCtaProps> = ({
         }
         transition={{ duration: 0.42, ease: editorialEase as unknown as number[] }}
       >
-        <button
-          onClick={() => onNavigate(page)}
-          className="group w-full inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white py-4 px-6 font-bold shadow-glow-signal magnetic-btn ring-focus-signal"
-        >
+        <Button variant="primary" size="lg" fullWidth onClick={() => onNavigate(page)}>
           {label}
           <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
-        </button>
+        </Button>
       </motion.div>
       <div className="md:hidden h-24" aria-hidden />
     </>

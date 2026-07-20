@@ -1,6 +1,12 @@
 import React from 'react'
 
-type RevealVariant = 'up' | 'down' | 'left' | 'right' | 'scale' | 'fade' | 'stagger'
+/**
+ * `down` | `left` | `right` | `scale` were removed 2026-07-20. They had zero call
+ * sites and existed only as options, while every real usage was `up` or
+ * `stagger`. Narrowing the union means a future call to a deleted variant is a
+ * type error instead of an element that silently never becomes visible.
+ */
+type RevealVariant = 'up' | 'fade' | 'stagger'
 
 interface RevealProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: RevealVariant

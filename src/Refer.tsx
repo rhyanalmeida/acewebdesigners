@@ -30,21 +30,21 @@ import { fadeUpHero } from './lib/motion'
 import { SeoMeta, organizationLd, breadcrumbForPath } from './seo'
 
 const YOU_GET = [
-  '$200 cash reward when your referral completes their website',
+  'Half the profit on their site when your referral launches with us',
   'No limit on how many referrals you can make',
   'Help businesses grow their online presence',
 ]
 
 const THEY_GET = [
   'FREE homepage design mockup',
-  'Professional website starting at $200',
+  'A website built for them, with a mockup shown before they pay',
   'Same-day launches available',
 ]
 
 const HOW_STEPS = [
   { Icon: Users, title: '1. Refer a client', desc: 'Share our contact information with someone who needs a website.' },
   { Icon: CheckCircle2, title: '2. They get a website', desc: 'Your referral completes their website project with us.' },
-  { Icon: DollarSign, title: '3. You get paid', desc: 'Receive $200 cash once the project is completed.' },
+  { Icon: DollarSign, title: "3. You get paid", desc: 'You get half the profit on their site once the project is done.' },
 ] as const
 
 function Refer() {
@@ -73,7 +73,7 @@ function Refer() {
               We&rsquo;ve received your referral information and will be reaching out to {referralName} soon.
             </p>
             <p className="mt-3 text-ink-700/80">
-              You&rsquo;ll receive your <span className="text-signal-700 font-semibold">$200</span> reward once they complete their website project with us.
+              You&rsquo;ll get half the profit on their site once they complete their project with us.
             </p>
           </Card>
         </Section>
@@ -104,21 +104,21 @@ function Refer() {
               </Eyebrow>
             </motion.div>
             <motion.div variants={fadeUpHero}>
-              <GradientHeading level={1} size="display" className="mt-6" accent="earn $200" accentUnderline>
-                Refer a client,
+              <GradientHeading level={1} size="display" className="mt-6" accent="split it with you" accentUnderline>
+                Send someone our way and we&rsquo;ll
               </GradientHeading>
             </motion.div>
             <motion.p className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed" variants={fadeUpHero}>
-              Know someone who needs a professional website? Refer them and earn{' '}
-              <span className="text-editorial-italic text-signal-600">$200</span> when they complete their project.
+              Know someone who needs a website? Send them to us. When they launch, you get half the
+              profit on their site.
             </motion.p>
             <motion.div variants={fadeUpHero}>
-              <Card tone="default" padding="lg" rounded="xl2" className="mt-9 inline-flex flex-col items-center max-w-sm mx-auto">
-                <span className="label-mono text-ink-700/70">Cash reward</span>
+              <Card tone="default" padding="lg" rounded="xl2" className="mt-9 inline-flex flex-col items-start max-w-sm">
+                <span className="label-mono text-ink-700/70">Your cut</span>
                 <div className="mt-1 flex items-baseline gap-1 text-ink-900">
-                  <span className="font-display text-7xl font-semibold tracking-tight">$200</span>
+                  <span className="font-display text-7xl font-semibold tracking-tight">50%</span>
                 </div>
-                <p className="text-ink-700/80 text-sm mt-1">per successful referral</p>
+                <p className="text-ink-700/80 text-sm mt-1">of the profit on their site</p>
               </Card>
             </motion.div>
           </motion.div>
@@ -128,8 +128,8 @@ function Refer() {
         <Section tone="default" padding="lg">
           <SectionHeading
             eyebrow="How it works"
-            heading="Three simple steps to"
-            accent="earn $200"
+            heading="Three steps, and"
+            accent="none of them are yours"
           />
           <StaggerGrid
             items={HOW_STEPS}
@@ -289,7 +289,7 @@ function Refer() {
               The more referrals you make, the more you earn. Help businesses grow while building your income.
             </p>
             <Card tone="inverted" padding="lg" rounded="xl2" className="mt-10 inline-flex flex-col items-center max-w-sm mx-auto">
-              <div className="font-display text-4xl font-semibold text-cream-50">$200 per referral</div>
+              <div className="font-display text-4xl font-semibold text-cream-50">Half the profit</div>
               <div className="text-cream-100/65 text-sm mt-1">No limit on earnings</div>
             </Card>
             <div className="mt-10 flex justify-center">
@@ -299,7 +299,7 @@ function Refer() {
         </Section>
       </main>
 
-      <LandingFooter tagline="Based in Leominster, MA, serving small businesses nationwide." />
+      <LandingFooter tagline="Rhyan and Valerie. Websites for contractors, anywhere in the United States." />
     </div>
   )
 }

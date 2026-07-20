@@ -4,7 +4,6 @@ import Section from '../ui/Section'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 import Card from '../ui/Card'
-import Reveal from '../ui/Reveal'
 
 interface FreeDesignBenefitsProps {
   eyebrow?: string
@@ -29,20 +28,18 @@ const FreeDesignBenefits: React.FC<FreeDesignBenefitsProps> = ({
       </GradientHeading>
     </div>
 
-    <Reveal variant="stagger" className={`mt-12 grid gap-5 ${columns === 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'}`}>
+    <div className={`mt-12 grid gap-5 ${columns === 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : 'sm:grid-cols-2'}`}>
       {benefits.map((b, i) => (
-        <div key={i} data-reveal-stagger-child style={{ transitionDelay: `${i * 60}ms` }}>
-          <Card tone="default" padding="lg" rounded="xl2" interactive shine>
-            <div className="flex items-start gap-4">
-              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-50 text-forest-700 ring-1 ring-forest-100">
-                <CheckCircle2 className="h-5 w-5" aria-hidden />
-              </span>
-              <p className="text-base sm:text-lg text-ink-800 leading-relaxed">{b}</p>
-            </div>
-          </Card>
-        </div>
+        <Card key={i} tone="default" padding="lg" interactive className="h-full">
+          <div className="flex items-start gap-4">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center border border-forest-500/40 text-forest-700">
+              <CheckCircle2 className="h-5 w-5" aria-hidden />
+            </span>
+            <p className="text-base sm:text-lg text-ink-800 leading-relaxed">{b}</p>
+          </div>
+        </Card>
       ))}
-    </Reveal>
+    </div>
   </Section>
 )
 

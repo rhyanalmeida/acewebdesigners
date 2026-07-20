@@ -4,33 +4,56 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Fraunces', 'ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        // ONE family for display and body: Archivo, variable on weight AND width.
+        // The width axis is the whole point — Expanded/Black gives signage-weight
+        // headlines, Condensed gives spec-sheet labels, from a single file.
+        //
+        // Fraunces was removed 2026-07-20. A large serif display face over a warm
+        // off-white ground is the documented signature of AI-generated web design,
+        // which is exactly what the site was being mocked for.
+        //
+        // Also rejected, with reasons: Oswald / Anton / Bebas Neue are the reflexive
+        // "make it look tough" faces and the default of every contractor and gym
+        // template — they would have made the site MORE generic while feeling more
+        // industrial. Geist now reads as developer-tool marketing. Bricolage
+        // Grotesque is on its way to being the next Inter. Instrument Sans caps at
+        // 700 with no width axis, so it cannot carry display.
+        sans: ['Archivo', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Archivo', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        // Real mono, not the system fallback. Carries the numbering, the metadata
+        // labels and every date-stamped figure. See docs/ART_DIRECTION.md.
+        mono: ['IBM Plex Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        // ----- New editorial palette (Phase 3) -----
-        // Ground pulled off the beige end of the range (was #FBF7F0). Still warm
-        // paper, but out of the cream/beige band that reads as machine-default.
+        // ----- Concrete palette (2026-07-20) -----
+        // Warmth removed entirely. The previous ramp was warm paper (#FAF8F4 and
+        // friends), and warm off-white under a display face is the AI-web-design
+        // signature we keep getting caught by. These are neutral-cool greys —
+        // concrete, not parchment. Industrial brands use white or near-black
+        // grounds and never warm cream.
+        //
+        // Token names kept as `cream-*` deliberately: renaming would touch ~37
+        // files for zero visual gain, and a rename is what buried the last palette
+        // change in noise. The values are the contract, not the word.
         cream: {
-          50:  '#FAF8F4', // body paper
-          100: '#F3F1EC', // section alt
-          200: '#E8E5DE', // panels
-          300: '#D8D4CB', // dividers / muted
-          400: '#BDB8AC',
+          50:  '#F2F1EF', // ground
+          100: '#EAE9E6', // section alt
+          200: '#DEDCD8', // panels
+          300: '#C9C7C2', // dividers / muted
+          400: '#A9A7A1',
         },
         // Neutralised: the old ramp was a warm near-black (#1A1611) which reinforced
         // the cream-and-rust signature. Body text now sits near #404040, and nothing
         // is pure black — a convention every reference studio follows.
         ink: {
-          50:  '#F4F3F1', // inverted-on-dark text
-          100: '#D8D6D2',
-          200: '#9C9994',
-          500: '#5C5A56',
-          700: '#4A4845', // body text muted
-          800: '#404040', // body text default
-          900: '#262625', // headlines / strong text
-          950: '#141413',
+          50:  '#F2F1EF', // inverted-on-dark text
+          100: '#D4D3D0',
+          200: '#96958F',
+          500: '#575652',
+          700: '#3C3B38', // body text muted
+          800: '#2A2927', // body text default
+          900: '#111110', // headlines / strong text / inverted grounds
+          950: '#000000',
         },
         // Primary accent. Was rust #C04E1A until 2026-07-20 — that hue, on a cream
         // ground under a serif display face, is the documented signature of
@@ -58,131 +81,61 @@ export default {
           800: '#163627',
           900: '#0E2218',
         },
-        // ----- Legacy palettes (kept registered for backward compat) -----
-        brand: {
-          50:  '#eef4ff',
-          100: '#dbe7ff',
-          200: '#bfd3ff',
-          300: '#93b4ff',
-          400: '#6088ff',
-          500: '#3a62ff',
-          600: '#2747f5',
-          700: '#1f37dc',
-          800: '#1f31b1',
-          900: '#1f2f8b',
-          950: '#161e58',
-        },
-        accent: {
-          50:  '#fff8eb',
-          100: '#ffeac6',
-          200: '#ffd388',
-          300: '#ffb74a',
-          400: '#ffa01f',
-          500: '#f57c0a',
-          600: '#d95b05',
-          700: '#b43e08',
-          800: '#92310f',
-          900: '#782a10',
-        },
-        surface: {
-          0:   '#ffffff',
-          50:  '#fafafb',
-          100: '#f4f4f6',
-          200: '#e7e7eb',
-          300: '#d2d2d9',
-          400: '#9c9ca8',
-          500: '#6b6b78',
-          600: '#4a4a55',
-          700: '#33333c',
-          800: '#1f1f26',
-          900: '#131318',
-          950: '#0a0a0e',
-        },
+        // The `brand` (indigo), `accent` (orange) and `surface` (cool grey) ramps
+        // were deleted 2026-07-20. `brand` fed the blue→violet→magenta gradient
+        // that is the single most recognisable generated-site signature, and it
+        // survived the previous palette replacement untouched. Three registered
+        // ramps that nothing intentionally used meant the palette was never
+        // actually enforced. Editorial palette above is the whole system now:
+        // cream ground, ink type, signal for the one thing being pointed at,
+        // forest for confirmed states.
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #2747f5 0%, #6c3df0 50%, #a330e6 100%)',
-        'brand-gradient-soft': 'linear-gradient(135deg, rgba(39,71,245,0.08) 0%, rgba(163,48,230,0.08) 100%)',
-        'mesh-1': 'radial-gradient(at 20% 0%, rgba(96,136,255,0.18) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(163,48,230,0.18) 0px, transparent 50%), radial-gradient(at 80% 100%, rgba(39,71,245,0.12) 0px, transparent 50%)',
-        'mesh-2': 'radial-gradient(at 0% 0%, rgba(39,71,245,0.22) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(163,48,230,0.22) 0px, transparent 55%)',
-        'noise-fade': 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.02) 100%)',
-        // ----- Editorial backgrounds -----
+        // `brand-gradient`, `brand-gradient-soft`, `mesh-1`, `mesh-2` deleted
+        // 2026-07-20 — all four were blue/violet/magenta. One accent, never a
+        // gradient. `paper-noise` is the only decorative background that remains
+        // and it is two 4%-opacity washes of the real palette.
         'paper-noise': 'radial-gradient(at 0% 0%, rgba(160,9,9,0.04) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(31,77,61,0.04) 0px, transparent 55%)',
       },
+      // `ring` and `inner-soft` deleted — zero uses. `glow-signal` deleted: a
+      // coloured glow under a button is the soft/premium register being removed.
+      // What survives is flat and structural; depth comes from 1px rules, not blur.
       boxShadow: {
-        soft:    '0 1px 2px rgba(38, 38, 37, 0.04), 0 8px 24px rgba(38, 38, 37, 0.06)',
-        lift:    '0 4px 12px rgba(38, 38, 37, 0.08), 0 24px 48px rgba(38, 38, 37, 0.10)',
-        ring:    '0 0 0 1px rgba(38, 38, 37, 0.08)',
-        'glow-brand':   '0 10px 40px -10px rgba(39, 71, 245, 0.55), 0 4px 16px -4px rgba(163, 48, 230, 0.45)',
-        'glow-signal':  '0 10px 32px -10px rgba(160, 9, 9, 0.45), 0 4px 12px -4px rgba(160, 9, 9, 0.25)',
-        'inner-soft':   'inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(38, 38, 37, 0.04)',
+        soft: '0 1px 2px rgba(17, 17, 16, 0.05)',
+        lift: '0 2px 0 0 rgba(17, 17, 16, 1)',
       },
+      // All three collapsed to 0 on 2026-07-20. This one edit squares 17 call
+      // sites across the library without touching them. The keys are kept rather
+      // than deleted precisely so those call sites keep compiling — `rounded-xl3`
+      // now simply means "square", and the classes get cleaned up as each
+      // component is touched. `xl4` was registered and never used once.
+      //
+      // Tailwind's built-in `rounded-full` is deliberately NOT overridden here:
+      // ~37 of its ~72 uses are in admin/, RestaurantWizard and Scheduler, where
+      // they are genuinely circles (status dots, avatars, skeleton bars).
       borderRadius: {
-        xl2: '1.25rem',
-        xl3: '1.75rem',
-        xl4: '2.25rem',
+        xl2: '0px',
+        xl3: '0px',
       },
       transitionTimingFunction: {
         premium: 'cubic-bezier(0.22, 1, 0.36, 1)',
         spring:  'cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
+      // 20 keyframes were registered here; 3 were used. The rest (blob, shimmer,
+      // border-shine, float-soft, glow-pulse, marquee, the four directional
+      // fades, scale-in, slide-up, gradient-shift) were deleted 2026-07-20.
+      // glow-pulse and gradient-shift were also indigo/violet. A library of
+      // unused decorative motion is how a site ends up decorated by default.
       keyframes: {
-        'fade-in':       { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-        'fade-in-up':    { '0%': { opacity: '0', transform: 'translateY(24px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-        'fade-in-down':  { '0%': { opacity: '0', transform: 'translateY(-24px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-        'fade-in-left':  { '0%': { opacity: '0', transform: 'translateX(-24px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
-        'fade-in-right': { '0%': { opacity: '0', transform: 'translateX(24px)' }, '100%': { opacity: '1', transform: 'translateX(0)' } },
-        'scale-in':      { '0%': { opacity: '0', transform: 'scale(0.96)' }, '100%': { opacity: '1', transform: 'scale(1)' } },
-        'slide-up':      { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-        'gradient-shift':{ '0%, 100%': { backgroundPosition: '0% 50%' }, '50%': { backgroundPosition: '100% 50%' } },
-        shimmer:         { '0%': { backgroundPosition: '-1000px 0' }, '100%': { backgroundPosition: '1000px 0' } },
-        'glow-pulse':    {
-          '0%, 100%': { boxShadow: '0 0 24px rgba(39, 71, 245, 0.25)' },
-          '50%':      { boxShadow: '0 0 40px rgba(39, 71, 245, 0.55), 0 0 60px rgba(163, 48, 230, 0.35)' },
-        },
-        'pulse-signal':    {
+        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(24px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+        'pulse-signal': {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(160, 9, 9, 0.35)' },
           '50%':      { boxShadow: '0 0 0 8px rgba(160, 9, 9, 0)' },
         },
-        'float-soft':    { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
-        marquee:         { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
-        'border-shine':  { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
-        blob:            {
-          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
-          '33%':      { transform: 'translate(30px, -50px) scale(1.1)' },
-          '66%':      { transform: 'translate(-20px, 20px) scale(0.9)' },
-        },
-        'underline-draw': {
-          '0%':   { transform: 'scaleX(0)' },
-          '100%': { transform: 'scaleX(1)' },
-        },
-        'icon-nudge': {
-          '0%':   { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(4px)' },
-        },
-        'ken-burns': {
-          '0%, 100%': { transform: 'scale(1) translate(0, 0)' },
-          '50%':      { transform: 'scale(1.04) translate(-1%, -1%)' },
-        },
       },
       animation: {
-        'fade-in':       'fade-in 0.5s ease-out both',
-        'fade-in-up':    'fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'fade-in-down':  'fade-in-down 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'fade-in-left':  'fade-in-left 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'fade-in-right': 'fade-in-right 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'scale-in':      'scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'slide-up':      'slide-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'gradient-shift':'gradient-shift 6s ease infinite',
-        shimmer:         'shimmer 3s linear infinite',
-        'glow-pulse':    'glow-pulse 3s ease-in-out infinite',
-        'pulse-signal':    'pulse-signal 2.4s ease-in-out infinite',
-        'float-soft':    'float-soft 5s ease-in-out infinite',
-        marquee:         'marquee 30s linear infinite',
-        'border-shine':  'border-shine 6s linear infinite',
-        blob:            'blob 8s ease-in-out infinite',
-        'underline-draw':'underline-draw 0.45s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'icon-nudge':    'icon-nudge 0.3s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'ken-burns':     'ken-burns 14s ease-in-out infinite',
+        'fade-in-up':   'fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'pulse-signal': 'pulse-signal 2.4s ease-in-out infinite',
       },
     },
   },

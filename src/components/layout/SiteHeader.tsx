@@ -1,6 +1,7 @@
 import React from 'react'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import Button from '../ui/Button'
 import Container from '../ui/Container'
 import Logo from '../ui/Logo'
 import { editorialEase } from '../../lib/motion'
@@ -19,7 +20,7 @@ const NAV_LINKS: Array<{ label: string; page: string }> = [
   { label: 'Social Media', page: 'socialmedia' },
   { label: 'Our Work', page: 'work' },
   { label: 'Contact', page: 'contact' },
-  { label: 'Refer & Earn', page: 'refer' },
+  { label: 'Refer', page: 'refer' },
 ]
 
 const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
@@ -62,7 +63,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
     <header>
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:bg-ink-900 focus:text-cream-50 focus:px-4 focus:py-2 focus:rounded-full focus:shadow-lift"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:bg-ink-900 focus:text-cream-50 focus:px-4 focus:py-2"
       >
         Skip to content
       </a>
@@ -95,32 +96,29 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
                   <button
                     key={link.page}
                     onClick={() => go(link.page)}
-                    className={`relative text-sm font-medium ring-focus-signal rounded transition-colors duration-300 ease-premium ${
+                    className={`relative text-sm font-medium ring-focus-signal transition-colors duration-200 ease-out ${
                       active ? 'text-ink-900' : 'text-ink-700 hover:text-ink-900'
                     }`}
                   >
                     {link.label}
                     <span
                       aria-hidden
-                      className={`absolute -bottom-1 left-0 h-[2px] rounded-full bg-signal-500 transition-all duration-500 ease-premium ${
+                      className={`absolute -bottom-1 left-0 h-[2px] bg-signal-500 transition-all duration-300 ease-out ${
                         active ? 'w-full' : 'w-0'
                       }`}
                     />
                   </button>
                 )
               })}
-              <button
-                onClick={() => go('contact')}
-                className="group ml-2 inline-flex items-center gap-1.5 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-5 py-2 text-sm font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300 ease-premium"
-              >
-                Free Design
+              <Button variant="primary" size="sm" className="ml-2" onClick={() => go('contact')}>
+                Book a call
                 <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
-              </button>
+              </Button>
             </div>
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-signal"
+              className="md:hidden p-2 text-ink-800 hover:text-ink-900 ring-focus-signal"
               aria-expanded={isMenuOpen}
               aria-controls="mobile-drawer"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -151,7 +149,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
             <button
               data-drawer-close
               onClick={() => setIsMenuOpen(false)}
-              className="p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-signal"
+              className="p-2 text-ink-800 hover:text-ink-900 ring-focus-signal"
               aria-label="Close menu"
             >
               <X className="h-6 w-6" aria-hidden />
@@ -164,7 +162,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
                   <motion.button
                     key={link.page}
                     onClick={() => go(link.page)}
-                    className="text-left font-display text-2xl py-3 px-3 rounded-lg text-ink-800 hover:bg-cream-100 hover:text-ink-900 transition-colors ring-focus-signal"
+                    className="text-left font-display text-2xl py-3 px-3 text-ink-800 hover:bg-cream-100 hover:text-ink-900 transition-colors ring-focus-signal"
                     initial={reduced ? false : { opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 24 }}
@@ -178,13 +176,10 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
                   </motion.button>
                 ))}
             </AnimatePresence>
-            <button
-              onClick={() => go('contact')}
-              className="group mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-8 py-4 font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
-            >
-              GET MY FREE DESIGN NOW!
+            <Button variant="primary" size="lg" fullWidth className="mt-6" onClick={() => go('contact')}>
+              See available times
               <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
-            </button>
+            </Button>
           </nav>
         </div>
       </div>

@@ -1,13 +1,11 @@
 import React from 'react'
-import { Star, ArrowRight, Sparkles } from 'lucide-react'
+import { Star, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Container from '../ui/Container'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
-import BadgePill from '../ui/BadgePill'
+import Button from '../ui/Button'
 import PhoneCta from '../ui/PhoneCta'
-import Magnetic from '../ui/Magnetic'
-import CursorHalo from '../ui/CursorHalo'
 import { fadeUpHero } from '../../lib/motion'
 
 interface LandingHeroProps {
@@ -41,7 +39,6 @@ const LandingHero: React.FC<LandingHeroProps> = ({
   ratingLabel = 'Rated 5.0 / 5 on Google',
 }) => (
   <section className="relative isolate overflow-hidden bg-cream-50 text-ink-900 bg-paper-noise">
-    <CursorHalo />
     <Container size="lg" className="relative z-10 py-20 sm:py-24 lg:py-28">
       <hr className="rule-hairline mb-12 sm:mb-14" />
       <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
@@ -52,20 +49,11 @@ const LandingHero: React.FC<LandingHeroProps> = ({
           variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } } }}
         >
           <motion.div variants={fadeUpHero}>
-            <Eyebrow tone="brand">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden />
-              {eyebrow}
-            </Eyebrow>
+            <Eyebrow tone="brand">{eyebrow}</Eyebrow>
           </motion.div>
 
           <motion.div variants={fadeUpHero}>
-            <GradientHeading
-              level={1}
-              size="display"
-              className="mt-6"
-              accent={accent}
-              accentUnderline={Boolean(accent)}
-            >
+            <GradientHeading level={1} size="display" className="mt-6" accent={accent}>
               {headline}
             </GradientHeading>
           </motion.div>
@@ -78,10 +66,10 @@ const LandingHero: React.FC<LandingHeroProps> = ({
           </motion.p>
 
           {urgencyText && (
-            <motion.div className="mt-6 inline-flex" variants={fadeUpHero}>
-              <BadgePill tone="brand" glow>
+            <motion.div className="mt-6" variants={fadeUpHero}>
+              <span className="label-mono inline-flex items-center gap-2 border border-signal-500/40 text-signal-600 px-3 py-1.5">
                 {urgencyText}
-              </BadgePill>
+              </span>
             </motion.div>
           )}
 
@@ -89,15 +77,10 @@ const LandingHero: React.FC<LandingHeroProps> = ({
             className="mt-9 flex flex-col sm:flex-row gap-3 items-center sm:items-start lg:items-start justify-center lg:justify-start"
             variants={fadeUpHero}
           >
-            <Magnetic strength={6}>
-              <button
-                onClick={onCta}
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
-              >
-                {ctaLabel}
-                <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
-              </button>
-            </Magnetic>
+            <Button variant="primary" size="lg" onClick={onCta}>
+              {ctaLabel}
+              <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
+            </Button>
           </motion.div>
 
           {riskReversal && (
@@ -110,7 +93,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
           )}
 
           <div className="mt-6 flex items-center justify-center lg:justify-start gap-3 text-sm text-ink-700">
-            <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${rating} out of 5 stars`}>
+            <div className="flex items-center gap-0.5 text-ink-900" aria-label={`${rating} out of 5 stars`}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
@@ -124,7 +107,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
 
           <hr className="rule-hairline my-8 max-w-sm lg:mx-0 mx-auto" />
           <motion.div className="flex justify-center lg:justify-start" variants={fadeUpHero}>
-            <PhoneCta showLabels={false} />
+            <PhoneCta showLabels={false} source="landing-hero" />
           </motion.div>
         </motion.div>
 
@@ -135,8 +118,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="absolute -inset-3 bg-signal-100/60 rounded-xl3 -z-10" aria-hidden />
-            <div className="relative rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 shadow-lift bg-cream-100">
+            <div className="relative overflow-hidden border border-ink-900/15 bg-cream-100">
               <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
                 <iframe
                   src={videoSrc}

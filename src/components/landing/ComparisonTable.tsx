@@ -44,7 +44,7 @@ const renderCell = (cell: Cell, isAce = false) => {
     return <X className="mx-auto h-5 w-5 text-ink-700/40" aria-label="No" />
   }
   if (cell === 'partial') {
-    return <Minus className="mx-auto h-5 w-5 text-amber-500" aria-label="Partial" />
+    return <Minus className="mx-auto h-5 w-5 text-ink-700/50" aria-label="Partial" />
   }
   return <span className="text-sm">{cell}</span>
 }
@@ -56,7 +56,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
   rows = DEFAULT_ROWS,
 }) => (
   <Section tone="default" padding="lg">
-    <div className="text-center max-w-2xl mx-auto">
+    <div className="max-w-2xl">
       <Eyebrow tone="brand">{eyebrow}</Eyebrow>
       <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
         {heading}
@@ -84,7 +84,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
             </th>
             <th
               scope="col"
-              className="rounded-t-xl2 bg-ink-900 text-cream-50 px-3 py-3 text-center font-display font-semibold"
+              className="bg-ink-900 text-cream-50 px-3 py-3 text-center font-display font-semibold"
             >
               Ace (combo)
             </th>
@@ -92,7 +92,6 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
         </thead>
         <tbody>
           {rows.map((row, i) => {
-            const isLast = i === rows.length - 1
             return (
               <tr key={row.feature}>
                 <th
@@ -125,9 +124,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
                   {renderCell(row.agency)}
                 </td>
                 <td
-                  className={`text-center px-3 py-3 bg-ink-900 text-cream-50 ${
-                    isLast ? 'rounded-b-xl2' : ''
-                  } border-t border-cream-50/10 ${i === 0 ? 'border-t-0' : ''}`}
+                  className={`text-center px-3 py-3 bg-ink-900 text-cream-50 border-t border-cream-50/10 ${i === 0 ? 'border-t-0' : ''}`}
                 >
                   {renderCell(row.ace, true)}
                 </td>

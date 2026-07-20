@@ -1,7 +1,14 @@
 import React from 'react'
 import Container from './Container'
 
-type SectionTone = 'default' | 'muted' | 'inverted' | 'gradient' | 'mesh' | 'panel'
+type SectionTone =
+  | 'default'
+  | 'muted'
+  | 'inverted'
+  | 'gradient'
+  | 'mesh'
+  | 'panel'
+  | 'blueprint'
 type SectionPadding = 'none' | 'sm' | 'md' | 'lg' | 'xl'
 type ContainerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full'
 
@@ -13,15 +20,26 @@ interface SectionProps extends React.HTMLAttributes<HTMLElement> {
   as?: 'section' | 'header' | 'footer' | 'div' | 'article'
 }
 
-// Editorial cream palette — old tone names remapped so existing pages
-// inherit the new look without per-page changes.
+// Tone names are historical; the values are the contract. Every page inherits
+// the concrete ground from here, which is why this is the highest-leverage file
+// in the library — 16 consumers.
+//
+// `blueprint` is the /contractorlanding skin: same system, drafting-sheet
+// surface. It is a tone rather than a separate component so that page keeps
+// using the identical primitives as the rest of the site.
+//
+// `gradient` and `mesh` are dead aliases kept only so existing call sites
+// compile; both now resolve to real tones. Removing them from the union is an
+// API change across the landing components, so they get cleaned up when those
+// files are next touched.
 const toneMap: Record<SectionTone, string> = {
-  default:  'bg-cream-50 text-ink-900',
-  muted:    'bg-cream-100 text-ink-900',
-  panel:    'bg-cream-200 text-ink-900',
-  inverted: 'bg-ink-900 text-cream-50',
-  gradient: 'bg-ink-900 text-cream-50',
-  mesh:     'bg-cream-100 text-ink-900 bg-paper-noise',
+  default:   'bg-cream-50 text-ink-900',
+  muted:     'bg-cream-100 text-ink-900',
+  panel:     'bg-cream-200 text-ink-900',
+  inverted:  'bg-ink-900 text-cream-50',
+  gradient:  'bg-ink-900 text-cream-50',
+  mesh:      'bg-cream-100 text-ink-900',
+  blueprint: 'surface-blueprint text-ink-900',
 }
 
 const paddingMap: Record<SectionPadding, string> = {

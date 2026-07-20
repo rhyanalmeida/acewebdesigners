@@ -4,41 +4,56 @@ type EyebrowTone = 'brand' | 'muted' | 'inverted' | 'accent' | 'forest'
 
 interface EyebrowProps extends React.HTMLAttributes<HTMLSpanElement> {
   tone?: EyebrowTone
+  /**
+   * Renders the label inside a bordered tag. Default flipped to `false`
+   * 2026-07-20 — it used to default `true`, which put a soft rounded-full pill
+   * with an inset ring at the top of every single section on the site. That
+   * shape is the clearest generated-site tell in the library.
+   */
   pill?: boolean
 }
 
-// Editorial: rust = primary accent, forest = trust/safety accent.
-// Tone names kept for backward compat; visuals warmed up.
+/**
+ * The section label. Mono, uppercase, tracked wide — this is the annotation
+ * voice, and it does a lot of the technical character on its own.
+ *
+ * FIXED 2026-07-20: this component carried an inline
+ * `style={{ fontFamily: 'ui-monospace, …' }}` which overrode Tailwind entirely,
+ * so every eyebrow on the site rendered in the *system* mono (Consolas on
+ * Windows, Menlo on Mac) and the IBM Plex Mono token never applied anywhere it
+ * was most visible. The inline style is gone; `font-mono` now resolves properly.
+ */
 const toneMap: Record<EyebrowTone, string> = {
-  brand:    'text-signal-700 bg-signal-50 ring-signal-100',
-  muted:    'text-ink-700 bg-cream-100 ring-ink-900/10',
-  inverted: 'text-cream-100/85 bg-cream-50/10 ring-cream-50/15',
-  accent:   'text-signal-700 bg-signal-50 ring-signal-100',
-  forest:   'text-forest-700 bg-forest-50 ring-forest-100',
+  brand:    'text-signal-600',
+  accent:   'text-signal-600',
+  muted:    'text-ink-700',
+  inverted: 'text-cream-100/70',
+  forest:   'text-forest-700',
+}
+
+const pillToneMap: Record<EyebrowTone, string> = {
+  brand:    'text-signal-600 border-signal-500/40',
+  accent:   'text-signal-600 border-signal-500/40',
+  muted:    'text-ink-700 border-ink-900/25',
+  inverted: 'text-cream-100/70 border-cream-50/25',
+  forest:   'text-forest-700 border-forest-500/40',
 }
 
 const Eyebrow: React.FC<EyebrowProps> = ({
   tone = 'brand',
-  pill = true,
+  pill = false,
   className = '',
   children,
   ...rest
 }) => (
   <span
-    className={`inline-flex items-center gap-2 text-xs sm:text-sm font-medium tracking-[0.18em] uppercase ${
-      pill
-        ? `px-3 py-1.5 rounded-full ring-1 ring-inset ${toneMap[tone]}`
-        : `${
-            tone === 'inverted'
-              ? 'text-cream-100/85'
-              : tone === 'forest'
-              ? 'text-forest-700'
-              : tone === 'muted'
-              ? 'text-ink-700'
-              : 'text-signal-700'
-          }`
-    } ${className}`}
-    style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}
+    className={[
+      'inline-flex items-center gap-2 font-mono text-[0.7rem] sm:text-xs font-medium tracking-[0.2em] uppercase',
+      pill ? `px-2.5 py-1 border ${pillToneMap[tone]}` : toneMap[tone],
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ')}
     {...rest}
   >
     {children}

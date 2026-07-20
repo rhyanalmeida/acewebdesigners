@@ -1,507 +1,228 @@
 import React from 'react'
-import {
-  Sparkles,
-  Calendar,
-  Instagram,
-  Facebook,
-  Music2,
-  Youtube,
-  MapPin,
-  CheckCircle2,
-  ArrowRight,
-  Repeat,
-  Camera,
-  ExternalLink,
-  TrendingUp,
-} from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 
-import {
-  Section,
-  Eyebrow,
-  GradientHeading,
-  Card,
-  PageHero,
-  SectionHeading,
-  StaggerGrid,
-  PriceCard,
-  PhoneCta,
-  TrustStack,
-  BadgePill,
-  IconTile,
-  FinalCta,
-} from './components/ui'
-import { LandingFaq } from './components/landing'
-import { SeoMeta, serviceLd, organizationLd, breadcrumbForPath } from './seo'
+import { Section, Eyebrow, GradientHeading, SectionHeading, FinalCta } from './components/ui'
+import { SeoMeta, organizationLd, serviceLd, breadcrumbForPath } from './seo'
 
-// page is rendered inside PageShell; nav handled by SiteHeader/Footer
-type SocialMediaProps = Record<string, never>
+/**
+ * Numbers on this page are LIVE COUNTS, read off the accounts on 2026-07-20 and
+ * stamped with that date. They will drift. When they are updated, re-read them —
+ * do not nudge them upward.
+ *
+ * Two claims that used to be here were false and are not coming back:
+ *   - "21k+ followers" for Told History. The real figure is 20.8K, i.e. BELOW
+ *     21k. A rounded-up follower count on a page selling honesty is a bad trade.
+ *   - "Started at 0 followers a few months ago — growing fast" for Luxury
+ *     Makeover. It has 198 followers. It is not growing fast, and it does not
+ *     need to be: it produced a $20,000+ contract anyway, which is a far better
+ *     story than the vague one that was covering for it.
+ *
+ * The $20,000+ is the CLIENT's contract revenue from Valerie's work. It is not
+ * our revenue. Do not blur that.
+ */
 
-const STANDARD_FEATURES = [
-  '3-5 hand-crafted posts per week',
-  'Instagram + Facebook + TikTok',
-  'Caption + hashtag research',
-  'Monthly content calendar',
-  'Reels + carousels included',
-]
+const STATS_AS_OF = 'July 2026'
 
-const DELUXE_FEATURES = [
-  '7 days a week of content',
-  'Instagram + Facebook + TikTok',
-  'Google Business Profile posts',
-  'Custom graphics + branded templates',
-  'Priority response (same-day)',
-  'Reels + short-form video included',
-]
+const goContact = () =>
+  window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'contact' } }))
 
-type PlatformKind = 'tiktok' | 'instagram' | 'facebook' | 'youtube'
-
-const PLATFORM_LABEL: Record<PlatformKind, string> = {
-  tiktok: 'TikTok',
-  instagram: 'Instagram',
-  facebook: 'Facebook',
-  youtube: 'YouTube',
+interface Account {
+  name: string
+  what: string
+  /** Live counts, read on 2026-07-20. Omit rather than estimate. */
+  followers?: string
+  likes?: string
+  links: Array<{ label: string; url: string }>
 }
 
-const CLIENT_ACCOUNTS: ReadonlyArray<{
-  /** Display name shown on the card */
-  name: string
-  note: string
-  /** Optional headline stat — rendered as a prominent badge on the card */
-  stat?: string
-  platforms: ReadonlyArray<{ kind: PlatformKind; url: string }>
-}> = [
+const ACCOUNTS: Account[] = [
   {
-    name: 'Told History',
-    note: 'Our flagship account — viral history shorts on TikTok and YouTube.',
-    stat: '21k+ followers',
-    platforms: [
-      { kind: 'tiktok', url: 'https://www.tiktok.com/@told.history' },
-      { kind: 'youtube', url: 'https://www.youtube.com/@told.history' },
+    name: 'Luxury Makeover',
+    what: 'Bathroom remodels. Valerie built the account from nothing.',
+    followers: '198',
+    likes: '51.4K',
+    links: [
+      { label: 'TikTok', url: 'https://www.tiktok.com/@luxurymakeover_official' },
+      { label: 'Instagram', url: 'https://www.instagram.com/luxurymakeover_ig' },
     ],
   },
   {
-    name: 'Luxury Makeover',
-    note: 'Started at 0 followers a few months ago — growing fast.',
-    platforms: [
-      { kind: 'tiktok', url: 'https://www.tiktok.com/@luxurymakeover_official' },
-      { kind: 'instagram', url: 'https://www.instagram.com/luxurymakeover_ig' },
+    name: 'Told History',
+    what: 'History shorts. Our own account, which is where we learned most of this.',
+    followers: '20.8K',
+    likes: '1.9M',
+    links: [
+      { label: 'TikTok', url: 'https://www.tiktok.com/@told.history' },
+      { label: 'YouTube', url: 'https://www.youtube.com/@told.history' },
     ],
   },
   {
     name: '911 Local Plumbing',
-    note: 'Built from scratch — generating real plumbing calls.',
-    platforms: [
-      { kind: 'tiktok', url: 'https://www.tiktok.com/@911localplumbing' },
-      { kind: 'instagram', url: 'https://www.instagram.com/911localplumbing' },
+    what: 'Plumbing. Built from scratch and running.',
+    links: [
+      { label: 'TikTok', url: 'https://www.tiktok.com/@911localplumbing' },
+      { label: 'Instagram', url: 'https://www.instagram.com/911localplumbing' },
     ],
   },
   {
     name: 'Conuco Restaurant Takeout',
-    note: 'Established restaurant — steady growth.',
-    platforms: [
-      { kind: 'instagram', url: 'https://www.instagram.com/conucotakeout' },
-      { kind: 'facebook', url: 'https://www.facebook.com/conucotakeout' },
-    ],
-  },
-  {
-    name: "Oliver's Cafe",
-    note: 'Selected social posts for the cafe.',
-    platforms: [
-      { kind: 'instagram', url: 'https://www.instagram.com/oliverscafema' },
-      { kind: 'facebook', url: 'https://www.facebook.com/oliverscafema' },
+    what: 'Dominican takeout. We built their site too.',
+    links: [
+      { label: 'Instagram', url: 'https://www.instagram.com/conucotakeout' },
+      { label: 'Facebook', url: 'https://www.facebook.com/conucotakeout' },
     ],
   },
 ]
 
-const PROCESS = [
-  {
-    Icon: Sparkles,
-    title: '1. Free trial week',
-    desc: 'Pick Standard or Deluxe. We post for 7 days on us — no card on file, no commitment.',
-  },
-  {
-    Icon: Camera,
-    title: '2. We deliver posts',
-    desc: 'You get a content calendar, captions, hashtags, and the actual posts published — all done for you.',
-  },
-  {
-    Icon: Repeat,
-    title: '3. Keep going or walk away',
-    desc: 'Love it? Keep posting weekly. Not for you? No hard feelings. We only earn after you choose to stay.',
-  },
-] as const
+const SocialMedia: React.FC = () => (
+  <>
+    <SeoMeta
+      path="/socialmedia"
+      jsonLd={[
+        organizationLd(),
+        serviceLd({
+          name: 'Social media management for trades',
+          description:
+            'Social media run for contractors and trades by Valerie at Ace Web Designers. One account we run has 198 followers and brought its owner a contract worth over $20,000.',
+          serviceType: 'Social media management',
+          url: 'https://acewebdesigners.com/socialmedia',
+        }),
+        breadcrumbForPath('/socialmedia')!,
+      ]}
+    />
 
-const FAQS = [
-  {
-    question: 'How does the free trial work?',
-    answer:
-      "Pick Standard or Deluxe and we'll post on your accounts for one full week — completely free. No credit card to start. At the end of the week, decide if you want to continue. If yes, we bill you weekly going forward. If not, we wrap up cleanly and you keep all the posts we made.",
-  },
-  {
-    question: "What if I don't like the posts?",
-    answer:
-      "Tell us. We'll rework anything that doesn't feel right — captions, graphics, tone, whatever. We'd rather get it perfect than ship something off-brand.",
-  },
-  {
-    question: 'Can I cancel anytime?',
-    answer:
-      'Yes. There are no contracts. We bill weekly so you can pause or stop whenever you want — just give us 7 days notice so we can finish the queued content.',
-  },
-  {
-    question: 'Do I have to provide content (photos, videos)?',
-    answer:
-      "Helpful but not required. If you can send us a few job-site photos or behind-the-scenes shots each week, the posts feel more authentic. If not, we use stock + custom graphics on Deluxe to fill the gaps.",
-  },
-  {
-    question: 'What if I want a website AND social media?',
-    answer:
-      "That's the bundle deal — $250 off any website tier (Basic actually becomes free), plus a discount on the weekly social: Standard drops to $25/wk, Deluxe drops to $84/wk. See the combo section above.",
-  },
-] as const
+    {/* ── OPENING ──────────────────────────────────────────────────────────
+        Leads with the number that disproves the premise everyone else sells. */}
+    <section className="relative bg-cream-50 text-ink-900 bg-paper-noise" aria-label="Social media">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-20 pb-16 sm:pt-24 lg:pt-28">
+        <Eyebrow tone="muted">Social media</Eyebrow>
+        <GradientHeading level={1} size="display" className="mt-6 max-w-4xl">
+          198 followers. Two bathrooms. Over $20,000.
+        </GradientHeading>
+        <p className="mt-8 max-w-2xl text-lg text-ink-800 leading-relaxed">
+          That is one of Valerie&rsquo;s accounts. It has fewer than two hundred followers and it
+          put a five-figure contract on a remodeler&rsquo;s calendar. Everyone in this business
+          sells you follower growth. Follower counts do not pay for bathrooms.
+        </p>
+      </div>
+      <hr className="rule-hairline" />
+    </section>
 
-const goContact = (data?: { budget?: string; message?: string }) => {
-  window.dispatchEvent(
-    new CustomEvent('navigate', {
-      detail: { page: 'contact', data },
-    }),
-  )
-}
+    {/* ── THE ARGUMENT ── asymmetric split */}
+    <Section tone="muted" padding="lg">
+      <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div>
+          <Eyebrow tone="muted">Why that number is the point</Eyebrow>
+          <h2 className="mt-6 font-display text-3xl sm:text-4xl leading-tight text-ink-900">
+            You are not trying to be famous. You are trying to fill next month.
+          </h2>
+        </div>
+        <div className="space-y-5 text-ink-800 leading-relaxed lg:pt-16">
+          <p>
+            A follower is someone who saw a video once. A customer is someone who needed a
+            bathroom done and found somebody they trusted to do it. Those are not the same person
+            and they do not arrive the same way.
+          </p>
+          <p>
+            The Luxury Makeover account has 198 followers and 51,400 likes as of {STATS_AS_OF}.
+            The likes matter more than the followers here, because they mean the work is being
+            watched by people it is landing on.
+          </p>
+          <p className="text-ink-900 font-medium">
+            If someone is quoting you a follower target, ask them what it is worth.
+          </p>
+        </div>
+      </div>
+    </Section>
 
-const SocialMedia: React.FC<SocialMediaProps> = () => {
-  return (
-    <>
-      <SeoMeta
-        path="/socialmedia"
-        jsonLd={[
-          organizationLd(),
-          serviceLd({
-            name: 'Social Media Management for Small Business',
-            description:
-              'Done-for-you social posting on Instagram, Facebook, TikTok, and Google Business Profile. Standard $30/wk or Deluxe $99/wk. First week free.',
-            serviceType: 'Social media management',
-            url: 'https://acewebdesigners.com/socialmedia',
-          }),
-          breadcrumbForPath('/socialmedia')!,
-        ]}
+    {/* ── ACCOUNTS ── ruled rows with live figures and links out, so anyone can
+        check the numbers themselves rather than take ours. */}
+    <Section tone="default" padding="lg">
+      <SectionHeading
+        eyebrow="Accounts we run"
+        heading="Go and look"
+        accent="at them yourself"
+        sub={`Follower and like counts read directly from the accounts in ${STATS_AS_OF}. They will have moved since — the links go to the live profiles.`}
       />
-      {/* HERO */}
-      <PageHero
-        eyebrow="Social media that works"
-        eyebrowIcon={Sparkles}
-        size="display"
-        headline="Social media that"
-        accent="brings work in"
-        sub="Posts that show your craft, drive calls, and never sound like AI wrote them. Try a week free — pay only if you want to keep going."
-      >
-        <div className="mt-8 flex justify-center">
-          <BadgePill tone="brand" glow>
-            <Calendar className="h-3 w-3" aria-hidden />
-            1 week free — both packages
-          </BadgePill>
-        </div>
-        <div className="mt-8 flex justify-center">
-          <PhoneCta showLabels={false} />
-        </div>
-        <div className="mt-10 flex justify-center">
-          <TrustStack
-            items={[
-              { icon: 'star', label: '5.0 on Google' },
-              { icon: 'shield', label: 'No card on file' },
-              { icon: 'clock', label: 'Cancel anytime' },
-            ]}
-          />
-        </div>
-      </PageHero>
+      <ul className="mt-14 border-t border-ink-900/10">
+        {ACCOUNTS.map(a => (
+          <li
+            key={a.name}
+            className="grid gap-4 py-8 border-b border-ink-900/10 lg:grid-cols-[1fr_auto_14rem] lg:items-center lg:gap-10"
+          >
+            <div>
+              <h3 className="font-display text-xl text-ink-900">{a.name}</h3>
+              <p className="mt-1.5 text-ink-800 leading-relaxed max-w-xl">{a.what}</p>
+            </div>
 
-      {/* PRICING */}
-      <Section id="pricing" tone="default" padding="lg">
-        <SectionHeading
-          eyebrow="Pricing"
-          heading="Two ways to"
-          accent="show up online"
-          sub="Both packages start with a free trial week. Standard gets you on the big three. Deluxe adds Google Business Profile + daily posts."
-        />
-        <div className="mt-14 grid gap-6 lg:grid-cols-2 max-w-4xl mx-auto">
-          <PriceCard
-            tier="Standard"
-            price="$30"
-            priceSub="per week — billed weekly"
-            description="3-5 posts a week across the platforms that matter most for local business."
-            features={[...STANDARD_FEATURES]}
-            ctaLabel="Start my free week"
-            onCta={() =>
-              goContact({
-                budget: 'social-standard',
-                message:
-                  "I'm interested in the Standard Social Media package — start my free trial week.",
-              })
-            }
-          />
-          <PriceCard
-            tier="Deluxe"
-            price="$99"
-            priceSub="per week — billed weekly"
-            description="Daily content, Google Business Profile, custom graphics, priority response."
-            features={[...DELUXE_FEATURES]}
-            highlight
-            ctaLabel="Start my free week"
-            onCta={() =>
-              goContact({
-                budget: 'social-deluxe',
-                message:
-                  "I'm interested in the Deluxe Social Media package — start my free trial week.",
-              })
-            }
-          />
-        </div>
-
-        <div className="mt-10 max-w-3xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-ink-700/80">
-            <span className="inline-flex items-center gap-1.5">
-              <Instagram className="h-4 w-4 text-signal-600" aria-hidden /> Instagram
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Facebook className="h-4 w-4 text-signal-600" aria-hidden /> Facebook
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Music2 className="h-4 w-4 text-signal-600" aria-hidden /> TikTok
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-forest-700" aria-hidden /> Google Business Profile
-              <span className="label-mono text-ink-700/55 ml-1">Deluxe only</span>
-            </span>
-          </div>
-        </div>
-      </Section>
-
-      {/* PROOF — $20K + client accounts */}
-      <Section id="proof" tone="inverted" padding="lg">
-        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.2fr]">
-          <div data-reveal="up">
-            <Eyebrow tone="inverted">
-              <TrendingUp className="h-3.5 w-3.5" aria-hidden />
-              Real numbers
-            </Eyebrow>
-            <GradientHeading
-              level={2}
-              size="xl"
-              tone="inverted"
-              className="mt-5"
-              accent="for our clients"
-            >
-              We&rsquo;ve already brought in{' '}
-              <span className="text-editorial-italic text-signal-300">$20,000+</span>{' '}
-            </GradientHeading>
-            <p className="mt-6 text-cream-100/80 text-base sm:text-lg leading-relaxed max-w-md">
-              Posts that turn into calls, jobs, and orders. Here are accounts we manage today —
-              click through and see for yourself.
-            </p>
-          </div>
-
-          <div data-reveal="up" className="grid gap-4 sm:grid-cols-2">
-            {CLIENT_ACCOUNTS.map(account => (
-              <Card
-                key={account.name}
-                tone="inverted"
-                padding="lg"
-                rounded="xl2"
-                className="flex flex-col"
-              >
-                <div className="flex items-start justify-between gap-3">
+            {(a.followers || a.likes) && (
+              <dl className="flex gap-8 lg:gap-10">
+                {a.followers && (
                   <div>
-                    <span className="label-mono text-cream-100/55">Client</span>
-                    <p className="mt-1 font-display text-lg sm:text-xl font-semibold text-cream-50">
-                      {account.name}
-                    </p>
+                    <dt className="label-mono text-ink-700/60">Followers</dt>
+                    <dd className="mt-1 font-mono text-lg text-ink-900">{a.followers}</dd>
                   </div>
-                  {account.stat && (
-                    <span className="shrink-0 inline-flex items-center rounded-full bg-signal-500 text-white px-2.5 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-signal">
-                      {account.stat}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-3 text-sm text-cream-100/80 leading-relaxed flex-1">
-                  {account.note}
-                </p>
-                <hr className="border-cream-50/15 my-4" />
-                <div className="flex flex-wrap items-center gap-2">
-                  {account.platforms.map(platform => {
-                    const Icon =
-                      platform.kind === 'tiktok'
-                        ? Music2
-                        : platform.kind === 'instagram'
-                          ? Instagram
-                          : platform.kind === 'youtube'
-                            ? Youtube
-                            : Facebook
-                    return (
-                      <a
-                        key={platform.kind}
-                        href={platform.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-cream-50/10 hover:bg-cream-50/20 ring-1 ring-cream-50/15 px-3 py-1.5 text-xs font-medium text-cream-50 transition-colors duration-200 ring-focus-signal"
-                      >
-                        <Icon className="h-3.5 w-3.5 text-signal-300" aria-hidden />
-                        {PLATFORM_LABEL[platform.kind]}
-                        <ExternalLink className="h-3 w-3 text-cream-100/55" aria-hidden />
-                      </a>
-                    )
-                  })}
-                </div>
-              </Card>
-            ))}
-          </div>
+                )}
+                {a.likes && (
+                  <div>
+                    <dt className="label-mono text-ink-700/60">Likes</dt>
+                    <dd className="mt-1 font-mono text-lg text-ink-900">{a.likes}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
+
+            <div className="flex gap-4 lg:justify-end">
+              {a.links.map(l => (
+                <a
+                  key={l.url}
+                  href={l.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 label-mono text-ink-700 hover:text-signal-600 transition-colors"
+                >
+                  {l.label}
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Section>
+
+    {/* ── WHO ── Valerie */}
+    <Section tone="muted" padding="lg">
+      <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div>
+          <Eyebrow tone="muted">Who makes them</Eyebrow>
+          <h2 className="mt-6 font-display text-3xl sm:text-4xl leading-tight text-ink-900">
+            Valerie does all of it.
+          </h2>
         </div>
-      </Section>
-
-      {/* COMBO DEAL */}
-      <Section id="bundle" tone="muted" padding="lg">
-        <SectionHeading
-          eyebrow="Bundle & save"
-          heading="Pair social media with"
-          accent="a website"
-          sub="One bundle, two wins: $250 off any website AND a reduced rate on social. Basic websites become free with the bundle."
-        />
-
-        <div className="mt-14 grid gap-6 lg:grid-cols-2 max-w-4xl mx-auto">
-          {/* Standard combo */}
-          <Card tone="default" padding="xl" rounded="xl3" className="flex flex-col">
-            <span className="label-mono text-signal-700">Standard combo</span>
-            <h3 className="mt-3 font-display text-3xl sm:text-4xl font-semibold text-ink-900 leading-tight">
-              Any website +{' '}
-              <span className="text-editorial-italic text-signal-600">$25/wk</span> social
-            </h3>
-            <hr className="rule-hairline my-6" />
-            <ul className="space-y-3 flex-1">
-              <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
-                <span><strong className="text-ink-900">$250 off</strong> any website tier (Basic becomes free)</span>
-              </li>
-              <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
-                <span>Standard SMM drops from $30/wk → <strong className="text-ink-900">$25/wk</strong></span>
-              </li>
-              <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
-                <span>3-5 posts/week on IG + FB + TikTok</span>
-              </li>
-              <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
-                <span>Free trial week + free homepage design — both before you pay</span>
-              </li>
-            </ul>
-            <button
-              onClick={() =>
-                goContact({
-                  budget: 'combo-standard',
-                  message:
-                    "I'm interested in the Website + Standard Social Media combo — $250 off any website + $25/wk social.",
-                })
-              }
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-ink-900 hover:bg-ink-800 text-cream-50 font-semibold px-6 py-3.5 text-sm magnetic-btn ring-focus-signal transition-colors duration-300"
-            >
-              Get the Standard combo
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
-          </Card>
-
-          {/* Deluxe combo */}
-          <Card tone="inverted" padding="xl" rounded="xl3" className="flex flex-col relative">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-signal-500 text-white px-3 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-signal">
-              Best value
-            </span>
-            <span className="label-mono text-cream-100/65">Deluxe combo</span>
-            <h3 className="mt-3 font-display text-3xl sm:text-4xl font-semibold text-cream-50 leading-tight">
-              Any website +{' '}
-              <span className="text-editorial-italic text-signal-300">$84/wk</span> social
-            </h3>
-            <hr className="border-cream-50/15 my-6" />
-            <ul className="space-y-3 flex-1">
-              <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
-                <span><strong className="text-cream-50">$250 off</strong> any website tier (Basic becomes free)</span>
-              </li>
-              <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
-                <span>Deluxe SMM drops from $99/wk → <strong className="text-cream-50">$84/wk</strong></span>
-              </li>
-              <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
-                <span>Daily posts + Google Business Profile + custom graphics</span>
-              </li>
-              <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
-                <span>Free trial week + free homepage design — both before you pay</span>
-              </li>
-            </ul>
-            <button
-              onClick={() =>
-                goContact({
-                  budget: 'combo-deluxe',
-                  message:
-                    "I'm interested in the Website + Deluxe Social Media combo — $250 off any website + $84/wk social.",
-                })
-              }
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold px-6 py-3.5 text-sm magnetic-btn ring-focus-signal transition-colors duration-300 shadow-glow-signal"
-            >
-              Get the Deluxe combo
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
-          </Card>
+        <div className="space-y-5 text-ink-800 leading-relaxed lg:pt-16">
+          <p>
+            She is also an esthetician, and she reckons beautifying a social page works the same
+            way as beautifying anything else: you are trying to make something look genuine and
+            feel good, and you have to actually care how it turns out.
+          </p>
+          <p>
+            She writes the posts, designs them, and puts them out. You are not sent a content
+            calendar to approve at eleven at night.
+          </p>
         </div>
-      </Section>
+      </div>
+    </Section>
 
-      {/* PROCESS — 3 steps */}
-      <Section tone="default" padding="lg">
-        <SectionHeading
-          eyebrow="How it works"
-          heading="From handshake to"
-          accent="first post live"
-          sub="No long onboarding. No agency contract. We start posting within 48 hours."
-        />
-        <StaggerGrid
-          items={PROCESS}
-          className="mt-12 grid gap-6 md:grid-cols-3"
-          delayMs={90}
-          keyFn={s => s.title}
-          childClassName="text-center"
-          renderItem={s => (
-            <>
-              <IconTile tone="brand" size="lg" className="mx-auto">
-                <s.Icon />
-              </IconTile>
-              <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{s.title}</h3>
-              <p className="mt-2 text-ink-800 leading-relaxed">{s.desc}</p>
-            </>
-          )}
-        />
-      </Section>
-
-      {/* FAQ */}
-      <LandingFaq
-        eyebrow="Questions"
-        heading="The most common"
-        accent="things owners ask"
-        items={[...FAQS]}
-      />
-
-      {/* FINAL CTA */}
-      <FinalCta
-        eyebrow="No card. No catch."
-        heading="Try one week,"
-        accent="totally free."
-        body="Pick a package, tell us about your business, and we'll start posting within 48 hours. If you don't love it, we walk away — no hard feelings."
-        ctaLabel="Start my free week"
-        onCta={() =>
-          goContact({
-            message:
-              'I want to start my free social media trial week — please reach out to set it up.',
-          })
-        }
-      />
-    </>
-  )
-}
+    <FinalCta
+      eyebrow="Book a time"
+      heading="Show us the work you do"
+      accent="and we will show you the posts"
+      body="Fifteen minutes. Bring photos of a job you are proud of, and we will tell you honestly whether social is worth it for your trade."
+      ctaLabel="See available times"
+      onCta={goContact}
+    />
+  </>
+)
 
 export default SocialMedia

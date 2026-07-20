@@ -1,31 +1,26 @@
 import React from 'react'
-import { Calendar } from 'lucide-react'
 
 import { BookingWidget } from './components/BookingWidget'
 import { MAIN_CALENDAR } from './config/calendars'
-import {
-  Section,
-  Card,
-  PageHero,
-  SectionHeading,
-  PhoneCta,
-  Reveal,
-  TrustStack,
-} from './components/ui'
+import { Section, Eyebrow, GradientHeading, PhoneCta, TrustStack } from './components/ui'
 import { SeoMeta, organizationLd, localBusinessLd, breadcrumbForPath } from './seo'
+
+/**
+ * The booking widget and its containerId are LOAD-BEARING. `contact-page-booking`
+ * is targeted by CSS in src/index.css and the Scheduler inside it owns every
+ * payload to the `lead` and `book` edge functions plus both trackLead /
+ * trackSchedule pixel calls. Restyle around it; do not rewire it.
+ *
+ * The package/budget banner was removed 2026-07-20 along with public pricing —
+ * it printed "Website in a Day ($200)" and friends, and nothing sets that state
+ * any more now that the pricing tiers are gone.
+ */
 
 interface ContactProps {
   initialData?: {
     budget?: string
     message?: string
   }
-}
-
-const labelForBudget = (budget?: string) => {
-  if (budget === 'basic') return 'Website in a Day ($200)'
-  if (budget === 'standard') return 'Standard Website ($1,000)'
-  if (budget === 'ecommerce') return 'E-commerce Website ($1,500)'
-  return 'Custom Project'
 }
 
 function Contact({ initialData }: ContactProps) {
@@ -35,91 +30,78 @@ function Contact({ initialData }: ContactProps) {
         path="/contact"
         jsonLd={[organizationLd(), localBusinessLd(), breadcrumbForPath('/contact')!]}
       />
-      <PageHero
-        eyebrow="Free consultation"
-        eyebrowIcon={Calendar}
-        size="xl"
-        headline="Book your"
-        accent="free design consultation"
-        sub="15 minutes with our team — free homepage mockup in 24-48 hours."
-        className="!pb-12"
-      >
-        <div className="mt-8 flex justify-center">
-          <TrustStack
-            items={[
-              { icon: 'shield', label: 'No credit card required' },
-              { icon: 'clock', label: 'No obligation' },
-              { icon: 'star', label: '5.0 on Google' },
-            ]}
-          />
-        </div>
-        <div className="mt-8 flex justify-center">
-          <PhoneCta showLabels={false} />
-        </div>
-      </PageHero>
 
-      {/* BOOKING WIDGET */}
-      <Section tone="muted" padding="md" containerSize="md" className="-mt-10">
-        <Reveal variant="up">
-          <Card tone="default" padding="xl" rounded="xl3" className="shadow-lift">
-          <div className="text-center">
-            <span className="label-mono text-signal-700">Schedule</span>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-semibold text-ink-900 leading-tight">
-              Pick a time that works.{' '}
-              <span className="text-editorial-italic text-signal-600">We&rsquo;ll show up.</span>
-            </h2>
-            <p className="mt-4 text-ink-700 max-w-xl mx-auto leading-relaxed">
-              Book a 15-minute slot. We&rsquo;ll send your{' '}
-              <span className="font-semibold text-ink-900">free</span> homepage design within 24-48 hours.
-            </p>
-
-            {initialData?.budget && (
-              <div className="mt-5 inline-block text-left bg-signal-50 ring-1 ring-signal-100 rounded-xl px-4 py-3 text-sm text-ink-900">
-                <p>
-                  You selected the{' '}
-                  <span className="font-semibold">{labelForBudget(initialData.budget)}</span> package.
-                </p>
-                {initialData.message && (
-                  <p className="mt-2 italic text-ink-800">&ldquo;{initialData.message}&rdquo;</p>
-                )}
+      {/* ── OPENING ── left-aligned; the old PageHero was a centred stack.
+          Says exactly what the call is, because the thing keeping a contractor
+          from booking is not knowing what he is walking into. */}
+      <section className="relative bg-cream-50 text-ink-900 bg-paper-noise" aria-label="Book a call">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-20 pb-12 sm:pt-24 lg:pt-28">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:items-end">
+            <div>
+              <Eyebrow tone="muted">Book a call</Eyebrow>
+              <GradientHeading level={1} size="xl" className="mt-6">
+                Ten to fifteen minutes, and there is already something to look at.
+              </GradientHeading>
+            </div>
+            <div className="lg:pb-2">
+              <p className="text-lg text-ink-800 leading-relaxed">
+                We build a custom made website mockup for your business before you join. On the
+                call you tell us what you like and what you do not, and we plan the changes.
+                Getting on the call costs nothing.
+              </p>
+              <div className="mt-7">
+                <PhoneCta showLabels={false} />
               </div>
-            )}
+            </div>
           </div>
 
-          <div className="mt-10">
-            {/* LeadConnector booking widget — main calendar (containerId preserved) */}
-            <BookingWidget calendarConfig={MAIN_CALENDAR} containerId="contact-page-booking" />
+          <div className="mt-12 pt-8 border-t border-ink-900/10">
+            <TrustStack
+              align="left"
+              items={[
+                { icon: 'clock', label: '10–15 minutes' },
+                { icon: 'shield', label: 'No card, no commitment' },
+                { icon: 'sparkles', label: 'A mockup already built for you' },
+                { icon: 'star', label: '5.0 on Google' },
+              ]}
+            />
           </div>
+        </div>
+      </section>
 
-          <p className="mt-6 max-w-xl mx-auto text-sm text-ink-800 bg-cream-100 border-l-4 border-signal-500 rounded-xl p-4 text-left">
-            <strong className="text-signal-700">Please show up!</strong> We&rsquo;re real people who block time for you. Thanks!
+      {/* ── SCHEDULER ── */}
+      <Section tone="muted" padding="lg" containerSize="md">
+        {initialData?.message && (
+          <p className="mb-8 border-l-2 border-signal-500 pl-4 text-ink-800 italic">
+            &ldquo;{initialData.message}&rdquo;
           </p>
-          </Card>
-        </Reveal>
+        )}
+
+        {/* LeadConnector booking widget — main calendar (containerId preserved) */}
+        <BookingWidget calendarConfig={MAIN_CALENDAR} containerId="contact-page-booking" />
+
+        <p className="mt-8 border-l-2 border-signal-500 pl-4 text-sm text-ink-800">
+          If you book, please turn up. It is two of us and we block the time out for you.
+        </p>
       </Section>
 
-      {/* ALTERNATIVE CONTACT */}
-      <Section tone="default" padding="lg" containerSize="md">
-        <Reveal variant="up">
-          <SectionHeading
-            eyebrow="Other ways to reach us"
-            heading="Prefer another"
-            accent="way to connect?"
-            sub="Call, text, or email — we usually reply within hours."
-            maxWidth="max-w-none"
-          />
-        </Reveal>
-
-        <Reveal variant="up" delay={100}>
-          <Card tone="default" padding="xl" rounded="xl3" className="mt-12">
-            <PhoneCta />
-            <hr className="rule-hairline my-7" />
-            <p className="text-sm text-ink-700">
-              Based in Leominster, MA — serving small businesses{' '}
-              <span className="text-editorial-italic text-signal-600">nationwide</span>.
+      {/* ── OTHER WAYS ── */}
+      <Section tone="default" padding="lg">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-20">
+          <div>
+            <Eyebrow tone="muted">Or just ring us</Eyebrow>
+            <h2 className="mt-6 font-display text-3xl leading-tight text-ink-900">
+              You do not have to book anything to ask a question.
+            </h2>
+            <p className="mt-5 text-ink-800 leading-relaxed">
+              Call or text. We work anywhere in the United States, so it does not matter where you
+              are.
             </p>
-          </Card>
-        </Reveal>
+          </div>
+          <div className="lg:pt-8">
+            <PhoneCta />
+          </div>
+        </div>
       </Section>
     </>
   )

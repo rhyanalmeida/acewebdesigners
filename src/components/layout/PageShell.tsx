@@ -28,7 +28,7 @@ const PageShell: React.FC<PageShellProps> = ({
   topPadding = true,
   children,
 }) => (
-  <div className="min-h-screen bg-surface-0 text-surface-900">
+  <div className="min-h-screen bg-cream-50 text-ink-900">
     {showHeader && <SiteHeader onNavigate={onNavigate} currentPage={currentPage} />}
     <main id="main" className={topPadding && showHeader ? 'pt-16' : ''}>
       {children}

@@ -8,18 +8,21 @@ interface IconTileProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: IconTileSize
 }
 
+// Square tiles with a real border. The `accent` glow and the soft inset rings
+// are gone, as is the hover `scale-110 -rotate-3` — a tilting, growing icon is
+// decorative motion of exactly the kind being removed.
 const toneMap: Record<IconTileTone, string> = {
-  brand:    'bg-signal-50 text-signal-600 ring-1 ring-signal-100',
-  accent:   'bg-signal-500 text-white shadow-glow-signal',
-  neutral:  'bg-cream-100 text-ink-700 ring-1 ring-ink-900/10',
-  inverted: 'bg-cream-50/10 text-cream-50 ring-1 ring-cream-50/15',
-  forest:   'bg-forest-50 text-forest-700 ring-1 ring-forest-100',
+  brand:    'bg-transparent text-signal-500 border border-signal-500/40',
+  accent:   'bg-signal-500 text-white border border-signal-500',
+  neutral:  'bg-transparent text-ink-700 border border-ink-900/25',
+  inverted: 'bg-transparent text-cream-50 border border-cream-50/25',
+  forest:   'bg-transparent text-forest-700 border border-forest-500/40',
 }
 
 const sizeMap: Record<IconTileSize, string> = {
-  sm: 'h-9 w-9 rounded-lg [&>svg]:h-4 [&>svg]:w-4',
-  md: 'h-12 w-12 rounded-xl [&>svg]:h-6 [&>svg]:w-6',
-  lg: 'h-14 w-14 rounded-xl2 [&>svg]:h-7 [&>svg]:w-7',
+  sm: 'h-9 w-9 [&>svg]:h-4 [&>svg]:w-4',
+  md: 'h-11 w-11 [&>svg]:h-5 [&>svg]:w-5',
+  lg: 'h-14 w-14 [&>svg]:h-6 [&>svg]:w-6',
 }
 
 const IconTile: React.FC<IconTileProps> = ({
@@ -30,7 +33,7 @@ const IconTile: React.FC<IconTileProps> = ({
   ...rest
 }) => (
   <div
-    className={`inline-flex items-center justify-center transition-transform duration-300 ease-premium motion-safe:group-hover:scale-110 motion-safe:group-hover:-rotate-3 ${toneMap[tone]} ${sizeMap[size]} ${className}`}
+    className={`inline-flex items-center justify-center shrink-0 ${toneMap[tone]} ${sizeMap[size]} ${className}`}
     {...rest}
   >
     {children}

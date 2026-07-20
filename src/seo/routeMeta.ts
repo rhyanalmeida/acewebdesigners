@@ -30,48 +30,43 @@ const baseMeta = (path: string, partial: Omit<RouteMeta, 'canonical'>): RouteMet
 
 export const ROUTE_META: Record<string, RouteMeta> = {
   '/': baseMeta('/', {
-    title: 'Small Business Web Design + Social Media | Ace Web Designers',
+    title: 'Websites for Contractors | Ace Web Designers',
     description:
-      'Beautiful websites and social media management for small businesses. Free design first — pay only if you love it. Same-day launches available. Based in Leominster, MA.',
+      'We build websites for people who do the actual work. You see a custom made mockup on a 15-minute call before you pay anything.',
     keywords:
-      'small business website design, contractor websites, social media management, web design Massachusetts',
+      'contractor website design, trades website, plumber website, electrician website, remodeler website',
   }),
   '/about': baseMeta('/about', {
-    title: 'About Ace Web Designers | Built for Small Business',
+    title: 'Rhyan and Valerie | Ace Web Designers',
     description:
-      'A small Leominster, MA team helping small businesses across the U.S. get online and stay there. Free design first, no risk to start.',
+      'Two people who started this because Rhyan’s dad built bathrooms for a living and had no website. What we do and who we do it for.',
   }),
   '/services': baseMeta('/services', {
-    title: 'Web Design + Social Media Services | Ace Web Designers',
+    title: 'What We Build | Ace Web Designers',
     description:
-      'Websites from $200, hosting from $15/mo, and social media management from $30/wk. Free design and free first week — pay only if you love it.',
+      'Websites, social media, and the software that usually gets overpriced: email dashboards, automatic reminders, and CRMs. Basic SEO on every site.',
   }),
   '/work': baseMeta('/work', {
-    title: 'Our Work | Real Small Business Websites | Ace Web Designers',
+    title: 'Work | Ace Web Designers',
     description:
-      'Real websites and social campaigns we’ve built for restaurants, contractors, and service businesses across the United States.',
-  }),
-  '/reviews': baseMeta('/reviews', {
-    title: 'Client Reviews & Testimonials | Ace Web Designers',
-    description:
-      'Verified Google reviews from small business owners we’ve worked with. Real stories, real results.',
+      'A few sites we have built, and the accounts we run. Every screenshot is the live site.',
   }),
   '/contact': baseMeta('/contact', {
-    title: 'Book a Free Design Call | Ace Web Designers',
+    title: 'Book a Call | Ace Web Designers',
     description:
-      'Pick a 15-minute slot. We send you a free homepage design within 24 hours. No card on file, no commitment.',
+      'Pick a time. It takes 10–15 minutes, we show you a custom made website mockup, and it costs nothing to get on the call.',
   }),
   '/socialmedia': baseMeta('/socialmedia', {
-    title: 'Social Media Management for Small Business | Ace Web Designers',
+    title: 'Social Media for Trades | Ace Web Designers',
     description:
-      'Posts that show your craft and bring work in. Standard $30/wk or Deluxe $99/wk — first week free, no card on file.',
+      'One account we run has 198 followers and 51,400 likes, and it brought its owner two bathrooms worth over $20,000. Follower counts are not the point.',
     keywords:
-      'social media management small business, contractor social media, Instagram management, TikTok for trades, Google Business Profile management',
+      'contractor social media, trades social media, TikTok for contractors, Instagram for trades, Google Business Profile management',
   }),
   '/refer': baseMeta('/refer', {
-    title: 'Refer & Earn — $200 Per Referral | Ace Web Designers',
+    title: 'Refer Someone | Ace Web Designers',
     description:
-      'Send us a small business that needs a website. When they launch with us, you get $200. Simple.',
+      'Send us a business that needs a website. When they launch with us, you get half the profit on their site.',
   }),
   '/landing': baseMeta('/landing', {
     title: 'Free Website Design for Small Business | Ace Web Designers',

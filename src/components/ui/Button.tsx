@@ -1,92 +1,94 @@
 import React from 'react'
-import { LucideIcon } from 'lucide-react'
 
-type Variant = 'primary' | 'brand' | 'rust' | 'secondary' | 'outline' | 'ghost' | 'link' | 'inverted'
-type Size = 'sm' | 'md' | 'lg' | 'xl'
+/**
+ * The button.
+ *
+ * Before this existed the primary CTA class string was copy-pasted **11 times**
+ * across FinalCta, LandingHero, LandingContractors (×2), WebsiteSocialCombo,
+ * SiteHeader (×2), SiteFooter, MobileStickyCta, Refer and Home — each copy
+ * subtly different, so there was no search-and-replace. It had already started
+ * to rot: Home's copy had silently lost its shadow and nobody noticed.
+ * docs/CREDIBILITY_PLAN_2026-07-20.md counted 4. It was 11.
+ *
+ * Shape language, 2026-07-20: square. No radius, no glow, no magnetic hover,
+ * no gradient. A button is a rectangle you press. Feedback is a 1px shift
+ * against a hard offset shadow — mechanical, like a real switch, rather than
+ * the float-and-scale that reads as generated.
+ *
+ * `ring-focus-signal` is kept on every variant: keyboard focus is not optional.
+ */
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant
-  size?: Size
-  icon?: LucideIcon
-  iconPosition?: 'left' | 'right'
-  loading?: boolean
+type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+type ButtonSize = 'sm' | 'md' | 'lg'
+
+interface ButtonBaseProps {
+  variant?: ButtonVariant
+  size?: ButtonSize
   fullWidth?: boolean
-  magnetic?: boolean
+  tone?: 'default' | 'inverted'
+  className?: string
   children: React.ReactNode
 }
 
-const baseClasses =
-  'group inline-flex items-center justify-center font-semibold rounded-full transition-all duration-300 ease-premium disabled:opacity-50 disabled:cursor-not-allowed ring-focus-signal'
+type ButtonProps = ButtonBaseProps &
+  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonBaseProps>
 
-const variantClasses: Record<Variant, string> = {
-  // Editorial primary — ink-on-cream filled pill
-  primary:
-    'bg-ink-900 text-cream-50 hover:bg-ink-800 shadow-soft hover:shadow-lift',
-  // Editorial brand-equivalent — same as primary (kept for backward compat)
-  brand:
-    'bg-ink-900 text-cream-50 hover:bg-ink-800 shadow-soft hover:shadow-lift',
-  // Rust — primary CTA when contrast on cream is wanted
-  rust:
-    'bg-signal-500 text-white hover:bg-signal-600 shadow-glow-signal',
-  secondary:
-    'bg-cream-100 text-ink-900 ring-1 ring-ink-900/15 hover:bg-cream-200 shadow-soft',
-  outline:
-    'border-2 border-ink-900/20 text-ink-900 hover:border-signal-500 hover:text-signal-700 hover:bg-signal-50 hover:-translate-y-0.5 hover:shadow-soft',
-  ghost:
-    'text-ink-800 hover:text-signal-700 hover:bg-signal-50 hover:shadow-soft',
-  link:
-    'nav-underline text-signal-700 hover:text-signal-800 px-0 py-0 rounded-none shadow-none',
-  inverted:
-    'bg-cream-50 text-ink-900 hover:bg-cream-100 shadow-soft hover:shadow-lift',
-}
-
-const sizeClasses: Record<Size, string> = {
+const SIZES: Record<ButtonSize, string> = {
   sm: 'px-4 py-2 text-sm',
   md: 'px-6 py-3 text-base',
-  lg: 'px-8 py-4 text-lg',
-  xl: 'px-10 py-5 text-xl',
+  lg: 'px-8 py-4 text-base sm:text-lg',
+}
+
+/**
+ * `translate` + `shadow` pair: the button sits 2px proud of a solid black block
+ * and presses flush on :active. Nothing blurs.
+ */
+const VARIANTS: Record<ButtonVariant, Record<'default' | 'inverted', string>> = {
+  primary: {
+    default:
+      'bg-signal-500 text-white border border-signal-500 hover:bg-signal-600 hover:border-signal-600 shadow-[3px_3px_0_0_#111110] hover:shadow-[1px_1px_0_0_#111110] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]',
+    inverted:
+      'bg-signal-500 text-white border border-signal-500 hover:bg-signal-600 hover:border-signal-600 shadow-[3px_3px_0_0_#F2F1EF] hover:shadow-[1px_1px_0_0_#F2F1EF] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]',
+  },
+  secondary: {
+    default:
+      'bg-transparent text-ink-900 border border-ink-900 hover:bg-ink-900 hover:text-cream-50',
+    inverted:
+      'bg-transparent text-cream-50 border border-cream-50 hover:bg-cream-50 hover:text-ink-900',
+  },
+  ghost: {
+    default:
+      'bg-transparent text-ink-900 border border-transparent hover:border-ink-900 px-0 hover:px-6',
+    inverted:
+      'bg-transparent text-cream-50 border border-transparent hover:border-cream-50 px-0 hover:px-6',
+  },
 }
 
 const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
-  icon: Icon,
-  iconPosition = 'right',
-  loading = false,
   fullWidth = false,
-  magnetic = false,
+  tone = 'default',
   className = '',
   children,
-  disabled,
-  ...props
-}) => {
-  const widthClass = fullWidth ? 'w-full' : ''
-  const magneticClass = magnetic ? 'magnetic-btn' : ''
-  const sizeClass = variant === 'link' ? '' : sizeClasses[size]
-
-  const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClass} ${widthClass} ${magneticClass} ${className}`
-
-  return (
-    <button className={classes} disabled={disabled || loading} {...props}>
-      {loading && (
-        <svg
-          className="animate-spin -ml-1 mr-3 h-5 w-5"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-        </svg>
-      )}
-      {Icon && iconPosition === 'left' && !loading && <Icon className="w-5 h-5 mr-2" />}
-      {children}
-      {Icon && iconPosition === 'right' && !loading && (
-        <Icon className="w-5 h-5 ml-2 icon-nudge" />
-      )}
-    </button>
-  )
-}
+  ...rest
+}) => (
+  <button
+    className={[
+      'group inline-flex items-center justify-center gap-2 font-semibold uppercase tracking-[0.08em]',
+      'transition-[background-color,color,box-shadow,transform,border-color,padding] duration-150 ease-out',
+      'ring-focus-signal disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
+      SIZES[size],
+      VARIANTS[variant][tone],
+      fullWidth ? 'w-full' : '',
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ')}
+    {...rest}
+  >
+    {children}
+  </button>
+)
 
 export default Button

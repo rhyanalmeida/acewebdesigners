@@ -4,7 +4,6 @@ import Section from '../ui/Section'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 import Card from '../ui/Card'
-import Reveal from '../ui/Reveal'
 
 export interface LandingExample {
   imageUrl: string
@@ -36,31 +35,31 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
   examples,
 }) => (
   <Section tone="default" padding="lg">
-    <div className="text-center max-w-2xl mx-auto">
+    <div className="max-w-2xl">
       <Eyebrow>{eyebrow}</Eyebrow>
       <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
         {heading}
       </GradientHeading>
     </div>
 
-    <Reveal variant="stagger" className="mt-12 grid gap-6 md:grid-cols-3">
+    <div className="mt-12 grid gap-6 md:grid-cols-3">
       {examples.map((ex, i) => (
-        <div key={i} data-reveal-stagger-child style={{ transitionDelay: `${i * 100}ms` }}>
-          <Card tone="default" padding="none" rounded="xl3" interactive shine className="overflow-hidden h-full flex flex-col">
-            <div className="relative overflow-hidden aspect-[16/10] bg-cream-100">
+        <div key={i}>
+          <Card tone="default" padding="none" interactive className="overflow-hidden h-full flex flex-col">
+            <div className="relative overflow-hidden aspect-[16/10] bg-cream-100 border-b border-ink-900/10">
               <img
                 src={ex.imageUrl}
                 alt={ex.imageAlt}
                 loading="lazy"
                 decoding="async"
-                className="h-full w-full object-cover transition-transform duration-700 ease-premium group-hover:scale-105"
+                className="h-full w-full object-cover"
               />
             </div>
             <div className="p-7 flex flex-col flex-1">
               {/* Stars only accompany a real review — showing them over a caption
                   would imply a rating nobody gave. */}
               {ex.quote && (
-                <div className="flex items-center gap-0.5 text-amber-500" aria-label={`${ex.rating ?? 5} out of 5 stars`}>
+                <div className="flex items-center gap-0.5 text-ink-900" aria-label={`${ex.rating ?? 5} out of 5 stars`}>
                   {Array.from({ length: 5 }).map((_, idx) => (
                     <Star
                       key={idx}
@@ -73,9 +72,9 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
 
               {ex.quote ? (
                 <blockquote className="mt-4 font-display text-lg text-ink-900 leading-snug flex-1">
-                  <span className="text-signal-500 text-2xl leading-none mr-0.5 align-[-0.15em] text-editorial-italic">&ldquo;</span>
+                  <span className="text-signal-500 text-2xl leading-none mr-0.5 align-[-0.15em]">&ldquo;</span>
                   {ex.quote}
-                  <span className="text-signal-500 text-2xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
+                  <span className="text-signal-500 text-2xl leading-none ml-0.5 align-[-0.15em]">&rdquo;</span>
                 </blockquote>
               ) : (
                 <p className="font-display text-lg text-ink-900 leading-snug flex-1">{ex.caption}</p>
@@ -99,7 +98,7 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
           </Card>
         </div>
       ))}
-    </Reveal>
+    </div>
   </Section>
 )
 

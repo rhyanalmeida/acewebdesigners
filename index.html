@@ -24,21 +24,24 @@
     <!-- Performance Optimization: DNS Prefetch and Preconnect -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="//i.ibb.co" />
     <link rel="dns-prefetch" href="//i.postimg.cc" />
-    <link rel="dns-prefetch" href="//images.unsplash.com" />
     <link rel="dns-prefetch" href="//www.google.com" />
     <link rel="dns-prefetch" href="//www.gstatic.com" />
     <link rel="dns-prefetch" href="//connect.facebook.net" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://i.ibb.co" crossorigin />
 
-    <!-- Preload Critical Resources -->
+    <!-- Preload Critical Resources
+         Was preloading Inter + Outfit. Outfit was referenced nowhere in the CSS
+         or Tailwind config, so it was a blocking request for a font that never
+         rendered; Fraunces — the display face the whole design depends on — was
+         NOT preloaded and arrived late via a render-blocking @import, which put
+         a serif→Fraunces reflow on every heading at first paint. Now preloads
+         exactly the three faces the site actually uses. -->
     <link
       rel="preload"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap"
       as="style"
       onload="
         this.onload = null
@@ -48,7 +51,7 @@
     <noscript
       ><link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap"
     /></noscript>
 
     <!-- Preload critical images -->
@@ -60,8 +63,6 @@
     />
 
     <!-- Resource hints for better performance -->
-    <link rel="prefetch" href="https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif" />
-    <link rel="prefetch" href="https://i.ibb.co/Myx4nrSr/concuo-gif.gif" />
 
     <meta
       http-equiv="Content-Security-Policy"
@@ -69,10 +70,7 @@
     />
 
     <!-- Primary Meta Tags - Enhanced SEO -->
-    <title>
-      Small Business Web Design Company USA | Professional Website Development Nationwide | Ace Web
-      Designers
-    </title>
+    <title>Websites for Contractors | Ace Web Designers</title>
     <!-- Per-route description / robots / canonical are provided by SeoMeta
          (react-helmet-async). Static <meta name="description"> and friends
          used to live here but were duplicating the dynamic ones, and the
@@ -115,8 +113,10 @@
     <meta name="twitter:creator" content="@acewebdesigners" />
 
     <!-- Additional SEO Tags -->
-    <meta name="theme-color" content="#FBF7F0" />
-    <meta name="msapplication-TileColor" content="#3b82f6" />
+    <!-- #FBF7F0 was the old cream and #3b82f6 the old indigo; both were missed by
+         the palette replacement. Now cream-50 and signal-500. -->
+    <meta name="theme-color" content="#FAF8F4" />
+    <meta name="msapplication-TileColor" content="#A00909" />
     <meta name="application-name" content="Ace Web Designers" />
 
     <!-- Organization Schema -->
@@ -395,7 +395,6 @@
           "Custom Small Business Websites",
           "Small Business Web Optimization"
         ],
-        "priceRange": "$$",
         "paymentAccepted": ["Cash", "Credit Card", "PayPal"],
         "currenciesAccepted": "USD",
         "openingHours": "Mo-Fr 09:00-17:00",
@@ -458,34 +457,42 @@
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "How much does a website cost for a small business?",
+            "name": "What happens on the call?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Our small business websites start at $200 for a basic one-page site, $1,000 for a standard multi-page website, and $1,500 for e-commerce. All packages include hosting, mobile responsiveness, and basic SEO. We provide a free design mockup before you pay anything."
+              "text": "It runs 10 to 15 minutes. We show you a custom made website mockup, you tell us what you like and what you don't, and we plan the changes. It costs nothing to get on the call."
             }
           },
           {
             "@type": "Question",
-            "name": "How long does it take to build a small business website?",
+            "name": "Do I have to pay before I see anything?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Most small business websites are completed within 1-3 weeks. Our 'Website in a Day' option delivers a professional site in just 24 hours. Timeline depends on complexity and how quickly you provide content and feedback."
+              "text": "No. The mockup exists before the call. You look at it first and decide after."
             }
           },
           {
             "@type": "Question",
-            "name": "Do you work with small businesses outside Massachusetts?",
+            "name": "Do you work outside Massachusetts?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes! We specialize in helping small businesses nationwide across all 50 states. Most of our communication is done remotely through video calls, email, and phone. Location doesn't limit our ability to create an amazing website for your small business."
+              "text": "Yes, anywhere in the United States. The call is a video call and the work happens the same either way."
             }
           },
           {
             "@type": "Question",
-            "name": "Can you help with SEO for small businesses?",
+            "name": "Is SEO included?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes! We include basic SEO setup with every small business website and offer advanced SEO services to help you rank higher on Google. We'll optimize your site for your target keywords and help small business owners get found nationwide."
+              "text": "Basic SEO is set up on every site we build. It is not an upsell."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can you build more than a website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Email dashboards, automatic text and email reminders, and full CRMs. These are the tools trades usually get gouged on, which is why we build them."
             }
           }
         ]
@@ -497,8 +504,8 @@
       {
         "@context": "https://schema.org",
         "@type": "Service",
-        "name": "Small Business Web Design Services",
-        "description": "Professional web design and development services specifically for small businesses nationwide. Custom websites, e-commerce solutions, SEO optimization, and digital marketing.",
+        "name": "Websites and Social Media for Contractors",
+        "description": "Websites, social media management, and business software for contractors and trades. Custom made mockup shown on a call before you pay. Basic SEO on every site.",
         "provider": {
           "@type": "Organization",
           "name": "Ace Web Designers",
@@ -510,42 +517,36 @@
         },
         "hasOfferCatalog": {
           "@type": "OfferCatalog",
-          "name": "Small Business Web Design Packages",
+          "name": "What we build",
           "itemListElement": [
             {
               "@type": "Offer",
               "itemOffered": {
                 "@type": "Service",
-                "name": "Basic Small Business Website",
-                "description": "One-page professional website for small businesses"
-              },
-              "price": "200",
-              "priceCurrency": "USD"
+                "name": "Contractor website",
+                "description": "A website built around the work you actually do, with basic SEO set up"
+              }
             },
             {
               "@type": "Offer",
               "itemOffered": {
                 "@type": "Service",
-                "name": "Standard Small Business Website",
-                "description": "Multi-page website with advanced features for small businesses"
-              },
-              "price": "1000",
-              "priceCurrency": "USD"
+                "name": "Social media management",
+                "description": "Posts that show the craft, run for you"
+              }
             },
             {
               "@type": "Offer",
               "itemOffered": {
                 "@type": "Service",
-                "name": "Small Business E-commerce Website",
-                "description": "Full e-commerce solution for small business online stores"
-              },
-              "price": "1500",
-              "priceCurrency": "USD"
+                "name": "Business tools",
+                "description": "Email dashboards, automatic text and email reminders, and CRMs"
+              }
             }
           ]
         },
         "category": "Web Design Services",
-        "serviceType": "Small Business Web Design"
+        "serviceType": "Contractor Web Design"
       }
     </script>
 

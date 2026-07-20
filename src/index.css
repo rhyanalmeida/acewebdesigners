@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
+/* Fraunces + Hanken are preloaded in index.html; this @import is the stylesheet
+   fallback. Inter was removed 2026-07-20 — it is the flagship "generated site"
+   tell. See docs/ART_DIRECTION.md. IBM Plex Mono carries every number, label and
+   date stamp; before this the `.label-num` job-sheet numbering fell back to the
+   system mono stack and rendered as Consolas by accident. */
+/* Archivo carries display AND body via its width axis; IBM Plex Mono carries
+   every label, number and date stamp. Both are preloaded in index.html — this
+   @import is the stylesheet fallback. See docs/ART_DIRECTION.md. */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,30 +15,36 @@
 /* ---------- BASE TYPOGRAPHY (Editorial cream) ---------- */
 @layer base {
   html {
-    background-color: #FAF8F4; /* cream-50 — prevents white flash */
+    background-color: #F2F1EF; /* cream-50 (concrete) — prevents white flash */
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #FAF8F4;
-    color: #262625;
+    background-color: #F2F1EF;
+    color: #2A2927;
   }
 
+  /* Headings run WIDE and heavy — Archivo's width axis is doing the work that a
+     serif used to do. `wdth` 112 is expanded without tipping into novelty. */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fraunces', ui-serif, Georgia, Cambria, 'Times New Roman', serif;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    font-variation-settings: 'opsz' 96, 'SOFT' 50;
-    color: #262625;
+    font-family: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    font-variation-settings: 'wdth' 112;
+    color: #111110;
   }
 
-  h1 { font-size: clamp(2.75rem, 5.5vw, 4.5rem); font-weight: 600; }
-  h2 { font-size: clamp(2.25rem, 4.25vw, 3.25rem); font-weight: 600; }
-  h3 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; }
+  /* One big jump, then a flat tail. A strict modular ratio gives six sizes that
+     all look alike, which is what the previous scale produced. Only h1 is
+     dramatic; everything below it is close together on purpose. */
+  h1 { font-size: clamp(3rem, 6vw, 5rem); font-weight: 600; }
+  h2 { font-size: 1.75rem; font-weight: 600; }
+  h3 { font-size: 1.25rem; font-weight: 600; }
 
   /* Tap-target friendly buttons + links on mobile */
   @media (max-width: 768px) {
@@ -40,31 +54,29 @@
   }
 }
 
-/* ---------- EDITORIAL UTILITIES (Phase 3) ---------- */
+/* ---------- STRUCTURAL UTILITIES ---------- */
 @layer utilities {
-  /* Italic accent — Fraunces with high opsz for stylistic, breathing italic */
-  .text-editorial-italic {
-    font-style: italic;
-    font-variation-settings: 'opsz' 144, 'SOFT' 100;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
+  /* `.text-editorial-italic` was deleted 2026-07-20 with Fraunces. It set
+     `font-style: italic` plus serif optical-size axes — italicised serif
+     emphasis on a warm ground is a named AI-web-design tell. Emphasis is now
+     carried by weight, width and the red, never by slant. */
 
-  /* Hairline rule — warm cream-300 divider */
+  /* Structural rules. Solid and visible, not apologetic hairlines — the
+     structure is meant to be seen. */
   .rule-hairline {
     border: 0;
     height: 1px;
-    background-color: rgba(38, 38, 37, 0.12);
+    background-color: rgba(17, 17, 16, 0.18);
   }
   .rule-hairline-strong {
     border: 0;
-    height: 1px;
-    background-color: rgba(38, 38, 37, 0.22);
+    height: 2px;
+    background-color: rgba(17, 17, 16, 0.9);
   }
 
   /* Mono caps — for editorial metadata (industry · stack · year) */
   .label-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.72rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -73,111 +85,62 @@
 
   /* Numbered list (editorial: 001 — Item) */
   .label-num {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.85rem;
     letter-spacing: 0.04em;
-    color: rgba(38, 38, 37, 0.55);
+    color: rgba(17, 17, 16, 0.5);
   }
 
-  /* Focus ring — rust accent */
+  /* Focus ring. Square offset, not a rounded halo. */
   .ring-focus-signal {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-signal-500;
   }
 
-  /* Cream surface utilities */
-  .surface-paper { background-color: #FAF8F4; }
-  .surface-cream { background-color: #F3F1EC; }
-  .surface-panel { background-color: #E8E5DE; }
-  .surface-ink   { background-color: #262625; color: #F4F3F1; }
+  .surface-paper { background-color: #F2F1EF; }
+  .surface-cream { background-color: #EAE9E6; }
+  .surface-panel { background-color: #DEDCD8; }
+  .surface-ink   { background-color: #111110; color: #F2F1EF; }
+
+  /* BLUEPRINT — /contractorlanding only. A drafting sheet, not a cyanotype:
+     cool near-white with a hairline grid at 24px, black line work, red
+     annotation. If this ever starts reading as fancy dress, the grid opacity is
+     too high or the blue is too saturated. Both are deliberately near the floor. */
+  .surface-blueprint {
+    background-color: #EDF0F2;
+    background-image:
+      linear-gradient(to right, rgba(17, 40, 60, 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(17, 40, 60, 0.055) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  /* Every 5th line heavier, the way real graph paper reads. */
+  .surface-blueprint-major {
+    background-color: #EDF0F2;
+    background-image:
+      linear-gradient(to right, rgba(17, 40, 60, 0.10) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(17, 40, 60, 0.10) 1px, transparent 1px),
+      linear-gradient(to right, rgba(17, 40, 60, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(17, 40, 60, 0.045) 1px, transparent 1px);
+    background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  }
 }
 
-/* ---------- LEGACY UTILITIES (kept registered) ---------- */
+/* ---------- REMOVED 2026-07-20: the "soft/premium" register ----------
+   Deleted together because they were one idea wearing six hats — depth and
+   delight signalled through blur, glow, sheen and springy hover. That is the
+   vocabulary that reads as generated, and it fought a structure meant to look
+   measured rather than pillowy.
+
+     .glass-surface / .glass-surface-dark  glassmorphism, explicitly banned
+     .premium-card-shine                   conic sheen sweep on hover
+     .magnetic-btn                         translateY + scale on hover
+     .attention-ring                       pulsing red halo behind the CTA
+     .divider-fade                         gradient-to-transparent rule
+     .ring-focus-brand                     duplicate alias of .ring-focus-signal
+     .text-gradient-brand[-animated]       blue→violet→magenta, deleted earlier
+
+   Depth now comes from 1px rules and flat offset, never from blur.
+   Do not reintroduce any of these. */
 @layer utilities {
-  .text-gradient-brand {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(120deg, #2747f5 0%, #6c3df0 50%, #a330e6 100%);
-  }
-  .text-gradient-brand-animated {
-    @apply text-gradient-brand;
-    background-size: 200% auto;
-    animation: gradient-shift 6s ease infinite;
-  }
-
-  /* Editorial-mode brand text-gradient: replaces blue/purple with serif italic emphasis */
-  .text-accent-italic {
-    @apply text-editorial-italic text-signal-600;
-  }
-
-  .glass-surface {
-    background: rgba(251, 247, 240, 0.75);
-    backdrop-filter: saturate(140%) blur(14px);
-    -webkit-backdrop-filter: saturate(140%) blur(14px);
-    border: 1px solid rgba(38, 38, 37, 0.06);
-  }
-  .glass-surface-dark {
-    background: rgba(38, 38, 37, 0.55);
-    backdrop-filter: saturate(140%) blur(14px);
-    -webkit-backdrop-filter: saturate(140%) blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .divider-fade {
-    height: 1px;
-    background: linear-gradient(to right, transparent, rgba(38, 38, 37, 0.18), transparent);
-  }
-
-  .ring-focus-brand {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-signal-500;
-  }
-
-  /* Subtle conic-gradient sweep on hover — switched to warm tone */
-  .premium-card-shine {
-    position: relative;
-    isolation: isolate;
-  }
-  .premium-card-shine::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, rgba(160,9,9,0) 0%, rgba(160,9,9,0.45) 50%, rgba(31,77,61,0) 100%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    pointer-events: none;
-    z-index: 1;
-  }
-  .premium-card-shine:hover::before { opacity: 1; }
-
-  /* Magnetic CTA — pure CSS micro-motion, no JS */
-  .magnetic-btn {
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
-  }
-  .magnetic-btn:hover  { transform: translateY(-2px) scale(1.015); }
-  .magnetic-btn:active { transform: translateY(0) scale(0.99); transition-duration: 0.15s; }
-
-  /* Soft attention ring — pulses an outer ring without fighting transform-based hover */
-  @keyframes attention-ring {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(160, 9, 9, 0.30), 0 10px 32px -10px rgba(160, 9, 9, 0.45), 0 4px 12px -4px rgba(160, 9, 9, 0.25); }
-    50%      { box-shadow: 0 0 0 10px rgba(160, 9, 9, 0), 0 10px 32px -10px rgba(160, 9, 9, 0.55), 0 4px 12px -4px rgba(160, 9, 9, 0.35); }
-  }
-  .attention-ring {
-    animation: attention-ring 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-  }
-  .magnetic-btn:hover.attention-ring { animation-play-state: paused; }
-
-  /* Marquee infinite scroll (LogoStrip / Marquee primitive) */
-  .marquee-track {
-    display: flex;
-    width: max-content;
-    animation: marquee 30s linear infinite;
-  }
-  .marquee-track:hover { animation-play-state: paused; }
-
   /* Nav link underline — left-anchored, draws on hover/active */
   .nav-underline {
     position: relative;
@@ -234,10 +197,6 @@
     will-change: opacity, transform;
   }
   [data-reveal="up"]      { transform: translateY(28px); }
-  [data-reveal="down"]    { transform: translateY(-28px); }
-  [data-reveal="left"]    { transform: translateX(-28px); }
-  [data-reveal="right"]   { transform: translateX(28px); }
-  [data-reveal="scale"]   { transform: scale(0.96); }
   [data-reveal="fade"]    { transform: none; }
   [data-reveal="stagger"] { transform: none; }
 
@@ -289,14 +248,13 @@
   }
 }
 
-/* ---------- HIGH CONTRAST ---------- */
+/* ---------- HIGH CONTRAST ----------
+   Both hexes here were stale: the colour was #82310F (the OLD rust-700, mislabelled
+   as signal-700) and the body colour was #0D0A07 (the OLD ink-950). Corrected to
+   the live tokens. */
 @media (prefers-contrast: high) {
-  .text-gradient-brand,
-  .text-gradient-brand-animated {
-    background: none;
-    color: #82310F; /* signal-700 */
-  }
-  body { color: #0D0A07; }
+  body { color: #141413; }
+  a { text-decoration-thickness: 2px; }
 }
 
 /* ---------- LEADCONNECTOR BOOKING WIDGET (LOAD-BEARING) ----------

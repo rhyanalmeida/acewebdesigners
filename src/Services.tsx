@@ -1,197 +1,180 @@
 import React from 'react'
-import { CheckCircle2, Sparkles } from 'lucide-react'
 
-import {
-  Section,
-  BadgePill,
-  PageHero,
-  SectionHeading,
-  StaggerGrid,
-  PriceCard,
-  Reveal,
-  TrustStack,
-} from './components/ui'
+import { Section, Eyebrow, GradientHeading, SectionHeading, FinalCta, TrustStack } from './components/ui'
 import { SeoMeta, organizationLd, serviceLd, breadcrumbForPath } from './seo'
 
-interface Pkg {
-  name: string
-  price: string
-  monthly: string
-  description: string
-  features: string[]
-  popular?: boolean
-  budgetKey: 'basic' | 'standard' | 'ecommerce'
-}
+/**
+ * No pricing on this page, or anywhere public. The three-tier PriceCard grid
+ * and the estimate calculator were removed 2026-07-20 (owner decision): what a
+ * job costs depends on the job, and publishing tiers meant the site argued
+ * about money before it had said anything worth paying for.
+ *
+ * The tools section is written as a grievance with a solution attached, not a
+ * feature list, because that is what it is — Rhyan watched his dad pay
+ * thousands a month for software that was worse than what we could build.
+ */
 
-const PACKAGES: Pkg[] = [
+const goContact = () =>
+  window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'contact' } }))
+
+const WEBSITE_INCLUDES = [
   {
-    name: 'Website in a Day',
-    price: '$200',
-    monthly: '15',
-    description: 'Perfect for businesses needing a professional web presence quickly.',
-    features: ['One-day turnaround', 'Mobile responsive design', 'Basic SEO setup', 'Contact form integration'],
-    budgetKey: 'basic',
+    label: 'Built for you',
+    title: 'Not a template with your logo dropped in',
+    desc: 'The pages you actually need, the services you want to get called about, and photos of your own jobs rather than somebody else’s.',
   },
   {
-    name: 'Standard Website',
-    price: '$1,000',
-    monthly: '30',
-    description: 'Professional multi-page website solution for established businesses.',
-    popular: true,
-    features: [
-      'Custom multi-page design',
-      'Advanced SEO optimization',
-      'Content management system',
-      '3 rounds of revisions',
-      'Social media integration',
-      'Analytics dashboard',
-    ],
-    budgetKey: 'standard',
+    label: 'Findable',
+    title: 'Basic SEO on every site, not as an extra',
+    desc: 'Set up when we build it. One reviewer put it better than we would: he gets a TON of leads coming in just with SEO.',
   },
   {
-    name: 'E-commerce Website',
-    price: '$1,500',
-    monthly: '45',
-    description: 'Complete e-commerce solution for businesses ready to sell online.',
-    features: [
-      'Full e-commerce setup',
-      'Product management system',
-      'Secure payment integration',
-      'Inventory management',
-      'Order processing system',
-      'Customer account portal',
-    ],
-    budgetKey: 'ecommerce',
+    label: 'Contactable',
+    title: 'Enquiries that do not land in your personal inbox',
+    desc: 'Right now every potential customer probably arrives in the same Gmail as your receipts and your family photos. That is where jobs go to be forgotten.',
+  },
+  {
+    label: 'Looked after',
+    title: 'Hosting and changes handled',
+    desc: 'You are not going to log in and edit anything. We know that. When something needs changing, you tell us and it changes.',
   },
 ]
 
-const COMPARE_FEATURES: Array<{ label: string; basic: boolean; standard: boolean; ecommerce: boolean }> = [
-  { label: 'Free design mockup', basic: true, standard: true, ecommerce: true },
-  { label: 'Mobile responsive', basic: true, standard: true, ecommerce: true },
-  { label: 'Hosting included', basic: true, standard: true, ecommerce: true },
-  { label: 'SSL secure', basic: true, standard: true, ecommerce: true },
-  { label: 'Multi-page design', basic: false, standard: true, ecommerce: true },
-  { label: 'Content management', basic: false, standard: true, ecommerce: true },
-  { label: 'Advanced SEO', basic: false, standard: true, ecommerce: true },
-  { label: 'Online payments', basic: false, standard: false, ecommerce: true },
-  { label: 'Inventory management', basic: false, standard: false, ecommerce: true },
+const TOOLS = [
+  { title: 'Email dashboards', desc: 'Enquiries in one place, separate from everything else in your inbox.' },
+  { title: 'Automatic text and email reminders', desc: 'For quotes, appointments, and the follow-ups you meant to send and did not.' },
+  { title: 'Full CRMs', desc: 'When a spreadsheet has stopped being enough and the off-the-shelf option costs more than it should.' },
 ]
 
-function Services() {
-  // PRESERVED: same custom event dispatch that App.tsx listens for.
-  const handleGetStarted = (pkg: Pkg) => {
-    const event = new CustomEvent('navigate', {
-      detail: {
-        page: 'contact',
-        data: {
-          budget: pkg.budgetKey,
-          message: `I'm interested in the ${pkg.name} package.`,
-        },
-      },
-    })
-    window.dispatchEvent(event)
-  }
+const Services: React.FC = () => (
+  <>
+    <SeoMeta
+      path="/services"
+      jsonLd={[
+        organizationLd(),
+        serviceLd({
+          name: 'Websites and social media for contractors',
+          description:
+            'Websites, social media management, and business software for contractors and trades. A custom made mockup is shown on a call before you pay. Basic SEO on every site.',
+          serviceType: 'Web design and social media management',
+          url: 'https://acewebdesigners.com/services',
+        }),
+        breadcrumbForPath('/services')!,
+      ]}
+    />
 
-  return (
-    <>
-      <SeoMeta
-        path="/services"
-        jsonLd={[
-          organizationLd(),
-          serviceLd({
-            name: 'Web Design + Social Media Services',
-            description:
-              'Websites from $200, hosting from $15/mo, social media management from $30/wk. Free design and free trial week.',
-            serviceType: 'Web design and social media management',
-            url: 'https://acewebdesigners.com/services',
-          }),
-          breadcrumbForPath('/services')!,
-        ]}
-      />
-      <PageHero
-        eyebrow="Our packages"
-        eyebrowIcon={Sparkles}
-        size="xl"
-        headline="Pick the package that fits — after seeing your"
-        accent="free design"
-        sub="Professional web solutions tailored to your business. Every package starts with a free homepage mockup."
-        className="!pb-12"
-      >
-        <div className="mt-8 flex justify-center">
-          <TrustStack />
+    {/* ── OPENING ── asymmetric and left-aligned. PageHero was a centred stack. */}
+    <section className="relative bg-cream-50 text-ink-900 bg-paper-noise" aria-label="What we build">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-20 pb-16 sm:pt-24 lg:pt-28">
+        <Eyebrow tone="muted">What we build</Eyebrow>
+        <GradientHeading level={1} size="display" className="mt-6 max-w-4xl">
+          Three things, done properly.
+        </GradientHeading>
+        <p className="mt-8 max-w-2xl text-lg text-ink-800 leading-relaxed">
+          A website, the social media around it, and the software you are probably being
+          overcharged for. We would rather do three things well than list twenty.
+        </p>
+        <div className="mt-12 pt-8 border-t border-ink-900/10">
+          <TrustStack align="left" />
         </div>
-      </PageHero>
+      </div>
+    </section>
 
-      {/* PRICING — using PriceCard primitive */}
-      <Section tone="default" padding="lg" className="-mt-8">
-        <StaggerGrid
-          items={PACKAGES}
-          className="grid gap-6 lg:grid-cols-3"
-          delayMs={90}
-          keyFn={pkg => pkg.name}
-          renderItem={pkg => (
-            <PriceCard
-              tier={pkg.name}
-              price={pkg.price}
-              priceSub={`+ $${pkg.monthly}/month hosting & support`}
-              description={pkg.description}
-              features={pkg.features}
-              highlight={pkg.popular ?? false}
-              ctaLabel="Get my free design"
-              onCta={() => handleGetStarted(pkg)}
-            />
-          )}
-        />
-      </Section>
+    {/* ── WEBSITE ── ruled rows */}
+    <Section tone="muted" padding="lg">
+      <SectionHeading
+        eyebrow="01 — The website"
+        heading="What is actually"
+        accent="in it"
+        sub="You see a custom made mockup on the call before any of this is agreed."
+      />
+      <ul className="mt-14 border-t border-ink-900/10">
+        {WEBSITE_INCLUDES.map(item => (
+          <li
+            key={item.label}
+            className="grid gap-3 py-8 border-b border-ink-900/10 sm:grid-cols-[10rem_1fr] sm:gap-8"
+          >
+            <span className="label-mono text-signal-600">{item.label}</span>
+            <div>
+              <h3 className="font-display text-xl text-ink-900">{item.title}</h3>
+              <p className="mt-2 text-ink-800 leading-relaxed max-w-2xl">{item.desc}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Section>
 
-      {/* COMPARISON TABLE — editorial */}
-      <Section tone="muted" padding="lg" containerSize="lg">
-        <Reveal variant="up">
-          <SectionHeading
-            eyebrow="Compare"
-            heading="Which package is"
-            accent="best for you"
-          />
-        </Reveal>
+    {/* ── SOCIAL ── asymmetric split, leading with the real result */}
+    <Section tone="default" padding="lg">
+      <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div>
+          <Eyebrow tone="muted">02 — Social media</Eyebrow>
+          <h2 className="mt-6 font-display text-3xl sm:text-4xl leading-tight text-ink-900">
+            Valerie runs it. You do not write captions at nine at night.
+          </h2>
+        </div>
+        <div className="space-y-5 text-ink-800 leading-relaxed lg:pt-16">
+          <p>
+            One of the accounts she runs has fewer than two hundred followers. It has also brought
+            its owner two bathrooms on a contract worth more than twenty thousand dollars.
+          </p>
+          <p>
+            That is the whole argument. Follower counts are the thing everyone sells and mostly
+            they do not matter. Getting the right work in front of someone who is ready to hire
+            does.
+          </p>
+          <button
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'socialmedia' } }))
+            }
+            className="label-mono text-signal-600 underline underline-offset-4 hover:text-signal-700 transition-colors ring-focus-signal rounded"
+          >
+            See the accounts and the numbers
+          </button>
+        </div>
+      </div>
+    </Section>
 
-        <Reveal variant="up" delay={120} className="mt-12 overflow-x-auto rounded-xl3 ring-1 ring-ink-900/10 bg-cream-50">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-900/10">
-                <th className="px-6 py-5 label-mono text-ink-700/70">Feature</th>
-                {PACKAGES.map(p => (
-                  <th key={p.name} className="px-6 py-5 font-display text-base font-semibold text-ink-900">
-                    <span className="block">{p.name}</span>
-                    {p.popular && (
-                      <span className="mt-1 inline-flex">
-                        <BadgePill tone="brand">Popular</BadgePill>
-                      </span>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARE_FEATURES.map((row, i) => (
-                <tr key={row.label} className={i % 2 === 0 ? 'bg-cream-100/50' : ''}>
-                  <td className="px-6 py-4 font-medium text-ink-800">{row.label}</td>
-                  {(['basic', 'standard', 'ecommerce'] as const).map(key => (
-                    <td key={key} className="px-6 py-4">
-                      {row[key] ? (
-                        <CheckCircle2 className="h-5 w-5 text-forest-700" aria-label="Included" />
-                      ) : (
-                        <span className="text-ink-700/30" aria-label="Not included">—</span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Reveal>
-      </Section>
-    </>
-  )
-}
+    {/* ── TOOLS ── the grievance section, deliberately not a feature grid */}
+    <Section tone="muted" padding="lg">
+      <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div>
+          <Eyebrow tone="muted">03 — The tools</Eyebrow>
+          <h2 className="mt-6 font-display text-3xl sm:text-4xl leading-tight text-ink-900">
+            The software trades get gouged on.
+          </h2>
+          <p className="mt-6 text-ink-800 leading-relaxed">
+            Rhyan watched his dad pay thousands a month for online tools that could have been
+            better, while trying to provide for a family. We build these ourselves for that
+            reason, and we price them like people who saw that happen.
+          </p>
+        </div>
+        <ul className="border-t border-ink-900/10 lg:mt-2">
+          {TOOLS.map((t, i) => (
+            <li
+              key={t.title}
+              className="grid gap-2 py-7 border-b border-ink-900/10 sm:grid-cols-[3rem_1fr] sm:gap-6"
+            >
+              <span className="label-num text-ink-700/50">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3 className="font-display text-lg text-ink-900">{t.title}</h3>
+                <p className="mt-1.5 text-ink-800 leading-relaxed">{t.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Section>
+
+    <FinalCta
+      eyebrow="Book a time"
+      heading="Tell us what you need"
+      accent="on a fifteen-minute call"
+      body="We will have a custom made website mockup on the screen when you join. What it costs depends on what you want, and we will tell you straight."
+      ctaLabel="See available times"
+      onCta={goContact}
+    />
+  </>
+)
 
 export default Services
