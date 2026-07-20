@@ -35,10 +35,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://i.ibb.co" crossorigin />
 
-    <!-- Preload Critical Resources -->
+    <!-- Preload Critical Resources
+         Was preloading Inter + Outfit. Outfit was referenced nowhere in the CSS
+         or Tailwind config, so it was a blocking request for a font that never
+         rendered; Fraunces — the display face the whole design depends on — was
+         NOT preloaded and arrived late via a render-blocking @import, which put
+         a serif→Fraunces reflow on every heading at first paint. Now preloads
+         exactly the three faces the site actually uses. -->
     <link
       rel="preload"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300..900&family=IBM+Plex+Mono:wght@400;500&display=swap"
       as="style"
       onload="
         this.onload = null
@@ -48,7 +54,7 @@
     <noscript
       ><link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300..900&family=IBM+Plex+Mono:wght@400;500&display=swap"
     /></noscript>
 
     <!-- Preload critical images -->

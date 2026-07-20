@@ -61,7 +61,6 @@ function App() {
       else if (path.includes('/services')) setCurrentPage('services')
       else if (path.includes('/about')) setCurrentPage('about')
       else if (path.includes('/work')) setCurrentPage('work')
-      else if (path.includes('/reviews')) setCurrentPage('reviews')
       else if (path.includes('/contact')) setCurrentPage('contact')
       else if (path.includes('/refer')) setCurrentPage('refer')
       else if (path.includes('/termsofservice')) setCurrentPage('termsofservice')
@@ -121,7 +120,6 @@ function App() {
       about: ['About', 'About', 'general'],
       services: ['Services', 'Services', 'general'],
       work: ['Our Work', 'Portfolio', 'general'],
-      reviews: ['Reviews', 'Reviews', 'general'],
       contact: ['Contact', 'Contact', 'general'],
       socialmedia: ['Social Media', 'Social Media Services', 'social_media'],
       refer: ['Refer & Earn', 'Referral', 'general'],

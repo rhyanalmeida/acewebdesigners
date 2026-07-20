@@ -119,7 +119,7 @@ function AboutUs() {
               <img
                 src="/rhyan.jpg"
                 alt="Rhyan, lead developer at Ace Web Designers"
-                className="block w-full h-[420px] object-cover motion-safe:animate-ken-burns"
+                className="block w-full h-[420px] object-cover"
                 loading="lazy"
                 decoding="async"
               />

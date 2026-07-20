@@ -51,11 +51,6 @@ export const ROUTE_META: Record<string, RouteMeta> = {
     description:
       'Real websites and social campaigns we’ve built for restaurants, contractors, and service businesses across the United States.',
   }),
-  '/reviews': baseMeta('/reviews', {
-    title: 'Client Reviews & Testimonials | Ace Web Designers',
-    description:
-      'Verified Google reviews from small business owners we’ve worked with. Real stories, real results.',
-  }),
   '/contact': baseMeta('/contact', {
     title: 'Book a Free Design Call | Ace Web Designers',
     description:

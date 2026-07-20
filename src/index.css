@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
+/* Fraunces + Hanken are preloaded in index.html; this @import is the stylesheet
+   fallback. Inter was removed 2026-07-20 — it is the flagship "generated site"
+   tell. See docs/ART_DIRECTION.md. IBM Plex Mono carries every number, label and
+   date stamp; before this the `.label-num` job-sheet numbering fell back to the
+   system mono stack and rendered as Consolas by accident. */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300..900&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,8 +16,9 @@
   }
 
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #FAF8F4;
@@ -28,9 +34,12 @@
     color: #262625;
   }
 
-  h1 { font-size: clamp(2.75rem, 5.5vw, 4.5rem); font-weight: 600; }
-  h2 { font-size: clamp(2.25rem, 4.25vw, 3.25rem); font-weight: 600; }
-  h3 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; }
+  /* One big jump, then a flat tail. A strict modular ratio gives six sizes that
+     all look alike, which is what the previous scale produced. Only h1 is
+     dramatic; everything below it is close together on purpose. */
+  h1 { font-size: clamp(3rem, 6vw, 5rem); font-weight: 600; }
+  h2 { font-size: 1.75rem; font-weight: 600; }
+  h3 { font-size: 1.25rem; font-weight: 600; }
 
   /* Tap-target friendly buttons + links on mobile */
   @media (max-width: 768px) {
@@ -64,7 +73,7 @@
 
   /* Mono caps — for editorial metadata (industry · stack · year) */
   .label-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.72rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -73,7 +82,7 @@
 
   /* Numbered list (editorial: 001 — Item) */
   .label-num {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.85rem;
     letter-spacing: 0.04em;
     color: rgba(38, 38, 37, 0.55);
@@ -91,23 +100,13 @@
   .surface-ink   { background-color: #262625; color: #F4F3F1; }
 }
 
-/* ---------- LEGACY UTILITIES (kept registered) ---------- */
+/* ---------- LEGACY UTILITIES (kept registered) ----------
+   `.text-gradient-brand` / `.text-gradient-brand-animated` were deleted
+   2026-07-20 along with the whole `brand` indigo ramp. They painted a
+   blue→violet→magenta gradient (#2747f5 → #6c3df0 → #a330e6), which is the most
+   recognisable generated-site signature in circulation. One accent, never a
+   gradient. Do not reintroduce. */
 @layer utilities {
-  .text-gradient-brand {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(120deg, #2747f5 0%, #6c3df0 50%, #a330e6 100%);
-  }
-  .text-gradient-brand-animated {
-    @apply text-gradient-brand;
-    background-size: 200% auto;
-    animation: gradient-shift 6s ease infinite;
-  }
-
-  /* Editorial-mode brand text-gradient: replaces blue/purple with serif italic emphasis */
-  .text-accent-italic {
-    @apply text-editorial-italic text-signal-600;
-  }
-
   .glass-surface {
     background: rgba(251, 247, 240, 0.75);
     backdrop-filter: saturate(140%) blur(14px);
@@ -170,14 +169,6 @@
   }
   .magnetic-btn:hover.attention-ring { animation-play-state: paused; }
 
-  /* Marquee infinite scroll (LogoStrip / Marquee primitive) */
-  .marquee-track {
-    display: flex;
-    width: max-content;
-    animation: marquee 30s linear infinite;
-  }
-  .marquee-track:hover { animation-play-state: paused; }
-
   /* Nav link underline — left-anchored, draws on hover/active */
   .nav-underline {
     position: relative;
@@ -234,10 +225,6 @@
     will-change: opacity, transform;
   }
   [data-reveal="up"]      { transform: translateY(28px); }
-  [data-reveal="down"]    { transform: translateY(-28px); }
-  [data-reveal="left"]    { transform: translateX(-28px); }
-  [data-reveal="right"]   { transform: translateX(28px); }
-  [data-reveal="scale"]   { transform: scale(0.96); }
   [data-reveal="fade"]    { transform: none; }
   [data-reveal="stagger"] { transform: none; }
 
@@ -289,14 +276,13 @@
   }
 }
 
-/* ---------- HIGH CONTRAST ---------- */
+/* ---------- HIGH CONTRAST ----------
+   Both hexes here were stale: the colour was #82310F (the OLD rust-700, mislabelled
+   as signal-700) and the body colour was #0D0A07 (the OLD ink-950). Corrected to
+   the live tokens. */
 @media (prefers-contrast: high) {
-  .text-gradient-brand,
-  .text-gradient-brand-animated {
-    background: none;
-    color: #82310F; /* signal-700 */
-  }
-  body { color: #0D0A07; }
+  body { color: #141413; }
+  a { text-decoration-thickness: 2px; }
 }
 
 /* ---------- LEADCONNECTOR BOOKING WIDGET (LOAD-BEARING) ----------
