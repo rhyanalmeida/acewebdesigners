@@ -302,17 +302,6 @@ function LandingContractors() {
           tone="muted"
         />
 
-        {/* WEBSITE + SOCIAL MEDIA COMBO — cross-sell anchor */}
-        <WebsiteSocialCombo
-          websiteImage="https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif"
-          websiteAlt="Contractor website example showing project gallery and quote form"
-          socialImage="https://i.ibb.co/Myx4nrSr/concuo-gif.gif"
-          socialAlt="Contractor social media feed example with jobsite reels"
-          onCta={scrollToBooking}
-        />
-
-        <ComparisonTable />
-
         <FreeDesignBenefits
           eyebrow="What's included"
           heading="Every contractor combo includes"
@@ -349,6 +338,20 @@ function LandingContractors() {
             </>
           }
         />
+
+        {/* Cross-sell and comparison sit AFTER the form on purpose. They invite a
+            "let me weigh my options" beat, which is the wrong thing to hand a visitor
+            immediately before the ask. Ad traffic that scrolls past the form still
+            reaches them, and both CTAs scroll back up. */}
+        <WebsiteSocialCombo
+          websiteImage="https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif"
+          websiteAlt="Contractor website example showing project gallery and quote form"
+          socialImage="https://i.ibb.co/Myx4nrSr/concuo-gif.gif"
+          socialAlt="Contractor social media feed example with jobsite reels"
+          onCta={scrollToBooking}
+        />
+
+        <ComparisonTable />
 
         <LandingFaq
           eyebrow="Questions"

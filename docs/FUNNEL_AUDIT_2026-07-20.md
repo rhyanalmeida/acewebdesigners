@@ -187,8 +187,11 @@ the 2-of-2 booking rate says that once someone reaches the form, it works. The p
 arriving, not what greets them.
 
 ### 7. Small tracking fixes
-- Fire the browser pixel Lead/Schedule even when the server call fails (`Scheduler.tsx` currently
-  tracks only in the success branch — a transient 5xx loses the conversion entirely).
+- Fire the browser pixel **Lead** even when the server call fails (`Scheduler.tsx` tracked only in
+  the success branch, so a transient 5xx/cold start lost the conversion entirely). Safe because
+  both sides share `eventId` — if the server did send, Meta dedupes.
+  **Schedule is deliberately left gated**: there an error means no appointment was created, so
+  firing it would record a conversion that never happened.
 - Change the ad CTA button type from `BOOK_TRAVEL` to `BOOK_NOW`.
 - `withDefaultAdIds` stamps ad IDs on any `?source=landing-contractors` visit lacking UTM, inflating
   ad-attributed leads in our own DB. Meta's attribution is unaffected.

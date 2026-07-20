@@ -249,16 +249,17 @@ export const Scheduler: React.FC<SchedulerProps> = ({
         })
         if (error) {
           console.error('[Scheduler] lead capture error (continuing to calendar)', error)
-        } else {
-          // Fire the browser pixel Lead only AFTER the server Lead succeeds, so the
-          // two share an event_id and Meta dedupes — never an optimistic, unmatched
-          // event for a request that errored.
-          trackLead(eventId, { content_name: calendarName ?? `${calendar} booking` })
         }
       } catch (err) {
         // Don't block the funnel on a lead-capture hiccup — let them book.
         console.error('[Scheduler] lead invoke failed (continuing to calendar)', err)
       } finally {
+        // Fire the browser Lead regardless of the server outcome. It shares `eventId`
+        // with the server CAPI Lead, so if the server did send, Meta dedupes the pair;
+        // if it didn't, this is the only record of a real conversion. Gating this on
+        // server success made transient 5xx/cold-start failures invisible to Meta,
+        // which starves ad optimization at exactly the moment it matters.
+        trackLead(eventId, { content_name: calendarName ?? `${calendar} booking` })
         setLeadSubmitting(false)
         setStep('calendar')
       }
