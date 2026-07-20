@@ -14,7 +14,7 @@ import {
   BookingSection,
   LandingFaq,
   TrustStrip,
-  WebsiteSocialCombo,
+  BlueprintReveal,
   ComparisonTable,
 } from './components/landing'
 import { SeoMeta, serviceLd, faqPageLd, organizationLd, localBusinessLd, breadcrumbForPath } from './seo'
@@ -496,13 +496,7 @@ function LandingContractors() {
             "let me weigh my options" beat, which is the wrong thing to hand a visitor
             immediately before the ask. Ad traffic that scrolls past the form still
             reaches them, and both CTAs scroll back up. */}
-        <WebsiteSocialCombo
-          websiteImage="/work/dunn.webp"
-          websiteAlt="Contractor website example showing project gallery and quote form"
-          socialImage="/work/conuco.webp"
-          socialAlt="Contractor social media feed example with jobsite reels"
-          onCta={scrollToBooking}
-        />
+        <BlueprintReveal onCta={scrollToBooking} />
 
         <ComparisonTable />
 
