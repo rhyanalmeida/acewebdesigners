@@ -79,6 +79,55 @@ The video does as much filtering as the copy. A polished 9:16 with confident voi
 
 ---
 
+## ⚠️ The shipped ad does not follow this spec (measured 2026-07-20)
+
+The live ad "funny hook" (video `1003845082530934`, 22.3s) ignores the 0-3s row of the table above.
+Frames pulled from the actual creative: a young man in a grey hoodie on a couch in a cinder-block
+room, **holding two chihuahuas**, with one-word-per-frame captions ("MOST / WEBSITES / BUILT / 2009").
+
+There is no phone, no website, no job site, no "Free website for contractors" text — nothing in the
+first six seconds that tells a contractor this ad is for him or what he gets.
+
+What that cost, from Ads Manager:
+
+| Metric | Value | Read |
+|---|---|---|
+| `quality_ranking` | `BELOW_AVERAGE_35` | bottom 35% of competing ads |
+| CPM | $54.17 | ~3-4x the 2025 median (~$13.50) |
+| Hold to ~5.6s | 30% (2,461 of 8,207 plays) | benchmark for the 3-15s window is 40-50% |
+| Spend to 25-34 males | 30% | Advantage+ read it as entertainment content, not a contractor ad |
+| Leads | 2 lifetime | one of whom said *"thought i was wix repair"* |
+
+A real comment on the ad, 2026-07-19: *"With that haircut? You build the sites with microsoft paint?"*
+That is the audience telling us the creative is failing the credibility test — and comments like it
+drive ad-hides, which is what `quality_ranking` actually measures.
+
+**This is the single highest-value fix in the funnel.** Moving Below Average → Average should pull
+CPM toward $25-30, which roughly doubles the impressions $20/day buys, before any conversion-rate
+improvement.
+
+### Requirements for the replacement (test 3-5 hook variants, same body)
+
+1. **Second 1 names the audience on screen** — "CONTRACTORS:" / "ROOFERS:" in large burned-in text.
+   Advantage+ needs this as much as the viewer does; it's how delivery finds the right people.
+2. **Second 1 shows the payoff** — the actual generated homepage preview scrolling on a phone. We
+   build these automatically; use a real one.
+3. **Shoot on a job site or in a truck**, not a couch. No pets.
+4. **State the offer plainly by second 5** — "we build your homepage before the call, free, you only
+   pay if you love it."
+5. Keep it phone-shot and native. The problem is not production value — it's that nothing signals
+   *this is for you, and here is what you get*.
+
+Suggested hook lines to test:
+- "Contractors — this is your website, and I built it before we ever spoke." *(phone showing preview)*
+- "Your competitor's site books jobs at 11pm. Yours doesn't. Here's yours, free."
+- "I built a free homepage for your contracting business. You either love it or you walk."
+
+Keep the ad set on Lead and the budget at $20/day while testing — see
+`docs/FUNNEL_AUDIT_2026-07-20.md` for why raising budget behind a Below-Average ad buys more junk.
+
+---
+
 ## How to upload (after the video is ready)
 
 1. **Phone or desktop:** open `https://adsmanager.facebook.com/adsmanager/manage/ads?act=553999801104558`

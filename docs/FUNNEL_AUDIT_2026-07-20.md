@@ -2,6 +2,32 @@
 
 $659.90 spent. 2 leads. 2 bookings. 0 shows. 0 sales.
 
+## Execution status (2026-07-20)
+
+| # | Action | Status |
+|---|---|---|
+| 1 | Commit + push live code (master was behind production) | **Done** — verified build hash matched live before pushing |
+| 2 | Block Audience Network account-wide | **Done** — Advertising settings → Placement controls now "Defined"; both AN surfaces excluded |
+| 3 | New creative | **Handed off** — evidence + hook briefs in `docs/contractor-ad-creative.md`. Needs a shoot |
+| 4 | Moderate the 15 ad comments | **Needs a human** — see note below |
+| 5 | Show-rate mechanics (GHL) | **Not started** — GHL UI work |
+| 6 | Move booking form above cross-sell/comparison | **Done** — live, 12.6 → 8.6 mobile screens |
+| 7a | Fire browser Lead on server failure | **Done** — live |
+| 7b | `docs/META_ADS.md` stale-doc trap | **Done** — replaced with a pointer |
+| 7c | Ad CTA `BOOK_TRAVEL` → `BOOK_NOW` | **Blocked** — `META_ADS_TOKEN` is read-only; do it in Ads Manager UI |
+
+Two deliberate holds:
+
+- **Minimum booking notice left at 4h.** The plan floated 4h → 24h, but that rests on an n=2
+  hypothesis that runs *against* the benchmark curve (show rate normally peaks at next-day and
+  declines with distance). Changing it could suppress an already tiny booking volume, and with 2
+  leads there is no way to measure the result. Worth doing as a deliberate experiment, not as a
+  silent fix.
+- **Ad comment moderation.** Reading them requires a page token the ads token doesn't have, and the
+  Facebook UI route runs through the owner's personal feed where blind automation risks stray likes
+  or replies. One comment was captured before stopping (2026-07-19): *"With that haircut? You build
+  the sites with microsoft paint?"* — worth hiding, and it corroborates the creative finding.
+
 The booking system and the tracking are both working correctly. The money is being lost in the
 ad creative, the placements, and the show rate.
 
