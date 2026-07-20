@@ -218,6 +218,16 @@ stay in the Ace Web Designers portfolio.)
   bound to the pixel the page fires.
 - `META_ADS_TOKEN` (`.env.local`) is **READ-ONLY** — can't create/update ads/creatives/pixels; do that
   via Ads Manager UI (Playwright). Account past-due was cleared 2026-07-06.
+- **Audience Network is blocked account-wide** (2026-07-20) — Ads Manager → Advertising settings →
+  Placement controls, both AN surfaces excluded. It was 41% of all landing-page views and 0 leads
+  (rewarded video bought 236 link clicks for $32 — accidental taps in mobile games). Applies to every
+  campaign on the account, including restaurant. Don't re-enable. Marketplace and right column are
+  deliberately left ON — excluding 3+ surfaces constricts the auction.
+- This is an **Advantage+ leads campaign**, so per-ad-set manual placement selection isn't offered;
+  the account-level control above is the only route.
+- Current diagnosis + priorities: `docs/FUNNEL_AUDIT_2026-07-20.md`. Headline: the ad's
+  `quality_ranking` is `BELOW_AVERAGE_35` driving a $54 CPM (~3-4x median), and the creative ignores
+  its own spec in `docs/contractor-ad-creative.md`. Creative is the top lever, not the funnel.
 
 ---
 
