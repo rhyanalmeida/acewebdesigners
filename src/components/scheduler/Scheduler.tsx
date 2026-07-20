@@ -20,6 +20,7 @@ import 'react-day-picker/style.css'
 import { supabase, isSupabaseConfigured } from '../../lib/supabase'
 import { getAttribution } from '../../utils/attribution'
 import { trackLead, trackSchedule } from '../../utils/pixelTracking'
+import Button from '../ui/Button'
 
 interface Slot {
   startISO: string
@@ -399,13 +400,9 @@ export const Scheduler: React.FC<SchedulerProps> = ({
 
             {leadError && <p className="mt-3 text-sm text-red-600">{leadError}</p>}
 
-            <button
-              type="submit"
-              disabled={leadSubmitting}
-              className="mt-4 w-full rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
-            >
+            <Button type="submit" variant="primary" size="md" fullWidth disabled={leadSubmitting} className="mt-4">
               {leadSubmitting ? 'One moment…' : 'See available times'}
-            </button>
+            </Button>
             <p className="mt-3 text-center text-xs text-ink-700/60">Prefer to talk? Call {PHONE_DISPLAY}.</p>
           </form>
         </div>
@@ -423,7 +420,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
             <p className="mt-2 text-ink-700">Call or text us and we'll get you scheduled right away.</p>
             <a
               href={`tel:${PHONE}`}
-              className="mt-4 inline-block rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
+              className="mt-4 inline-flex items-center justify-center gap-2 bg-signal-500 px-6 py-3 font-semibold uppercase tracking-[0.08em] text-white border border-signal-500 transition-colors hover:bg-signal-600 hover:border-signal-600 shadow-[3px_3px_0_0_#111110]"
             >
               Call {PHONE_DISPLAY}
             </a>
@@ -439,7 +436,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
       {loading ? (
         <div className="flex items-center justify-center rounded-2xl bg-gray-50" style={{ minHeight }}>
           <div className="text-center">
-            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-signal-500" />
             <p className="font-medium text-gray-600">Loading available times…</p>
           </div>
         </div>
@@ -486,7 +483,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                         key={s.startISO}
                         type="button"
                         onClick={() => setSelectedSlot(s)}
-                        className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-700 transition-colors hover:border-blue-500 hover:bg-blue-50"
+                        className="border border-ink-900/20 bg-cream-50 px-3 py-2 text-sm font-medium text-ink-800 transition-colors hover:border-signal-500 hover:bg-signal-50 hover:text-signal-700"
                       >
                         {formatTime(s.startISO)}
                       </button>
@@ -501,12 +498,12 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                   <button
                     type="button"
                     onClick={() => setSelectedSlot(null)}
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-signal-600 hover:underline"
                   >
                     ← change time
                   </button>
                 </div>
-                <p className="mb-4 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800">
+                <p className="mb-4 border border-signal-200 bg-signal-50 px-3 py-2 text-sm text-signal-800">
                   {formatLongDate(selectedSlot.startISO)} at <strong>{formatTime(selectedSlot.startISO)}</strong>
                 </p>
                 <p className="mb-3 text-sm text-ink-700">
@@ -538,14 +535,9 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                   call — it's ready when we meet.
                 </p>
 
-                <button
-                  type="button"
-                  onClick={handleBook}
-                  disabled={booking}
-                  className="w-full rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
-                >
+                <Button type="button" variant="primary" size="md" fullWidth onClick={handleBook} disabled={booking}>
                   {booking ? 'Booking…' : 'Confirm booking'}
-                </button>
+                </Button>
                 <p className="mt-3 text-center text-xs text-ink-700/60">Prefer to talk? Call {PHONE_DISPLAY}.</p>
               </div>
             )}
@@ -557,6 +549,6 @@ export const Scheduler: React.FC<SchedulerProps> = ({
 }
 
 const inputClass =
-  'w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-ink-900 placeholder-ink-700/50 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500'
+  'w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-ink-900 placeholder-ink-700/50 focus:border-signal-500 focus:outline-none focus:ring-1 focus:ring-signal-500'
 
 export default Scheduler

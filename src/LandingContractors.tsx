@@ -224,15 +224,7 @@ function LandingContractors() {
                   </motion.p>
 
                   <HeroReveal className="mt-7 flex flex-col sm:flex-row justify-center gap-3">
-                    {/* The one CTA that pulses: the hero ask gets the (otherwise
-                        unused) signal-ring animation so it reads as THE button
-                        without leaving the palette. Everything else stays still. */}
-                    <Button
-                      variant="primary"
-                      size="lg"
-                      onClick={scrollToBooking}
-                      className="animate-pulse-signal sm:px-10 sm:py-5 sm:text-lg"
-                    >
+                    <Button variant="primary" size="lg" onClick={scrollToBooking}>
                       Get my free design
                       <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
                     </Button>

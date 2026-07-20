@@ -10,10 +10,11 @@ import React from 'react'
  * to rot: Home's copy had silently lost its shadow and nobody noticed.
  * docs/CREDIBILITY_PLAN_2026-07-20.md counted 4. It was 11.
  *
- * Shape language, 2026-07-20 (rev B): softly rounded, tactile. The hard black
- * offset-shadow experiment read as harsh next to the editorial surfaces (owner
- * call) — primary now carries a subtle vertical signal gradient with a tinted
- * soft shadow and a small lift on hover, pressing flat on :active.
+ * Shape language, 2026-07-20: square. No radius, no glow, no magnetic hover,
+ * no gradient. A button is a rectangle you press. Feedback is a 1px shift
+ * against a hard offset shadow — mechanical, like a real switch, rather than
+ * the float-and-scale that reads as generated. (A rounded-gradient variant was
+ * tried and reverted the same day — owner call: keep the mechanical look.)
  *
  * `ring-focus-signal` is kept on every variant: keyboard focus is not optional.
  */
@@ -39,16 +40,16 @@ const SIZES: Record<ButtonSize, string> = {
   lg: 'px-8 py-4 text-base sm:text-lg',
 }
 
-const PRIMARY =
-  'bg-gradient-to-b from-signal-500 to-signal-700 text-white border border-signal-700/60 ' +
-  'shadow-md shadow-signal-900/25 hover:from-signal-400 hover:to-signal-600 ' +
-  'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-signal-900/30 ' +
-  'active:translate-y-0 active:shadow-sm'
-
+/**
+ * `translate` + `shadow` pair: the button sits 2px proud of a solid black block
+ * and presses flush on :active. Nothing blurs.
+ */
 const VARIANTS: Record<ButtonVariant, Record<'default' | 'inverted', string>> = {
   primary: {
-    default: PRIMARY,
-    inverted: PRIMARY,
+    default:
+      'bg-signal-500 text-white border border-signal-500 hover:bg-signal-600 hover:border-signal-600 shadow-[3px_3px_0_0_#111110] hover:shadow-[1px_1px_0_0_#111110] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]',
+    inverted:
+      'bg-signal-500 text-white border border-signal-500 hover:bg-signal-600 hover:border-signal-600 shadow-[3px_3px_0_0_#F2F1EF] hover:shadow-[1px_1px_0_0_#F2F1EF] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]',
   },
   secondary: {
     default:
@@ -75,7 +76,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => (
   <button
     className={[
-      'group inline-flex items-center justify-center gap-2 rounded-lg font-semibold uppercase tracking-[0.08em]',
+      'group inline-flex items-center justify-center gap-2 font-semibold uppercase tracking-[0.08em]',
       'transition-[background-color,color,box-shadow,transform,border-color,padding] duration-150 ease-out',
       'ring-focus-signal disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
       SIZES[size],

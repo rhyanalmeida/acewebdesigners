@@ -128,11 +128,9 @@ export default {
       // unused decorative motion is how a site ends up decorated by default.
       keyframes: {
         'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(24px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-        // Includes the primary button's resting drop shadow so the pulse doesn't
-        // strip its depth (animation box-shadow replaces the utility's).
         'pulse-signal': {
-          '0%, 100%': { boxShadow: '0 4px 6px -1px rgba(58, 3, 3, 0.25), 0 0 0 0 rgba(160, 9, 9, 0.35)' },
-          '50%':      { boxShadow: '0 4px 6px -1px rgba(58, 3, 3, 0.25), 0 0 0 8px rgba(160, 9, 9, 0)' },
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(160, 9, 9, 0.35)' },
+          '50%':      { boxShadow: '0 0 0 8px rgba(160, 9, 9, 0)' },
         },
       },
       animation: {

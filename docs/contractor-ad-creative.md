@@ -314,56 +314,76 @@ waiting.
 Tap below.
 ```
 
-### Script C — warm & personal (2026-07-20) — RECORD THIS
+### Script C v2 — research-tuned, modular hook test (2026-07-20) — RECORD THIS
 
-Chosen for the next shoot: a fresh **9:16 selfie of Rhyan's face**, proven "build & show free" offer
-(Script A's converting framing) with a **warm, personal opener** — Rhyan introduces himself as a real
-individual builder, "not a big agency." That opener is the direct antidote to the credibility problem
-that sank "funny hook": every hostile comment came from web developers calling it "AI slop / they're
-all identical." A named human saying *I build these myself* breaks the recognisable cheap-agency-ad
-genre on sight. Scripts A and B above remain as alternates.
+Supersedes the first Script C draft. A fresh **9:16 selfie of Rhyan's face**, proven "build & show
+free" offer with a **warm, personal founder credential** ("I build them myself, not a big agency" —
+the antidote to the "AI slop / they're all identical" roast). Validated against 2026 best practice,
+triangulated across multiple independent sources, weighted below our own first-party data:
 
-~96 words, ~30–32s at conversational pace (the winner was 95 words / 31.6s).
+- **The hook is the #1 lever.** Meta's own research: **47% of a video ad's value lands in the first
+  3 seconds**, 74% by 10s; 65% who watch 3s keep watching to 10s. Hook swaps move performance
+  **40–60%** on identical content. So the pain/consequence must hit in **second 1** — not a self-intro
+  first (the earlier draft delayed it to ~4–5s). Both the research and our own 2025 winner lead with
+  the pain. *(adligator, coinis, benly, roaspig)*
+- **Test 3–5 hooks against one body** — but Meta's current **Andromeda** algorithm rewards creative
+  *diversity*, so 5 near-identical clones with one line swapped is penalised. The hooks below are
+  **distinct angles** on purpose; let winners become distinct creatives. *(leadsbridge, tailorededge)*
+- **Founder-led talking head + authenticity** is a named lead-gen winner for home services; **visible
+  proof** (a real site on a phone) converts contractors better than pure talking head — hence the
+  phone insert. *(performancemarketer, creeksidemarketingpros, pipelineon)*
+- **Risk reversal** ("only pay if you love it") lifts conversion ~21% and is a recognised
+  high-converting pattern. *(quicksprout, crazyegg)*
+
+#### The BODY — film once (~22s)
+
+Opens generically ("So here's what I'll do") so it splices cleanly after any hook.
 
 ```
-Hey — I'm Rhyan. I build websites for contractors myself.
-Not some big agency, not a call center. Just me and my small team.
+So here's what I'll do. I'll build you a brand-new website — fast, clean,
+made to get you more calls and more jobs.
 
-Here's the thing: your website is the first thing a customer sees.
-And if it looks old or slow, they just call the next guy.
+And I build them myself. I'm Rhyan — not a big agency, not a call center.
 
-So let me build you a new one. Fast, clean, made to get you more
-calls and more jobs. I'll build it first and show it to you for free —
-you only pay if you love it.
+[CUT — phone scrolling a real generated contractor homepage, 2–3s]
 
-That's it. No pressure, no catch. Tap below and let's talk.
+I'll build it first and show it to you for free. You only pay if you love it.
+No pressure, no catch. Tap below and let's talk.
 ```
 
-Every beat is traceable to the measured data:
+#### The HOOKS — film each as a separate ~3s take, lands the message in second 1
 
-| Beat | Line | Why |
+Record A + B + C at minimum (all face-led). D and E are stretch takes.
+
+| # | Hook (spoken to camera, sec 0–3) | Why / basis |
 |---|---|---|
-| Warm/personal open | "I'm Rhyan… not some big agency… just me and my small team" | Names a real human in second 1 (winner did; failing ad never did). Rebuts "AI slop / they're all identical" — a person, not a template. |
-| Direct address | "your website is the first thing a customer sees" | Speaks TO the contractor — the winner's proven direct-address opening. |
-| Consequence | "they just call the next guy" | A customer phoning a competitor — a real cost, not "looks like 2009" (an observation with no stated cost). Contractor vernacular. |
-| Offer = a website | "let me build you a new one… I'll build it first and show it to you for free" | Fixes the biggest failure of "funny hook", which sold a *meeting* ("thought i was wix repair"). |
-| Outcomes not features | "more calls and more jobs" | What a contractor thinks in — not "fast, modern, mobile-friendly" or "transform your digital presence". |
-| Risk reversal | "only pay if you love it" | The proven hook that kills the price objection. |
-| Low pressure | "No pressure, no catch" | Gain-framed + inviting beat loss-framed + exclusionary 9x; also likely helps show-rate. |
-| Mobile CTA | "Tap below" | ~97% mobile traffic (not "click the link"). |
+| **A** *(safest — closest to the proven 2025 winner)* | "Your website is the first thing a customer sees — and if it looks outdated, they just call the next guy." | Pain + consequence in second 1; contractor vernacular. The exact shape that converted 9x in 2025. |
+| **B** *(offer-forward challenger)* | "Contractors — I'll build your whole website for free. And I'll prove it." | Names audience + offer + credibility promise up front; "prove it" sets up the phone insert. |
+| **C** *(curiosity / relevance)* | "When's the last time you actually looked at your own website?" | Question hook opens a loop; forces self-relevance. |
+| D *(honest / anti-"AI-slop")* | "You've probably seen a hundred of these ads. I'm gonna be straight with you." | Disarms the "they're all identical" pattern skeptics recognise. Stretch take. |
+| E *(show-the-payoff — phone in hand at open)* | "This is a website I built for a contractor — free, before we ever talked." | Leads with visible proof (strongest per contractor research); needs the phone visible from frame 1. |
 
-**On camera (9:16 face shot):** match the winner — collared shirt or clean plain tee, plain wall with
-even light (or in a truck / at a real job site), tight head-and-shoulders with the phone at eye level
-straight to lens, nothing else in frame, **no pets**. 1080×1920, MP4/H.264, ~30s.
+**What each beat does (unchanged logic from the proven winner):** direct address → consequence →
+offer = a *website* not a meeting → outcomes ("calls and jobs", not "mobile-friendly") → named human
+→ risk reversal → low pressure → mobile CTA ("Tap below", ~97% mobile).
 
-**On-screen text + captions:**
-- Seconds 0–2: static overlay `CONTRACTORS —` (large). Audio opens personal; the text does the
+#### On camera (9:16 face shot)
+
+Match the winner — collared shirt or clean plain tee, plain wall with even light (or a truck / real
+job site), tight head-and-shoulders with the phone at eye level straight to lens, nothing else in
+frame, **no pets**. 1080×1920, MP4/H.264, total cut **~25–28s** (hook in second 1). The phone-insert
+clip = a real generated homepage (from `generate-site`) scrolling on a phone screen.
+
+#### On-screen text + captions
+
+- Seconds 0–2: static overlay `CONTRACTORS —` (large). Audio hook plays; the text does the
   audience-targeting for muted viewers *and* for Advantage+ delivery.
 - Captions: burned-in (85% watch muted), **clean phrase style** — 3–5 words per line, bottom third,
   plain white sans on a subtle dark scrim, static per phrase. NOT one-word-per-frame kinetic captions
   (that TikTok signal skewed delivery to 25–34 males / entertainment audiences).
 
-**Ad copy to pair (gain-framed, low-pressure — like the winner):**
+#### Ad copy to pair (gain-framed, low-pressure — like the winner)
+
 - Headline (≤27 chars): `Free Website for Contractors`
 - Description: `Real builder · Only pay if you love it`
 - Primary text:
@@ -376,6 +396,14 @@ straight to lens, nothing else in frame, **no pets**. 1080×1920, MP4/H.264, ~30
   ```
 - CTA button: `Book Now`
 - Destination: `https://acewebdesigners.com/contractorlanding?source=landing-contractors`
+
+#### Testing & KPIs
+
+Run A/B/C as **distinct creatives** in the ad set (Andromeda rewards diversity — not 5 clones).
+**Judge on leads, not CTR/CPM/retention** — the 2025 winner beat "funny hook" 9x on conversion while
+losing every attention metric. Use **hook rate (>25–30% watch-past-3s)** only as an early diagnostic
+that a hook isn't dead on arrival; the deciding KPI is leads. Keep the ad set on **Lead / $20/day /
+Advantage+**. Let it run to enough leads before picking a winner.
 
 ### Do not put these in the script
 
