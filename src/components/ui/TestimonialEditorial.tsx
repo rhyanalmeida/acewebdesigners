@@ -41,7 +41,7 @@ const Monogram: React.FC<{ name: string; tone: 'default' | 'inverted' }> = ({
   const isDark = tone === 'inverted'
   return (
     <span
-      className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-display text-lg font-semibold ${
+      className={`inline-flex h-11 w-11 shrink-0 items-center justify-center font-mono text-sm font-medium ${
         isDark ? 'bg-cream-50 text-ink-900' : 'bg-ink-900 text-cream-50'
       }`}
       aria-hidden
@@ -69,10 +69,10 @@ const TestimonialEditorial: React.FC<TestimonialEditorialProps> = ({
 
   return (
     <figure
-      className={`relative flex flex-col rounded-xl3 p-7 sm:p-9 ${
+      className={`relative flex flex-col p-7 sm:p-9 ${
         isDark
-          ? 'bg-ink-900 text-cream-50 ring-1 ring-cream-50/10'
-          : 'bg-cream-50 text-ink-900 ring-1 ring-ink-900/10'
+          ? 'bg-ink-900 text-cream-50 border border-cream-50/15'
+          : 'bg-cream-50 text-ink-900 border border-ink-900/15'
       } ${className}`}
     >
       <blockquote className={quoteSize}>

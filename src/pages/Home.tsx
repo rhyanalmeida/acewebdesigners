@@ -3,7 +3,9 @@ import { ArrowRight, ChevronRight, Plus, Minus } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import {
+  Button,
   Container,
+  Figure,
   Section,
   Eyebrow,
   GradientHeading,
@@ -68,6 +70,29 @@ const TESTIMONIALS = [
     name: 'Francisco Oliveira',
     quote: 'Great experience! Highly recommend!',
   },
+]
+
+/**
+ * PHOTO SLOTS — awaiting real images from Rhyan (2026-07-20).
+ *
+ * Drop files into /public/work/ and fill in `src` below. The slots render
+ * nothing at all until then, so the page is honest in the meantime.
+ *
+ * What is needed, in priority order:
+ *   1. A bathroom Rhyan's dad's team built, or a Luxury Makeover job — the
+ *      trade the whole site is addressed to.
+ *   2. Hands working. Tools, materials, mid-job. Not posed.
+ *   3. A finished deck (Dunn) — we have the website screenshot, not the deck.
+ *
+ * Phone photos are fine and preferred over anything staged. Figure's `mono`
+ * treatment unifies mixed lighting.
+ *
+ * NEVER fill these with stock or generated imagery.
+ */
+const JOB_PHOTOS: Array<{ src?: string; alt?: string; caption?: string }> = [
+  { src: undefined, alt: undefined, caption: 'Bathroom' },
+  { src: undefined, alt: undefined, caption: 'On site' },
+  { src: undefined, alt: undefined, caption: 'Deck' },
 ]
 
 const GOOGLE_REVIEWS_URL =
@@ -196,20 +221,14 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
               </p>
 
               <div className="mt-9 flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={() => onNavigate('contact')}
-                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-8 py-4 magnetic-btn ring-focus-signal transition-colors duration-300"
-                >
+                <Button variant="primary" size="lg" onClick={() => onNavigate('contact')}>
                   See available times
                   <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
-                </button>
-                <button
-                  onClick={() => onNavigate('work')}
-                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-cream-100 hover:bg-cream-200 text-ink-900 font-semibold text-base sm:text-lg px-7 py-4 ring-1 ring-ink-900/15 transition-colors duration-300 ease-premium ring-focus-signal"
-                >
+                </Button>
+                <Button variant="secondary" size="lg" onClick={() => onNavigate('work')}>
                   See the work
                   <ChevronRight className="h-5 w-5 icon-nudge" aria-hidden />
-                </button>
+                </Button>
               </div>
 
               <div className="mt-8">
@@ -259,6 +278,23 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             </p>
           </div>
         </div>
+
+        {/* Renders nothing until real photographs exist. See JOB_PHOTOS above. */}
+        {JOB_PHOTOS.some(p => p.src) && (
+          <div className="mt-16 grid gap-6 sm:grid-cols-3">
+            {JOB_PHOTOS.map((p, i) => (
+              <Figure
+                key={p.caption}
+                src={p.src}
+                alt={p.alt}
+                caption={p.caption}
+                index={String(i + 1).padStart(2, '0')}
+                treatment="mono"
+                aspect="aspect-[4/5]"
+              />
+            ))}
+          </div>
+        )}
       </Section>
 
       {/* ── THE CALL ──────────────────────────────────────────────────────────

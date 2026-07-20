@@ -40,7 +40,7 @@ const PhoneCta: React.FC<PhoneCtaProps> = ({
       <a
         href={formatPhoneHref(phone)}
         onClick={() => trackPhoneClick(source)}
-        className={`group inline-flex items-center gap-2.5 ring-focus-signal rounded ${baseLink} transition-colors duration-200 ease-premium`}
+        className={`group inline-flex items-center gap-2.5 ring-focus-signal ${baseLink} transition-colors duration-200 ease-premium`}
         aria-label={`Call ${phone}`}
       >
         <Phone className="h-4 w-4 shrink-0" aria-hidden />
@@ -54,7 +54,7 @@ const PhoneCta: React.FC<PhoneCtaProps> = ({
 
       <a
         href={`mailto:${email}`}
-        className={`group inline-flex items-center gap-2.5 ring-focus-signal rounded ${baseLink} transition-colors duration-200 ease-premium`}
+        className={`group inline-flex items-center gap-2.5 ring-focus-signal ${baseLink} transition-colors duration-200 ease-premium`}
         aria-label={`Email ${email}`}
       >
         <Mail className="h-4 w-4 shrink-0" aria-hidden />

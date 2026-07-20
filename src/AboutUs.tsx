@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import {
   Section,
   Eyebrow,
+  Figure,
   GradientHeading,
   SectionHeading,
   FinalCta,
@@ -106,20 +107,21 @@ const AboutUs: React.FC = () => (
       />
 
       <div className="mt-14 grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 items-start">
-        <div className="relative">
-          <div className="rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 bg-cream-200">
-            <img
-              src="/rhyan.jpg"
-              alt="Rhyan of Ace Web Designers"
-              className="block w-full h-[420px] object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          {/* Placeholder note: replace with a photo of Rhyan AND Valerie when
-              supplied. Do not fill this with stock or generated imagery. */}
-          <p className="mt-3 label-mono text-ink-700/60">Rhyan</p>
-        </div>
+        {/*
+          PHOTO SLOT — Rhyan is supplying a photo of him AND Valerie.
+          When it lands: drop it in /public/, then swap `src` to it, update
+          `alt`, and change the caption to both names.
+          Until then this shows the one real photo that exists rather than a
+          placeholder box. Do NOT substitute stock or generated imagery.
+        */}
+        <Figure
+          src="/rhyan.jpg"
+          alt="Rhyan of Ace Web Designers"
+          caption="Rhyan"
+          index="01"
+          treatment="mono"
+          aspect="aspect-[4/5]"
+        />
 
         <ul className="border-t border-ink-900/10">
           <li className="grid gap-3 py-8 border-b border-ink-900/10 sm:grid-cols-[8rem_1fr] sm:gap-8">
@@ -150,7 +152,7 @@ const AboutUs: React.FC = () => (
       </div>
     </Section>
 
-    {/* ── WHAT WE WON'T DO ──────────────────────────────────────────────────
+    {/* ── WHAT WE WILL NOT DO ──────────────────────────────────────────────────
         Built from Rhyan's own answer. Kept short — a long list of refusals
         starts to sound like posturing. */}
     <Section tone="muted" padding="lg">

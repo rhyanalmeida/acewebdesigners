@@ -1,7 +1,7 @@
 import React from 'react'
 
 const inputBaseClass =
-  'w-full px-4 py-3 bg-white border border-ink-900/15 rounded-xl text-ink-900 placeholder:text-ink-500/60 focus:outline-none focus:ring-2 focus:ring-signal-500/40 focus:border-signal-500 hover:border-ink-900/30 transition-[border-color,box-shadow,transform] duration-300 ease-premium motion-safe:focus:-translate-y-px'
+  'w-full px-4 py-3 bg-cream-50 border border-ink-900/30 text-ink-900 placeholder:text-ink-500/70 focus:outline-none focus:border-signal-500 focus:ring-1 focus:ring-signal-500 hover:border-ink-900/50 transition-[border-color] duration-150 ease-out'
 
 export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className = '', ...rest }, ref) => (

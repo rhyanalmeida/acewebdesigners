@@ -1,5 +1,4 @@
 import React from 'react'
-import HandUnderline from './HandUnderline'
 
 type Level = 1 | 2 | 3 | 4
 type Size = 'sm' | 'md' | 'lg' | 'xl' | 'display'
@@ -9,19 +8,47 @@ interface GradientHeadingProps extends React.HTMLAttributes<HTMLHeadingElement> 
   level?: Level
   size?: Size
   tone?: Tone
-  /** Italic accent phrase — rendered as Fraunces italic in rust */
+  /** Emphasised phrase, rendered in the accent red. */
   accent?: React.ReactNode
   accentPlacement?: 'inline' | 'after' | 'before'
-  /** Draws a hand-drawn underline beneath the accent on scroll-into-view */
-  accentUnderline?: boolean
 }
 
+/**
+ * Every headline on the site renders through here — 18 files. This is the one
+ * place the display face is decided, which is why the typeface change is a
+ * single-file edit.
+ *
+ * The name is now a lie twice over: there is no gradient (removed with the
+ * indigo ramp) and no longer a serif. It is kept anyway — renaming costs 18
+ * files of churn for zero visual gain, and a rename is what buried the last
+ * palette change in noise. The name is a bad label on a good chokepoint.
+ *
+ * 2026-07-20: Fraunces → Archivo. A serif display face over a warm ground is
+ * the documented AI-web-design signature. Weight and WIDTH now carry what the
+ * serif used to — `font-variation-settings: 'wdth'` expands as the size steps
+ * up, so display headlines read as signage rather than as an article.
+ *
+ * `accentUnderline` and its HandUnderline squiggle were deleted: no call site
+ * ever passed the prop, so it was dead code reachable only through an unused
+ * API. Emphasis is colour alone.
+ */
+
 const sizeMap: Record<Size, string> = {
-  sm:      'text-2xl sm:text-3xl',
-  md:      'text-3xl sm:text-4xl',
-  lg:      'text-4xl sm:text-5xl lg:text-6xl',
-  xl:      'text-5xl sm:text-6xl lg:text-7xl',
-  display: 'text-5xl sm:text-7xl lg:text-[5.5rem] leading-[1.05]',
+  sm:      'text-xl sm:text-2xl',
+  md:      'text-2xl sm:text-3xl',
+  lg:      'text-3xl sm:text-4xl lg:text-5xl',
+  xl:      'text-4xl sm:text-5xl lg:text-6xl',
+  display: 'text-[2.75rem] sm:text-6xl lg:text-7xl',
+}
+
+/** Wider as it gets bigger. Small headings stay near-normal so body text next
+ *  to them does not look squeezed. */
+const widthMap: Record<Size, number> = {
+  sm: 100,
+  md: 104,
+  lg: 108,
+  xl: 112,
+  display: 118,
 }
 
 const toneMap: Record<Tone, string> = {
@@ -30,51 +57,41 @@ const toneMap: Record<Tone, string> = {
 }
 
 const accentToneMap: Record<Tone, string> = {
-  default:  'text-signal-600',
-  inverted: 'text-signal-300',
+  default: 'text-signal-500',
+  // signal-300 (#E58787) on near-black reads as washed-out pink, not as the
+  // brand red — it loses the accent entirely. signal-400 holds its chroma
+  // against #111110 while still clearing contrast for large text.
+  inverted: 'text-signal-400',
 }
 
-/**
- * GradientHeading — editorial: serif Fraunces, italic accent in rust.
- * Component name preserved for backward compat; behavior shifted from
- * gradient text to italic editorial accent.
- */
 const GradientHeading: React.FC<GradientHeadingProps> = ({
   level = 2,
   size = 'lg',
   tone = 'default',
   accent,
   accentPlacement = 'inline',
-  accentUnderline = false,
   className = '',
+  style,
   children,
   ...rest
 }) => {
-  const Tag = (`h${level}`) as React.ElementType
-  // The accent used to be italic serif in the accent colour. Italicised serif
-  // emphasis on a warm ground is one of the most-cited "AI-generated" tells, so the
-  // emphasis is now carried by colour alone — same hierarchy, none of the signature.
-  // See docs/REDESIGN_PLAN_2026-07-20.md §0.
+  const Tag = `h${level}` as React.ElementType
+
   const accentEl = accent ? (
-    <span className={`relative inline-block ${accentToneMap[tone]}`}>
-      {accent}
-      {accentUnderline && (
-        <span className="absolute -bottom-1 left-0 right-0 h-2 pointer-events-none" aria-hidden="true">
-          <HandUnderline color={tone === 'inverted' ? '#E58787' : '#A00909'} />
-        </span>
-      )}
-    </span>
+    <span className={accentToneMap[tone]}>{accent}</span>
   ) : null
 
   return (
     <Tag
-      className={`font-display font-semibold tracking-tight ${sizeMap[size]} ${toneMap[tone]} ${className}`}
+      className={`font-display font-extrabold tracking-[-0.03em] leading-[1.02] ${sizeMap[size]} ${toneMap[tone]} ${className}`}
+      style={{ fontVariationSettings: `'wdth' ${widthMap[size]}`, ...style }}
       {...rest}
     >
       {accentPlacement === 'before' && accentEl ? <>{accentEl} </> : null}
       {children}
-      {accentPlacement === 'after' && accentEl ? <> {accentEl}</> : null}
-      {accentPlacement === 'inline' && accentEl ? <> {accentEl}</> : null}
+      {(accentPlacement === 'after' || accentPlacement === 'inline') && accentEl ? (
+        <> {accentEl}</>
+      ) : null}
     </Tag>
   )
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Mail, Phone, MapPin, ArrowRight } from 'lucide-react'
+import Button from '../ui/Button'
 import Container from '../ui/Container'
 import Logo from '../ui/Logo'
 import { NavigateFn } from './SiteHeader'
@@ -19,13 +20,16 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
             Rhyan and Valerie. We build websites for contractors and the people who do the
             work themselves, anywhere in the United States.
           </p>
-          <button
+          <Button
+            variant="primary"
+            size="sm"
+            tone="inverted"
+            className="mt-8"
             onClick={() => onNavigate('contact')}
-            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-6 py-3 text-sm font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
           >
             See available times
             <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
-          </button>
+          </Button>
         </div>
 
         <div className="md:col-span-3">
@@ -42,7 +46,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
               <li key={l.page}>
                 <button
                   onClick={() => onNavigate(l.page)}
-                  className="nav-underline text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal rounded font-display"
+                  className="nav-underline text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal"
                 >
                   {l.label}
                 </button>
@@ -57,7 +61,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
             <li>
               <a
                 href="mailto:hello@acewebdesigners.com"
-                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal rounded"
+                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal"
               >
                 <Mail className="h-4 w-4 text-signal-300" aria-hidden />
                 hello@acewebdesigners.com
@@ -66,7 +70,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
             <li>
               <a
                 href="tel:+17744467375"
-                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal rounded"
+                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal"
               >
                 <Phone className="h-4 w-4 text-signal-300" aria-hidden />
                 (774) 446-7375
@@ -88,13 +92,13 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
           <div className="flex flex-wrap gap-5 text-sm">
             <button
               onClick={() => onNavigate('privacy')}
-              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-signal rounded"
+              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-signal"
             >
               Privacy Policy
             </button>
             <button
               onClick={() => onNavigate('termsofservice')}
-              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-signal rounded"
+              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-signal"
             >
               Terms of Service
             </button>

@@ -36,7 +36,9 @@ const ICON_MAP = {
 const TrustStack: React.FC<TrustStackProps> = ({
   items = DEFAULT_ITEMS,
   tone = 'default',
-  align = 'center',
+  // Default flipped from 'center' to 'left' 2026-07-20 to match the left-aligned
+  // rhythm. Pass align="center" deliberately where a block should break it.
+  align = 'left',
   className = '',
 }) => {
   const isDark = tone === 'inverted'

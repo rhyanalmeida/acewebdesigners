@@ -86,7 +86,7 @@ const Work: React.FC = () => (
         <article className="grid gap-8 lg:grid-cols-12 lg:gap-12 items-start">
           <div className={`lg:col-span-8 ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
             <a href={p.link} target="_blank" rel="noopener noreferrer" className="block group">
-              <div className="overflow-hidden rounded-xl3 ring-1 ring-ink-900/10 bg-cream-200">
+              <div className="overflow-hidden border border-ink-900/20 bg-cream-200">
                 <img
                   src={p.image}
                   alt={`The ${p.title} website`}

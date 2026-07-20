@@ -4,40 +4,56 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        // Inter was dropped 2026-07-20. It is the default of every generated site
-        // and every SaaS template, and under a serif display face it is most of
-        // what makes a page read as machine output. Hanken Grotesk is humanist
-        // enough to survive at body size without announcing itself, and is not
-        // Jakarta/Manrope/DM Sans — the next wave of the same genericism.
-        sans: ['Hanken Grotesk', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Fraunces', 'ui-serif', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
-        // Real mono, not the system fallback. Carries the job-sheet numbering,
-        // metadata labels and every date-stamped figure. See docs/ART_DIRECTION.md.
+        // ONE family for display and body: Archivo, variable on weight AND width.
+        // The width axis is the whole point — Expanded/Black gives signage-weight
+        // headlines, Condensed gives spec-sheet labels, from a single file.
+        //
+        // Fraunces was removed 2026-07-20. A large serif display face over a warm
+        // off-white ground is the documented signature of AI-generated web design,
+        // which is exactly what the site was being mocked for.
+        //
+        // Also rejected, with reasons: Oswald / Anton / Bebas Neue are the reflexive
+        // "make it look tough" faces and the default of every contractor and gym
+        // template — they would have made the site MORE generic while feeling more
+        // industrial. Geist now reads as developer-tool marketing. Bricolage
+        // Grotesque is on its way to being the next Inter. Instrument Sans caps at
+        // 700 with no width axis, so it cannot carry display.
+        sans: ['Archivo', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Archivo', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        // Real mono, not the system fallback. Carries the numbering, the metadata
+        // labels and every date-stamped figure. See docs/ART_DIRECTION.md.
         mono: ['IBM Plex Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        // ----- New editorial palette (Phase 3) -----
-        // Ground pulled off the beige end of the range (was #FBF7F0). Still warm
-        // paper, but out of the cream/beige band that reads as machine-default.
+        // ----- Concrete palette (2026-07-20) -----
+        // Warmth removed entirely. The previous ramp was warm paper (#FAF8F4 and
+        // friends), and warm off-white under a display face is the AI-web-design
+        // signature we keep getting caught by. These are neutral-cool greys —
+        // concrete, not parchment. Industrial brands use white or near-black
+        // grounds and never warm cream.
+        //
+        // Token names kept as `cream-*` deliberately: renaming would touch ~37
+        // files for zero visual gain, and a rename is what buried the last palette
+        // change in noise. The values are the contract, not the word.
         cream: {
-          50:  '#FAF8F4', // body paper
-          100: '#F3F1EC', // section alt
-          200: '#E8E5DE', // panels
-          300: '#D8D4CB', // dividers / muted
-          400: '#BDB8AC',
+          50:  '#F2F1EF', // ground
+          100: '#EAE9E6', // section alt
+          200: '#DEDCD8', // panels
+          300: '#C9C7C2', // dividers / muted
+          400: '#A9A7A1',
         },
         // Neutralised: the old ramp was a warm near-black (#1A1611) which reinforced
         // the cream-and-rust signature. Body text now sits near #404040, and nothing
         // is pure black — a convention every reference studio follows.
         ink: {
-          50:  '#F4F3F1', // inverted-on-dark text
-          100: '#D8D6D2',
-          200: '#9C9994',
-          500: '#5C5A56',
-          700: '#4A4845', // body text muted
-          800: '#404040', // body text default
-          900: '#262625', // headlines / strong text
-          950: '#141413',
+          50:  '#F2F1EF', // inverted-on-dark text
+          100: '#D4D3D0',
+          200: '#96958F',
+          500: '#575652',
+          700: '#3C3B38', // body text muted
+          800: '#2A2927', // body text default
+          900: '#111110', // headlines / strong text / inverted grounds
+          950: '#000000',
         },
         // Primary accent. Was rust #C04E1A until 2026-07-20 — that hue, on a cream
         // ground under a serif display face, is the documented signature of
@@ -81,17 +97,25 @@ export default {
         // and it is two 4%-opacity washes of the real palette.
         'paper-noise': 'radial-gradient(at 0% 0%, rgba(160,9,9,0.04) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(31,77,61,0.04) 0px, transparent 55%)',
       },
+      // `ring` and `inner-soft` deleted — zero uses. `glow-signal` deleted: a
+      // coloured glow under a button is the soft/premium register being removed.
+      // What survives is flat and structural; depth comes from 1px rules, not blur.
       boxShadow: {
-        soft:    '0 1px 2px rgba(38, 38, 37, 0.04), 0 8px 24px rgba(38, 38, 37, 0.06)',
-        lift:    '0 4px 12px rgba(38, 38, 37, 0.08), 0 24px 48px rgba(38, 38, 37, 0.10)',
-        ring:    '0 0 0 1px rgba(38, 38, 37, 0.08)',
-        'glow-signal':  '0 10px 32px -10px rgba(160, 9, 9, 0.45), 0 4px 12px -4px rgba(160, 9, 9, 0.25)',
-        'inner-soft':   'inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(38, 38, 37, 0.04)',
+        soft: '0 1px 2px rgba(17, 17, 16, 0.05)',
+        lift: '0 2px 0 0 rgba(17, 17, 16, 1)',
       },
+      // All three collapsed to 0 on 2026-07-20. This one edit squares 17 call
+      // sites across the library without touching them. The keys are kept rather
+      // than deleted precisely so those call sites keep compiling — `rounded-xl3`
+      // now simply means "square", and the classes get cleaned up as each
+      // component is touched. `xl4` was registered and never used once.
+      //
+      // Tailwind's built-in `rounded-full` is deliberately NOT overridden here:
+      // ~37 of its ~72 uses are in admin/, RestaurantWizard and Scheduler, where
+      // they are genuinely circles (status dots, avatars, skeleton bars).
       borderRadius: {
-        xl2: '1.25rem',
-        xl3: '1.75rem',
-        xl4: '2.25rem',
+        xl2: '0px',
+        xl3: '0px',
       },
       transitionTimingFunction: {
         premium: 'cubic-bezier(0.22, 1, 0.36, 1)',
@@ -108,15 +132,10 @@ export default {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(160, 9, 9, 0.35)' },
           '50%':      { boxShadow: '0 0 0 8px rgba(160, 9, 9, 0)' },
         },
-        'underline-draw': {
-          '0%':   { transform: 'scaleX(0)' },
-          '100%': { transform: 'scaleX(1)' },
-        },
       },
       animation: {
-        'fade-in-up':     'fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
-        'pulse-signal':   'pulse-signal 2.4s ease-in-out infinite',
-        'underline-draw': 'underline-draw 0.45s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'fade-in-up':   'fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'pulse-signal': 'pulse-signal 2.4s ease-in-out infinite',
       },
     },
   },
