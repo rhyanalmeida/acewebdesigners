@@ -56,15 +56,6 @@ const EXAMPLES = [
   },
 ]
 
-// Drawing title-block cells (decorative drafting metadata — not claims).
-const TITLE_BLOCK: Array<{ label: string; value: string; accent?: boolean }> = [
-  { label: 'Project', value: 'Free homepage + social' },
-  { label: 'Trade', value: 'Contractors' },
-  { label: 'Rev', value: 'A', accent: true },
-  { label: 'Sheet', value: '01' },
-  { label: 'Date', value: '2026' },
-]
-
 const FAQS = [
   {
     question: 'How fast can I really get online?',
@@ -102,6 +93,28 @@ const FAQS = [
       "We're a Leominster, MA team with 5.0 on Google. The discovery call is 15 minutes with no card on file — you walk away with a free homepage design either way. That's the easiest way to find out.",
   },
 ]
+
+function HeroReveal({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <motion.div variants={fadeUpHero} className={className}>
+      {children}
+    </motion.div>
+  )
+}
+
+function TeamMember({ src, alt, name, role }: { src: string; alt: string; name: string; role: string }) {
+  return (
+    <div className="flex items-center gap-5">
+      <div className="w-24 shrink-0">
+        <Figure src={src} alt={alt} treatment="mono" aspect="aspect-square" />
+      </div>
+      <div>
+        <span className="label-mono text-signal-600">{name}</span>
+        <p className="mt-1 text-ink-900 leading-snug">{role}</p>
+      </div>
+    </div>
+  )
+}
 
 function LandingContractors() {
   const bookingFormRef = useRef<HTMLElement>(null)
@@ -182,97 +195,69 @@ function LandingContractors() {
 
       <main id="main">
         {/* ── HERO — BLUEPRINT TITLE BLOCK (blueprint moment 1) ──────────────────
-            The offer framed as a real drawing sheet: a ruled title-block box on the
-            drafting-paper grid, project metadata along the bottom. This is the only
-            section that animates on entry (matches the home page). */}
+            The offer framed as a ruled title-block box on the drafting-paper grid.
+            This is the only section that animates on entry (matches the home page). */}
         <section
           className="relative isolate overflow-hidden surface-blueprint-major text-ink-900"
           aria-label="Introduction"
         >
-          <Container size="lg" className="py-12 sm:py-16 lg:py-20">
+          <Container size="lg" className="py-8 sm:py-10 lg:py-12">
             <motion.div
               className="border border-ink-900/70 bg-[#EDF0F2]/40"
               initial="hidden"
               animate="show"
               variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } } }}
             >
-              <div className="p-6 sm:p-10 lg:p-12">
-                <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-                  <div>
-                    <motion.div variants={fadeUpHero}>
-                      <Eyebrow tone="brand">For contractors &amp; home service pros</Eyebrow>
-                    </motion.div>
-                    <motion.div variants={fadeUpHero}>
-                      <GradientHeading level={1} size="display" className="mt-6" accent="for free to start">
-                        Get a website + social media that bring jobs in
-                      </GradientHeading>
-                    </motion.div>
-                    <motion.p
-                      className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed max-w-xl"
-                      variants={fadeUpHero}
+              <div className="p-6 sm:p-8">
+                <div className="mx-auto max-w-3xl text-center">
+                  <HeroReveal>
+                    <GradientHeading level={1} size="display" accent="for free to start">
+                      Get a website + social media that bring jobs in
+                    </GradientHeading>
+                  </HeroReveal>
+                  <motion.p
+                    className="mt-5 text-lg sm:text-xl text-ink-800 leading-relaxed mx-auto max-w-xl"
+                    variants={fadeUpHero}
+                  >
+                    We design your homepage <strong>and</strong> your first week of social posts — free.
+                    Pay only if you love it.
+                  </motion.p>
+
+                  <HeroReveal className="mt-7 flex flex-col sm:flex-row justify-center gap-3">
+                    {/* The one CTA that pulses: the hero ask gets the (otherwise
+                        unused) signal-ring animation so it reads as THE button
+                        without leaving the palette. Everything else stays still. */}
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={scrollToBooking}
+                      className="animate-pulse-signal sm:px-10 sm:py-5 sm:text-lg"
                     >
-                      We design your homepage <strong>and</strong> your first week of social posts — free.
-                      Pay only if you love it.
-                    </motion.p>
+                      Get my free design
+                      <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
+                    </Button>
+                  </HeroReveal>
 
-                    <motion.div className="mt-8 flex flex-col sm:flex-row gap-3" variants={fadeUpHero}>
-                      <Button variant="primary" size="lg" onClick={scrollToBooking}>
-                        Get my free design
-                        <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
-                      </Button>
-                    </motion.div>
+                  <motion.p className="mt-3 text-sm text-ink-700/80" variants={fadeUpHero}>
+                    No card. No commitment. See the design first — then decide.{' '}
+                    <a
+                      href="tel:+17744467375"
+                      className="underline decoration-signal-500/40 underline-offset-4 hover:decoration-signal-500 hover:text-signal-700 inline-flex items-center gap-1"
+                    >
+                      <Phone className="h-3.5 w-3.5" aria-hidden /> Or call (774) 446-7375
+                    </a>
+                  </motion.p>
 
-                    <motion.p className="mt-3 text-sm text-ink-700/80" variants={fadeUpHero}>
-                      No card. No commitment. See the design first — then decide.{' '}
-                      <a
-                        href="tel:+17744467375"
-                        className="underline decoration-signal-500/40 underline-offset-4 hover:decoration-signal-500 hover:text-signal-700 inline-flex items-center gap-1"
-                      >
-                        <Phone className="h-3.5 w-3.5" aria-hidden /> Or call (774) 446-7375
-                      </a>
-                    </motion.p>
-
-                    <div className="mt-6 flex items-center gap-3 text-sm text-ink-700">
-                      <div className="flex items-center gap-0.5 text-ink-900" aria-label="5 out of 5 stars">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
-                        ))}
-                      </div>
-                      <span className="font-medium text-ink-800">Rated 5.0 / 5 on Google</span>
+                  <div className="mt-5 flex items-center justify-center gap-3 text-sm text-ink-700">
+                    <div className="flex items-center gap-0.5 text-ink-900" aria-label="5 out of 5 stars">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
+                      ))}
                     </div>
+                    <span className="font-medium text-ink-800">Rated 5.0 / 5 on Google</span>
                   </div>
-
-                  <motion.div variants={fadeUpHero} className="relative border border-ink-900/60 bg-cream-50">
-                    <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
-                      <iframe
-                        src="https://player.vimeo.com/video/1088261551?h=a19a5e95f4&badge=0&autopause=0&player_id=0&app_id=58479"
-                        loading="lazy"
-                        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
-                        title="Free contractor website preview"
-                      />
-                    </div>
-                  </motion.div>
                 </div>
               </div>
-
-              {/* Title block — the drawing's project metadata strip */}
-              <dl className="grid grid-cols-2 sm:grid-cols-5 border-t border-ink-900/70">
-                {TITLE_BLOCK.map((cell, i) => (
-                  <div
-                    key={cell.label}
-                    className={`px-4 py-3 border-ink-900/20 border-t sm:border-t-0 ${
-                      i === 0 ? 'sm:border-l-0' : 'sm:border-l'
-                    } ${i % 2 === 1 ? 'border-l sm:border-l' : ''}`}
-                  >
-                    <dt className="label-mono text-ink-700/60">{cell.label}</dt>
-                    <dd className={`mt-1 label-mono ${cell.accent ? 'text-signal-600' : 'text-ink-900'}`}>
-                      {cell.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
             </motion.div>
           </Container>
         </section>
@@ -282,6 +267,7 @@ function LandingContractors() {
           heading="See the work"
           accent="we've done"
           examples={EXAMPLES}
+          padding="md"
         />
 
         <BlueprintReveal onCta={scrollToBooking} />
@@ -291,7 +277,9 @@ function LandingContractors() {
             About page) do the trust work the removed sections used to. Kept at
             identifier scale on purpose — blown up they read as a corporate team
             page. No invented facts or quotes. */}
-        <Section tone="muted" padding="lg">
+        {/* pb trimmed: BookingSection below shares the muted ground, so its own
+            top padding provides the breathing room — full md padding doubles up. */}
+        <Section tone="muted" padding="md" className="pb-4 sm:pb-6">
           <div className="max-w-2xl">
             <Eyebrow tone="brand">Who you'll actually talk to</Eyebrow>
             <GradientHeading level={2} size="lg" className="mt-5" accent="That's the whole company">
@@ -303,42 +291,25 @@ function LandingContractors() {
             </p>
           </div>
 
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 max-w-3xl">
-            <div className="flex items-center gap-5">
-              <div className="w-24 shrink-0">
-                <Figure
-                  src="/team/rhyan.webp"
-                  alt="Rhyan, who designs and builds the sites at Ace Web Designers"
-                  treatment="mono"
-                  aspect="aspect-square"
-                />
-              </div>
-              <div>
-                <span className="label-mono text-signal-600">Rhyan</span>
-                <p className="mt-1 text-ink-900 leading-snug">
-                  Designs and builds the sites, and runs the calls.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-5">
-              <div className="w-24 shrink-0">
-                <Figure
-                  src="/team/valerie.webp"
-                  alt="Valerie, who runs all the social media at Ace Web Designers"
-                  treatment="mono"
-                  aspect="aspect-square"
-                />
-              </div>
-              <div>
-                <span className="label-mono text-signal-600">Valerie</span>
-                <p className="mt-1 text-ink-900 leading-snug">Does every bit of the social.</p>
-              </div>
-            </div>
+          <div className="mt-8 grid gap-8 sm:grid-cols-2 max-w-3xl">
+            <TeamMember
+              src="/team/rhyan.webp"
+              alt="Rhyan, who designs and builds the sites at Ace Web Designers"
+              name="Rhyan"
+              role="Designs and builds the sites, and runs the calls."
+            />
+            <TeamMember
+              src="/team/valerie.webp"
+              alt="Valerie, who runs all the social media at Ace Web Designers"
+              name="Valerie"
+              role="Does every bit of the social."
+            />
           </div>
         </Section>
 
         <BookingSection
           ref={bookingFormRef}
+          padding="md"
           eyebrow="Book your free design"
           heading="Schedule your"
           accent="discovery call"
@@ -371,6 +342,7 @@ function LandingContractors() {
           heading="What contractors"
           accent="ask us most"
           items={FAQS}
+          padding="md"
         />
 
       </main>
@@ -387,24 +359,6 @@ function LandingContractors() {
         </Button>
       </div>
       <div className="md:hidden h-24" aria-hidden />
-
-      {/* DESKTOP sticky CTA — small floating button, bottom-right */}
-      <div
-        className="hidden md:block fixed bottom-6 right-6 z-40"
-        role="region"
-        aria-label="Quick book"
-      >
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={scrollToBooking}
-          className="bg-cream-50 shadow-lift"
-        >
-          <HardHat className="h-4 w-4 text-signal-500" aria-hidden />
-          Book my free design
-          <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
-        </Button>
-      </div>
 
       <LandingFooter
         tagline="Websites + social media built for contractors and home service pros across the United States."

@@ -2,24 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Theme-aware favicon: black "A" on light browser chrome, white "A" on dark.
-         Favicons can't use CSS invert, so we serve the right variant via
-         prefers-color-scheme media queries. -->
-    <link
-      rel="icon"
-      type="image/png"
-      href="/favicon-dark.png"
-      media="(prefers-color-scheme: light)"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      href="/favicon-light.png"
-      media="(prefers-color-scheme: dark)"
-    />
-    <!-- Fallback for browsers that ignore the media attribute on icon links.
-         Default to the white mark since most browser tab bars are dark. -->
-    <link rel="icon" type="image/png" href="/favicon-light.png" />
+    <!-- Theme-aware favicon, covered in BOTH directions:
+         1) Primary = a self-inverting SVG. Its internal prefers-color-scheme
+            media query flips the mark (black on light chrome, white on dark)
+            inside one file, so browsers that support SVG favicons (Chrome,
+            Firefox, Edge, Safari 16.4+) always render the correct color.
+         2) PNG fallbacks (with media queries) cover browsers without SVG-favicon
+            support. The generic fallback is the WHITE mark, since a browser that
+            also ignores `media` is almost certainly showing a dark tab bar.
+         The SVG is listed last among <link rel="icon"> because browsers prefer
+         the last supported/most-appropriate icon — SVG wins wherever supported. -->
+    <link rel="icon" type="image/png" href="/favicon-dark.png" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/png" href="/favicon-light.png" media="(prefers-color-scheme: dark)" />
+    <link rel="alternate icon" type="image/png" href="/favicon-light.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- iOS composites transparent home-screen icons onto black, so use the white mark. -->
     <link
       rel="apple-touch-icon"

@@ -314,6 +314,69 @@ waiting.
 Tap below.
 ```
 
+### Script C — warm & personal (2026-07-20) — RECORD THIS
+
+Chosen for the next shoot: a fresh **9:16 selfie of Rhyan's face**, proven "build & show free" offer
+(Script A's converting framing) with a **warm, personal opener** — Rhyan introduces himself as a real
+individual builder, "not a big agency." That opener is the direct antidote to the credibility problem
+that sank "funny hook": every hostile comment came from web developers calling it "AI slop / they're
+all identical." A named human saying *I build these myself* breaks the recognisable cheap-agency-ad
+genre on sight. Scripts A and B above remain as alternates.
+
+~96 words, ~30–32s at conversational pace (the winner was 95 words / 31.6s).
+
+```
+Hey — I'm Rhyan. I build websites for contractors myself.
+Not some big agency, not a call center. Just me and my small team.
+
+Here's the thing: your website is the first thing a customer sees.
+And if it looks old or slow, they just call the next guy.
+
+So let me build you a new one. Fast, clean, made to get you more
+calls and more jobs. I'll build it first and show it to you for free —
+you only pay if you love it.
+
+That's it. No pressure, no catch. Tap below and let's talk.
+```
+
+Every beat is traceable to the measured data:
+
+| Beat | Line | Why |
+|---|---|---|
+| Warm/personal open | "I'm Rhyan… not some big agency… just me and my small team" | Names a real human in second 1 (winner did; failing ad never did). Rebuts "AI slop / they're all identical" — a person, not a template. |
+| Direct address | "your website is the first thing a customer sees" | Speaks TO the contractor — the winner's proven direct-address opening. |
+| Consequence | "they just call the next guy" | A customer phoning a competitor — a real cost, not "looks like 2009" (an observation with no stated cost). Contractor vernacular. |
+| Offer = a website | "let me build you a new one… I'll build it first and show it to you for free" | Fixes the biggest failure of "funny hook", which sold a *meeting* ("thought i was wix repair"). |
+| Outcomes not features | "more calls and more jobs" | What a contractor thinks in — not "fast, modern, mobile-friendly" or "transform your digital presence". |
+| Risk reversal | "only pay if you love it" | The proven hook that kills the price objection. |
+| Low pressure | "No pressure, no catch" | Gain-framed + inviting beat loss-framed + exclusionary 9x; also likely helps show-rate. |
+| Mobile CTA | "Tap below" | ~97% mobile traffic (not "click the link"). |
+
+**On camera (9:16 face shot):** match the winner — collared shirt or clean plain tee, plain wall with
+even light (or in a truck / at a real job site), tight head-and-shoulders with the phone at eye level
+straight to lens, nothing else in frame, **no pets**. 1080×1920, MP4/H.264, ~30s.
+
+**On-screen text + captions:**
+- Seconds 0–2: static overlay `CONTRACTORS —` (large). Audio opens personal; the text does the
+  audience-targeting for muted viewers *and* for Advantage+ delivery.
+- Captions: burned-in (85% watch muted), **clean phrase style** — 3–5 words per line, bottom third,
+  plain white sans on a subtle dark scrim, static per phrase. NOT one-word-per-frame kinetic captions
+  (that TikTok signal skewed delivery to 25–34 males / entertainment audiences).
+
+**Ad copy to pair (gain-framed, low-pressure — like the winner):**
+- Headline (≤27 chars): `Free Website for Contractors`
+- Description: `Real builder · Only pay if you love it`
+- Primary text:
+  ```
+  Your website is the first thing a customer sees — and if it's outdated, they call the next guy.
+
+  So I'll build you a new one first and show it to you for free. You only pay if you love it. No pressure, no catch — just a real designer (me), not a sales rep.
+
+  Tap below and let's talk ↓
+  ```
+- CTA button: `Book Now`
+- Destination: `https://acewebdesigners.com/contractorlanding?source=landing-contractors`
+
 ### Do not put these in the script
 
 Each of these is in the current failing ad:
