@@ -144,6 +144,55 @@ It held fewer viewers, cost more per impression, and got fewer clicks — and co
 That is the whole lesson: the funny hook buys more attention of the wrong kind. Do not judge the
 replacement on CTR, hold rate, or CPM. Judge it on leads.
 
+### Full transcripts (Whisper, 2026-07-20)
+
+**WINNER — "Free Preview Rhyan 1", 31.6s**
+```
+[ 0.0]  Listen up business owners, your website is the first thing that customers see
+        and if it's ugly or outdated, they're going to call someone else.
+[ 9.0]  That's why I can build you a new website, one that's fast, gets you more
+        business, more leads, more customers
+[14.2]  and the best part, I can show it to you for free.
+[19.3]  No obligation, only pay when you love it.
+[22.4]  My name is Ryan and I've been building websites for years now and I'd love to
+        get started on your dream.
+[28.0]  Click the link down below and we'll talk soon, bye.
+```
+
+**CURRENT — "funny hook", 22.3s**
+```
+[ 0.0]  Most contractor websites look like they were built in 2009.
+[ 3.3]  That's why we build you a fast, modern, mobile-friendly website.
+[ 6.4]  Book a free website meeting right now and get a redesign for your business.
+[10.5]  No strings attached. You only pay if you love it.
+[13.4]  So contractors, what are you waiting for?
+[15.4]  Let's work together and transform your digital presence.
+[18.2]  Turn all those leads into paying customers.
+[20.8]  We'll talk soon. Bye.
+```
+
+### Six differences in the script that explain the 9x
+
+1. **Audience named in second 0 vs second 13.4.** The winner opens *"Listen up business owners"* —
+   first two words. The current ad's only audience callout is *"So contractors"* at **13.4s**, by
+   which point ~70-80% have already scrolled. Effectively nobody hears it.
+2. **The offer is a website vs a meeting.** Winner: *"I can show it to you for free."* Current:
+   *"Book a free website meeting."* Nobody wants a meeting; everybody wants to see their website.
+   This is very likely what produced Sean's *"thought i was wix repair"* — the current ad never makes
+   clear that a finished design is the deliverable.
+3. **Consequence vs observation.** Winner: *"if it's ugly or outdated, they're going to call someone
+   else"* — a customer phoning a competitor. Current: *"look like they were built in 2009"* — an
+   aesthetic remark with no stated cost.
+4. **A named human with a track record.** Winner: *"My name is Ryan and I've been building websites
+   for years now."* The current ad **never gives a name or a credential** — it's all "we". Paired
+   with the hoodie and the chihuahuas, nothing anchors credibility. That is the gap the
+   *"microsoft paint"* comment walked straight into.
+5. **Outcomes vs features.** Winner: *"more business, more leads, more customers."* Current: *"fast,
+   modern, mobile-friendly"* — then *"transform your digital presence,"* which is consultant jargon
+   a roofer would never use.
+6. **"I" vs "we".** The winner is one person making a personal promise. The current is a vague
+   corporate "we" that could be anyone.
+
 ### Copy that ran with it
 
 Headline: `Get a Website Preview—Only Pay If You Love It`
@@ -162,11 +211,47 @@ Note how different this is from the current copy, which is loss-framed and exclu
 The winner is **gain-framed, inviting, and explicitly low-pressure**. "No risk, no pressure" plausibly
 helps the show-rate problem too — it lowers the perceived stakes of the call.
 
+### Captions — yes, but not the current style
+
+Roughly 85% of Meta video is watched muted, so an uncaptioned ad loses its message entirely for most
+viewers. Add them.
+
+But **do not reuse the current ad's caption style.** One-word-per-frame kinetic captions
+("MOST / WEBSITES / BUILT / 2009") are a TikTok-native convention, and they are part of why
+Advantage+ reads this as entertainment content and delivers it to 25-34 males rather than contractors.
+The winner ran with **no burned-in captions at all** and outconverted it 9x, so captions are clearly
+not what was driving the result — the style is a targeting signal, not a comprehension aid.
+
+| Do | Don't |
+|---|---|
+| 3-5 words per line, bottom third | one word per frame |
+| plain sans, white on subtle dark scrim | colored per-word highlighting |
+| static per phrase | bouncing / scaling / animated |
+| plain punctuation | emoji in captions |
+
+### Fixing the audience-callout problem without re-recording
+
+The spoken words are fixed without a reshoot — but the **on-screen text is not**, and that is enough
+to solve the biggest script problem.
+
+The winner says *"Listen up business owners"*, which is general rather than contractor-specific. Add a
+**static text overlay in seconds 0-2** reading `CONTRACTORS —` or `ATTENTION: CONTRACTORS`. The audio
+stays welcoming and general while the on-screen text does the targeting. A slight mismatch between
+spoken "business owners" and overlaid "contractors" is harmless — the text is what both the viewer
+and the algorithm read first.
+
+This gets the audience named in **second 0 instead of second 13.4** with no reshoot at all.
+
 ### Recommended action
 
-Run the existing "Free Preview Rhyan 1" video at contractors, with the winning copy structure adapted
-only where necessary (`local businesses` → `contractors`). Keep the no-pressure, gain-framed shape —
-that is the part that worked. Change nothing else at the same time, so the result is readable.
+1. Take the existing "Free Preview Rhyan 1" video (Vimeo `1088261551`, or the 9:16 asset already in
+   the ad account as video `522183757526673`).
+2. Add a static `CONTRACTORS —` overlay over seconds 0-2.
+3. Add clean phrase captions in the style table above.
+4. Use the winning copy structure, changing only `local businesses` → `contractors`. Keep the
+   no-pressure, gain-framed shape.
+
+Change nothing else at the same time, so the result stays readable.
 
 If a reshoot happens later, these are the requirements:
 
