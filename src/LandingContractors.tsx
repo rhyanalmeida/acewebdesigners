@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react'
-import { HardHat, Zap, TrendingUp, MapPin, Camera, ArrowRight, Phone, Star, Check } from 'lucide-react'
+import { HardHat, ArrowRight, Phone, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { LandingFooter } from './components/ui'
 
@@ -10,12 +10,9 @@ import { useScrollReveal } from './hooks/useScrollReveal'
 
 import {
   LandingExamples,
-  ProcessSteps,
   BookingSection,
   LandingFaq,
-  TrustStrip,
   BlueprintReveal,
-  ComparisonTable,
 } from './components/landing'
 import { SeoMeta, serviceLd, faqPageLd, organizationLd, localBusinessLd, breadcrumbForPath } from './seo'
 import {
@@ -24,8 +21,7 @@ import {
   Eyebrow,
   GradientHeading,
   Button,
-  Card,
-  IconTile,
+  Figure,
 } from './components/ui'
 import { fadeUpHero } from './lib/motion'
 
@@ -57,55 +53,6 @@ const EXAMPLES = [
     caption: 'Menu system, online ordering and a mobile experience built for a phone in one hand.',
     authorName: 'Hot Pot One',
     href: 'https://hotpotone.net/',
-  },
-]
-
-const BENEFITS = [
-  'Same-day website launch available',
-  'A free homepage mockup before paying a penny',
-  'First week of social posts free — see the work first',
-  'Mobile-friendly design that works on every device',
-  'Project gallery to showcase your best jobs',
-  'Lead capture forms that send leads to your phone',
-  'Local SEO + Google Business Profile setup',
-  'Professional hosting + ongoing support included',
-]
-
-const PROCESS = [
-  {
-    title: 'Quick discovery call',
-    description: '15 minutes to understand your trade, service area, and the kind of work you want more of.',
-  },
-  {
-    title: 'Free design + first social post',
-    description: "We send a custom homepage design AND a sample social post within 24 hours — often same-day.",
-  },
-  {
-    title: 'Launch fast — both channels',
-    description: 'Approve and your site goes live in 1–3 days. We start posting that same week.',
-  },
-]
-
-const PAIN_POINTS = [
-  {
-    title: 'Get found locally',
-    desc: 'Modern site + Google Business Profile + local SEO so the homes near you actually find you when they search.',
-    Icon: MapPin,
-  },
-  {
-    title: 'Show the work',
-    desc: 'Project galleries on your site, jobsite reels on social. Real photos of real jobs beat stock images every time.',
-    Icon: Camera,
-  },
-  {
-    title: 'Look bigger than you are',
-    desc: 'A professional site and consistent posting make a 2-person crew look like the trusted local pro. Most competitors ghost online.',
-    Icon: TrendingUp,
-  },
-  {
-    title: 'Stop wasting nights posting',
-    desc: 'You stay on jobs. We run the social. One team, one bill, no agency hand-offs.',
-    Icon: Zap,
   },
 ]
 
@@ -330,96 +277,6 @@ function LandingContractors() {
           </Container>
         </section>
 
-        <TrustStrip />
-
-        {/* PAIN POINTS — concrete cards */}
-        <Section tone="default" padding="lg">
-          <div className="max-w-2xl">
-            <Eyebrow tone="brand">Built for contractors</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-5" accent="contractors actually have">
-              The four problems
-            </GradientHeading>
-          </div>
-          <div className="mt-12 grid gap-5 sm:grid-cols-2">
-            {PAIN_POINTS.map(p => (
-              <Card key={p.title} tone="default" padding="lg" interactive className="h-full">
-                <div className="flex items-start gap-4">
-                  <IconTile tone="neutral" size="md">
-                    <p.Icon />
-                  </IconTile>
-                  <div>
-                    <h3 className="font-display text-xl font-semibold text-ink-900">{p.title}</h3>
-                    <p className="mt-2 text-ink-800 leading-relaxed">{p.desc}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </Section>
-
-        {/* ── DIMENSION-MARKED CALLOUT (blueprint moment 3) ──────────────────────
-            The offer drawn as a detail, annotated with drafting dimension lines.
-            Used exactly once — the memorable drawing detail on the page. Static,
-            so it renders in screenshots and honours reduced motion. */}
-        <Section tone="blueprint" padding="lg">
-          <div className="max-w-2xl mb-10">
-            <Eyebrow tone="brand">The offer, measured</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-5">
-              What “free to start” actually means
-            </GradientHeading>
-          </div>
-
-          <div className="relative pt-10 pl-12 max-w-3xl">
-            {/* Top dimension line */}
-            <div
-              className="absolute left-12 right-0 top-5 h-px bg-ink-900/50 flex items-center justify-center"
-              aria-hidden
-            >
-              <span className="bg-[#EDF0F2] px-2 label-mono text-signal-600 -translate-y-1/2">Free</span>
-            </div>
-            <div className="absolute left-12 top-3.5 h-3 w-px bg-ink-900/50" aria-hidden />
-            <div className="absolute right-0 top-3.5 h-3 w-px bg-ink-900/50" aria-hidden />
-
-            {/* Left dimension line */}
-            <div
-              className="absolute top-10 bottom-0 left-6 w-px bg-ink-900/50 flex items-center justify-center"
-              aria-hidden
-            >
-              <span
-                className="bg-[#EDF0F2] py-2 label-mono text-signal-600"
-                style={{ writingMode: 'vertical-rl' }}
-              >
-                No card
-              </span>
-            </div>
-            <div className="absolute left-[1.125rem] top-10 w-3 h-px bg-ink-900/50" aria-hidden />
-            <div className="absolute left-[1.125rem] bottom-0 w-3 h-px bg-ink-900/50" aria-hidden />
-
-            {/* The detail */}
-            <figure className="relative border border-ink-900/70 bg-[#EDF0F2]">
-              <figcaption className="absolute -top-3 left-4 bg-signal-500 text-white label-mono px-2 py-0.5">
-                Detail A
-              </figcaption>
-              <div className="p-8 sm:p-10">
-                <p className="label-mono text-signal-600">Included at no cost</p>
-                <ul className="mt-4 space-y-3 text-lg text-ink-900">
-                  <li className="flex items-start gap-3">
-                    <Check className="h-5 w-5 shrink-0 mt-1 text-signal-600" aria-hidden />
-                    A custom homepage, built for your business
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Check className="h-5 w-5 shrink-0 mt-1 text-signal-600" aria-hidden />
-                    Your first week of social posts
-                  </li>
-                </ul>
-                <p className="mt-5 text-ink-800 leading-relaxed">
-                  You see it first. You pay only if you love it.
-                </p>
-              </div>
-            </figure>
-          </div>
-        </Section>
-
         <LandingExamples
           eyebrow="Real contractor websites"
           heading="See the work"
@@ -427,40 +284,57 @@ function LandingContractors() {
           examples={EXAMPLES}
         />
 
-        <ProcessSteps
-          eyebrow="How it works"
-          heading="Discovery call to launch"
-          accent="in days, not months"
-          steps={PROCESS}
-          tone="muted"
-        />
+        <BlueprintReveal onCta={scrollToBooking} />
 
-        {/* ── WHAT YOU GET — BLUEPRINT SPEC SHEET (blueprint moment 2) ───────────
-            The included list rendered as a bill of materials on the drafting grid:
-            item number, spec, red annotation check. */}
-        <Section tone="blueprint" padding="lg">
+        {/* ── TEAM STRIP — the two real faces right before the ask ───────────────
+            Cold ad traffic doesn't know us; the portraits (real, same ones as the
+            About page) do the trust work the removed sections used to. Kept at
+            identifier scale on purpose — blown up they read as a corporate team
+            page. No invented facts or quotes. */}
+        <Section tone="muted" padding="lg">
           <div className="max-w-2xl">
-            <Eyebrow tone="brand">What's included</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-5">
-              The spec sheet
+            <Eyebrow tone="brand">Who you'll actually talk to</Eyebrow>
+            <GradientHeading level={2} size="lg" className="mt-5" accent="That's the whole company">
+              Two people.
             </GradientHeading>
             <p className="mt-5 text-base sm:text-lg text-ink-700 leading-relaxed">
-              Every contractor combo ships with these. No surprise line items.
+              A two-person team in Leominster, MA — 5.0 on Google. The person you talk to is the
+              person doing the work.
             </p>
           </div>
 
-          <ul className="mt-12 border-t-2 border-ink-900/70">
-            {BENEFITS.map((b, i) => (
-              <li
-                key={b}
-                className="grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 py-4 border-b border-ink-900/20"
-              >
-                <span className="label-num text-ink-700/60">{String(i + 1).padStart(2, '0')}</span>
-                <span className="text-ink-900 leading-snug">{b}</span>
-                <Check className="h-5 w-5 text-signal-600" aria-label="included" />
-              </li>
-            ))}
-          </ul>
+          <div className="mt-10 grid gap-8 sm:grid-cols-2 max-w-3xl">
+            <div className="flex items-center gap-5">
+              <div className="w-24 shrink-0">
+                <Figure
+                  src="/team/rhyan.webp"
+                  alt="Rhyan, who designs and builds the sites at Ace Web Designers"
+                  treatment="mono"
+                  aspect="aspect-square"
+                />
+              </div>
+              <div>
+                <span className="label-mono text-signal-600">Rhyan</span>
+                <p className="mt-1 text-ink-900 leading-snug">
+                  Designs and builds the sites, and runs the calls.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-5">
+              <div className="w-24 shrink-0">
+                <Figure
+                  src="/team/valerie.webp"
+                  alt="Valerie, who runs all the social media at Ace Web Designers"
+                  treatment="mono"
+                  aspect="aspect-square"
+                />
+              </div>
+              <div>
+                <span className="label-mono text-signal-600">Valerie</span>
+                <p className="mt-1 text-ink-900 leading-snug">Does every bit of the social.</p>
+              </div>
+            </div>
+          </div>
         </Section>
 
         <BookingSection
@@ -492,14 +366,6 @@ function LandingContractors() {
           }
         />
 
-        {/* Cross-sell and comparison sit AFTER the form on purpose. They invite a
-            "let me weigh my options" beat, which is the wrong thing to hand a visitor
-            immediately before the ask. Ad traffic that scrolls past the form still
-            reaches them, and both CTAs scroll back up. */}
-        <BlueprintReveal onCta={scrollToBooking} />
-
-        <ComparisonTable />
-
         <LandingFaq
           eyebrow="Questions"
           heading="What contractors"
@@ -507,38 +373,6 @@ function LandingContractors() {
           items={FAQS}
         />
 
-        {/* FINAL CTA — concrete inverted close */}
-        <Section tone="inverted" padding="lg" containerSize="md">
-          <div className="text-center">
-            <hr className="border-0 h-px bg-cream-50/20 mb-12 max-w-[8rem] mx-auto" />
-            <Eyebrow tone="inverted">One easy step</Eyebrow>
-            <GradientHeading
-              level={2}
-              size="xl"
-              tone="inverted"
-              className="mt-6"
-              accent="before you pay anything"
-            >
-              Free design. Free first week of social.
-            </GradientHeading>
-            <p className="mt-6 text-base sm:text-lg text-cream-100/75 max-w-xl mx-auto leading-relaxed">
-              See it first. Decide later. The whole point is you don't risk a thing on the call.
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button variant="primary" size="lg" tone="inverted" onClick={scrollToBooking}>
-                Get my free design
-                <ArrowRight className="h-5 w-5" aria-hidden />
-              </Button>
-              <a
-                href="tel:+17744467375"
-                className="inline-flex items-center gap-2 text-cream-50 hover:text-signal-300 underline decoration-cream-50/30 underline-offset-4 hover:decoration-signal-300 transition-colors"
-              >
-                <Phone className="h-5 w-5" aria-hidden />
-                Or call (774) 446-7375
-              </a>
-            </div>
-          </div>
-        </Section>
       </main>
 
       {/* MOBILE sticky CTA */}

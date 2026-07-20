@@ -2,22 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Theme-aware favicon: black "A" on light browser chrome, white "A" on dark.
+         Favicons can't use CSS invert, so we serve the right variant via
+         prefers-color-scheme media queries. -->
     <link
       rel="icon"
       type="image/png"
-      sizes="32x32"
-      href="/logo.png"
+      href="/favicon-dark.png"
+      media="(prefers-color-scheme: light)"
     />
     <link
       rel="icon"
       type="image/png"
-      sizes="16x16"
-      href="/logo.png"
+      href="/favicon-light.png"
+      media="(prefers-color-scheme: dark)"
     />
+    <!-- Fallback for browsers that ignore the media attribute on icon links.
+         Default to the white mark since most browser tab bars are dark. -->
+    <link rel="icon" type="image/png" href="/favicon-light.png" />
+    <!-- iOS composites transparent home-screen icons onto black, so use the white mark. -->
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="/logo.png"
+      href="/favicon-light.png"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
