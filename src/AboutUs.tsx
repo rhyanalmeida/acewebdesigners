@@ -106,50 +106,61 @@ const AboutUs: React.FC = () => (
         sub="We do this alongside other work, building something of our own — the same thing our clients are doing. The person you talk to is the person doing the work."
       />
 
-      <div className="mt-14 grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 items-start">
-        {/*
-          PHOTO SLOT — Rhyan is supplying a photo of him AND Valerie.
-          When it lands: drop it in /public/, then swap `src` to it, update
-          `alt`, and change the caption to both names.
-          Until then this shows the one real photo that exists rather than a
-          placeholder box. Do NOT substitute stock or generated imagery.
-        */}
-        <Figure
-          src="/rhyan.jpg"
-          alt="Rhyan of Ace Web Designers"
-          caption="Rhyan"
-          index="01"
-          treatment="mono"
-          aspect="aspect-[4/5]"
-        />
+      {/*
+        Both portraits are real, supplied by Rhyan 2026-07-20, and shot on the
+        same backdrop — which is why they can sit side by side without looking
+        like two unrelated photos. Rendered through Figure at `mono` so the warm
+        cast on one and the cooler cast on the other resolve to one set.
+        Deliberately kept at identifier scale rather than hero scale: these are
+        studio headshots, and blown up large they read as a corporate team page,
+        which is the register this site argues against.
 
-        <ul className="border-t border-ink-900/10">
-          <li className="grid gap-3 py-8 border-b border-ink-900/10 sm:grid-cols-[8rem_1fr] sm:gap-8">
+        NOTE: the file they replaced, /public/rhyan.jpg, was not an image at all
+        — it was 14 bytes of ASCII reading "404: Not Found", so the About page
+        had been rendering a broken image since long before this redesign.
+      */}
+      <ul className="mt-14 border-t border-ink-900/15">
+        <li className="grid gap-5 py-10 border-b border-ink-900/15 sm:grid-cols-[7rem_1fr] sm:gap-10">
+          <Figure
+            src="/team/rhyan.webp"
+            alt="Rhyan, who designs and builds the sites at Ace Web Designers"
+            treatment="mono"
+            aspect="aspect-square"
+          />
+          <div>
             <span className="label-mono text-signal-600">Rhyan</span>
-            <div>
-              <h3 className="font-display text-xl text-ink-900">Designs the sites, runs the calls</h3>
-              <p className="mt-2 text-ink-800 leading-relaxed">
-                He builds the mockup before you turn up, sits on the call, and does the site
-                itself. He grew up watching his dad do excellent work that nobody online could
-                find, and separately watching him pay thousands a month for software that was
-                worse than what we could make. Both of those are why this exists.
-              </p>
-            </div>
-          </li>
-          <li className="grid gap-3 py-8 border-b border-ink-900/10 sm:grid-cols-[8rem_1fr] sm:gap-8">
+            <h3 className="mt-2 font-display text-xl text-ink-900">
+              Designs the sites, runs the calls
+            </h3>
+            <p className="mt-2 text-ink-800 leading-relaxed max-w-2xl">
+              He builds the mockup before you turn up, sits on the call, and does the site itself.
+              He grew up watching his dad do excellent work that nobody online could find, and
+              separately watching him pay thousands a month for software that was worse than what
+              we could make. Both of those are why this exists.
+            </p>
+          </div>
+        </li>
+        <li className="grid gap-5 py-10 border-b border-ink-900/15 sm:grid-cols-[7rem_1fr] sm:gap-10">
+          <Figure
+            src="/team/valerie.webp"
+            alt="Valerie, who runs all the social media at Ace Web Designers"
+            treatment="mono"
+            aspect="aspect-square"
+          />
+          <div>
             <span className="label-mono text-signal-600">Valerie</span>
-            <div>
-              <h3 className="font-display text-xl text-ink-900">Does every bit of the social</h3>
-              <p className="mt-2 text-ink-800 leading-relaxed">
-                She is also an esthetician, and she says beautifying a social page works the same
-                way as beautifying anything else. She wants things to look genuine and feel
-                good, and she likes watching people do well. One reviewer put it more directly
-                than we would: Valerie made my social media explode.
-              </p>
-            </div>
-          </li>
-        </ul>
-      </div>
+            <h3 className="mt-2 font-display text-xl text-ink-900">
+              Does every bit of the social
+            </h3>
+            <p className="mt-2 text-ink-800 leading-relaxed max-w-2xl">
+              She is also an esthetician, and she says beautifying a social page works the same way
+              as beautifying anything else. She wants things to look genuine and feel good, and she
+              likes watching people do well. One reviewer put it more directly than we would:
+              Valerie made my social media explode.
+            </p>
+          </div>
+        </li>
+      </ul>
     </Section>
 
     {/* ── WHAT WE WILL NOT DO ──────────────────────────────────────────────────
