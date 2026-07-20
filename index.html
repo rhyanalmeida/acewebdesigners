@@ -17,8 +17,9 @@
       href="/favicon-light.png"
       media="(prefers-color-scheme: dark)"
     />
-    <!-- Fallback for browsers that ignore the media attribute on icon links. -->
-    <link rel="icon" type="image/png" href="/favicon-dark.png" />
+    <!-- Fallback for browsers that ignore the media attribute on icon links.
+         Default to the white mark since most browser tab bars are dark. -->
+    <link rel="icon" type="image/png" href="/favicon-light.png" />
     <!-- iOS composites transparent home-screen icons onto black, so use the white mark. -->
     <link
       rel="apple-touch-icon"
