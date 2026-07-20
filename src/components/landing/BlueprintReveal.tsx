@@ -92,8 +92,8 @@ const BlueprintReveal: React.FC<BlueprintRevealProps> = ({
       style={{ clipPath: 'polygon(0 2.4%, 100% 0, 100% 97.6%, 0 100%)' }}
       aria-label="Website and social media, working as one system"
     >
-      <Container size="lg" className="py-24 sm:py-28 lg:py-32">
-        <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+      <Container size="lg" className="py-16 sm:py-20 lg:py-24">
+        <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           {/* Copy — plain, always visible */}
           <div>
             <Eyebrow tone="inverted">Website + Social Media</Eyebrow>

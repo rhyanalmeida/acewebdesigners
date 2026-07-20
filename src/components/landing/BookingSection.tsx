@@ -1,5 +1,5 @@
 import React from 'react'
-import Section from '../ui/Section'
+import Section, { type SectionPadding } from '../ui/Section'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 import TrustStack from '../ui/TrustStack'
@@ -23,6 +23,7 @@ interface BookingSectionProps {
   whatToExpect?: string[]
   /** Soft scarcity microcopy rendered just above the calendar (no numbers). */
   scarcityNote?: React.ReactNode
+  padding?: SectionPadding
 }
 
 /**
@@ -47,6 +48,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
       reminder,
       whatToExpect,
       scarcityNote,
+      padding = 'lg',
     },
     forwardedRef
   ) => {
@@ -65,7 +67,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
       <Section
         as="section"
         tone="muted"
-        padding="lg"
+        padding={padding}
         containerSize="md"
         ref={setRef}
         className="scroll-mt-24"

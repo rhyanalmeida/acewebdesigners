@@ -1,6 +1,6 @@
 import React from 'react'
 import { Plus, Minus } from 'lucide-react'
-import Section from '../ui/Section'
+import Section, { type SectionPadding } from '../ui/Section'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 
@@ -14,6 +14,7 @@ interface LandingFaqProps {
   heading: React.ReactNode
   accent?: React.ReactNode
   items: FaqItem[]
+  padding?: SectionPadding
 }
 
 const LandingFaq: React.FC<LandingFaqProps> = ({
@@ -21,11 +22,12 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
   heading,
   accent,
   items,
+  padding = 'lg',
 }) => {
   const [openIndex, setOpenIndex] = React.useState<number | null>(null)
 
   return (
-    <Section tone="default" padding="lg" containerSize="md">
+    <Section tone="default" padding={padding} containerSize="md">
       <div className="max-w-2xl">
         <Eyebrow>{eyebrow}</Eyebrow>
         <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
@@ -33,7 +35,7 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
         </GradientHeading>
       </div>
 
-      <div className="mt-12 border-t border-ink-900/10">
+      <div className="mt-10 border-t border-ink-900/10">
         {items.map((item, i) => {
           const isOpen = openIndex === i
           return (

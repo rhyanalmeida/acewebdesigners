@@ -1,6 +1,6 @@
 import React from 'react'
 import { Star } from 'lucide-react'
-import Section from '../ui/Section'
+import Section, { type SectionPadding } from '../ui/Section'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
 import Card from '../ui/Card'
@@ -26,6 +26,7 @@ interface LandingExamplesProps {
   heading: React.ReactNode
   accent?: React.ReactNode
   examples: LandingExample[]
+  padding?: SectionPadding
 }
 
 const LandingExamples: React.FC<LandingExamplesProps> = ({
@@ -33,8 +34,9 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
   heading,
   accent,
   examples,
+  padding = 'lg',
 }) => (
-  <Section tone="default" padding="lg">
+  <Section tone="default" padding={padding}>
     <div className="max-w-2xl">
       <Eyebrow>{eyebrow}</Eyebrow>
       <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
@@ -42,7 +44,7 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
       </GradientHeading>
     </div>
 
-    <div className="mt-12 grid gap-6 md:grid-cols-3">
+    <div className="mt-10 grid gap-6 md:grid-cols-3">
       {examples.map((ex, i) => (
         <div key={i}>
           <Card tone="default" padding="none" interactive className="overflow-hidden h-full flex flex-col">

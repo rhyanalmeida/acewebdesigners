@@ -351,7 +351,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
   // ── confirmation ──────────────────────────────────────────────────────────────
   if (step === 'done' && confirmed) {
     return (
-      <div id={containerId} className={`booking-widget-container ${className}`} style={{ minHeight }}>
+      <div id={containerId} className={`booking-widget-container ${className}`}>
         <div className="rounded-2xl bg-cream-50 ring-1 ring-ink-900/10 p-8 text-center shadow-soft">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
             <svg className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -378,7 +378,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
   // ── Step 1: gate form ───────────────────────────────────────────────────────
   if (step === 'lead') {
     return (
-      <div id={containerId} className={`booking-widget-container ${className}`} style={{ minHeight }}>
+      <div id={containerId} className={`booking-widget-container ${className}`}>
         <div className="mx-auto max-w-md rounded-2xl bg-cream-50 p-6 ring-1 ring-ink-900/10 shadow-soft">
           <p className="mb-1 text-sm font-semibold text-ink-800">Book your free website demo</p>
           <p className="mb-4 text-sm text-ink-700/70">Just your contact info to start — then pick a time. Takes 30 seconds.</p>

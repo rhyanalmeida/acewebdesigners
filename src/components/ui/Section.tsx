@@ -9,7 +9,7 @@ type SectionTone =
   | 'mesh'
   | 'panel'
   | 'blueprint'
-type SectionPadding = 'none' | 'sm' | 'md' | 'lg' | 'xl'
+export type SectionPadding = 'none' | 'sm' | 'md' | 'lg' | 'xl'
 type ContainerSize = 'sm' | 'md' | 'lg' | 'xl' | 'full'
 
 interface SectionProps extends React.HTMLAttributes<HTMLElement> {
