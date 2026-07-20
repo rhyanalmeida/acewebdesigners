@@ -46,7 +46,9 @@ const TrustStrip: React.FC<TrustStripProps> = ({ items = DEFAULT_ITEMS, tone = '
                 <Icon
                   className={`h-4 w-4 shrink-0 ${
                     filled
-                      ? 'text-amber-500 fill-amber-500'
+                      ? isDark
+                        ? 'text-cream-50 fill-cream-50'
+                        : 'text-ink-900 fill-ink-900'
                       : isDark
                       ? 'text-signal-300'
                       : 'text-signal-600'

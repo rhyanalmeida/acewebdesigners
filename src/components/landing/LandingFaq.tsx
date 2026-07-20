@@ -3,7 +3,6 @@ import { Plus, Minus } from 'lucide-react'
 import Section from '../ui/Section'
 import Eyebrow from '../ui/Eyebrow'
 import GradientHeading from '../ui/GradientHeading'
-import Reveal from '../ui/Reveal'
 
 export interface FaqItem {
   question: string
@@ -27,38 +26,31 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
 
   return (
     <Section tone="default" padding="lg" containerSize="md">
-      <div className="text-center">
+      <div className="max-w-2xl">
         <Eyebrow>{eyebrow}</Eyebrow>
         <GradientHeading level={2} size="lg" className="mt-5" accent={accent}>
           {heading}
         </GradientHeading>
       </div>
 
-      <Reveal variant="up" className="mt-12 space-y-3">
+      <div className="mt-12 border-t border-ink-900/10">
         {items.map((item, i) => {
           const isOpen = openIndex === i
           return (
-            <div
-              key={i}
-              className={`rounded-xl2 ring-1 transition-all duration-500 ease-premium ${
-                isOpen
-                  ? 'bg-cream-50 ring-signal-300 shadow-soft'
-                  : 'bg-cream-50 ring-ink-900/10 hover:ring-ink-900/20'
-              }`}
-            >
+            <div key={i} className="border-b border-ink-900/10">
               <button
                 type="button"
                 aria-expanded={isOpen}
                 aria-controls={`faq-panel-${i}`}
                 id={`faq-trigger-${i}`}
                 onClick={() => setOpenIndex(isOpen ? null : i)}
-                className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left ring-focus-signal rounded-xl2"
+                className="w-full flex items-start justify-between gap-4 py-6 text-left ring-focus-signal"
               >
                 <span className="font-display font-semibold text-base sm:text-lg text-ink-900">
                   {item.question}
                 </span>
-                <span className={`shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isOpen ? 'bg-signal-500 text-white' : 'bg-cream-100 text-ink-800 ring-1 ring-ink-900/10'}`}>
-                  {isOpen ? <Minus className="h-4 w-4" aria-hidden /> : <Plus className="h-4 w-4" aria-hidden />}
+                <span className="shrink-0 mt-1 text-signal-600">
+                  {isOpen ? <Minus className="h-5 w-5" aria-hidden /> : <Plus className="h-5 w-5 text-ink-700/60" aria-hidden />}
                 </span>
               </button>
               <div
@@ -68,7 +60,7 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
                 className={`grid transition-[grid-template-rows] duration-500 ease-premium ${isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
               >
                 <div className="overflow-hidden">
-                  <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-ink-800 leading-relaxed">
+                  <div className="pb-6 -mt-1 text-ink-800 leading-relaxed max-w-3xl">
                     {item.answer}
                   </div>
                 </div>
@@ -76,7 +68,7 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
             </div>
           )
         })}
-      </Reveal>
+      </div>
     </Section>
   )
 }

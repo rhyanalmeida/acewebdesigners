@@ -82,7 +82,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
         </div>
 
         {/* Form first — the CTA drops visitors here; supporting copy reads below. */}
-        <div className="mt-8 rounded-xl3 bg-cream-50 shadow-lift ring-1 ring-ink-900/10 p-3 sm:p-6 md:p-10">
+        <div className="mt-8 bg-cream-50 border border-ink-900/15 shadow-lift p-3 sm:p-6 md:p-10">
           <BookingWidget
             calendarConfig={calendarConfig}
             containerId={containerId}
@@ -97,7 +97,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
 
         {whatToExpect && whatToExpect.length > 0 && (
           <div className="mt-6 mx-auto max-w-3xl">
-            <div className="rounded-xl2 bg-cream-50 ring-1 ring-ink-900/10 p-5 sm:p-6 shadow-soft">
+            <div className="bg-cream-50 border border-ink-900/15 p-5 sm:p-6">
               <p className="label-mono text-ink-700/70 text-center">What to expect on the call</p>
               <ul className="mt-4 grid gap-3 sm:grid-cols-3">
                 {whatToExpect.map((item, i) => (
@@ -107,7 +107,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
                   >
                     <span
                       aria-hidden
-                      className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-signal-500 text-white text-xs font-semibold"
+                      className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center bg-signal-500 text-white text-xs font-semibold"
                     >
                       {i + 1}
                     </span>
@@ -121,7 +121,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
 
         {reminder && (
           <div className="mt-6 text-center">
-            <p className="inline-block max-w-2xl text-sm text-ink-800 bg-cream-50 border-l-4 border-signal-500 rounded-xl p-4 shadow-soft text-left">
+            <p className="inline-block max-w-2xl text-sm text-ink-800 bg-cream-50 border border-ink-900/15 border-l-4 border-l-signal-500 p-4 text-left">
               {reminder}
             </p>
           </div>
