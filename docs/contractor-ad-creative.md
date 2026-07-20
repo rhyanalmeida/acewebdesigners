@@ -354,6 +354,45 @@ Change nothing else at the same time, so the result stays readable.
 
 If a reshoot happens later, these are the requirements:
 
+## The comments: the ad is being served to web developers (2026-07-20)
+
+11 comments sit on the ad. Only one is on Facebook (`674428835752335_122187160304878825`); the rest
+are on the **Instagram** copy (`instagram.com/p/Davd_w2g5bU/`), which is where the spend went.
+
+Facebook — Mike Dee: *"With that haircut? You build the sites with microsoft paint?"*
+
+Instagram:
+| Who | Comment | Likes |
+|---|---|---|
+| iainfeeney | "Your website is clearly made with Claude, and you didn't even use a transparent file for your logo." | 1 |
+| enlevator | "no one wants your AI slop" | 2 |
+| kevinfromlongisland | "There are multiple errors in your schema, google didn't even index your services page because it is terrible" | 1 |
+| wallykillbot | "I see the site was built with AI. Did y'all do a QA check?" | 3 |
+| official.nap.god | "No offense, but these ads are hurting more than they help… the real devs are gonna continue to roast bud… **Us devs are bombarded by these ads every other reel**, and they're all identical." | 3 |
+| mharris750 | "😂😂" | 1 |
+
+**Every commenter is a web developer.** Not one contractor. That is a delivery failure, not a comment
+problem: Meta is showing a website-services ad to the people who *build websites*, because they are
+the ones who engage with website content. It explains the 30% of spend going to 25-34 males, the
+6,510 post engagements against 2 leads, and the `BELOW_AVERAGE_35` quality ranking — 11 likes sit on
+hostile comments, and agreement-with-criticism is exactly the negative signal quality ranking
+measures.
+
+`official.nap.god`'s note is the most useful thing anyone has told us: the creative reads as a
+saturated, recognisable genre ("the same scripted new cheap websites… they're all identical"). Devs
+recognise the template on sight and pile on.
+
+### Which criticisms are actually true
+
+| Claim | Verdict |
+|---|---|
+| Logo isn't transparent | **False.** `logo.png` is 500×500 PNG colour type 6 (RGBA) with a real alpha channel. |
+| Multiple schema errors | **Partly true.** All 5 JSON-LD blocks parse as valid JSON, but `@type: WebDesignCompany` is **not a schema.org type** (schema.org/WebDesignCompany → 404). Should be `ProfessionalService` or `LocalBusiness`. One real error, not "multiple". |
+| Services page not indexed | **Unverified.** `/services` is present in `public/sitemap.xml`; actual Google index status not checked. |
+
+Fix the `WebDesignCompany` type — it's real, it's cheap, and it's the kind of thing that gets quoted
+back at us.
+
 ### Requirements for a reshoot (test 3-5 hook variants, same body)
 
 1. **Second 1 names the audience on screen** — "CONTRACTORS:" / "ROOFERS:" in large burned-in text.
