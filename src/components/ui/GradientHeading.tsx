@@ -30,8 +30,8 @@ const toneMap: Record<Tone, string> = {
 }
 
 const accentToneMap: Record<Tone, string> = {
-  default:  'text-rust-600',
-  inverted: 'text-rust-300',
+  default:  'text-signal-600',
+  inverted: 'text-signal-300',
 }
 
 /**
@@ -51,12 +51,16 @@ const GradientHeading: React.FC<GradientHeadingProps> = ({
   ...rest
 }) => {
   const Tag = (`h${level}`) as React.ElementType
+  // The accent used to be italic serif in the accent colour. Italicised serif
+  // emphasis on a warm ground is one of the most-cited "AI-generated" tells, so the
+  // emphasis is now carried by colour alone — same hierarchy, none of the signature.
+  // See docs/REDESIGN_PLAN_2026-07-20.md §0.
   const accentEl = accent ? (
-    <span className={`relative inline-block text-editorial-italic ${accentToneMap[tone]}`}>
+    <span className={`relative inline-block ${accentToneMap[tone]}`}>
       {accent}
       {accentUnderline && (
         <span className="absolute -bottom-1 left-0 right-0 h-2 pointer-events-none" aria-hidden="true">
-          <HandUnderline color={tone === 'inverted' ? '#E68A5C' : '#C04E1A'} />
+          <HandUnderline color={tone === 'inverted' ? '#E58787' : '#A00909'} />
         </span>
       )}
     </span>

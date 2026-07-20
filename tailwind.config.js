@@ -10,34 +10,45 @@ export default {
       },
       colors: {
         // ----- New editorial palette (Phase 3) -----
+        // Ground pulled off the beige end of the range (was #FBF7F0). Still warm
+        // paper, but out of the cream/beige band that reads as machine-default.
         cream: {
-          50:  '#FBF7F0', // body paper
-          100: '#F5EFE3', // section alt
-          200: '#EDE3D0', // panels
-          300: '#E1D2B6', // dividers / muted
-          400: '#C9B68E',
+          50:  '#FAF8F4', // body paper
+          100: '#F3F1EC', // section alt
+          200: '#E8E5DE', // panels
+          300: '#D8D4CB', // dividers / muted
+          400: '#BDB8AC',
         },
+        // Neutralised: the old ramp was a warm near-black (#1A1611) which reinforced
+        // the cream-and-rust signature. Body text now sits near #404040, and nothing
+        // is pure black — a convention every reference studio follows.
         ink: {
-          50:  '#F2EEE6', // inverted-on-dark text
-          100: '#D9D2C2',
-          200: '#9A9080',
-          500: '#5A4F3D',
-          700: '#3D3527', // body text muted
-          800: '#2A241C', // body text default
-          900: '#1A1611', // headlines / strong text
-          950: '#0D0A07',
+          50:  '#F4F3F1', // inverted-on-dark text
+          100: '#D8D6D2',
+          200: '#9C9994',
+          500: '#5C5A56',
+          700: '#4A4845', // body text muted
+          800: '#404040', // body text default
+          900: '#262625', // headlines / strong text
+          950: '#141413',
         },
-        rust: {
-          50:  '#FCF1EA',
-          100: '#F8DCC9',
-          200: '#F0B492',
-          300: '#E68A5C',
-          400: '#D9683A',
-          500: '#C04E1A', // primary accent
-          600: '#A23F12',
-          700: '#82310F',
-          800: '#62250C',
-          900: '#3F1808',
+        // Primary accent. Was rust #C04E1A until 2026-07-20 — that hue, on a cream
+        // ground under a serif display face, is the documented signature of
+        // AI-generated web design (and is Claude's own brand colour), which is
+        // precisely what we were being mocked for. Now a deliberate editorial red.
+        // Token kept as `signal` so the name doesn't lie about the colour.
+        // See docs/REDESIGN_PLAN_2026-07-20.md §0.
+        signal: {
+          50:  '#FDF2F2',
+          100: '#FADEDE',
+          200: '#F2B8B8',
+          300: '#E58787',
+          400: '#CC4444',
+          500: '#A00909', // primary accent
+          600: '#8A0808',
+          700: '#6E0606',
+          800: '#520505',
+          900: '#3A0303',
         },
         forest: {
           50:  '#EEF3EF',
@@ -95,15 +106,15 @@ export default {
         'mesh-2': 'radial-gradient(at 0% 0%, rgba(39,71,245,0.22) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(163,48,230,0.22) 0px, transparent 55%)',
         'noise-fade': 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.02) 100%)',
         // ----- Editorial backgrounds -----
-        'paper-noise': 'radial-gradient(at 0% 0%, rgba(192,78,26,0.04) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(31,77,61,0.04) 0px, transparent 55%)',
+        'paper-noise': 'radial-gradient(at 0% 0%, rgba(160,9,9,0.04) 0px, transparent 55%), radial-gradient(at 100% 100%, rgba(31,77,61,0.04) 0px, transparent 55%)',
       },
       boxShadow: {
-        soft:    '0 1px 2px rgba(26, 22, 17, 0.04), 0 8px 24px rgba(26, 22, 17, 0.06)',
-        lift:    '0 4px 12px rgba(26, 22, 17, 0.08), 0 24px 48px rgba(26, 22, 17, 0.10)',
-        ring:    '0 0 0 1px rgba(26, 22, 17, 0.08)',
+        soft:    '0 1px 2px rgba(38, 38, 37, 0.04), 0 8px 24px rgba(38, 38, 37, 0.06)',
+        lift:    '0 4px 12px rgba(38, 38, 37, 0.08), 0 24px 48px rgba(38, 38, 37, 0.10)',
+        ring:    '0 0 0 1px rgba(38, 38, 37, 0.08)',
         'glow-brand':   '0 10px 40px -10px rgba(39, 71, 245, 0.55), 0 4px 16px -4px rgba(163, 48, 230, 0.45)',
-        'glow-rust':    '0 10px 32px -10px rgba(192, 78, 26, 0.45), 0 4px 12px -4px rgba(192, 78, 26, 0.25)',
-        'inner-soft':   'inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(26, 22, 17, 0.04)',
+        'glow-signal':  '0 10px 32px -10px rgba(160, 9, 9, 0.45), 0 4px 12px -4px rgba(160, 9, 9, 0.25)',
+        'inner-soft':   'inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(38, 38, 37, 0.04)',
       },
       borderRadius: {
         xl2: '1.25rem',
@@ -128,9 +139,9 @@ export default {
           '0%, 100%': { boxShadow: '0 0 24px rgba(39, 71, 245, 0.25)' },
           '50%':      { boxShadow: '0 0 40px rgba(39, 71, 245, 0.55), 0 0 60px rgba(163, 48, 230, 0.35)' },
         },
-        'pulse-rust':    {
-          '0%, 100%': { boxShadow: '0 0 0 0 rgba(192, 78, 26, 0.35)' },
-          '50%':      { boxShadow: '0 0 0 8px rgba(192, 78, 26, 0)' },
+        'pulse-signal':    {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(160, 9, 9, 0.35)' },
+          '50%':      { boxShadow: '0 0 0 8px rgba(160, 9, 9, 0)' },
         },
         'float-soft':    { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
         marquee:         { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } },
@@ -164,7 +175,7 @@ export default {
         'gradient-shift':'gradient-shift 6s ease infinite',
         shimmer:         'shimmer 3s linear infinite',
         'glow-pulse':    'glow-pulse 3s ease-in-out infinite',
-        'pulse-rust':    'pulse-rust 2.4s ease-in-out infinite',
+        'pulse-signal':    'pulse-signal 2.4s ease-in-out infinite',
         'float-soft':    'float-soft 5s ease-in-out infinite',
         marquee:         'marquee 30s linear infinite',
         'border-shine':  'border-shine 6s linear infinite',

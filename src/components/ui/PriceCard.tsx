@@ -43,7 +43,7 @@ const PriceCard: React.FC<PriceCardProps> = ({
       } ${className}`}
     >
       {highlight && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-rust-500 text-white px-3 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-rust">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-signal-500 text-white px-3 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-signal">
           Most popular
         </span>
       )}
@@ -76,7 +76,7 @@ const PriceCard: React.FC<PriceCardProps> = ({
         {features.map((feat, i) => (
           <li key={i} className="flex items-start gap-3">
             <Check
-              className={`h-5 w-5 mt-0.5 shrink-0 ${highlight ? 'text-rust-300' : 'text-rust-600'}`}
+              className={`h-5 w-5 mt-0.5 shrink-0 ${highlight ? 'text-signal-300' : 'text-signal-600'}`}
               aria-hidden
             />
             <span className={`text-sm sm:text-base ${highlight ? 'text-cream-100/90' : 'text-ink-800'}`}>
@@ -88,9 +88,9 @@ const PriceCard: React.FC<PriceCardProps> = ({
 
       <Tag
         {...tagProps}
-        className={`mt-8 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-all duration-300 ease-premium magnetic-btn ring-focus-rust ${
+        className={`mt-8 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold transition-all duration-300 ease-premium magnetic-btn ring-focus-signal ${
           highlight
-            ? 'bg-rust-500 text-white hover:bg-rust-600 shadow-glow-rust'
+            ? 'bg-signal-500 text-white hover:bg-signal-600 shadow-glow-signal'
             : 'bg-ink-900 text-cream-50 hover:bg-ink-800'
         }`}
       >

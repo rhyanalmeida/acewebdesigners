@@ -3,7 +3,6 @@ import { HardHat, Zap, TrendingUp, MapPin, Camera, ArrowRight, Phone } from 'luc
 import { LandingFooter } from './components/ui'
 
 import { CONTRACTOR_CALENDAR } from './config/calendars'
-import { CONTRACTOR_PIXEL } from './config/pixels'
 import { getAttribution } from './utils/attribution'
 import { initializeContractorPixel, trackViewContent } from './utils/pixelTracking'
 import { useScrollReveal } from './hooks/useScrollReveal'
@@ -39,7 +38,7 @@ import { Star } from 'lucide-react'
 // Specialist') attached to real clients' screenshots.
 const EXAMPLES = [
   {
-    imageUrl: 'https://i.ibb.co/Myx4nrSr/concuo-gif.gif',
+    imageUrl: '/work/conuco.webp',
     imageAlt: 'Conuco Takeout website — menu, online ordering and food photography',
     quote:
       'Ace Web Designers built an amazing website for my business! Working with Rhyan and Valerie was a great experience. They delivered a website that truly represents my restaurant.',
@@ -48,14 +47,14 @@ const EXAMPLES = [
     rating: 5 as const,
   },
   {
-    imageUrl: 'https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif',
+    imageUrl: '/work/dunn.webp',
     imageAlt: 'Dunn Construction website — project gallery and quote form',
     caption: 'Project gallery, service listings and a quote form that reaches the owner’s phone.',
     authorName: 'Dunn Construction',
-    href: 'https://dunnconstruction.com/',
+    href: 'https://dunnconstructionma.com/',
   },
   {
-    imageUrl: 'https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif',
+    imageUrl: '/work/hotpot.webp',
     imageAlt: 'Hot Pot One website — menu system and online ordering',
     caption: 'Menu system, online ordering and a mobile experience built for a phone in one hand.',
     authorName: 'Hot Pot One',
@@ -64,7 +63,7 @@ const EXAMPLES = [
 ]
 
 const BENEFITS = [
-  '⚡ SAME-DAY website launch available — get online TODAY',
+  'Same-day website launch available',
   'A free homepage mockup before paying a penny',
   'First week of social posts free — see the work first',
   'Mobile-friendly design that works on every device',
@@ -176,9 +175,6 @@ function LandingContractors() {
       })
     }
 
-    console.log(`✅ ${CONTRACTOR_PIXEL.name} (${CONTRACTOR_PIXEL.pixelId}): Initialized and tracking`)
-    console.log(`✅ LeadConnector booking widget loaded on Contractor Landing page`)
-    console.log(`📅 Using calendar: ${CONTRACTOR_CALENDAR.name}`)
   }, [])
 
   useScrollReveal('contractorlanding')
@@ -199,7 +195,6 @@ function LandingContractors() {
       const targetPosition = rect.top + scrollTop - offset
 
       window.scrollTo({ top: targetPosition, behavior: 'smooth' })
-      console.log(`📜 Scrolling to booking form: offset=${offset}px, target=${targetPosition}px, mobile=${isMobile}`)
     })
   }, [])
 
@@ -242,7 +237,7 @@ function LandingContractors() {
               Pay only if you love it.
             </>
           }
-          urgencyText="⚡ Same-day launch available"
+          urgencyText="Same-day launch available"
           ctaLabel="Get my free design"
           onCta={scrollToBooking}
           riskReversal={
@@ -250,7 +245,7 @@ function LandingContractors() {
               No card. No commitment. See the design first — then decide.{' '}
               <a
                 href="tel:+17744467375"
-                className="underline decoration-rust-500/40 underline-offset-4 hover:decoration-rust-500 hover:text-rust-700 inline-flex items-center gap-1"
+                className="underline decoration-signal-500/40 underline-offset-4 hover:decoration-signal-500 hover:text-signal-700 inline-flex items-center gap-1"
               >
                 <Phone className="h-3.5 w-3.5" aria-hidden /> Or call (774) 446-7375
               </a>
@@ -337,7 +332,7 @@ function LandingContractors() {
           }
           reminder={
             <>
-              <strong className="text-rust-700">Please show up!</strong> We block real time for each
+              <strong className="text-signal-700">Please show up!</strong> We block real time for each
               call. We're contractor-friendly — we get how busy your day is.
             </>
           }
@@ -348,9 +343,9 @@ function LandingContractors() {
             immediately before the ask. Ad traffic that scrolls past the form still
             reaches them, and both CTAs scroll back up. */}
         <WebsiteSocialCombo
-          websiteImage="https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif"
+          websiteImage="/work/dunn.webp"
           websiteAlt="Contractor website example showing project gallery and quote form"
-          socialImage="https://i.ibb.co/Myx4nrSr/concuo-gif.gif"
+          socialImage="/work/conuco.webp"
           socialAlt="Contractor social media feed example with jobsite reels"
           onCta={scrollToBooking}
         />
@@ -386,7 +381,7 @@ function LandingContractors() {
               <Magnetic strength={6}>
                 <button
                   onClick={scrollToBooking}
-                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
                 >
                   Get my free design
                   <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
@@ -394,7 +389,7 @@ function LandingContractors() {
               </Magnetic>
               <a
                 href="tel:+17744467375"
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-cream-50 hover:text-rust-300 underline decoration-cream-50/30 underline-offset-4 hover:decoration-rust-300 transition-colors"
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-cream-50 hover:text-signal-300 underline decoration-cream-50/30 underline-offset-4 hover:decoration-signal-300 transition-colors"
               >
                 <Phone className="h-5 w-5" aria-hidden />
                 Or call (774) 446-7375
@@ -412,7 +407,7 @@ function LandingContractors() {
       >
         <button
           onClick={scrollToBooking}
-          className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white py-4 px-6 font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white py-4 px-6 font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
         >
           <HardHat className="h-5 w-5" aria-hidden />
           See available times
@@ -431,7 +426,7 @@ function LandingContractors() {
             onClick={scrollToBooking}
             className="group inline-flex items-center gap-2 rounded-full bg-ink-900 hover:bg-ink-800 text-cream-50 px-5 py-3 text-sm font-semibold shadow-lift ring-1 ring-ink-900/20 transition-colors duration-300"
           >
-            <HardHat className="h-4 w-4 text-rust-300" aria-hidden />
+            <HardHat className="h-4 w-4 text-signal-300" aria-hidden />
             Book my free design
             <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
           </button>

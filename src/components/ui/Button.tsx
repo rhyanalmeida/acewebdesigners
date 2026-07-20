@@ -16,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const baseClasses =
-  'group inline-flex items-center justify-center font-semibold rounded-full transition-all duration-300 ease-premium disabled:opacity-50 disabled:cursor-not-allowed ring-focus-rust'
+  'group inline-flex items-center justify-center font-semibold rounded-full transition-all duration-300 ease-premium disabled:opacity-50 disabled:cursor-not-allowed ring-focus-signal'
 
 const variantClasses: Record<Variant, string> = {
   // Editorial primary — ink-on-cream filled pill
@@ -27,15 +27,15 @@ const variantClasses: Record<Variant, string> = {
     'bg-ink-900 text-cream-50 hover:bg-ink-800 shadow-soft hover:shadow-lift',
   // Rust — primary CTA when contrast on cream is wanted
   rust:
-    'bg-rust-500 text-white hover:bg-rust-600 shadow-glow-rust',
+    'bg-signal-500 text-white hover:bg-signal-600 shadow-glow-signal',
   secondary:
     'bg-cream-100 text-ink-900 ring-1 ring-ink-900/15 hover:bg-cream-200 shadow-soft',
   outline:
-    'border-2 border-ink-900/20 text-ink-900 hover:border-rust-500 hover:text-rust-700 hover:bg-rust-50 hover:-translate-y-0.5 hover:shadow-soft',
+    'border-2 border-ink-900/20 text-ink-900 hover:border-signal-500 hover:text-signal-700 hover:bg-signal-50 hover:-translate-y-0.5 hover:shadow-soft',
   ghost:
-    'text-ink-800 hover:text-rust-700 hover:bg-rust-50 hover:shadow-soft',
+    'text-ink-800 hover:text-signal-700 hover:bg-signal-50 hover:shadow-soft',
   link:
-    'nav-underline text-rust-700 hover:text-rust-800 px-0 py-0 rounded-none shadow-none',
+    'nav-underline text-signal-700 hover:text-signal-800 px-0 py-0 rounded-none shadow-none',
   inverted:
     'bg-cream-50 text-ink-900 hover:bg-cream-100 shadow-soft hover:shadow-lift',
 }

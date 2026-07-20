@@ -19,7 +19,7 @@ const toneMap: Record<CardTone, string> = {
   panel:    'bg-cream-200 text-ink-900 ring-1 ring-ink-900/8',
   inverted: 'bg-ink-900 text-cream-50 ring-1 ring-cream-50/10',
   glass:    'glass-surface text-ink-900 shadow-soft',
-  brand:    'bg-rust-500 text-white shadow-glow-rust ring-1 ring-rust-600/40',
+  brand:    'bg-signal-500 text-white shadow-glow-signal ring-1 ring-signal-600/40',
 }
 
 const paddingMap: Record<CardPadding, string> = {

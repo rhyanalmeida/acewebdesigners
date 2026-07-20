@@ -42,7 +42,7 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
               key={i}
               className={`rounded-xl2 ring-1 transition-all duration-500 ease-premium ${
                 isOpen
-                  ? 'bg-cream-50 ring-rust-300 shadow-soft'
+                  ? 'bg-cream-50 ring-signal-300 shadow-soft'
                   : 'bg-cream-50 ring-ink-900/10 hover:ring-ink-900/20'
               }`}
             >
@@ -52,12 +52,12 @@ const LandingFaq: React.FC<LandingFaqProps> = ({
                 aria-controls={`faq-panel-${i}`}
                 id={`faq-trigger-${i}`}
                 onClick={() => setOpenIndex(isOpen ? null : i)}
-                className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left ring-focus-rust rounded-xl2"
+                className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left ring-focus-signal rounded-xl2"
               >
                 <span className="font-display font-semibold text-base sm:text-lg text-ink-900">
                   {item.question}
                 </span>
-                <span className={`shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isOpen ? 'bg-rust-500 text-white' : 'bg-cream-100 text-ink-800 ring-1 ring-ink-900/10'}`}>
+                <span className={`shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isOpen ? 'bg-signal-500 text-white' : 'bg-cream-100 text-ink-800 ring-1 ring-ink-900/10'}`}>
                   {isOpen ? <Minus className="h-4 w-4" aria-hidden /> : <Plus className="h-4 w-4" aria-hidden />}
                 </span>
               </button>

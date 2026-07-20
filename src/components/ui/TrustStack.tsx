@@ -53,8 +53,8 @@ const TrustStack: React.FC<TrustStackProps> = ({
                 filled
                   ? 'text-amber-500 fill-amber-500'
                   : isDark
-                  ? 'text-rust-300'
-                  : 'text-rust-600'
+                  ? 'text-signal-300'
+                  : 'text-signal-600'
               }`}
               aria-hidden
             />

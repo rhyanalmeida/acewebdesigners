@@ -73,9 +73,9 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
 
               {ex.quote ? (
                 <blockquote className="mt-4 font-display text-lg text-ink-900 leading-snug flex-1">
-                  <span className="text-rust-500 text-2xl leading-none mr-0.5 align-[-0.15em] text-editorial-italic">&ldquo;</span>
+                  <span className="text-signal-500 text-2xl leading-none mr-0.5 align-[-0.15em] text-editorial-italic">&ldquo;</span>
                   {ex.quote}
-                  <span className="text-rust-500 text-2xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
+                  <span className="text-signal-500 text-2xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
                 </blockquote>
               ) : (
                 <p className="font-display text-lg text-ink-900 leading-snug flex-1">{ex.caption}</p>
@@ -89,7 +89,7 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
                     href={ex.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="label-mono text-rust-600 underline decoration-rust-300 underline-offset-4 hover:text-rust-700"
+                    className="label-mono text-signal-600 underline decoration-signal-300 underline-offset-4 hover:text-signal-700"
                   >
                     Visit site
                   </a>

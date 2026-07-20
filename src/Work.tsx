@@ -23,64 +23,85 @@ interface Project {
   pullQuote?: string
 }
 
+// Every image is a real screenshot of the live site, captured 2026-07-20 and served
+// locally as WebP (20-71KB) — previously these were multi-MB third-party GIFs plus,
+// for Told History, an Unsplash stock photo standing in for the actual site.
+//
+// Descriptions are first-person verb phrases about what we built, not adjective
+// soup. Ordered strongest-first. No invented metrics: the old `pullQuote` values
+// ("40% increase in online orders", "3× more qualified leads") were never measured,
+// so the only quote that remains is one a client actually wrote.
 const PROJECTS: Project[] = [
   {
-    title: 'Told History',
-    category: 'E-commerce',
-    description: 'An e-commerce store backed by a 21k+ follower social audience. History-themed shorts on TikTok and YouTube drive traffic into the storefront for branded merch and curated content.',
-    image: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-    link: 'https://toldhistory.com',
-    technologies: ['React', 'Tailwind CSS', 'E-commerce'],
-    features: ['Online Store', 'Secure Payments', 'Mobile Responsive'],
-    pullQuote: '21k+ followers driving traffic.',
-  },
-  {
-    title: 'Hot Pot One',
-    category: 'Restaurant',
-    description: 'A modern, user-friendly website featuring an intuitive menu system, online ordering capabilities, and seamless mobile experience.',
-    image: 'https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif',
-    link: 'https://hotpotone.net/',
-    technologies: ['React', 'Tailwind CSS', 'Node.js'],
-    features: ['Online Ordering', 'Menu Management', 'Mobile Responsive'],
-    pullQuote: '40% increase in online orders since launch.',
+    title: 'Dunn Construction',
+    category: 'Construction',
+    description:
+      'We gave a South Shore deck builder a portfolio that looks as considered as the work. Full-bleed project photography, a quote form that reaches the owner directly, and a dark treatment that lets the carpentry carry the page.',
+    image: '/work/dunn.webp',
+    link: 'https://dunnconstructionma.com/',
+    technologies: ['React', 'Tailwind CSS'],
+    features: ['Project Gallery', 'Quote Requests', 'Mobile Responsive'],
   },
   {
     title: 'Conuco Takeout',
     category: 'Restaurant',
-    description: 'Authentic Dominican cuisine takeout site featuring family recipes, online ordering, and vibrant food photography.',
-    image: 'https://i.ibb.co/Myx4nrSr/concuo-gif.gif',
+    description:
+      'We built a bilingual ordering site for a Dominican kitchen in Leominster — English and Spanish throughout, the food photographed properly, and online ordering that works one-handed on a phone.',
+    image: '/work/conuco.webp',
     link: 'https://conucotakeout.com/',
     technologies: ['React', 'Tailwind CSS', 'Firebase'],
-    features: ['Online Ordering', 'Menu Showcase', 'Mobile Responsive'],
-    pullQuote: '35% lift in takeout orders.',
+    features: ['Online Ordering', 'Bilingual EN/ES', 'Menu Showcase'],
+    pullQuote: '“A website that truly represents my restaurant.” — Pedro Dipre-Rojas, owner',
   },
   {
-    title: 'Dunn Construction',
-    category: 'Construction',
-    description: 'A professional website for a construction company showcasing services, past projects, and testimonials from satisfied clients.',
-    image: 'https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif',
-    link: 'https://dunnconstruction.com/',
-    technologies: ['React', 'Tailwind CSS', 'Next.js'],
-    features: ['Project Gallery', 'Service Listings', 'Contact Forms'],
-    pullQuote: '3× more qualified leads.',
+    title: 'Told History',
+    category: 'E-commerce',
+    description:
+      'We turned a 21k-follower history channel into a storefront. Branded merch, secure checkout, and a brand world that matches the tone of the videos driving the traffic.',
+    image: '/work/told.webp',
+    link: 'https://toldhistory.com/',
+    technologies: ['React', 'Tailwind CSS', 'E-commerce'],
+    features: ['Online Store', 'Secure Payments', 'Mobile Responsive'],
   },
   {
-    title: "Oliver's Cafe MA",
+    title: 'Hot Pot One',
     category: 'Restaurant',
-    description: "A vibrant restaurant website featuring delicious menu items, location info, and a gallery showcasing their signature burgers.",
-    image: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXI1Z2M5eHBrNWh0aDhhbTFiM2tjOTE5NTNicGxnenltdjl0dDhvNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/TQYGcRBizkMZ5uZYhA/giphy.gif',
-    link: 'https://oliverscafema.com/',
-    technologies: ['React', 'Tailwind CSS', 'JavaScript'],
-    features: ['Photo Gallery', 'Menu Showcase', 'Location Details'],
+    description:
+      'We put a Quincy hot pot and dim sum restaurant online with a menu that stays current and ordering that does not require a phone call.',
+    image: '/work/hotpot.webp',
+    link: 'https://hotpotone.net/',
+    technologies: ['React', 'Tailwind CSS', 'Node.js'],
+    features: ['Online Ordering', 'Menu Management', 'Mobile Responsive'],
   },
   {
     title: 'Chess Teaching USA',
     category: 'Education',
-    description: 'An engaging educational platform for chess instruction, featuring lesson schedules, instructor profiles, and resources.',
-    image: 'https://media.giphy.com/media/vJNRdZIrbg8SLklBZO/giphy.gif',
+    description:
+      'We built a booking platform for a FIDE-certified instructor — lesson scheduling, programme breakdowns, and instructor credentials up front where parents look first.',
+    image: '/work/chess.webp',
     link: 'https://chessteachingusa.com/',
     technologies: ['React', 'Tailwind CSS', 'Node.js'],
-    features: ['Online Lessons', 'Instructor Profiles', 'Resource Library'],
+    features: ['Lesson Booking', 'Instructor Profiles', 'Resource Library'],
+  },
+  {
+    title: 'Champona Champona',
+    category: 'E-commerce',
+    description:
+      'We built the launch site for an anti-bullying childrens book by author Yolanda Quesada — the story, the message, and a direct path to buying a copy.',
+    image: '/work/champona.webp',
+    link: 'https://champonachampona.com/',
+    technologies: ['React', 'Tailwind CSS'],
+    features: ['Book Sales', 'Author Story', 'Mobile Responsive'],
+  },
+  {
+    title: "Oliver's Cafe",
+    category: 'Restaurant',
+    description:
+      'We brought a two-location Leominster and Fitchburg breakfast spot online, with menus, a gallery and location details for both storefronts.',
+    image: '/work/olivers.webp',
+    link: 'https://oliverscafema.com/',
+    technologies: ['React', 'Tailwind CSS', 'JavaScript'],
+    features: ['Photo Gallery', 'Menu Showcase', 'Two Locations'],
   },
 ]
 
@@ -132,7 +153,7 @@ function Work() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ease-premium ring-focus-rust ${
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ease-premium ring-focus-signal ${
                     active
                       ? 'bg-ink-900 text-cream-50'
                       : 'bg-cream-100 text-ink-800 hover:bg-cream-200 ring-1 ring-ink-900/10'
@@ -150,7 +171,7 @@ function Work() {
               placeholder="Search projects..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 text-sm bg-cream-50 rounded-full ring-1 ring-ink-900/15 hover:ring-ink-900/30 focus:ring-2 focus:ring-rust-500 focus:outline-none transition-all duration-300 ease-premium"
+              className="w-full pl-11 pr-4 py-2.5 text-sm bg-cream-50 rounded-full ring-1 ring-ink-900/15 hover:ring-ink-900/30 focus:ring-2 focus:ring-signal-500 focus:outline-none transition-all duration-300 ease-premium"
               aria-label="Search projects"
             />
           </div>
@@ -189,7 +210,7 @@ function Work() {
                 </div>
                 <div className="p-7 sm:p-9 flex flex-col flex-1">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <span className="label-mono text-rust-700">
+                    <span className="label-mono text-signal-700">
                       {project.category}
                       {project.technologies && project.technologies[0] && (
                         <>
@@ -226,7 +247,7 @@ function Work() {
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-rust-700 hover:text-rust-800 font-semibold ring-focus-rust rounded font-display"
+                      className="inline-flex items-center gap-1.5 text-signal-700 hover:text-signal-800 font-semibold ring-focus-signal rounded font-display"
                     >
                       Visit live site
                       <ExternalLink className="h-4 w-4" aria-hidden />

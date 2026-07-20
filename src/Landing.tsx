@@ -159,7 +159,7 @@ function Landing() {
           trackerId="landing-conversion-tracker"
           reminder={
             <>
-              <strong className="text-rust-700">Please show up!</strong> We're real people who block time for you. Thanks!
+              <strong className="text-signal-700">Please show up!</strong> We're real people who block time for you. Thanks!
             </>
           }
         />

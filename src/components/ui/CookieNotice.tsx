@@ -64,7 +64,7 @@ const CookieNotice: React.FC = () => {
         type="button"
         onClick={() => persist('granted')}
         aria-label="Dismiss cookie notice"
-        className="absolute top-3 right-3 p-1 rounded-full text-ink-700 hover:text-ink-900 hover:bg-cream-100 ring-focus-rust"
+        className="absolute top-3 right-3 p-1 rounded-full text-ink-700 hover:text-ink-900 hover:bg-cream-100 ring-focus-signal"
       >
         <X className="h-4 w-4" aria-hidden />
       </button>
@@ -79,14 +79,14 @@ const CookieNotice: React.FC = () => {
         <button
           type="button"
           onClick={() => persist('granted')}
-          className="flex-1 rounded-full bg-rust-500 hover:bg-rust-600 text-white text-sm font-semibold py-2.5 px-4 shadow-glow-rust ring-focus-rust transition-colors"
+          className="flex-1 rounded-full bg-signal-500 hover:bg-signal-600 text-white text-sm font-semibold py-2.5 px-4 shadow-glow-signal ring-focus-signal transition-colors"
         >
           Accept
         </button>
         <button
           type="button"
           onClick={() => persist('revoked')}
-          className="flex-1 rounded-full bg-cream-100 hover:bg-cream-200 text-ink-900 text-sm font-semibold py-2.5 px-4 ring-1 ring-ink-900/15 ring-focus-rust transition-colors"
+          className="flex-1 rounded-full bg-cream-100 hover:bg-cream-200 text-ink-900 text-sm font-semibold py-2.5 px-4 ring-1 ring-ink-900/15 ring-focus-signal transition-colors"
         >
           Decline
         </button>

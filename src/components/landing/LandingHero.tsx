@@ -92,7 +92,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
             <Magnetic strength={6}>
               <button
                 onClick={onCta}
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
               >
                 {ctaLabel}
                 <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
@@ -135,7 +135,7 @@ const LandingHero: React.FC<LandingHeroProps> = ({
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="absolute -inset-3 bg-rust-100/60 rounded-xl3 -z-10" aria-hidden />
+            <div className="absolute -inset-3 bg-signal-100/60 rounded-xl3 -z-10" aria-hidden />
             <div className="relative rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 shadow-lift bg-cream-100">
               <div style={{ padding: '56.25% 0 0 0', position: 'relative' }}>
                 <iframe

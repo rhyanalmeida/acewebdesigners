@@ -9,8 +9,8 @@ interface IconTileProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const toneMap: Record<IconTileTone, string> = {
-  brand:    'bg-rust-50 text-rust-600 ring-1 ring-rust-100',
-  accent:   'bg-rust-500 text-white shadow-glow-rust',
+  brand:    'bg-signal-50 text-signal-600 ring-1 ring-signal-100',
+  accent:   'bg-signal-500 text-white shadow-glow-signal',
   neutral:  'bg-cream-100 text-ink-700 ring-1 ring-ink-900/10',
   inverted: 'bg-cream-50/10 text-cream-50 ring-1 ring-cream-50/15',
   forest:   'bg-forest-50 text-forest-700 ring-1 ring-forest-100',

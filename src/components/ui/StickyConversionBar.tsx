@@ -42,7 +42,7 @@ const StickyConversionBar: React.FC<StickyConversionBarProps> = ({
       <button
         type="button"
         onClick={onClick}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 active:scale-[0.98] text-white font-semibold py-4 px-6 shadow-glow-rust magnetic-btn ring-focus-rust transition-all duration-300 ease-premium"
+        className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 active:scale-[0.98] text-white font-semibold py-4 px-6 shadow-glow-signal magnetic-btn ring-focus-signal transition-all duration-300 ease-premium"
       >
         {label}
         <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />

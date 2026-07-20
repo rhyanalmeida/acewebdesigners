@@ -71,7 +71,7 @@ const TestimonialEditorial: React.FC<TestimonialEditorialProps> = ({
     >
       {result && (
         <span className={`inline-flex items-center gap-1 self-start rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide uppercase mb-5 ${
-          isDark ? 'bg-rust-500/20 text-rust-200' : 'bg-rust-50 text-rust-700'
+          isDark ? 'bg-signal-500/20 text-signal-200' : 'bg-signal-50 text-signal-700'
         }`}>
           {result}
         </span>
@@ -84,11 +84,11 @@ const TestimonialEditorial: React.FC<TestimonialEditorialProps> = ({
       </div>
 
       <blockquote className={quoteSize}>
-        <span className={`text-rust-500 ${isFeature ? 'text-5xl' : 'text-3xl'} leading-none mr-1 align-[-0.2em] text-editorial-italic`}>
+        <span className={`text-signal-500 ${isFeature ? 'text-5xl' : 'text-3xl'} leading-none mr-1 align-[-0.2em] text-editorial-italic`}>
           &ldquo;
         </span>
         {quote}
-        <span className={`text-rust-500 ${isFeature ? 'text-5xl' : 'text-3xl'} leading-none ml-0.5 align-[-0.2em] text-editorial-italic`}>
+        <span className={`text-signal-500 ${isFeature ? 'text-5xl' : 'text-3xl'} leading-none ml-0.5 align-[-0.2em] text-editorial-italic`}>
           &rdquo;
         </span>
       </blockquote>

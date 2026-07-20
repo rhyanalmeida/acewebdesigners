@@ -27,8 +27,8 @@ const PhoneCta: React.FC<PhoneCtaProps> = ({
 }) => {
   const isDark = tone === 'inverted'
   const baseLink = isDark
-    ? 'text-cream-50 hover:text-rust-300'
-    : 'text-ink-900 hover:text-rust-600'
+    ? 'text-cream-50 hover:text-signal-300'
+    : 'text-ink-900 hover:text-signal-600'
   const subText = isDark ? 'text-cream-100/60' : 'text-ink-700/70'
 
   return (
@@ -40,13 +40,13 @@ const PhoneCta: React.FC<PhoneCtaProps> = ({
       <a
         href={formatPhoneHref(phone)}
         onClick={() => trackPhoneClick(source)}
-        className={`group inline-flex items-center gap-2.5 ring-focus-rust rounded ${baseLink} transition-colors duration-200 ease-premium`}
+        className={`group inline-flex items-center gap-2.5 ring-focus-signal rounded ${baseLink} transition-colors duration-200 ease-premium`}
         aria-label={`Call ${phone}`}
       >
         <Phone className="h-4 w-4 shrink-0" aria-hidden />
         <span className="flex flex-col leading-tight">
           {showLabels && <span className={`label-mono ${subText}`}>Call us</span>}
-          <span className="font-display text-base sm:text-lg font-medium underline decoration-rust-500/40 underline-offset-4 group-hover:decoration-rust-500 transition-colors">
+          <span className="font-display text-base sm:text-lg font-medium underline decoration-signal-500/40 underline-offset-4 group-hover:decoration-signal-500 transition-colors">
             {phone}
           </span>
         </span>
@@ -54,13 +54,13 @@ const PhoneCta: React.FC<PhoneCtaProps> = ({
 
       <a
         href={`mailto:${email}`}
-        className={`group inline-flex items-center gap-2.5 ring-focus-rust rounded ${baseLink} transition-colors duration-200 ease-premium`}
+        className={`group inline-flex items-center gap-2.5 ring-focus-signal rounded ${baseLink} transition-colors duration-200 ease-premium`}
         aria-label={`Email ${email}`}
       >
         <Mail className="h-4 w-4 shrink-0" aria-hidden />
         <span className="flex flex-col leading-tight">
           {showLabels && <span className={`label-mono ${subText}`}>Email</span>}
-          <span className="font-display text-base sm:text-lg font-medium underline decoration-rust-500/40 underline-offset-4 group-hover:decoration-rust-500 transition-colors">
+          <span className="font-display text-base sm:text-lg font-medium underline decoration-signal-500/40 underline-offset-4 group-hover:decoration-signal-500 transition-colors">
             {email}
           </span>
         </span>

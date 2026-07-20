@@ -144,7 +144,7 @@ function Reviews() {
             href={GOOGLE_REVIEWS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-rust-600 underline decoration-rust-300 underline-offset-4 hover:text-rust-700"
+            className="font-medium text-signal-600 underline decoration-signal-300 underline-offset-4 hover:text-signal-700"
           >
             Google review
           </a>

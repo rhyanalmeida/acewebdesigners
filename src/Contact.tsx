@@ -63,10 +63,10 @@ function Contact({ initialData }: ContactProps) {
         <Reveal variant="up">
           <Card tone="default" padding="xl" rounded="xl3" className="shadow-lift">
           <div className="text-center">
-            <span className="label-mono text-rust-700">Schedule</span>
+            <span className="label-mono text-signal-700">Schedule</span>
             <h2 className="mt-3 font-display text-3xl sm:text-4xl font-semibold text-ink-900 leading-tight">
               Pick a time that works.{' '}
-              <span className="text-editorial-italic text-rust-600">We&rsquo;ll show up.</span>
+              <span className="text-editorial-italic text-signal-600">We&rsquo;ll show up.</span>
             </h2>
             <p className="mt-4 text-ink-700 max-w-xl mx-auto leading-relaxed">
               Book a 15-minute slot. We&rsquo;ll send your{' '}
@@ -74,7 +74,7 @@ function Contact({ initialData }: ContactProps) {
             </p>
 
             {initialData?.budget && (
-              <div className="mt-5 inline-block text-left bg-rust-50 ring-1 ring-rust-100 rounded-xl px-4 py-3 text-sm text-ink-900">
+              <div className="mt-5 inline-block text-left bg-signal-50 ring-1 ring-signal-100 rounded-xl px-4 py-3 text-sm text-ink-900">
                 <p>
                   You selected the{' '}
                   <span className="font-semibold">{labelForBudget(initialData.budget)}</span> package.
@@ -91,8 +91,8 @@ function Contact({ initialData }: ContactProps) {
             <BookingWidget calendarConfig={MAIN_CALENDAR} containerId="contact-page-booking" />
           </div>
 
-          <p className="mt-6 max-w-xl mx-auto text-sm text-ink-800 bg-cream-100 border-l-4 border-rust-500 rounded-xl p-4 text-left">
-            <strong className="text-rust-700">Please show up!</strong> We&rsquo;re real people who block time for you. Thanks!
+          <p className="mt-6 max-w-xl mx-auto text-sm text-ink-800 bg-cream-100 border-l-4 border-signal-500 rounded-xl p-4 text-left">
+            <strong className="text-signal-700">Please show up!</strong> We&rsquo;re real people who block time for you. Thanks!
           </p>
           </Card>
         </Reveal>
@@ -116,7 +116,7 @@ function Contact({ initialData }: ContactProps) {
             <hr className="rule-hairline my-7" />
             <p className="text-sm text-ink-700">
               Based in Leominster, MA — serving small businesses{' '}
-              <span className="text-editorial-italic text-rust-600">nationwide</span>.
+              <span className="text-editorial-italic text-signal-600">nationwide</span>.
             </p>
           </Card>
         </Reveal>

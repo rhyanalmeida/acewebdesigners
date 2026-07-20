@@ -106,12 +106,15 @@ const FAQS = [
 ]
 
 const INDUSTRIES = [
-  { name: 'Restaurants & Food Service', icon: '🍽️', desc: 'Online ordering, menu displays, and reservation booking.' },
-  { name: 'Construction', icon: '🏗️', desc: 'Project portfolios, service listings, lead generation.' },
-  { name: 'Healthcare Practices', icon: '⚕️', desc: 'Appointment scheduling, service info, patient portals.' },
-  { name: 'Professional Services', icon: '💼', desc: 'Service showcases, testimonials, consultation booking.' },
-  { name: 'Retail & E-commerce', icon: '🛍️', desc: 'Online stores, inventory, secure payments.' },
-  { name: 'Fitness Studios', icon: '💪', desc: 'Class scheduling, memberships, training programs.' },
+  // Emoji icons removed 2026-07-20 — they break the editorial type treatment and are
+  // a named "AI-generated" tell. Numbered in mono instead, which is the convention
+  // across the studio sites we're taking direction from.
+  { name: 'Restaurants & Food Service', desc: 'Online ordering, menu displays, and reservation booking.' },
+  { name: 'Construction', desc: 'Project portfolios, service listings, lead generation.' },
+  { name: 'Healthcare Practices', desc: 'Appointment scheduling, service info, patient portals.' },
+  { name: 'Professional Services', desc: 'Service showcases, testimonials, consultation booking.' },
+  { name: 'Retail & E-commerce', desc: 'Online stores, inventory, secure payments.' },
+  { name: 'Fitness Studios', desc: 'Class scheduling, memberships, training programs.' },
 ]
 
 const PERFORMANCE = [
@@ -271,7 +274,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
               <Magnetic strength={6}>
                 <button
                   onClick={() => onNavigate('contact')}
-                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 magnetic-btn attention-ring ring-focus-rust transition-colors duration-300"
+                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-8 py-4 magnetic-btn attention-ring ring-focus-signal transition-colors duration-300"
                 >
                   Get my free design
                   <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />
@@ -279,7 +282,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
               </Magnetic>
               <button
                 onClick={() => onNavigate('work')}
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-cream-100 hover:bg-cream-200 text-ink-900 font-semibold text-base sm:text-lg px-7 py-4 ring-1 ring-ink-900/15 transition-colors duration-300 ease-premium ring-focus-rust"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-cream-100 hover:bg-cream-200 text-ink-900 font-semibold text-base sm:text-lg px-7 py-4 ring-1 ring-ink-900/15 transition-colors duration-300 ease-premium ring-focus-signal"
               >
                 See our work
                 <ChevronRight className="h-5 w-5 icon-nudge" aria-hidden />
@@ -357,10 +360,12 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
           className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           delayMs={60}
           keyFn={ind => ind.name}
-          renderItem={ind => (
-            <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
+          renderItem={(ind, i) => (
+            <Card tone="default" padding="lg" rounded="xl2" interactive className="h-full">
               <div className="flex items-start gap-4">
-                <span className="text-4xl shrink-0" aria-hidden>{ind.icon}</span>
+                <span className="label-num shrink-0 pt-1 text-ink-200" aria-hidden>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 <div>
                   <h3 className="font-display text-xl font-semibold text-ink-900">{ind.name}</h3>
                   <p className="mt-2 text-ink-800 leading-relaxed">{ind.desc}</p>
@@ -437,6 +442,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
       <Section id="testimonials" tone="muted" padding="lg">
         <SectionHeading
           eyebrow="Real results"
+          align="center"
           heading="What our clients"
           accent="actually say"
         />
@@ -462,7 +468,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             href={GOOGLE_REVIEWS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-rust-600 underline decoration-rust-300 underline-offset-4 hover:text-rust-700"
+            className="font-medium text-signal-600 underline decoration-signal-300 underline-offset-4 hover:text-signal-700"
           >
             Google review
           </a>
@@ -489,7 +495,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
                       key={n}
                       type="button"
                       onClick={() => setCalcPages(n)}
-                      className={`px-4 py-2 rounded-full text-sm font-semibold ring-1 transition-all duration-300 ease-premium ring-focus-rust ${
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ring-1 transition-all duration-300 ease-premium ring-focus-signal ${
                         calcPages === n
                           ? 'bg-ink-900 text-cream-50 ring-transparent'
                           : 'bg-cream-50 text-ink-800 ring-ink-900/15 hover:ring-ink-900/30'
@@ -510,14 +516,14 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
                         key={f.id}
                         type="button"
                         onClick={() => toggleFeature(f.id)}
-                        className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl ring-1 transition-all duration-300 ease-premium text-left ring-focus-rust ${
+                        className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl ring-1 transition-all duration-300 ease-premium text-left ring-focus-signal ${
                           active
-                            ? 'bg-rust-50 ring-rust-300 text-rust-800'
+                            ? 'bg-signal-50 ring-signal-300 text-signal-800'
                             : 'bg-cream-50 ring-ink-900/15 text-ink-800 hover:ring-ink-900/30'
                         }`}
                       >
                         <span className="text-sm font-medium">{f.label}</span>
-                        {active ? <CheckCircle2 className="h-4 w-4 text-rust-600 shrink-0" aria-hidden /> : <Plus className="h-4 w-4 text-ink-700/50 shrink-0" aria-hidden />}
+                        {active ? <CheckCircle2 className="h-4 w-4 text-signal-600 shrink-0" aria-hidden /> : <Plus className="h-4 w-4 text-ink-700/50 shrink-0" aria-hidden />}
                       </button>
                     )
                   })}
@@ -531,7 +537,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
                       key={t}
                       type="button"
                       onClick={() => setCalcTimeline(t)}
-                      className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold ring-1 transition-all duration-300 ease-premium ring-focus-rust ${
+                      className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold ring-1 transition-all duration-300 ease-premium ring-focus-signal ${
                         calcTimeline === t
                           ? 'bg-ink-900 text-cream-50 ring-transparent'
                           : 'bg-cream-50 text-ink-800 ring-ink-900/15 hover:ring-ink-900/30'
@@ -545,7 +551,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
             </div>
             <div className="rounded-xl3 bg-ink-900 p-8 text-cream-50 flex flex-col justify-between">
               <div>
-                <CalcIcon className="h-8 w-8 text-rust-300" aria-hidden />
+                <CalcIcon className="h-8 w-8 text-signal-300" aria-hidden />
                 <p className="mt-4 label-mono text-cream-100/55">Estimated</p>
                 <p className="mt-2 font-display text-6xl font-semibold tracking-tight">${calcEstimate.toLocaleString()}</p>
                 <p className="mt-3 text-sm text-cream-100/80 leading-relaxed">
@@ -554,7 +560,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
               </div>
               <button
                 onClick={() => onNavigate('contact')}
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold px-6 py-3 magnetic-btn ring-focus-rust transition-colors duration-300"
+                className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold px-6 py-3 magnetic-btn ring-focus-signal transition-colors duration-300"
               >
                 Book free consultation
                 <ArrowRight className="h-4 w-4" aria-hidden />
@@ -568,6 +574,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
       <Section id="faq" tone="muted" padding="lg" containerSize="md">
         <SectionHeading
           eyebrow="Questions"
+          align="center"
           heading="Everything you need to know,"
           accent="frequently asked"
         />
@@ -578,7 +585,7 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
               <div
                 key={i}
                 className={`rounded-xl2 ring-1 transition-all duration-500 ease-premium ${
-                  isOpen ? 'bg-cream-50 ring-rust-300 shadow-soft' : 'bg-cream-50 ring-ink-900/10 hover:ring-ink-900/20'
+                  isOpen ? 'bg-cream-50 ring-signal-300 shadow-soft' : 'bg-cream-50 ring-ink-900/10 hover:ring-ink-900/20'
                 }`}
               >
                 <button
@@ -586,10 +593,10 @@ const Home: React.FC<HomeProps> = ({ onNavigate, pendingScroll, onPendingScrollH
                   aria-expanded={isOpen}
                   aria-controls={`home-faq-panel-${i}`}
                   onClick={() => setOpenFaq(isOpen ? null : i)}
-                  className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left ring-focus-rust rounded-xl2"
+                  className="w-full flex items-center justify-between gap-4 p-5 sm:p-6 text-left ring-focus-signal rounded-xl2"
                 >
                   <span className="font-display font-semibold text-base sm:text-lg text-ink-900">{faq.q}</span>
-                  <span className={`shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isOpen ? 'bg-rust-500 text-white' : 'bg-cream-100 text-ink-800 ring-1 ring-ink-900/10'}`}>
+                  <span className={`shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isOpen ? 'bg-signal-500 text-white' : 'bg-cream-100 text-ink-800 ring-1 ring-ink-900/10'}`}>
                     {isOpen ? <Minus className="h-4 w-4" aria-hidden /> : <Plus className="h-4 w-4" aria-hidden />}
                   </span>
                 </button>

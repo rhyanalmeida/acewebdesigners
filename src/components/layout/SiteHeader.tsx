@@ -82,7 +82,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
           >
             <button
               onClick={() => go('home')}
-              className="ring-focus-rust rounded-lg"
+              className="ring-focus-signal rounded-lg"
               aria-label="Go to homepage"
             >
               <Logo />
@@ -95,14 +95,14 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
                   <button
                     key={link.page}
                     onClick={() => go(link.page)}
-                    className={`relative text-sm font-medium ring-focus-rust rounded transition-colors duration-300 ease-premium ${
+                    className={`relative text-sm font-medium ring-focus-signal rounded transition-colors duration-300 ease-premium ${
                       active ? 'text-ink-900' : 'text-ink-700 hover:text-ink-900'
                     }`}
                   >
                     {link.label}
                     <span
                       aria-hidden
-                      className={`absolute -bottom-1 left-0 h-[2px] rounded-full bg-rust-500 transition-all duration-500 ease-premium ${
+                      className={`absolute -bottom-1 left-0 h-[2px] rounded-full bg-signal-500 transition-all duration-500 ease-premium ${
                         active ? 'w-full' : 'w-0'
                       }`}
                     />
@@ -111,7 +111,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
               })}
               <button
                 onClick={() => go('contact')}
-                className="group ml-2 inline-flex items-center gap-1.5 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-5 py-2 text-sm font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300 ease-premium"
+                className="group ml-2 inline-flex items-center gap-1.5 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-5 py-2 text-sm font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300 ease-premium"
               >
                 Free Design
                 <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
@@ -120,7 +120,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-rust"
+              className="md:hidden p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-signal"
               aria-expanded={isMenuOpen}
               aria-controls="mobile-drawer"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -145,13 +145,13 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
       >
         <div className="flex flex-col h-full">
           <div className="flex justify-between items-center p-4 border-b border-ink-900/10">
-            <button onClick={() => go('home')} className="ring-focus-rust rounded-lg" aria-label="Go to homepage">
+            <button onClick={() => go('home')} className="ring-focus-signal rounded-lg" aria-label="Go to homepage">
               <Logo />
             </button>
             <button
               data-drawer-close
               onClick={() => setIsMenuOpen(false)}
-              className="p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-rust"
+              className="p-2 rounded-md text-ink-800 hover:text-ink-900 ring-focus-signal"
               aria-label="Close menu"
             >
               <X className="h-6 w-6" aria-hidden />
@@ -164,7 +164,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
                   <motion.button
                     key={link.page}
                     onClick={() => go(link.page)}
-                    className="text-left font-display text-2xl py-3 px-3 rounded-lg text-ink-800 hover:bg-cream-100 hover:text-ink-900 transition-colors ring-focus-rust"
+                    className="text-left font-display text-2xl py-3 px-3 rounded-lg text-ink-800 hover:bg-cream-100 hover:text-ink-900 transition-colors ring-focus-signal"
                     initial={reduced ? false : { opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 24 }}
@@ -180,7 +180,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
             </AnimatePresence>
             <button
               onClick={() => go('contact')}
-              className="group mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-8 py-4 font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+              className="group mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-8 py-4 font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
             >
               GET MY FREE DESIGN NOW!
               <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />

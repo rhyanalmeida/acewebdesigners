@@ -7,7 +7,7 @@
 /* ---------- BASE TYPOGRAPHY (Editorial cream) ---------- */
 @layer base {
   html {
-    background-color: #FBF7F0; /* cream-50 — prevents white flash */
+    background-color: #FAF8F4; /* cream-50 — prevents white flash */
   }
 
   body {
@@ -15,8 +15,8 @@
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #FBF7F0;
-    color: #1A1611;
+    background-color: #FAF8F4;
+    color: #262625;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -25,7 +25,7 @@
     letter-spacing: -0.02em;
     line-height: 1.1;
     font-variation-settings: 'opsz' 96, 'SOFT' 50;
-    color: #1A1611;
+    color: #262625;
   }
 
   h1 { font-size: clamp(2.75rem, 5.5vw, 4.5rem); font-weight: 600; }
@@ -54,12 +54,12 @@
   .rule-hairline {
     border: 0;
     height: 1px;
-    background-color: rgba(26, 22, 17, 0.12);
+    background-color: rgba(38, 38, 37, 0.12);
   }
   .rule-hairline-strong {
     border: 0;
     height: 1px;
-    background-color: rgba(26, 22, 17, 0.22);
+    background-color: rgba(38, 38, 37, 0.22);
   }
 
   /* Mono caps — for editorial metadata (industry · stack · year) */
@@ -76,19 +76,19 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.85rem;
     letter-spacing: 0.04em;
-    color: rgba(26, 22, 17, 0.55);
+    color: rgba(38, 38, 37, 0.55);
   }
 
   /* Focus ring — rust accent */
-  .ring-focus-rust {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rust-500;
+  .ring-focus-signal {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-signal-500;
   }
 
   /* Cream surface utilities */
-  .surface-paper { background-color: #FBF7F0; }
-  .surface-cream { background-color: #F5EFE3; }
-  .surface-panel { background-color: #EDE3D0; }
-  .surface-ink   { background-color: #1A1611; color: #F2EEE6; }
+  .surface-paper { background-color: #FAF8F4; }
+  .surface-cream { background-color: #F3F1EC; }
+  .surface-panel { background-color: #E8E5DE; }
+  .surface-ink   { background-color: #262625; color: #F4F3F1; }
 }
 
 /* ---------- LEGACY UTILITIES (kept registered) ---------- */
@@ -105,17 +105,17 @@
 
   /* Editorial-mode brand text-gradient: replaces blue/purple with serif italic emphasis */
   .text-accent-italic {
-    @apply text-editorial-italic text-rust-600;
+    @apply text-editorial-italic text-signal-600;
   }
 
   .glass-surface {
     background: rgba(251, 247, 240, 0.75);
     backdrop-filter: saturate(140%) blur(14px);
     -webkit-backdrop-filter: saturate(140%) blur(14px);
-    border: 1px solid rgba(26, 22, 17, 0.06);
+    border: 1px solid rgba(38, 38, 37, 0.06);
   }
   .glass-surface-dark {
-    background: rgba(26, 22, 17, 0.55);
+    background: rgba(38, 38, 37, 0.55);
     backdrop-filter: saturate(140%) blur(14px);
     -webkit-backdrop-filter: saturate(140%) blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -123,11 +123,11 @@
 
   .divider-fade {
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(26, 22, 17, 0.18), transparent);
+    background: linear-gradient(to right, transparent, rgba(38, 38, 37, 0.18), transparent);
   }
 
   .ring-focus-brand {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rust-500;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-signal-500;
   }
 
   /* Subtle conic-gradient sweep on hover — switched to warm tone */
@@ -141,7 +141,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(192,78,26,0) 0%, rgba(192,78,26,0.45) 50%, rgba(31,77,61,0) 100%);
+    background: linear-gradient(135deg, rgba(160,9,9,0) 0%, rgba(160,9,9,0.45) 50%, rgba(31,77,61,0) 100%);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -162,8 +162,8 @@
 
   /* Soft attention ring — pulses an outer ring without fighting transform-based hover */
   @keyframes attention-ring {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(192, 78, 26, 0.30), 0 10px 32px -10px rgba(192, 78, 26, 0.45), 0 4px 12px -4px rgba(192, 78, 26, 0.25); }
-    50%      { box-shadow: 0 0 0 10px rgba(192, 78, 26, 0), 0 10px 32px -10px rgba(192, 78, 26, 0.55), 0 4px 12px -4px rgba(192, 78, 26, 0.35); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(160, 9, 9, 0.30), 0 10px 32px -10px rgba(160, 9, 9, 0.45), 0 4px 12px -4px rgba(160, 9, 9, 0.25); }
+    50%      { box-shadow: 0 0 0 10px rgba(160, 9, 9, 0), 0 10px 32px -10px rgba(160, 9, 9, 0.55), 0 4px 12px -4px rgba(160, 9, 9, 0.35); }
   }
   .attention-ring {
     animation: attention-ring 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
@@ -294,7 +294,7 @@
   .text-gradient-brand,
   .text-gradient-brand-animated {
     background: none;
-    color: #82310F; /* rust-700 */
+    color: #82310F; /* signal-700 */
   }
   body { color: #0D0A07; }
 }

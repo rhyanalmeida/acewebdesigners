@@ -17,11 +17,11 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
           <Logo tone="inverted" size="lg" />
           <p className="mt-6 max-w-md text-base text-cream-100/70 leading-relaxed">
             Beautiful websites, built for small business. Based in Leominster, MA — serving owners
-            <span className="text-editorial-italic text-rust-300"> nationwide</span>.
+            <span className="text-editorial-italic text-signal-300"> nationwide</span>.
           </p>
           <button
             onClick={() => onNavigate('contact')}
-            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white px-6 py-3 text-sm font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-6 py-3 text-sm font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
           >
             Get a free design
             <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
@@ -42,7 +42,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
               <li key={l.page}>
                 <button
                   onClick={() => onNavigate(l.page)}
-                  className="nav-underline text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-rust rounded font-display"
+                  className="nav-underline text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal rounded font-display"
                 >
                   {l.label}
                 </button>
@@ -57,23 +57,23 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
             <li>
               <a
                 href="mailto:hello@acewebdesigners.com"
-                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-rust rounded"
+                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal rounded"
               >
-                <Mail className="h-4 w-4 text-rust-300" aria-hidden />
+                <Mail className="h-4 w-4 text-signal-300" aria-hidden />
                 hello@acewebdesigners.com
               </a>
             </li>
             <li>
               <a
                 href="tel:+17744467375"
-                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-rust rounded"
+                className="inline-flex items-center gap-2 text-cream-100/75 hover:text-cream-50 transition-colors ring-focus-signal rounded"
               >
-                <Phone className="h-4 w-4 text-rust-300" aria-hidden />
+                <Phone className="h-4 w-4 text-signal-300" aria-hidden />
                 (774) 446-7375
               </a>
             </li>
             <li className="inline-flex items-center gap-2 text-cream-100/75">
-              <MapPin className="h-4 w-4 text-rust-300" aria-hidden />
+              <MapPin className="h-4 w-4 text-signal-300" aria-hidden />
               Leominster, MA — Serving Nationwide
             </li>
           </ul>
@@ -88,13 +88,13 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
           <div className="flex flex-wrap gap-5 text-sm">
             <button
               onClick={() => onNavigate('privacy')}
-              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-rust rounded"
+              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-signal rounded"
             >
               Privacy Policy
             </button>
             <button
               onClick={() => onNavigate('termsofservice')}
-              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-rust rounded"
+              className="text-cream-100/60 hover:text-cream-50 transition-colors ring-focus-signal rounded"
             >
               Terms of Service
             </button>

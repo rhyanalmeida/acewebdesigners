@@ -258,13 +258,13 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
         <div className="mt-10 max-w-3xl mx-auto">
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-ink-700/80">
             <span className="inline-flex items-center gap-1.5">
-              <Instagram className="h-4 w-4 text-rust-600" aria-hidden /> Instagram
+              <Instagram className="h-4 w-4 text-signal-600" aria-hidden /> Instagram
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Facebook className="h-4 w-4 text-rust-600" aria-hidden /> Facebook
+              <Facebook className="h-4 w-4 text-signal-600" aria-hidden /> Facebook
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <Music2 className="h-4 w-4 text-rust-600" aria-hidden /> TikTok
+              <Music2 className="h-4 w-4 text-signal-600" aria-hidden /> TikTok
             </span>
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="h-4 w-4 text-forest-700" aria-hidden /> Google Business Profile
@@ -290,7 +290,7 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
               accent="for our clients"
             >
               We&rsquo;ve already brought in{' '}
-              <span className="text-editorial-italic text-rust-300">$20,000+</span>{' '}
+              <span className="text-editorial-italic text-signal-300">$20,000+</span>{' '}
             </GradientHeading>
             <p className="mt-6 text-cream-100/80 text-base sm:text-lg leading-relaxed max-w-md">
               Posts that turn into calls, jobs, and orders. Here are accounts we manage today —
@@ -315,7 +315,7 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
                     </p>
                   </div>
                   {account.stat && (
-                    <span className="shrink-0 inline-flex items-center rounded-full bg-rust-500 text-white px-2.5 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-rust">
+                    <span className="shrink-0 inline-flex items-center rounded-full bg-signal-500 text-white px-2.5 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-signal">
                       {account.stat}
                     </span>
                   )}
@@ -340,9 +340,9 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
                         href={platform.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-cream-50/10 hover:bg-cream-50/20 ring-1 ring-cream-50/15 px-3 py-1.5 text-xs font-medium text-cream-50 transition-colors duration-200 ring-focus-rust"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-cream-50/10 hover:bg-cream-50/20 ring-1 ring-cream-50/15 px-3 py-1.5 text-xs font-medium text-cream-50 transition-colors duration-200 ring-focus-signal"
                       >
-                        <Icon className="h-3.5 w-3.5 text-rust-300" aria-hidden />
+                        <Icon className="h-3.5 w-3.5 text-signal-300" aria-hidden />
                         {PLATFORM_LABEL[platform.kind]}
                         <ExternalLink className="h-3 w-3 text-cream-100/55" aria-hidden />
                       </a>
@@ -367,27 +367,27 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
         <div className="mt-14 grid gap-6 lg:grid-cols-2 max-w-4xl mx-auto">
           {/* Standard combo */}
           <Card tone="default" padding="xl" rounded="xl3" className="flex flex-col">
-            <span className="label-mono text-rust-700">Standard combo</span>
+            <span className="label-mono text-signal-700">Standard combo</span>
             <h3 className="mt-3 font-display text-3xl sm:text-4xl font-semibold text-ink-900 leading-tight">
               Any website +{' '}
-              <span className="text-editorial-italic text-rust-600">$25/wk</span> social
+              <span className="text-editorial-italic text-signal-600">$25/wk</span> social
             </h3>
             <hr className="rule-hairline my-6" />
             <ul className="space-y-3 flex-1">
               <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-600" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
                 <span><strong className="text-ink-900">$250 off</strong> any website tier (Basic becomes free)</span>
               </li>
               <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-600" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
                 <span>Standard SMM drops from $30/wk → <strong className="text-ink-900">$25/wk</strong></span>
               </li>
               <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-600" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
                 <span>3-5 posts/week on IG + FB + TikTok</span>
               </li>
               <li className="flex items-start gap-3 text-ink-800">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-600" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-600" aria-hidden />
                 <span>Free trial week + free homepage design — both before you pay</span>
               </li>
             </ul>
@@ -399,7 +399,7 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
                     "I'm interested in the Website + Standard Social Media combo — $250 off any website + $25/wk social.",
                 })
               }
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-ink-900 hover:bg-ink-800 text-cream-50 font-semibold px-6 py-3.5 text-sm magnetic-btn ring-focus-rust transition-colors duration-300"
+              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-ink-900 hover:bg-ink-800 text-cream-50 font-semibold px-6 py-3.5 text-sm magnetic-btn ring-focus-signal transition-colors duration-300"
             >
               Get the Standard combo
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -408,30 +408,30 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
 
           {/* Deluxe combo */}
           <Card tone="inverted" padding="xl" rounded="xl3" className="flex flex-col relative">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-rust-500 text-white px-3 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-rust">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-signal-500 text-white px-3 py-1 text-xs font-semibold tracking-wide uppercase shadow-glow-signal">
               Best value
             </span>
             <span className="label-mono text-cream-100/65">Deluxe combo</span>
             <h3 className="mt-3 font-display text-3xl sm:text-4xl font-semibold text-cream-50 leading-tight">
               Any website +{' '}
-              <span className="text-editorial-italic text-rust-300">$84/wk</span> social
+              <span className="text-editorial-italic text-signal-300">$84/wk</span> social
             </h3>
             <hr className="border-cream-50/15 my-6" />
             <ul className="space-y-3 flex-1">
               <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-300" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
                 <span><strong className="text-cream-50">$250 off</strong> any website tier (Basic becomes free)</span>
               </li>
               <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-300" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
                 <span>Deluxe SMM drops from $99/wk → <strong className="text-cream-50">$84/wk</strong></span>
               </li>
               <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-300" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
                 <span>Daily posts + Google Business Profile + custom graphics</span>
               </li>
               <li className="flex items-start gap-3 text-cream-100/90">
-                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-rust-300" aria-hidden />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0 text-signal-300" aria-hidden />
                 <span>Free trial week + free homepage design — both before you pay</span>
               </li>
             </ul>
@@ -443,7 +443,7 @@ const SocialMedia: React.FC<SocialMediaProps> = () => {
                     "I'm interested in the Website + Deluxe Social Media combo — $250 off any website + $84/wk social.",
                 })
               }
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold px-6 py-3.5 text-sm magnetic-btn ring-focus-rust transition-colors duration-300 shadow-glow-rust"
+              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold px-6 py-3.5 text-sm magnetic-btn ring-focus-signal transition-colors duration-300 shadow-glow-signal"
             >
               Get the Deluxe combo
               <ArrowRight className="h-4 w-4" aria-hidden />

@@ -39,7 +39,7 @@ const FinalCta: React.FC<FinalCtaProps> = ({
       )}
       <button
         onClick={onCta}
-        className="mt-10 inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300 ease-premium"
+        className="mt-10 inline-flex items-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-8 py-4 shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300 ease-premium"
       >
         {ctaLabel}
         <ArrowRight className="h-5 w-5" aria-hidden />

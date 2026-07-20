@@ -210,7 +210,7 @@ function RestaurantWizard() {
               value={restaurantName}
               onChange={(e) => setRestaurantName(e.target.value)}
               placeholder="e.g. Bella Napoli"
-              className="w-full rounded-xl border border-ink-200 bg-white px-4 py-3 text-ink-900 outline-none focus:border-rust-500 focus:ring-2 focus:ring-rust-500/20"
+              className="w-full rounded-xl border border-ink-200 bg-white px-4 py-3 text-ink-900 outline-none focus:border-signal-500 focus:ring-2 focus:ring-signal-500/20"
             />
             <label className="block text-sm font-medium text-ink-800 mt-5 mb-1.5">Type of food</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -221,7 +221,7 @@ function RestaurantWizard() {
                   onClick={() => setCuisine(c)}
                   className={`rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
                     cuisine === c
-                      ? 'border-rust-500 bg-rust-50 text-rust-700'
+                      ? 'border-signal-500 bg-signal-50 text-signal-700'
                       : 'border-ink-200 bg-white text-ink-700 hover:border-ink-300'
                   }`}
                 >
@@ -243,12 +243,12 @@ function RestaurantWizard() {
                     type="button"
                     onClick={() => toggleSection(s.id)}
                     className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
-                      on ? 'border-rust-500 bg-rust-50' : 'border-ink-200 bg-white hover:border-ink-300'
+                      on ? 'border-signal-500 bg-signal-50' : 'border-ink-200 bg-white hover:border-ink-300'
                     }`}
                   >
                     <span
                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                        on ? 'border-rust-500 bg-rust-500 text-white' : 'border-ink-300 bg-white'
+                        on ? 'border-signal-500 bg-signal-500 text-white' : 'border-ink-300 bg-white'
                       }`}
                     >
                       {on && <Check className="h-3.5 w-3.5" />}
@@ -273,7 +273,7 @@ function RestaurantWizard() {
                   type="button"
                   onClick={() => setThemeId(t.id)}
                   className={`rounded-2xl border-2 p-4 text-left transition-all ${
-                    themeId === t.id ? 'border-rust-500 shadow-lift' : 'border-ink-200 hover:border-ink-300'
+                    themeId === t.id ? 'border-signal-500 shadow-lift' : 'border-ink-200 hover:border-ink-300'
                   }`}
                   style={{ background: t.bg }}
                 >
@@ -313,13 +313,13 @@ function RestaurantWizard() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First name"
-                className="rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-rust-500 focus:ring-2 focus:ring-rust-500/20"
+                className="rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-signal-500 focus:ring-2 focus:ring-signal-500/20"
               />
               <input
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last name"
-                className="rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-rust-500 focus:ring-2 focus:ring-rust-500/20"
+                className="rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-signal-500 focus:ring-2 focus:ring-signal-500/20"
               />
             </div>
             <input
@@ -327,14 +327,14 @@ function RestaurantWizard() {
               onChange={(e) => setEmail(e.target.value)}
               type="email"
               placeholder="Email"
-              className="mt-3 w-full rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-rust-500 focus:ring-2 focus:ring-rust-500/20"
+              className="mt-3 w-full rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-signal-500 focus:ring-2 focus:ring-signal-500/20"
             />
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               type="tel"
               placeholder="Phone"
-              className="mt-3 w-full rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-rust-500 focus:ring-2 focus:ring-rust-500/20"
+              className="mt-3 w-full rounded-xl border border-ink-200 bg-white px-4 py-3 outline-none focus:border-signal-500 focus:ring-2 focus:ring-signal-500/20"
             />
             <p className="mt-3 text-xs text-ink-500">
               No card required to preview. We'll only use this to build & launch your site.
@@ -349,14 +349,14 @@ function RestaurantWizard() {
                 <div
                   key={p.key}
                   className={`rounded-2xl border-2 p-5 ${
-                    p.highlighted ? 'border-rust-500 bg-rust-50/40' : 'border-ink-200 bg-white'
+                    p.highlighted ? 'border-signal-500 bg-signal-50/40' : 'border-ink-200 bg-white'
                   }`}
                 >
                   <div className="flex items-baseline justify-between">
                     <h3 className="font-display text-xl font-semibold text-ink-900">
                       {p.name}
                       {p.highlighted && (
-                        <span className="ml-2 rounded-full bg-rust-500 px-2 py-0.5 text-xs font-semibold text-white align-middle">
+                        <span className="ml-2 rounded-full bg-signal-500 px-2 py-0.5 text-xs font-semibold text-white align-middle">
                           Popular
                         </span>
                       )}
@@ -370,7 +370,7 @@ function RestaurantWizard() {
                   <ul className="mt-3 space-y-1.5">
                     {p.features.map((f) => (
                       <li key={f} className="flex items-start gap-2 text-sm text-ink-700">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-rust-500" /> {f}
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-signal-500" /> {f}
                       </li>
                     ))}
                   </ul>
@@ -378,7 +378,7 @@ function RestaurantWizard() {
                     type="button"
                     disabled={submitting}
                     onClick={() => choosePlan(p.key)}
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-rust-500 px-6 py-3 font-semibold text-white hover:bg-rust-600 disabled:opacity-60 transition-colors"
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-signal-500 px-6 py-3 font-semibold text-white hover:bg-signal-600 disabled:opacity-60 transition-colors"
                   >
                     {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Start with {p.name} <ArrowRight className="h-4 w-4" /></>}
                   </button>
@@ -442,12 +442,12 @@ function StepDots({ step }: { step: number }) {
         <div key={label} className="flex items-center gap-2">
           <span
             className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-              i < step ? 'bg-rust-500 text-white' : i === step ? 'bg-ink-900 text-cream-50' : 'bg-ink-100 text-ink-400'
+              i < step ? 'bg-signal-500 text-white' : i === step ? 'bg-ink-900 text-cream-50' : 'bg-ink-100 text-ink-400'
             }`}
           >
             {i < step ? <Check className="h-3.5 w-3.5" /> : i + 1}
           </span>
-          {i < STEPS.length - 1 && <span className={`h-px w-5 ${i < step ? 'bg-rust-500' : 'bg-ink-200'}`} />}
+          {i < STEPS.length - 1 && <span className={`h-px w-5 ${i < step ? 'bg-signal-500' : 'bg-ink-200'}`} />}
         </div>
       ))}
     </div>

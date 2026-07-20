@@ -97,7 +97,7 @@ function AboutUs() {
               <Magnetic strength={6}>
                 <button
                   onClick={goContact}
-                  className="group inline-flex items-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base sm:text-lg px-7 py-3.5 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+                  className="group inline-flex items-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-7 py-3.5 shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
                 >
                   Get my free design
                   <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
@@ -114,7 +114,7 @@ function AboutUs() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="absolute -inset-3 bg-rust-100/60 rounded-xl3 -z-10" aria-hidden />
+            <div className="absolute -inset-3 bg-signal-100/60 rounded-xl3 -z-10" aria-hidden />
             <div className="relative rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 shadow-lift">
               <img
                 src="/rhyan.jpg"
@@ -158,7 +158,7 @@ function AboutUs() {
           </p>
           <p className="font-display text-2xl sm:text-3xl text-ink-900 leading-snug">
             That&rsquo;s why we do things differently.{' '}
-            <span className="text-editorial-italic text-rust-600">
+            <span className="text-editorial-italic text-signal-600">
               We create your complete design mockup first
             </span>
             , completely free.
@@ -169,11 +169,11 @@ function AboutUs() {
         </Reveal>
 
         <Card tone="default" padding="xl" rounded="xl3" className="mt-12">
-          <span className="label-mono text-rust-700">Quote · Founder</span>
+          <span className="label-mono text-signal-700">Quote · Founder</span>
           <p className="mt-4 font-display text-xl sm:text-2xl text-ink-900 leading-snug">
-            <span className="text-rust-500 text-3xl leading-none mr-1 align-[-0.15em] text-editorial-italic">&ldquo;</span>
+            <span className="text-signal-500 text-3xl leading-none mr-1 align-[-0.15em] text-editorial-italic">&ldquo;</span>
             We only succeed when you&rsquo;re absolutely thrilled with your website. The free design ensures we&rsquo;re the perfect fit before you invest a single dollar.
-            <span className="text-rust-500 text-3xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
+            <span className="text-signal-500 text-3xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
           </p>
           <hr className="rule-hairline my-7" />
           <div className="flex flex-wrap items-center gap-6">

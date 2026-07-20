@@ -73,7 +73,7 @@ function Refer() {
               We&rsquo;ve received your referral information and will be reaching out to {referralName} soon.
             </p>
             <p className="mt-3 text-ink-700/80">
-              You&rsquo;ll receive your <span className="text-rust-700 font-semibold">$200</span> reward once they complete their website project with us.
+              You&rsquo;ll receive your <span className="text-signal-700 font-semibold">$200</span> reward once they complete their website project with us.
             </p>
           </Card>
         </Section>
@@ -110,7 +110,7 @@ function Refer() {
             </motion.div>
             <motion.p className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed" variants={fadeUpHero}>
               Know someone who needs a professional website? Refer them and earn{' '}
-              <span className="text-editorial-italic text-rust-600">$200</span> when they complete their project.
+              <span className="text-editorial-italic text-signal-600">$200</span> when they complete their project.
             </motion.p>
             <motion.div variants={fadeUpHero}>
               <Card tone="default" padding="lg" rounded="xl2" className="mt-9 inline-flex flex-col items-center max-w-sm mx-auto">
@@ -173,7 +173,7 @@ function Refer() {
               <ul className="mt-5 space-y-3">
                 {THEY_GET.map(item => (
                   <li key={item} className="flex items-start gap-3 text-ink-800">
-                    <CheckCircle2 className="h-5 w-5 text-rust-600 shrink-0 mt-0.5" aria-hidden />
+                    <CheckCircle2 className="h-5 w-5 text-signal-600 shrink-0 mt-0.5" aria-hidden />
                     <span className="leading-relaxed">{item}</span>
                   </li>
                 ))}
@@ -263,7 +263,7 @@ function Refer() {
                 type="submit"
                 disabled={state.submitting}
                 whileTap={{ scale: 0.98 }}
-                className="group w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold py-4 px-6 shadow-glow-rust magnetic-btn ring-focus-rust disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-300"
+                className="group w-full inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold py-4 px-6 shadow-glow-signal magnetic-btn ring-focus-signal disabled:opacity-60 disabled:cursor-not-allowed transition-colors duration-300"
               >
                 {state.submitting && (
                   <span

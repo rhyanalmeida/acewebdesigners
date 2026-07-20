@@ -46,7 +46,7 @@ const MobileStickyCta: React.FC<MobileStickyCtaProps> = ({
       >
         <button
           onClick={() => onNavigate(page)}
-          className="group w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white py-4 px-6 font-bold shadow-glow-rust magnetic-btn ring-focus-rust"
+          className="group w-full inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white py-4 px-6 font-bold shadow-glow-signal magnetic-btn ring-focus-signal"
         >
           {label}
           <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />

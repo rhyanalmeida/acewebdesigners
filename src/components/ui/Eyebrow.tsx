@@ -10,10 +10,10 @@ interface EyebrowProps extends React.HTMLAttributes<HTMLSpanElement> {
 // Editorial: rust = primary accent, forest = trust/safety accent.
 // Tone names kept for backward compat; visuals warmed up.
 const toneMap: Record<EyebrowTone, string> = {
-  brand:    'text-rust-700 bg-rust-50 ring-rust-100',
+  brand:    'text-signal-700 bg-signal-50 ring-signal-100',
   muted:    'text-ink-700 bg-cream-100 ring-ink-900/10',
   inverted: 'text-cream-100/85 bg-cream-50/10 ring-cream-50/15',
-  accent:   'text-rust-700 bg-rust-50 ring-rust-100',
+  accent:   'text-signal-700 bg-signal-50 ring-signal-100',
   forest:   'text-forest-700 bg-forest-50 ring-forest-100',
 }
 
@@ -35,7 +35,7 @@ const Eyebrow: React.FC<EyebrowProps> = ({
               ? 'text-forest-700'
               : tone === 'muted'
               ? 'text-ink-700'
-              : 'text-rust-700'
+              : 'text-signal-700'
           }`
     } ${className}`}
     style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' }}

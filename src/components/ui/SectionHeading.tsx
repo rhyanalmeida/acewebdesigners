@@ -25,11 +25,16 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
   level = 2,
   size = 'lg',
   tone = 'default',
-  align = 'center',
+  // Default flipped from 'center' to 'left' on 2026-07-20. Every section on the site
+  // opened with a centred eyebrow/headline/sub because this default was never once
+  // overridden — and a centred stack repeated nine times is the clearest visual
+  // signature of a generated page. Left is the editorial default; pass
+  // align="center" deliberately where a section should break the rhythm.
+  align = 'left',
   maxWidth = 'max-w-2xl',
   className = '',
 }) => (
-  <div className={`${align === 'center' ? `text-center ${maxWidth} mx-auto` : ''} ${className}`}>
+  <div className={`${align === 'center' ? `text-center ${maxWidth} mx-auto` : maxWidth} ${className}`}>
     {eyebrow && <Eyebrow tone={eyebrowTone}>{eyebrow}</Eyebrow>}
     <GradientHeading level={level} size={size} tone={tone} className="mt-5" accent={accent}>
       {heading}

@@ -70,7 +70,7 @@ const WebsiteSocialCombo: React.FC<WebsiteSocialComboProps> = ({
       <div className="relative mx-auto w-full max-w-[280px] sm:max-w-xs">
         <div
           aria-hidden
-          className="absolute -inset-4 bg-rust-500/10 rounded-[2.5rem] blur-2xl -z-10"
+          className="absolute -inset-4 bg-signal-500/10 rounded-[2.5rem] blur-2xl -z-10"
         />
         <div className="relative rounded-[2.25rem] bg-ink-800 p-2 ring-1 ring-cream-50/15 shadow-lift">
           <div className="rounded-[1.85rem] overflow-hidden bg-cream-50 aspect-[9/19]">
@@ -82,7 +82,7 @@ const WebsiteSocialCombo: React.FC<WebsiteSocialComboProps> = ({
             />
           </div>
         </div>
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-rust-500 text-white text-[11px] font-semibold uppercase tracking-wide px-3 py-1 shadow-glow-rust">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-signal-500 text-white text-[11px] font-semibold uppercase tracking-wide px-3 py-1 shadow-glow-signal">
           <Instagram className="h-3 w-3" aria-hidden />
           Social
         </div>
@@ -92,7 +92,7 @@ const WebsiteSocialCombo: React.FC<WebsiteSocialComboProps> = ({
       <div className="relative">
         <div
           aria-hidden
-          className="hidden lg:block absolute -left-10 top-1/2 -translate-y-1/2 text-rust-300"
+          className="hidden lg:block absolute -left-10 top-1/2 -translate-y-1/2 text-signal-300"
         >
           <ArrowRight className="h-7 w-7" />
         </div>
@@ -103,7 +103,7 @@ const WebsiteSocialCombo: React.FC<WebsiteSocialComboProps> = ({
           />
           <div className="relative rounded-xl3 bg-ink-800 p-3 ring-1 ring-cream-50/15 shadow-lift">
             <div className="flex items-center gap-1.5 px-2 pb-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-rust-400/70" aria-hidden />
+              <span className="h-2.5 w-2.5 rounded-full bg-signal-400/70" aria-hidden />
               <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" aria-hidden />
               <span className="h-2.5 w-2.5 rounded-full bg-forest-400/70" aria-hidden />
             </div>
@@ -131,7 +131,7 @@ const WebsiteSocialCombo: React.FC<WebsiteSocialComboProps> = ({
           key={title}
           className="rounded-xl2 bg-ink-800/60 ring-1 ring-cream-50/10 p-5 sm:p-6 backdrop-blur-sm"
         >
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-rust-500/15 text-rust-300 ring-1 ring-rust-300/30">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-signal-500/15 text-signal-300 ring-1 ring-signal-300/30">
             <Icon className="h-5 w-5" aria-hidden />
           </span>
           <h3 className="mt-4 font-display text-lg font-semibold text-cream-50">{title}</h3>
@@ -153,7 +153,7 @@ const WebsiteSocialCombo: React.FC<WebsiteSocialComboProps> = ({
       <Magnetic strength={6}>
         <button
           onClick={onCta}
-          className="group inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white font-semibold text-base px-7 py-3.5 shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
+          className="group inline-flex items-center justify-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base px-7 py-3.5 shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
         >
           {ctaLabel}
           <ArrowRight className="h-5 w-5 icon-nudge" aria-hidden />

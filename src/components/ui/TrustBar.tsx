@@ -31,7 +31,7 @@ const TrustBar: React.FC<TrustBarProps> = ({
   const muted = isDark ? 'text-cream-100/60' : 'text-ink-700/70'
   const text  = isDark ? 'text-cream-100/90' : 'text-ink-800'
   const star  = isDark ? 'text-amber-300' : 'text-amber-500'
-  const iconColor = isDark ? 'text-rust-300' : 'text-forest-700'
+  const iconColor = isDark ? 'text-signal-300' : 'text-forest-700'
 
   return (
     <div

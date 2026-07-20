@@ -14,7 +14,7 @@ type Props = {
  */
 export default function HandUnderline({
   className = '',
-  color = '#C04E1A',
+  color = '#A00909',
   strokeWidth = 3,
   delay = 0.15,
 }: Props) {

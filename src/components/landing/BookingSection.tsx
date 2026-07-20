@@ -107,7 +107,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
                   >
                     <span
                       aria-hidden
-                      className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-rust-500 text-white text-xs font-semibold"
+                      className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-signal-500 text-white text-xs font-semibold"
                     >
                       {i + 1}
                     </span>
@@ -121,7 +121,7 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
 
         {reminder && (
           <div className="mt-6 text-center">
-            <p className="inline-block max-w-2xl text-sm text-ink-800 bg-cream-50 border-l-4 border-rust-500 rounded-xl p-4 shadow-soft text-left">
+            <p className="inline-block max-w-2xl text-sm text-ink-800 bg-cream-50 border-l-4 border-signal-500 rounded-xl p-4 shadow-soft text-left">
               {reminder}
             </p>
           </div>

@@ -35,7 +35,7 @@ const renderCell = (cell: Cell, isAce = false) => {
   if (cell === 'yes') {
     return (
       <Check
-        className={`mx-auto h-5 w-5 ${isAce ? 'text-rust-300' : 'text-forest-600'}`}
+        className={`mx-auto h-5 w-5 ${isAce ? 'text-signal-300' : 'text-forest-600'}`}
         aria-label="Yes"
       />
     )

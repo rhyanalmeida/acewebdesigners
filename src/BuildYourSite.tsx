@@ -60,21 +60,21 @@ function BuildYourSite() {
         {/* HERO */}
         <section className="px-5 pt-10 pb-6 sm:pt-14">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-rust-50 px-3 py-1 text-sm font-medium text-rust-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-signal-50 px-3 py-1 text-sm font-medium text-signal-700">
               <Sparkles className="h-4 w-4" /> For restaurants & cafés
             </span>
             <h1 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-5xl">
               Build your restaurant’s website
-              <span className="block text-rust-600">in minutes — go live for less</span>
+              <span className="block text-signal-600">in minutes — go live for less</span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-lg text-ink-600">
               Design it yourself with a live preview, then launch on a simple monthly plan
               from <strong>$99/mo</strong>. We build it, host it, and keep it updated.
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-ink-600">
-              <span className="inline-flex items-center gap-1.5"><BadgeCheck className="h-4 w-4 text-rust-500" /> No card to preview</span>
-              <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4 text-rust-500" /> Live in days</span>
-              <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 text-rust-500" /> Cancel anytime</span>
+              <span className="inline-flex items-center gap-1.5"><BadgeCheck className="h-4 w-4 text-signal-500" /> No card to preview</span>
+              <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4 text-signal-500" /> Live in days</span>
+              <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 text-signal-500" /> Cancel anytime</span>
             </div>
           </div>
         </section>
