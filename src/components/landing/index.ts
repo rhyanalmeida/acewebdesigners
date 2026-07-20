@@ -5,5 +5,5 @@ export { default as LandingExamples, type LandingExample } from './LandingExampl
 export { default as BookingSection } from './BookingSection'
 export { default as LandingFaq, type FaqItem } from './LandingFaq'
 export { default as TrustStrip, type TrustStripItem } from './TrustStrip'
-export { default as WebsiteSocialCombo } from './WebsiteSocialCombo'
+export { default as BlueprintReveal } from './BlueprintReveal'
 export { default as ComparisonTable, type ComparisonRow } from './ComparisonTable'
