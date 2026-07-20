@@ -173,9 +173,19 @@ replacement on CTR, hold rate, or CPM. Judge it on leads.
 
 ### Six differences in the script that explain the 9x
 
-1. **Audience named in second 0 vs second 13.4.** The winner opens *"Listen up business owners"* —
-   first two words. The current ad's only audience callout is *"So contractors"* at **13.4s**, by
-   which point ~70-80% have already scrolled. Effectively nobody hears it.
+1. **Direct address vs description.** ~~The current ad doesn't name its audience until 13.4s.~~
+   **Correction (2026-07-20): that was wrong.** "Most **contractor** websites" — the word is the
+   second word of the ad, at 0.0s. Both ads name the audience immediately, and Meta's content
+   understanding picks up "contractor" from second 0 either way, so there is no targeting-signal
+   difference here.
+
+   What survives is a smaller, purely rhetorical point: the winner uses **direct second-person
+   address** — *"Listen up business owners"* is a summons aimed at the viewer. In the current ad
+   "contractor" is an **adjective modifying "websites"** — it describes a category of object rather
+   than speaking to the person watching. The viewer isn't addressed directly until *"So contractors,
+   what are you waiting for?"* at 13.4s. That's a real direct-response distinction, but it is a much
+   weaker claim than the one originally made here, and it should not carry much weight in the
+   diagnosis.
 2. **The offer is a website vs a meeting.** Winner: *"I can show it to you for free."* Current:
    *"Book a free website meeting."* Nobody wants a meeting; everybody wants to see their website.
    This is very likely what produced Sean's *"thought i was wix repair"* — the current ad never makes
@@ -229,18 +239,18 @@ not what was driving the result — the style is a targeting signal, not a compr
 | static per phrase | bouncing / scaling / animated |
 | plain punctuation | emoji in captions |
 
-### Fixing the audience-callout problem without re-recording
+### Making the winner contractor-specific without re-recording
 
-The spoken words are fixed without a reshoot — but the **on-screen text is not**, and that is enough
-to solve the biggest script problem.
+This applies to the **winner** video, which genuinely is general — it says *"Listen up business
+owners"* and never says "contractor" at all. (The current ad does not have this problem; see the
+correction in difference 1.)
 
-The winner says *"Listen up business owners"*, which is general rather than contractor-specific. Add a
-**static text overlay in seconds 0-2** reading `CONTRACTORS —` or `ATTENTION: CONTRACTORS`. The audio
-stays welcoming and general while the on-screen text does the targeting. A slight mismatch between
-spoken "business owners" and overlaid "contractors" is harmless — the text is what both the viewer
-and the algorithm read first.
+Add a **static text overlay in seconds 0-2** reading `CONTRACTORS —` or `ATTENTION: CONTRACTORS`. The
+audio stays welcoming and general while the on-screen text does the targeting. A slight mismatch
+between spoken "business owners" and overlaid "contractors" is harmless — the text is what both the
+viewer and the algorithm read first.
 
-This gets the audience named in **second 0 instead of second 13.4** with no reshoot at all.
+No reshoot needed.
 
 ### Recommended action
 
