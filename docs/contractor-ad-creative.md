@@ -106,7 +106,71 @@ drive ad-hides, which is what `quality_ranking` actually measures.
 CPM toward $25-30, which roughly doubles the impressions $20/day buys, before any conversion-rate
 improvement.
 
-### Requirements for the replacement (test 3-5 hook variants, same body)
+## ✅ We already own a proven creative — use it (found 2026-07-20)
+
+The 2025 campaign that produced ~65 leads and **several paying clients** was driven almost entirely
+by ad **"video ad 5/29"** (`120223154842120259`) — $2,656 of the campaign's $2,762 and 971 of its
+1,024 link clicks. ("Valerie AD" only ever got $105 and 53 clicks; it was not the performer.)
+
+Its video is **"Free Preview Rhyan 1 - 526"**, 31.5s — the same video already embedded in the
+landing-page hero (`LandingContractors.tsx:255`, Vimeo `1088261551`). We have it.
+
+### Same presenter. Completely different presentation.
+
+| | "Free Preview Rhyan 1" (worked) | "funny hook" (current) |
+|---|---|---|
+| Wardrobe | white collared shirt | grey hoodie |
+| Setting | plain neutral wall | couch, cinder-block room |
+| Framing | tight head-and-shoulders, direct to camera | wide, seated, laptop |
+| Props | none | **two chihuahuas** |
+| Captions | none burned in | one word per frame, TikTok style |
+| Register | calm, professional, making an offer | comedic |
+
+The problem was never the presenter — it was that one video reads as a business owner making an
+offer and the other reads as a teenager making a TikTok.
+
+### The counter-signal, stated honestly
+
+The winning ad's *attention* metrics were *worse*:
+
+| | winner (2025) | current |
+|---|---|---|
+| CTR | 4.97% | 6.84% |
+| CPM | $82 | $54 |
+| Hold to 25% | **19%** | **30%** |
+| Click → lead | **~6.3%** | **0.69%** |
+
+It held fewer viewers, cost more per impression, and got fewer clicks — and converted **9x better**.
+That is the whole lesson: the funny hook buys more attention of the wrong kind. Do not judge the
+replacement on CTR, hold rate, or CPM. Judge it on leads.
+
+### Copy that ran with it
+
+Headline: `Get a Website Preview—Only Pay If You Love It`
+Description: `Zero risk. We design your website first. You decide if it's worth it.`
+Body:
+```
+🚨 Free Website Preview! No upfront cost.
+We'll build you a custom website first—only pay if you love it.
+Perfect for local businesses ready to upgrade their online presence.
+✅ No risk, no pressure.
+🎥 Watch the video to learn more.
+```
+
+Note how different this is from the current copy, which is loss-framed and exclusionary
+("losing thousands of $$$", "Not for beginners", "established US contractors only", "Limited spots").
+The winner is **gain-framed, inviting, and explicitly low-pressure**. "No risk, no pressure" plausibly
+helps the show-rate problem too — it lowers the perceived stakes of the call.
+
+### Recommended action
+
+Run the existing "Free Preview Rhyan 1" video at contractors, with the winning copy structure adapted
+only where necessary (`local businesses` → `contractors`). Keep the no-pressure, gain-framed shape —
+that is the part that worked. Change nothing else at the same time, so the result is readable.
+
+If a reshoot happens later, these are the requirements:
+
+### Requirements for a reshoot (test 3-5 hook variants, same body)
 
 1. **Second 1 names the audience on screen** — "CONTRACTORS:" / "ROOFERS:" in large burned-in text.
    Advantage+ needs this as much as the viewer does; it's how delivery finds the right people.
