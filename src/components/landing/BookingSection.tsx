@@ -81,8 +81,22 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
           </div>
         </div>
 
+        {/* Form first — the CTA drops visitors here; supporting copy reads below. */}
+        <div className="mt-8 rounded-xl3 bg-cream-50 shadow-lift ring-1 ring-ink-900/10 p-3 sm:p-6 md:p-10">
+          <BookingWidget
+            calendarConfig={calendarConfig}
+            containerId={containerId}
+          />
+        </div>
+
+        {scarcityNote && (
+          <p className="mt-6 text-center text-sm text-ink-700/80 max-w-2xl mx-auto">
+            {scarcityNote}
+          </p>
+        )}
+
         {whatToExpect && whatToExpect.length > 0 && (
-          <div className="mt-10 mx-auto max-w-3xl">
+          <div className="mt-6 mx-auto max-w-3xl">
             <div className="rounded-xl2 bg-cream-50 ring-1 ring-ink-900/10 p-5 sm:p-6 shadow-soft">
               <p className="label-mono text-ink-700/70 text-center">What to expect on the call</p>
               <ul className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -104,19 +118,6 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
             </div>
           </div>
         )}
-
-        {scarcityNote && (
-          <p className="mt-6 text-center text-sm text-ink-700/80 max-w-2xl mx-auto">
-            {scarcityNote}
-          </p>
-        )}
-
-        <div className="mt-8 rounded-xl3 bg-cream-50 shadow-lift ring-1 ring-ink-900/10 p-3 sm:p-6 md:p-10">
-          <BookingWidget
-            calendarConfig={calendarConfig}
-            containerId={containerId}
-          />
-        </div>
 
         {reminder && (
           <div className="mt-6 text-center">

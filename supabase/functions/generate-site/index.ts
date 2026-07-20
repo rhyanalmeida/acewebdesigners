@@ -2,32 +2,33 @@
  * `generate-site` — auto-build a stunning multi-page preview website for a booking.
  *
  * Fired asynchronously by `book` right after a real (non-test) appointment is
- * created, and by the /admin Retry button. Claude Opus 4.8 writes a complete
+ * created, and by the /admin Retry button. Claude Sonnet 5 writes the complete
  * multi-page static site (Home / Services / About / Contact + shared styles.css
  * with micro-animations + main.js) personalized to the lead's business (name,
  * trade, city, phone), deployed to its own brand-new Netlify site. The link
  * lands on the appointment row (`preview_url`) and shows in /admin.
  *
- * Architecture — STAGED, because Supabase Edge isolates have a ~400s wall-clock
- * budget and a full multi-page Opus generation can exceed it in one shot. Each
- * stage answers 202 immediately, generates its slice of the site in
- * EdgeRuntime.waitUntil, then self-invokes the next stage with the accumulated
- * files (each stage = fresh isolate = fresh time budget):
- *   stage 1  styles.css + main.js + index.html      (sets the design system)
- *   stage 2  services.html + about.html             (matches stage-1 design)
- *   stage 3  contact.html → create Netlify site → deploy everything
- * Progress lives in appointments.site_status (queued → generating → deployed |
- * failed; No-Show sets deleted via `result`). If an isolate dies mid-run the row
- * stays 'generating' and /admin offers Retry (restarts from stage 1).
+ * THREE-STAGE OPUS 4.8 CHAIN (2026-07-13; upgraded same day from a Sonnet 5
+ * 2-stage chain — owner wanted King-Repairs-tier quality and accepted the
+ * higher cost, ~$0.60-1.10/site). A single streamed call cannot finish a
+ * quality site inside one isolate: Supabase Edge kills isolates at ~400s wall
+ * clock (verified twice live). Each stage answers 202 and self-invokes the
+ * next with the accumulated files — a fresh isolate = a fresh clock:
+ *   stage 1  styles.css + main.js              (the whole design system)
+ *   stage 2  index.html + services.html        (built on stage-1 classes)
+ *   stage 3  about.html + contact.html → Netlify deploy
+ * Design brief includes a VERIFIED Unsplash photo library (hallucinated photo
+ * URLs 404) + the King Repairs art direction (dark luxury, photo hero, badge
+ * chip, marquee ticker, counters). Progress lives in appointments.site_status
+ * (queued → generating → deployed | failed). If an isolate dies the row stays
+ * 'generating' and /admin offers Retry (restarts from stage 1).
  *
  * Auth (deployed --no-verify-jwt):
  *   • x-internal-key === SUPABASE_SERVICE_ROLE_KEY  (book trigger + stage chain), or
  *   • a Supabase user JWT whose email is in ADMIN_EMAILS (admin Retry).
  *
- * POST { appointmentId, force? }                      → start (stage 1)
- * POST { appointmentId, stage: 2|3, files } (internal) → continue the chain
- *
- * Cost: ~35-55k Opus output tokens per site ≈ $1.00-1.50 per booking.
+ * POST { appointmentId, force? }                       → start (stage 1), 202
+ * POST { appointmentId, stage: 2, files } (internal)   → continue the chain
  */
 
 import Anthropic from 'npm:@anthropic-ai/sdk@0.40.1'
@@ -35,69 +36,154 @@ import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { requireAdmin } from '../_shared/adminAuth.ts'
 import { createNetlifySite, deployFiles, netlifyConfigured } from '../_shared/netlify.ts'
+import {
+  type DesignSystem,
+  DEFAULT_DESIGN_SYSTEMS,
+  designSystemById,
+  renderArtDirection,
+  selectDesignSystem,
+} from '../_shared/designSystems.ts'
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
-const MODEL = 'claude-opus-4-8' // quality matters — this site is the sales pitch
-const MAX_TOKENS_PER_STAGE = 30000
+const MODEL = 'claude-opus-4-8' // strongest designer; owner accepted ~$0.60-1.10/site for King-Repairs-tier quality
 
 const FILE_MARKER = /^=====\s*FILE:\s*([\w./-]+)\s*=====\s*$/gm
 
-const DESIGN_SYSTEM_PROMPT = `You are an elite web designer and front-end developer producing a preview website that will be shown to a small local business owner in a sales meeting to win their business. Quality bar: the owner should think "this looks better than sites I'd pay thousands for" and find it hard to say no.
+// Verified-live Unsplash photos (all curl-checked 200 on 2026-07-13). The model
+// must use ONLY these — hallucinated photo IDs 404 and wreck the design.
+const PHOTO_LIBRARY = `PHOTO LIBRARY — use ONLY these images.unsplash.com photos (any other photo URL will 404):
+- photo-1600585154340-be6161a56a0c  striking modern home exterior at dusk, lit windows (best generic HERO)
+- photo-1570129477492-45c003edd2be  classic American house, porch + lawn (traditional HERO)
+- photo-1523217582562-09d0def993a6  white minimalist home exterior
+- photo-1600047509807-ba8f99d2cdde  modern gray/white siding exterior
+- photo-1503387762-592deb58ef4e  hands drafting on blueprints (planning/estimates)
+- photo-1504307651254-35680f356dfd  construction crew on structural site (crews at work)
+- photo-1541888946425-d81bb19240f5  large construction site, team in safety vests
+- photo-1556912173-3bb406ef7e77  bright white modern kitchen (kitchen remodel)
+- photo-1584622650111-993a426fbf0a  modern bathroom, glass shower + vanity
+- photo-1620626011761-996317b8d101  white bathroom, tub + towels
+- photo-1600566753086-00f18fb6b3ea  modern living room with staircase (interior reno)
+- photo-1600607687939-ce8a6c25118c  sleek open-plan luxury interior
+- photo-1562259949-e8e7689d7828  roller applying blue paint to wall (painting)
+- photo-1595814433015-e6f5ce69614e  painter's paint-splattered jeans + brush (painting, character shot)
+- photo-1589939705384-5185137a7f0f  carpenter with power tools at workbench (carpentry)
+- photo-1621905251189-08b45d6a269e  electrician in hardhat wiring a wall (electrical)
+- photo-1620653713380-7a34b773fef8  wrench on water-heater pipework (plumbing/HVAC)
+- photo-1632759145351-1d592919f522  roofer laying shingles (roofing)
+- photo-1635424710928-0544e8512eae  worker roped on rooftop by tree (roofing/tree work)
+- photo-1558904541-efa843a96f01  pristine green lawn + hedge (lawn care/landscaping)
+- photo-1416879595882-3373a0480b5b  soil + seed scoops (gardening/landscaping)
+- photo-1607400201889-565b1ee75f8e  insulation install (insulation)
+- photo-1581578731548-c64695cc6952  detail cleaning work (cleaning/handyman)
+- photo-1580256081112-e49377338b7f  commercial corridor + cleaning cart (janitorial/commercial)
+URL pattern: https://images.unsplash.com/photo-<id>?auto=format&fit=crop&w=1600&q=80 for hero backgrounds, w=800&q=75 for cards/sections. Pick 4-7 photos that FIT THIS TRADE; loading="lazy" on everything except the hero; meaningful alt text.`
+
+// The system prompt is assembled per-site: constant scaffolding (output contract,
+// photo library, motion craft, truthfulness) wraps the SELECTED art direction
+// (renderArtDirection), so every generated site is visually unique. The shared
+// page ingredients (hero, marquee, stat band, service cards, splits, CTA band,
+// footer) stay required in the STAGES instructions; the art direction restyles them.
+function buildSystemPrompt(ds: DesignSystem): string {
+  return `You are an elite web designer and front-end developer producing a preview website that will be shown to a small local business owner in a sales meeting to win their business. Quality bar: the owner should think "this looks better than sites I'd pay thousands for" and find it hard to say no. The benchmark is a $10k agency build: rich, confident, deliberate — never a flat template.
 
 OUTPUT CONTRACT — follow exactly:
-- Output ONLY files. Before each file, print exactly one marker line:
+- Output ONLY the files this request asks for, in the order asked. Before each file, print exactly one marker line:
 ===== FILE: <filename> =====
-  followed immediately by that file's raw contents. No markdown fences, no commentary before, between, or after files. Output ONLY the files you are asked for in this request.
+  followed immediately by that file's raw contents. No markdown fences, no commentary before, between, or after files.
 - The site is multi-page: / (index.html), /services.html, /about.html, /contact.html. Every page links the shared stylesheet (<link rel="stylesheet" href="/styles.css">) and script (<script src="/main.js" defer></script>) and shares the same nav + footer with working links between pages.
-- The ONLY external requests allowed are Google Fonts. NO external images, frameworks, or CDNs. All imagery via inline SVG and CSS (shapes, patterns, gradients, crafted icons) — intentional, not clip-art.
+- External requests allowed: Google Fonts + the photo library below. Nothing else (no frameworks, no CDNs). Icons via inline SVG — crafted, not clip-art.
 - Fully responsive, mobile-first (sound at 360px, 768px, 1200px), with a working hamburger nav on mobile. Semantic HTML; every page gets its own <title> and meta description.
+- HARD CODE BUDGET — each file must respect the line caps given in the request. This is a generation-time limit; exceeding it kills the build. Terse selectors, no comments, no dead CSS. Compact beats sprawling.
+- DRY — single source of truth everywhere: design tokens (colors, spacing, radii, shadows, timing) defined ONCE as CSS custom properties and referenced everywhere; one .btn / .card / .section / .reveal system reused across all pages; the shared nav + footer markup identical byte-for-byte on every page; one IntersectionObserver in main.js drives all reveals. Never restate a style or script two ways.
+- REQUIRED page ingredients (style them in the art direction below): a hero with a small badge/eyebrow chip + a display headline where ONE key word is emphasized (accent color) + subline + primary CTA (call) + secondary CTA + a row of small trust chips with inline SVG ticks; a slim scrolling MARQUEE ticker of 4-6 short trade promises after the hero; an animated STAT COUNTER band (3-4 process-fact stats); photo-and-text split sections; service cards with inline SVG icons; a photo-backed CTA band near the footer; a rich multi-column footer with tel: link and a small "Website preview by Ace Web Designers" line. NAV = business-name wordmark + small inline SVG mark + links + phone + accent CTA, solid/blurred on scroll.
 
-DESIGN — this must look stunning:
-- Distinctive, premium design fitted to this specific trade — its colors, mood, and imagery language. NEVER generic AI aesthetics: no purple gradients, no Inter/Roboto/system fonts, no cookie-cutter sameness. Pick 2 characterful Google Fonts (one display, one body) and a cohesive palette with strong contrast, defined as CSS custom properties in styles.css.
-- Rich but tasteful MICRO-ANIMATIONS throughout (styles.css + main.js, vanilla only):
-  • scroll-reveal via IntersectionObserver (fade/slide/scale-in with slight stagger),
-  • a hero entrance animation and a subtle ambient motion element (drifting SVG shapes or a slow gradient shift),
-  • hover states with depth (lift + shadow + color transitions) on cards and buttons, animated link underlines,
-  • an animated stat/counter or a scroll progress bar as a signature touch,
-  • respect prefers-reduced-motion.
+${PHOTO_LIBRARY}
+
+${renderArtDirection(ds)}
+
+MOTION CRAFT — motion is part of the quality bar (vanilla only, GPU-friendly transform/opacity, ALWAYS respect prefers-reduced-motion):
+- Execute this style's MOTION SIGNATURE above as the memorable moments; keep everything smooth and intentional, never janky or gratuitous.
+- One IntersectionObserver in main.js drives all scroll reveals with per-child stagger; a thin accent scroll-progress bar sits at the top of every page; stat counters count up on reveal; buttons and cards get tasteful hover feedback; the emphasized headline word gets its own reveal on load; the marquee scrolls via CSS and pauses on hover.
+- Under prefers-reduced-motion: disable transforms/auto-scroll/Ken-Burns and simply show content.
 
 TRUTHFULNESS — hard rules:
-- NEVER invent prices, discounts, license numbers, certifications, street addresses, opening hours, years in business, star ratings, or review counts presented as real. Testimonials must be clearly labeled "Example testimonial" in small text.
+- NEVER invent prices, discounts, license numbers, certifications, street addresses, opening hours, years in business, star ratings, or review counts presented as real. Stat counters use process facts, not history. Testimonials must be clearly labeled "Example testimonial" in small text.
 - Use ONLY the contact details provided in the brief. If something isn't provided, design around it rather than fabricating it.
 
 Every line should look deliberate. This site is the pitch.`
+}
+
+/** Load active styles from the `design_systems` table; fall back to the bundled set on any error. */
+async function loadDesignSystems(supa: ReturnType<typeof admin>): Promise<DesignSystem[]> {
+  try {
+    const { data, error } = await supa
+      .from('design_systems')
+      .select('id, name, trades, mood, palette, typography, layout, motion, photo')
+      .eq('active', true)
+      .order('sort', { ascending: true })
+      .order('id', { ascending: true })
+    if (error || !data || !data.length) return DEFAULT_DESIGN_SYSTEMS
+    return data as unknown as DesignSystem[]
+  } catch {
+    return DEFAULT_DESIGN_SYSTEMS
+  }
+}
+
+/** Resolve the design system for a booking: explicit override id, else deterministic by appt id + trade. */
+async function resolveDesignSystem(
+  supa: ReturnType<typeof admin>,
+  appt: ApptRow,
+  styleOverride?: string,
+): Promise<DesignSystem> {
+  const systems = await loadDesignSystems(supa)
+  return (
+    designSystemById(systems, styleOverride) ??
+    selectDesignSystem(systems, appt.id, appt.contacts?.business_type)
+  )
+}
 
 interface StageSpec {
   files: string[]
+  maxTokens: number
   instruction: string
 }
 
+// Per-stage output budgets keep each streamed call inside one isolate's ~400s
+// wall clock. Opus streams slower than Sonnet (~40-60 tok/s), so THREE smaller
+// stages instead of two: ~10k tokens/stage ≈ 3-4 min each.
 const STAGES: Record<number, StageSpec> = {
   1: {
-    files: ['styles.css', 'main.js', 'index.html'],
+    files: ['styles.css', 'main.js'],
+    maxTokens: 14000,
     instruction:
-      `For THIS request, output exactly these files in this order: styles.css, main.js, index.html.\n` +
-      `- styles.css: the entire shared design system + all animations for the whole site (nav, footer, buttons, cards, section layouts, reveal classes, page-hero styles the inner pages will reuse).\n` +
-      `- main.js: nav toggle, IntersectionObserver reveals, counters, small delights. Vanilla, defensive, under 150 lines.\n` +
-      `- index.html (Home): sticky nav (business name as wordmark, links to /, /services.html, /about.html, /contact.html, phone CTA button); hero with a strong trade-specific headline + subline + call CTA + secondary CTA; a highlights strip; 3 featured services teasing /services.html; why-choose-us trust points; 2-3 example-labeled testimonials; service-area line; closing CTA band; footer with tel: link and "Website preview by Ace Web Designers".`,
+      `For THIS request, output exactly these files in this order: styles.css, main.js.\n` +
+      `Line caps (HARD — the stream is cut off if you run long, destroying the build): styles.css ≤ 700, main.js ≤ 130.\n` +
+      `- styles.css: the ENTIRE shared design system + all animations for the whole site (tokens, nav incl. scrolled state, footer, buttons, badge chip, marquee, counters, cards, photo-split sections, hero + page-hero treatments, CTA band, reveal classes, form styles). Every page will be built from these classes — make the system complete.\n` +
+      `- main.js: nav toggle + scrolled-nav class, one IntersectionObserver for all reveals, stat counters, marquee is pure CSS. Vanilla, defensive.`,
   },
   2: {
-    files: ['services.html', 'about.html'],
+    files: ['index.html', 'services.html'],
+    maxTokens: 13000,
     instruction:
-      `The design system (styles.css, main.js) and index.html already exist — they are provided below. Match them EXACTLY: same nav, footer, fonts, palette, classes, and animation hooks. Add page-specific styles only via a small <style> block in the page <head> if truly needed.\n` +
-      `For THIS request, output exactly these files in this order: services.html, about.html.\n` +
-      `- services.html: full services page — 5-8 services this trade actually offers, each a crafted card with an inline SVG icon and a 2-3 sentence description; a process/how-we-work section (3-4 steps); CTA band.\n` +
-      `- about.html: the business story angle (generic and honest — no invented years or certifications), values, what working with them feels like, expanded why-us, a generically-phrased team section; CTA band.`,
+      `The design system (styles.css, main.js) already exists — provided below. Build strictly on its classes and tokens; add at most a tiny page-specific <style> block if truly needed. Do NOT re-output the provided files.\n` +
+      `For THIS request, output exactly these files in this order: index.html, services.html.\n` +
+      `Line caps (HARD — both files must fit; if index runs long, tighten services): index.html ≤ 300, services.html ≤ 210.\n` +
+      `- index.html (Home): the full ART DIRECTION home experience — photographic hero (badge chip, accent-italic word, dual CTAs, trust chips), marquee ticker, stat counter band, photo+text split section, 3 featured service cards teasing /services.html, why-choose-us, 2-3 example-labeled testimonials, service-area line, photo-backed CTA band, rich footer with tel: link and "Website preview by Ace Web Designers".\n` +
+      `- services.html: compact page-hero (photo + overlay); 5-8 services this trade actually offers, each a crafted card with an inline SVG icon and a 2-3 sentence description; a process/how-we-work section (3-4 steps); photo-backed CTA band; same nav + footer byte-for-byte.`,
   },
   3: {
-    files: ['contact.html'],
+    files: ['about.html', 'contact.html'],
+    maxTokens: 10000,
     instruction:
-      `The design system (styles.css, main.js) and index.html already exist — they are provided below. Match them EXACTLY: same nav, footer, fonts, palette, classes, and animation hooks.\n` +
-      `For THIS request, output exactly this file: contact.html.\n` +
-      `- contact.html: prominent phone tel: CTA; a beautifully styled contact form (fields only — it posts nowhere; note near the button that calling is fastest); service-area section; availability phrased as "Contact us for availability" — do NOT invent hours.`,
+      `The design system (styles.css, main.js) and index.html already exist — provided below. Match them EXACTLY: same nav, footer, fonts, palette, classes, animation hooks. Do NOT re-output them.\n` +
+      `For THIS request, output exactly these files in this order: about.html, contact.html.\n` +
+      `Line caps (HARD — both files must fit): about.html ≤ 170, contact.html ≤ 150.\n` +
+      `- about.html: compact page-hero (photo + overlay); the business story angle (generic and honest — no invented years or certifications), values, what working with them feels like, a photo+text split, expanded why-us; CTA band; same nav + footer byte-for-byte.\n` +
+      `- contact.html: compact page-hero; prominent phone tel: CTA; a beautifully styled contact form (fields only — it posts nowhere; note near the button that calling is fastest); service-area section; availability phrased as "Contact us for availability" — do NOT invent hours; same nav + footer byte-for-byte.`,
   },
 }
+const FINAL_STAGE = 3
 
 /** Split the model output on FILE markers into { "/name": content }. */
 export function parseFiles(raw: string): Record<string, string> {
@@ -125,9 +211,13 @@ function stripFences(raw: string): string {
 interface Body {
   appointmentId?: string
   force?: boolean
-  /** Internal chain state (stage 2/3 self-invocations only). */
+  /** Internal chain state (stage 2 self-invocation only). */
   stage?: number
   files?: Record<string, string>
+  /** Optional design-system id override (external callers, e.g. /admin Retry). */
+  style?: string
+  /** Resolved design system, threaded internally to stages 2-3 so they don't re-query/re-pick. */
+  ds?: DesignSystem
 }
 
 interface ApptRow {
@@ -160,11 +250,12 @@ function businessBrief(appt: ApptRow): string {
   )
 }
 
-/** Run one Opus stage; returns the newly generated files. Throws on bad output. */
+/** Run one Sonnet stage; returns the newly generated files. Throws on bad output. */
 async function generateStage(
   stage: number,
   appt: ApptRow,
   priorFiles: Record<string, string>,
+  ds: DesignSystem,
 ): Promise<Record<string, string>> {
   const spec = STAGES[stage]
   let userMsg = `${businessBrief(appt)}\n${spec.instruction}`
@@ -179,8 +270,8 @@ async function generateStage(
   const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY')! })
   const stream = anthropic.messages.stream({
     model: MODEL,
-    max_tokens: MAX_TOKENS_PER_STAGE,
-    system: DESIGN_SYSTEM_PROMPT,
+    max_tokens: spec.maxTokens,
+    system: buildSystemPrompt(ds),
     messages: [{ role: 'user', content: userMsg }],
   })
   const msg = await stream.finalMessage()
@@ -196,31 +287,48 @@ async function generateStage(
 }
 
 /** Fire the next stage as a fresh invocation (fresh isolate = fresh time budget). */
-async function invokeNextStage(appointmentId: string, stage: number, files: Record<string, string>): Promise<void> {
+async function invokeNextStage(
+  appointmentId: string,
+  stage: number,
+  files: Record<string, string>,
+  ds: DesignSystem,
+): Promise<void> {
   const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-site`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     },
-    body: JSON.stringify({ appointmentId, stage, files }),
+    body: JSON.stringify({ appointmentId, stage, files, ds }),
   })
   if (!resp.ok) throw new Error(`stage ${stage} handoff failed (${resp.status}) ${(await resp.text()).slice(0, 150)}`)
   await resp.body?.cancel()
 }
 
-async function runStage(stage: number, appt: ApptRow, priorFiles: Record<string, string>): Promise<void> {
+async function runStage(
+  stage: number,
+  appt: ApptRow,
+  priorFiles: Record<string, string>,
+  threadedDs?: DesignSystem,
+  styleOverride?: string,
+): Promise<void> {
   const supa = admin()
   const save = (fields: Record<string, unknown>) =>
     supa.from('appointments').update(fields).eq('id', appt.id)
 
+  // Stages 2-3 receive the resolved style; stage 1 resolves it (DB, else fallback).
+  const ds = threadedDs ?? (await resolveDesignSystem(supa, appt, styleOverride))
+
   try {
-    if (stage === 1) await save({ site_status: 'generating', site_error: null })
+    if (stage === 1) {
+      await save({ site_status: 'generating', site_error: null })
+      console.log(`[generate-site] appt=${appt.id} style="${ds.id}" (${ds.name}) trade="${appt.contacts?.business_type ?? ''}"`)
+    }
 
-    const files = { ...priorFiles, ...(await generateStage(stage, appt, priorFiles)) }
+    const files = { ...priorFiles, ...(await generateStage(stage, appt, priorFiles, ds)) }
 
-    if (stage < 3) {
-      await invokeNextStage(appt.id, stage + 1, files)
+    if (stage < FINAL_STAGE) {
+      await invokeNextStage(appt.id, stage + 1, files, ds)
       console.log(`[generate-site] stage ${stage} done appt=${appt.id} → stage ${stage + 1}`)
       return
     }
@@ -262,7 +370,7 @@ Deno.serve(async (req: Request) => {
   if (pre) return pre
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405)
 
-  // ── auth: internal trigger/chain (book + stages) OR admin JWT (Retry) ────────
+  // ── auth: internal trigger/chain (book + stage 2) OR admin JWT (Retry) ──────
   const internal =
     req.headers.get('x-internal-key') === Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!internal) {
@@ -300,7 +408,7 @@ Deno.serve(async (req: Request) => {
     if (appt.site_status === 'deployed' && !b.force) return json({ ok: true, skipped: 'already deployed' })
   }
 
-  const task = runStage(stage, appt, b.files ?? {})
+  const task = runStage(stage, appt, b.files ?? {}, b.ds, b.style)
   if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) {
     EdgeRuntime.waitUntil(task)
   } else {

@@ -35,7 +35,7 @@ import { formatInTimeZone } from 'npm:date-fns-tz@3'
 const GHL_API = 'https://services.leadconnectorhq.com'
 const GHL_VERSION = '2021-07-28'
 
-export type FunnelStage = 'lead' | 'booked' | 'showed' | 'purchased'
+export type FunnelStage = 'lead' | 'booked' | 'showed' | 'noshow' | 'purchased'
 
 /**
  * Which ad funnel a stage belongs to. SAME GHL account for all — funnels are
@@ -52,12 +52,14 @@ const STAGE_TAGS: Record<GhlFunnel, Record<FunnelStage, string>> = {
     lead: 'funnel-lead',
     booked: 'funnel-booked',
     showed: 'funnel-showed',
+    noshow: 'funnel-noshow',
     purchased: 'funnel-purchased',
   },
   restaurant: {
     lead: 'restaurant-lead',
     booked: 'restaurant-booked',
     showed: 'restaurant-showed',
+    noshow: 'restaurant-noshow',
     purchased: 'restaurant-purchased',
   },
 }

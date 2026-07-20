@@ -8,7 +8,7 @@ export default tseslint.config(
   // `supabase/functions` is Deno code (different runtime/globals, deployed by the
   // Supabase CLI) — it has its own toolchain and must not be linted by the app.
   // `.claude` holds throwaway agent worktrees (full repo copies) — never lint.
-  { ignores: ['dist', 'supabase/functions/**', '.claude/**'] },
+  { ignores: ['dist', 'coverage', 'supabase/functions/**', '.claude/**', '.netlify/**'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

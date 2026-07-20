@@ -47,6 +47,39 @@ function getCookie(name: string): string {
 interface StoredAttribution {
   utm: Record<string, string>
   landingUrl: string
+  fbclid?: string
+  fbc?: string
+  storedAt?: number
+}
+
+/** Meta's click attribution window — persist first-touch click ids this long. */
+const CLICK_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
+/** Best-effort read of the persisted first-touch record (session first, then local). */
+function readStored(): StoredAttribution | null {
+  for (const store of [sessionStorage, localStorage] as Storage[]) {
+    try {
+      const raw = store.getItem(STORE_KEY)
+      if (!raw) continue
+      const parsed = JSON.parse(raw) as StoredAttribution
+      if (parsed.storedAt && Date.now() - parsed.storedAt > CLICK_TTL_MS) continue
+      return parsed
+    } catch {
+      /* storage unavailable/corrupt — try the next one */
+    }
+  }
+  return null
+}
+
+function writeStored(value: StoredAttribution): void {
+  const raw = JSON.stringify(value)
+  for (const store of [sessionStorage, localStorage] as Storage[]) {
+    try {
+      store.setItem(STORE_KEY, raw)
+    } catch {
+      /* ignore (private mode / quota) */
+    }
+  }
 }
 
 /**
@@ -58,13 +91,7 @@ function firstTouch(): StoredAttribution {
   const empty: StoredAttribution = { utm: {}, landingUrl: '' }
   if (typeof window === 'undefined') return empty
 
-  let stored: StoredAttribution | null = null
-  try {
-    const raw = sessionStorage.getItem(STORE_KEY)
-    if (raw) stored = JSON.parse(raw) as StoredAttribution
-  } catch {
-    /* sessionStorage unavailable (private mode) — fall back to live URL */
-  }
+  const stored = readStored()
 
   const params = new URL(window.location.href).searchParams
   const fresh: Record<string, string> = {}
@@ -72,15 +99,34 @@ function firstTouch(): StoredAttribution {
     const v = params.get(k)
     if (v) fresh[k] = v.slice(0, 256)
   }
+  const liveFbclid = params.get('fbclid') || ''
 
-  // Only (re)store on a real first touch: nothing stored yet AND this load has params.
-  if (!stored && Object.keys(fresh).length) {
-    stored = { utm: fresh, landingUrl: window.location.href }
-    try {
-      sessionStorage.setItem(STORE_KEY, JSON.stringify(stored))
-    } catch {
-      /* ignore */
+  // Only (re)store on a real first touch: nothing stored yet AND this load carries
+  // params or a click id. fbclid/fbc persist too — the live URL loses them on any
+  // SPA navigation or history cleanup, and 3 of the first 5 production leads
+  // arrived without one for exactly that reason.
+  if (!stored && (Object.keys(fresh).length || liveFbclid)) {
+    const record: StoredAttribution = {
+      utm: fresh,
+      landingUrl: window.location.href,
+      fbclid: liveFbclid || undefined,
+      fbc: getCookie('_fbc') || (liveFbclid ? `fb.1.${Date.now()}.${liveFbclid}` : undefined),
+      storedAt: Date.now(),
     }
+    writeStored(record)
+    return record
+  }
+
+  // Backfill click ids into an older stored record that predates them.
+  if (stored && !stored.fbclid && liveFbclid) {
+    const record: StoredAttribution = {
+      ...stored,
+      fbclid: liveFbclid,
+      fbc: stored.fbc || getCookie('_fbc') || `fb.1.${Date.now()}.${liveFbclid}`,
+      storedAt: stored.storedAt ?? Date.now(),
+    }
+    writeStored(record)
+    return record
   }
 
   return stored ?? { utm: fresh, landingUrl: window.location.href }
@@ -88,9 +134,10 @@ function firstTouch(): StoredAttribution {
 
 export function getAttribution(): Attribution {
   if (typeof window === 'undefined') return { fbc: '', fbp: '', fbclid: '', utm: {}, landingUrl: '' }
-  const fbclid = new URL(window.location.href).searchParams.get('fbclid') || ''
-  const fbc = getCookie('_fbc') || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : '')
+  const stored = firstTouch()
+  const fbclid = new URL(window.location.href).searchParams.get('fbclid') || stored.fbclid || ''
+  const fbc =
+    getCookie('_fbc') || stored.fbc || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : '')
   const fbp = getCookie('_fbp')
-  const { utm, landingUrl } = firstTouch()
-  return { fbc, fbp, fbclid, utm, landingUrl: landingUrl || window.location.href }
+  return { fbc, fbp, fbclid, utm: stored.utm, landingUrl: stored.landingUrl || window.location.href }
 }

@@ -4,6 +4,7 @@ import { LandingFooter } from './components/ui'
 
 import { CONTRACTOR_CALENDAR } from './config/calendars'
 import { CONTRACTOR_PIXEL } from './config/pixels'
+import { getAttribution } from './utils/attribution'
 import { initializeContractorPixel, trackViewContent } from './utils/pixelTracking'
 import { useScrollReveal } from './hooks/useScrollReveal'
 
@@ -156,6 +157,10 @@ function LandingContractors() {
       window.history.replaceState({}, '', newUrl)
     }
 
+    // Capture first-touch attribution (fbclid/fbc/utm) NOW, while the ad params are
+    // still on the URL — waiting until form submit loses them on any navigation.
+    getAttribution()
+
     initializeContractorPixel()
 
     trackViewContent('Contractor Landing Page', 'Landing Page', 'contractor_services')
@@ -175,7 +180,11 @@ function LandingContractors() {
   useScrollReveal('contractorlanding')
 
   const scrollToBooking = useCallback(() => {
-    const element = bookingFormRef.current
+    // Land the visitor on the FORM itself, not the section heading — on mobile the
+    // heading + trust copy push the form a full viewport below where the CTA drops
+    // you, which reads as "the button didn't work".
+    const element =
+      document.getElementById('landing-contractors-form-container') ?? bookingFormRef.current
     if (!element) return
 
     requestAnimationFrame(() => {
@@ -399,7 +408,7 @@ function LandingContractors() {
           className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-rust-500 hover:bg-rust-600 text-white py-4 px-6 font-semibold shadow-glow-rust magnetic-btn ring-focus-rust transition-colors duration-300"
         >
           <HardHat className="h-5 w-5" aria-hidden />
-          GET MY FREE DESIGN NOW!
+          See available times
         </button>
       </div>
       <div className="md:hidden h-24" aria-hidden />

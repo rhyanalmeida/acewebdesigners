@@ -43,6 +43,15 @@ const pad = (n: number) => String(n).padStart(2, '0')
 function dayKey(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
+/** "Today" / "Tomorrow" chip label for a visitor-local day, else ''. */
+function proximityLabel(d: Date): string {
+  const today = new Date()
+  if (dayKey(d) === dayKey(today)) return 'Today'
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  if (dayKey(d) === dayKey(tomorrow)) return 'Tomorrow'
+  return ''
+}
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 }
@@ -170,6 +179,16 @@ export const Scheduler: React.FC<SchedulerProps> = ({
   }, [slots])
 
   const availableDayKeys = useMemo(() => new Set(slotsByDay.keys()), [slotsByDay])
+
+  // Default-select the earliest day with open slots. Shorter booking-to-call lead
+  // time is the most replicated no-show predictor, so bias visitors toward the
+  // soonest option instead of an empty "pick a day" state.
+  useEffect(() => {
+    if (selectedDay || slots.length === 0) return
+    const earliest = slots.reduce((min, s) => (s.startISO < min ? s.startISO : min), slots[0].startISO)
+    setSelectedDay(new Date(earliest))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slots])
   const timesForSelectedDay = useMemo(() => {
     if (!selectedDay) return []
     return (slotsByDay.get(dayKey(selectedDay)) ?? []).slice().sort((a, b) => a.startISO.localeCompare(b.startISO))
@@ -191,14 +210,6 @@ export const Scheduler: React.FC<SchedulerProps> = ({
       setLeadError('')
       if (!form.firstName.trim() || !form.lastName.trim()) {
         setLeadError('Please enter your first and last name.')
-        return
-      }
-      if (!form.businessName.trim()) {
-        setLeadError('Please enter your business name.')
-        return
-      }
-      if (!form.businessType.trim()) {
-        setLeadError('Please enter your type of business (e.g. Roofing, Plumbing).')
         return
       }
       if (!EMAIL_RE.test(form.email)) {
@@ -259,6 +270,14 @@ export const Scheduler: React.FC<SchedulerProps> = ({
   const handleBook = useCallback(async () => {
     if (!selectedSlot) return
     setBookError('')
+    if (!form.businessName.trim()) {
+      setBookError('Please enter your business name.')
+      return
+    }
+    if (!form.businessType.trim()) {
+      setBookError('Please enter your type of business (e.g. Roofing, Plumbing).')
+      return
+    }
     setBooking(true)
 
     // Schedule event_id: browser pixel + `book` fn share it → dedupe.
@@ -344,7 +363,11 @@ export const Scheduler: React.FC<SchedulerProps> = ({
           </p>
           <p className="mt-1 text-sm text-ink-700/70">Times shown in your timezone ({visitorTz}).</p>
           <p className="mt-4 text-sm text-ink-700">
-            A confirmation and reminders are on the way to <strong>{form.email}</strong>. See you then!
+            A confirmation and reminders are on the way to <strong>{form.email}</strong>.
+          </p>
+          <p className="mt-3 text-sm text-ink-700">
+            Our team is now building your <strong>free homepage preview</strong> for this call —
+            it'll be ready when we meet. See you then!
           </p>
         </div>
       </div>
@@ -356,30 +379,21 @@ export const Scheduler: React.FC<SchedulerProps> = ({
     return (
       <div id={containerId} className={`booking-widget-container ${className}`} style={{ minHeight }}>
         <div className="mx-auto max-w-md rounded-2xl bg-cream-50 p-6 ring-1 ring-ink-900/10 shadow-soft">
-          <p className="mb-1 text-sm font-semibold text-ink-800">Let's get you scheduled</p>
-          <p className="mb-4 text-sm text-ink-700/70">Enter your details, then pick a time that works for you.</p>
+          <p className="mb-1 text-sm font-semibold text-ink-800">Book your free website demo</p>
+          <p className="mb-4 text-sm text-ink-700/70">Just your contact info to start — then pick a time. Takes 30 seconds.</p>
           <form onSubmit={handleLeadSubmit}>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <input required value={form.firstName} onChange={setField('firstName')} placeholder="First name *" className={inputClass} autoComplete="given-name" />
                 <input required value={form.lastName} onChange={setField('lastName')} placeholder="Last name *" className={inputClass} autoComplete="family-name" />
               </div>
-              <input required value={form.businessName} onChange={setField('businessName')} placeholder="Business name *" className={inputClass} autoComplete="organization" />
-              <input
-                required
-                list="scheduler-business-types"
-                value={form.businessType}
-                onChange={setField('businessType')}
-                placeholder="Type of business (e.g. Roofing) *"
-                className={inputClass}
-              />
-              <datalist id="scheduler-business-types">
-                {BUSINESS_TYPES.map((t) => (
-                  <option key={t} value={t} />
-                ))}
-              </datalist>
               <input required type="email" value={form.email} onChange={setField('email')} placeholder="Email *" className={inputClass} autoComplete="email" />
-              <input required type="tel" value={form.phone} onChange={setField('phone')} placeholder="Phone *" className={inputClass} autoComplete="tel" />
+              <div>
+                <input required type="tel" value={form.phone} onChange={setField('phone')} placeholder="Phone *" className={inputClass} autoComplete="tel" />
+                <p className="mt-1 text-xs text-ink-700/60">
+                  We text your free design link + a call reminder. No spam calls, ever.
+                </p>
+              </div>
             </div>
 
             {leadError && <p className="mt-3 text-sm text-red-600">{leadError}</p>}
@@ -389,7 +403,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
               disabled={leadSubmitting}
               className="mt-4 w-full rounded-full bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
             >
-              {leadSubmitting ? 'One moment…' : 'Next — pick a time'}
+              {leadSubmitting ? 'One moment…' : 'See available times'}
             </button>
             <p className="mt-3 text-center text-xs text-ink-700/60">Prefer to talk? Call {PHONE_DISPLAY}.</p>
           </form>
@@ -456,6 +470,11 @@ export const Scheduler: React.FC<SchedulerProps> = ({
               <>
                 <p className="mb-3 text-sm font-semibold text-ink-800">
                   2. Pick a time — {selectedDay.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
+                  {proximityLabel(selectedDay) && (
+                    <span className="ml-2 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 align-middle">
+                      {proximityLabel(selectedDay)}
+                    </span>
+                  )}
                 </p>
                 {timesForSelectedDay.length === 0 ? (
                   <p className="text-ink-700/70">No times left this day. Try another.</p>
@@ -489,11 +508,34 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                 <p className="mb-4 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800">
                   {formatLongDate(selectedSlot.startISO)} at <strong>{formatTime(selectedSlot.startISO)}</strong>
                 </p>
-                <p className="mb-4 text-sm text-ink-700">
+                <p className="mb-3 text-sm text-ink-700">
                   Booking as <strong>{form.firstName} {form.lastName}</strong> ({form.email}).
                 </p>
 
+                <p className="mb-2 text-sm font-medium text-ink-800">Last step — so we can build your free demo:</p>
+                <div className="mb-4 space-y-3">
+                  <input required value={form.businessName} onChange={setField('businessName')} placeholder="Business name *" className={inputClass} autoComplete="organization" />
+                  <input
+                    required
+                    list="scheduler-business-types"
+                    value={form.businessType}
+                    onChange={setField('businessType')}
+                    placeholder="Type of business (e.g. Roofing) *"
+                    className={inputClass}
+                  />
+                  <datalist id="scheduler-business-types">
+                    {BUSINESS_TYPES.map((t) => (
+                      <option key={t} value={t} />
+                    ))}
+                  </datalist>
+                </div>
+
                 {bookError && <p className="mb-3 text-sm text-red-600">{bookError}</p>}
+
+                <p className="mb-3 text-xs text-ink-700/70">
+                  We block this time for you and start building your free homepage preview for the
+                  call — it's ready when we meet.
+                </p>
 
                 <button
                   type="button"
