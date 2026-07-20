@@ -252,6 +252,95 @@ viewer and the algorithm read first.
 
 No reshoot needed.
 
+---
+
+## The script to record (2026-07-20)
+
+Design rule: **the 2025 script is the proven asset — change only what has a reason to change.**
+Every edit below is traceable to something measured, not to taste.
+
+### Script A — minimal change (record this one)
+
+~95 words, ~30s at conversational pace (the winner was 95 words / 31.6s).
+
+```
+Listen up contractors — your website is the first thing a customer sees.
+And if it's ugly or outdated, they're going to call the next guy.
+
+That's why I'll build you a brand new website. One that's fast, and gets you
+more calls, more jobs, more customers.
+
+And the best part? I'll build it first, and show it to you for free.
+No obligation. You only pay when you love it.
+
+My name is Rhyan, I've been building websites for years, and I'd love to
+build yours.
+
+Tap below and we'll talk soon.
+```
+
+Every change from the proven original, and why:
+
+| Original | New | Reason |
+|---|---|---|
+| "Listen up business owners" | "Listen up contractors" | targets the niche; keeps the proven direct-address opening |
+| "they're going to call someone else" | "call the next guy" | contractor vernacular; same consequence framing |
+| "more business, more leads, more customers" | "more calls, more jobs, more customers" | *jobs* is the outcome a contractor actually thinks in |
+| "I can show it to you for free" | "I'll build it first, and show it to you for free" | fixes the single biggest gap — makes the deliverable a **website**, not a meeting |
+| "get started on your dream" | "build yours" | drops vague filler |
+| "Click the link down below" | "Tap below" | 97% of traffic is mobile |
+
+Everything else is verbatim, including the structure: direct address → consequence → offer →
+risk reversal → named human with track record → CTA.
+
+### Script B — the variant worth testing against it
+
+We now auto-generate a real preview site before every call, which we did not have in 2025. That is a
+genuinely stronger offer than "I can show it to you for free," so it deserves a test — but it is
+unproven, so it runs as the challenger, not the default.
+
+```
+Contractors — I already built you a website.
+
+I'm serious. Book a time, and before we ever talk, my team builds a real
+homepage for your business. Not a template. A real site, with your name on it.
+
+You show up, you look at it, and if you love it we go from there.
+If you don't, you walk. It costs you nothing either way.
+
+I'm Rhyan — I've been building websites for years, and yours is already
+waiting.
+
+Tap below.
+```
+
+### Do not put these in the script
+
+Each of these is in the current failing ad:
+
+- **"Book a free website meeting"** — sells a calendar appointment. Sell the website.
+- **"transform your digital presence"** — consultant jargon; a roofer would never say it.
+- **"fast, modern, mobile-friendly"** — features. Say what they *get*: calls, jobs, customers.
+- **"established US contractors only" / "Not for beginners" / "Limited spots"** — the winning ad copy
+  was *"Perfect for local businesses... No risk, no pressure."* Gain-framed and inviting beat
+  loss-framed and exclusionary by 9x. Low pressure probably helps the show-rate problem too.
+- Anonymous **"we"** with no name and no credential.
+
+### On camera
+
+Match the winner, since the visual read is half the result:
+
+| Do | Don't |
+|---|---|
+| collared shirt | hoodie |
+| plain wall, clean light | couch, cluttered room |
+| tight head-and-shoulders, straight to lens | wide seated shot |
+| nothing in frame | **no pets** |
+| 9:16, ~30s | 22s rushed |
+
+Add clean phrase captions (3-5 words, bottom third, static) — **not** the one-word-per-frame kinetic
+style. See the captions section above.
+
 ### Recommended action
 
 1. Take the existing "Free Preview Rhyan 1" video (Vimeo `1088261551`, or the 9:16 asset already in
