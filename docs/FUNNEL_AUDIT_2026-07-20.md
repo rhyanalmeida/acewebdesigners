@@ -157,6 +157,68 @@ Netlify is git-linked to github.com/rhyanalmeida/acewebdesigners and the live bu
 manually via CLI. **Any git-triggered deploy reverts the landing page to the 6-field gate form that
 converted at 0.2%** and silently drops the attribution fix.
 
+## The 2025 campaign that worked — what was actually different
+
+"New Leads Campaign Video" (campaign `120223154842100259`, ad "Valerie AD") ran May–Nov 2025,
+$2,761.60, 1,024 link clicks → ~65 leads (owner's records; Meta logged 0 because there was no CAPI),
+and **several of those became paying clients**. The ask was the same as today's: book a call on a
+calendar.
+
+Its media metrics were *worse* than today's, which rules out "the traffic was better":
+
+| | 2025 general (worked) | 2026 contractor |
+|---|---|---|
+| CPM | $63–95 (avg ~$83) | $54 |
+| CTR | 3.7–7.8% | 6.8% |
+| Link clicks | 1,024 | 610 |
+| Leads | ~65 | 2 |
+| Click → lead | ~6.3% | 0.69% |
+
+Same traffic quality, 9x the conversion. So the gap is not audience responsiveness.
+
+### What actually differed
+
+| | 2025 (worked) | 2026 contractor |
+|---|---|---|
+| Targeting | broad US + `advantage_audience:1`, **no detailed targeting** | **identical** |
+| Effective age | `age_range [25,55]` | 25–65 |
+| Optimization event | **`COMPLETE_REGISTRATION`** | `LEAD` |
+| Pixel | `670701952528812` ("1", dead since 2025-12-21, not in the codebase) | `4230021860577001` |
+| Daily budget | $15 | $20 |
+| Creative | "Valerie AD" | "funny hook" |
+| Niche / page | general → `/landing` | contractors → `/contractorlanding` |
+| Ask | calendar booking | **same** |
+
+**The targeting doctrine is vindicated** — the proven campaign was broad + Advantage+ with zero
+detailed targeting, exactly as `CLAUDE.md` prescribes. Don't change that.
+
+Three real differences remain, in order of likely impact:
+
+1. **Creative.** "Valerie AD" is a different presenter. The current "funny hook" carries a
+   `BELOW_AVERAGE_35` quality ranking and a live comment mocking the presenter's credibility. This
+   is the same conclusion the creative analysis reached independently.
+2. **Age range.** 2025 ran an effective 25–55. Today's 25–65 sent 18% of spend ($119) to the 65
+   bucket, which under `age_max: 65` is *only 65-year-olds*.
+3. **Optimization event.** 2025 optimized on `COMPLETE_REGISTRATION` — the deeper, post-booking
+   event — not `LEAD`. This directly contradicts the current setup, but there is a standing owner
+   decision (2026-07-17) to stay on Lead. **Do not change this without the owner** — surface it,
+   don't act on it.
+
+### Verdict on "should we move off contractors?"
+
+**No — not on this evidence.** The 2025 data does not isolate the niche as the problem; it isolates
+creative, age range, and optimization event, all of which are changeable *within* the contractor
+funnel. Two further reasons to stay:
+
+- **Main-site CAPI has never worked** (the token only writes the contractor dataset). Moving to
+  general traffic means returning to the 2025 condition — leads with no attribution, no idea which
+  ad or placement produced them. That is the exact blindness this year's work removed.
+- The contractor infrastructure (preview-site generation, GHL workflows, CAPI chain) is built and
+  verified working. Switching niches strands it.
+
+Test the proven creative *at contractors* first. Niche and creative are separate variables and have
+been getting treated as one.
+
 ## Finding 6 — the form is 12.6 screens down
 
 The booking form sits at 10,656px on an 844px mobile viewport, on a 14,104px page, as the 9th block.
