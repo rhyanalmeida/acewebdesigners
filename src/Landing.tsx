@@ -16,26 +16,39 @@ import {
 } from './components/landing'
 import { SeoMeta, organizationLd, localBusinessLd, serviceLd, breadcrumbForPath } from './seo'
 
+// 2026-07-20: all three quotes here were FABRICATED — the same class of invented
+// testimonial that ec71609 removed from the home page, which survived on this
+// page because nobody checked it. The "Hot Pot One" entry put a paragraph about
+// a flawless ordering system and "a significant increase in online orders" in
+// the mouth of a real, identifiable client. Hank Lin's actual Google review is
+// four words. The Dunn Construction quote was invented outright.
+//
+// Now: verbatim Google reviews only (docs/REAL_TESTIMONIALS.md), and no quote at
+// all where no real one exists. `quote` is optional for exactly this reason.
+// Nothing may be attributed to anyone who did not say it.
+//
+// Images were third-party GIFs on a free host (i.ibb.co) with typos baked into
+// the URLs — "concuo-gif", "dunn-consturction-gif" — while optimised local WebP
+// screenshots of the same three sites already existed in /public/work.
 const EXAMPLES = [
   {
-    imageUrl: 'https://i.ibb.co/r2g1Q1Qp/hotpotonegif.gif',
-    imageAlt: 'Hot Pot One Website Example',
-    quote: "Ace Web Designers created an amazing website for our restaurant. The ordering system works flawlessly and we've seen a significant increase in online orders.",
-    authorName: 'Hot Pot One — Restaurant',
-    rating: 5 as const,
-  },
-  {
-    imageUrl: 'https://i.ibb.co/Myx4nrSr/concuo-gif.gif',
-    imageAlt: 'Conuco Takeout Website Example',
-    quote: 'The team at Ace Web Designers understood exactly what we needed. Our Dominican cuisine is now beautifully showcased online, and customers love ordering through our website.',
-    authorName: 'Conuco Takeout — Restaurant',
-    rating: 5 as const,
-  },
-  {
-    imageUrl: 'https://i.ibb.co/S1Yv7K9/dunn-consturction-gif.gif',
-    imageAlt: 'Dunn Construction Website Example',
-    quote: "We were recommended to Rhyan and Valerie by a friend. Within days, we had a professional website that perfectly represented our construction business. We're already getting more leads!",
+    imageUrl: '/work/dunn.webp',
+    imageAlt: 'The Dunn Construction website',
     authorName: 'Dunn Construction',
+  },
+  {
+    imageUrl: '/work/conuco.webp',
+    imageAlt: 'The Conuco Takeout website',
+    quote:
+      'Ace Web Designers built an amazing website for my business! Working with Rhyan and Valerie was a great experience. Their communication is excellent, and this made the process smooth from start to finish.',
+    authorName: 'Pedro Dipre-Rojas — Conuco Takeout',
+    rating: 5 as const,
+  },
+  {
+    imageUrl: '/work/hotpot.webp',
+    imageAlt: 'The Hot Pot One website',
+    quote: 'Great service and excellent website design',
+    authorName: 'Hank Lin — Hot Pot One',
     rating: 5 as const,
   },
 ]

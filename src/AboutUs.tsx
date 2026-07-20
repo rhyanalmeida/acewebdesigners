@@ -1,276 +1,209 @@
 import React from 'react'
-import {
-  Code,
-  Briefcase,
-  Star,
-  Users,
-  Zap,
-  Brain,
-  Target,
-  Rocket,
-  ArrowRight,
-} from 'lucide-react'
-
 import { motion } from 'framer-motion'
 
 import {
   Section,
   Eyebrow,
   GradientHeading,
-  Card,
-  Reveal,
-  IconTile,
-  StatBlock,
   SectionHeading,
-  StaggerGrid,
   FinalCta,
   PhoneCta,
-  TrustStack,
-  Magnetic,
 } from './components/ui'
 import { fadeUpHero } from './lib/motion'
 import { SeoMeta, organizationLd, localBusinessLd, breadcrumbForPath } from './seo'
 
-const VALUES = [
-  { Icon: Target, title: 'Results-driven', desc: 'We focus on delivering measurable results that help your business grow.' },
-  { Icon: Brain, title: 'Innovation', desc: 'Staying ahead with the latest technologies and design trends.' },
-  { Icon: Users, title: 'Client-focused', desc: 'Your success is our priority. We build lasting partnerships.' },
-  { Icon: Rocket, title: 'Fast delivery', desc: 'Quick turnaround without compromising on quality.' },
-]
+/**
+ * Every biographical fact on this page came from Rhyan directly (interview,
+ * 2026-07-20). Nothing here may be embellished, and no fact may be added that
+ * he did not give us — no invented credentials, no years-in-business number, no
+ * client count, no "we've helped X businesses".
+ *
+ * Deliberately absent:
+ *   - The name of Rhyan's dad's business. He asked us not to name it.
+ *   - Any claim that we do not use AI. We run an Opus chain to build client
+ *     previews; claiming purity would be the same dishonesty this page argues
+ *     against. The position is that the tool was never the problem.
+ *
+ * The photo below is a placeholder. Rhyan is supplying a real photo of them
+ * both. Do not substitute stock or generated imagery to fill the space.
+ */
 
-const EXPERTISE = [
-  { Icon: Code, label: 'Custom development' },
-  { Icon: Star, label: 'UI/UX design' },
-  { Icon: Zap, label: 'Performance optimization' },
-  { Icon: Briefcase, label: 'Business strategy' },
-]
+const goContact = () =>
+  window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'contact' } }))
 
-// Verifiable values only — see the note in src/pages/Home.tsx.
-const STATS = [
-  { v: '5.0', l: 'Rated on Google' },
-  { v: '$0', l: 'Due before you see it' },
-  { v: '100%', l: 'Built custom' },
-  { v: '1–7d', l: 'Avg. delivery' },
-]
+const AboutUs: React.FC = () => (
+  <>
+    <SeoMeta
+      path="/about"
+      jsonLd={[organizationLd(), localBusinessLd(), breadcrumbForPath('/about', 'About')]}
+    />
 
-function AboutUs() {
-  const goContact = () => {
-    window.dispatchEvent(new CustomEvent('navigate', { detail: { page: 'contact' } }))
-  }
-
-  return (
-    <>
-      <SeoMeta
-        path="/about"
-        jsonLd={[organizationLd(), localBusinessLd(), breadcrumbForPath('/about')!]}
-      />
-      {/* HERO — editorial 2-col with owner photo */}
-      <Section tone="mesh" padding="lg">
-        <hr className="rule-hairline mb-12 sm:mb-14" />
-        <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr]">
-          <motion.div
-            initial="hidden"
-            animate="show"
-            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } } }}
-          >
-            <motion.div variants={fadeUpHero}>
-              <Eyebrow tone="brand">About us</Eyebrow>
-            </motion.div>
-            <motion.div variants={fadeUpHero}>
-              <GradientHeading
-                level={1}
-                size="display"
-                className="mt-6"
-                accent="Rhyan & Valerie"
-                accentUnderline
-              >
-                Meet
-              </GradientHeading>
-            </motion.div>
-            <motion.p
-              className="mt-6 text-lg sm:text-xl text-ink-800 leading-relaxed max-w-xl"
-              variants={fadeUpHero}
-            >
-              Your partners in creating exceptional digital experiences. We design websites that are beautiful, fast, and built to grow your business.
-            </motion.p>
-            <motion.div className="mt-9 flex flex-wrap items-center gap-4" variants={fadeUpHero}>
-              <Magnetic strength={6}>
-                <button
-                  onClick={goContact}
-                  className="group inline-flex items-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white font-semibold text-base sm:text-lg px-7 py-3.5 shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
-                >
-                  Get my free design
-                  <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
-                </button>
-              </Magnetic>
-            </motion.div>
-            <motion.div className="mt-8" variants={fadeUpHero}>
-              <PhoneCta />
-            </motion.div>
+    {/* ── OPENING ───────────────────────────────────────────────────────────
+        The dad. This is the origin and the customer portrait at the same time. */}
+    <section className="relative bg-cream-50 text-ink-900 bg-paper-noise" aria-label="About us">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-20 pb-16 sm:pt-24 lg:pt-28">
+        <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}>
+          <motion.div variants={fadeUpHero}>
+            <Eyebrow tone="muted">Rhyan and Valerie</Eyebrow>
           </motion.div>
-          <motion.div
-            className="relative max-w-md mx-auto lg:ml-auto w-full"
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="absolute -inset-3 bg-signal-100/60 rounded-xl3 -z-10" aria-hidden />
-            <div className="relative rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 shadow-lift">
-              <img
-                src="/rhyan.jpg"
-                alt="Rhyan, lead developer at Ace Web Designers"
-                className="block w-full h-[420px] object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <span className="absolute bottom-4 left-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream-50/95 backdrop-blur-sm ring-1 ring-ink-900/10 text-xs">
-              <span className="label-mono text-ink-700">Rhyan</span>
-              <span className="text-ink-700/60">·</span>
-              <span className="text-ink-800">Lead Developer</span>
-            </span>
+          <motion.div variants={fadeUpHero}>
+            <GradientHeading level={1} size="display" className="mt-6 max-w-4xl">
+              My dad built bathrooms for a living and never had a website.
+            </GradientHeading>
           </motion.div>
+          <motion.p
+            className="mt-8 max-w-2xl text-lg text-ink-800 leading-relaxed"
+            variants={fadeUpHero}
+          >
+            He is a master at the work. He put a whole team together. But after a ten to
+            thirteen hour day he wanted to be home with his family, not figuring out marketing,
+            so it never got done. That is the person this company was built for, and it is why
+            we work with trades instead of whoever turns up.
+          </motion.p>
+        </motion.div>
+      </div>
+      <hr className="rule-hairline" />
+    </section>
+
+    {/* ── THE FIRST JOB ─────────────────────────────────────────────────────
+        Asymmetric split. Told plainly, in the order it happened. The detail
+        about calling Hank over to the table is the point — do not smooth it out
+        into "we approached a local restaurant owner". */}
+    <Section tone="muted" padding="lg">
+      <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div>
+          <Eyebrow tone="muted">How it started</Eyebrow>
+          <h2 className="mt-6 font-display text-3xl sm:text-4xl leading-tight text-ink-900">
+            We were eating dinner and called the owner over to our table.
+          </h2>
         </div>
-      </Section>
-
-      {/* STATS */}
-      <Section tone="default" padding="md">
-        <StaggerGrid
-          items={STATS}
-          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
-          keyFn={s => s.l}
-          renderItem={s => <StatBlock value={s.v} label={s.l} />}
-        />
-      </Section>
-
-      {/* WHY FREE DESIGNS — editorial story */}
-      <Section tone="muted" padding="lg" containerSize="md">
-        <SectionHeading
-          eyebrow="Our story"
-          heading="Why we offer"
-          accent="free designs"
-          maxWidth="max-w-none"
-        />
-
-        <Reveal variant="up" className="mt-10 space-y-6 text-lg text-ink-800 leading-relaxed">
+        <div className="space-y-5 text-ink-800 leading-relaxed lg:pt-16">
           <p>
-            We believe every business deserves to see their vision come to life before making any commitment. Too many business owners have been burned by designers who promise the world but deliver disappointment.
-          </p>
-          <p className="font-display text-2xl sm:text-3xl text-ink-900 leading-snug">
-            That&rsquo;s why we do things differently.{' '}
-            <span className="text-editorial-italic text-signal-600">
-              We create your complete design mockup first
-            </span>
-            , completely free.
+            We were at Hank&rsquo;s restaurant, Hot Pot One, having dinner. We noticed he did not
+            have a website. So we called him over to the table, mid-meal, and asked him about it.
           </p>
           <p>
-            When you see exactly what your website will look like, how it will function, and how it represents your brand, you can make an informed decision. No surprises, no regrets — just confidence in your investment.
+            He was interested. A couple of meetings later his site was up. That was our first paid
+            job, and it is what got us moving on finding the next one.
           </p>
-        </Reveal>
-
-        <Card tone="default" padding="xl" rounded="xl3" className="mt-12">
-          <span className="label-mono text-signal-700">Quote · Founder</span>
-          <p className="mt-4 font-display text-xl sm:text-2xl text-ink-900 leading-snug">
-            <span className="text-signal-500 text-3xl leading-none mr-1 align-[-0.15em] text-editorial-italic">&ldquo;</span>
-            We only succeed when you&rsquo;re absolutely thrilled with your website. The free design ensures we&rsquo;re the perfect fit before you invest a single dollar.
-            <span className="text-signal-500 text-3xl leading-none ml-0.5 align-[-0.15em] text-editorial-italic">&rdquo;</span>
+          <p className="text-ink-900 font-medium">
+            He later left us a Google review. Four words: &ldquo;Great service and excellent
+            website design.&rdquo; We will take it.
           </p>
-          <hr className="rule-hairline my-7" />
-          <div className="flex flex-wrap items-center gap-6">
-            <div className="flex items-center gap-3">
-              <img
-                src="/rhyan.jpg"
-                alt=""
-                className="h-12 w-12 rounded-full object-cover ring-1 ring-ink-900/10"
-                loading="lazy"
-              />
-              <div>
-                <p className="label-mono text-ink-700">Rhyan</p>
-                <p className="text-sm text-ink-800">Lead Developer</p>
-              </div>
-            </div>
-            <span className="text-ink-700/30" aria-hidden>·</span>
-            <div className="flex items-center gap-3">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-ink-900 text-cream-50 font-display font-semibold ring-1 ring-ink-900/10" aria-hidden>
-                V
-              </span>
-              <div>
-                <p className="label-mono text-ink-700">Valerie</p>
-                <p className="text-sm text-ink-800">Design Lead</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </Section>
+        </div>
+      </div>
+    </Section>
 
-      {/* CORE VALUES */}
-      <Section tone="default" padding="lg">
-        <SectionHeading eyebrow="What we believe" heading="Our" accent="core values" />
-        <StaggerGrid
-          items={VALUES}
-          className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-          keyFn={v => v.title}
-          renderItem={v => (
-            <Card tone="default" padding="lg" rounded="xl2" interactive shine className="h-full">
-              <IconTile tone="brand" size="md">
-                <v.Icon />
-              </IconTile>
-              <h3 className="mt-5 font-display text-xl font-semibold text-ink-900">{v.title}</h3>
-              <p className="mt-2 text-ink-800 leading-relaxed">{v.desc}</p>
-            </Card>
-          )}
-        />
-      </Section>
-
-      {/* EXPERTISE */}
-      <Section tone="muted" padding="lg">
-        <SectionHeading eyebrow="What we do" heading="Our areas of" accent="expertise" />
-        <StaggerGrid
-          items={EXPERTISE}
-          className="mt-12 grid gap-6 grid-cols-2 lg:grid-cols-4"
-          delayMs={80}
-          keyFn={e => e.label}
-          childClassName="text-center"
-          renderItem={e => (
-            <>
-              <IconTile tone="brand" size="lg" className="mx-auto">
-                <e.Icon />
-              </IconTile>
-              <h3 className="mt-5 font-display text-lg font-semibold text-ink-900">{e.label}</h3>
-            </>
-          )}
-        />
-      </Section>
-
-      {/* CONTACT — editorial */}
-      <Section tone="default" padding="lg" containerSize="md">
-        <Card tone="default" padding="xl" rounded="xl3">
-          <Eyebrow tone="forest">Let&rsquo;s connect</Eyebrow>
-          <GradientHeading level={2} size="lg" className="mt-5" accent="we&rsquo;ll reply within hours">
-            Ready to start? —
-          </GradientHeading>
-          <p className="mt-5 text-ink-800 leading-relaxed max-w-xl">
-            Reach out and we&rsquo;ll send a free homepage design within 24 hours, often same day. Based in Leominster, MA — serving small businesses nationwide.
-          </p>
-          <hr className="rule-hairline my-8" />
-          <PhoneCta />
-          <div className="mt-8">
-            <TrustStack align="left" />
-          </div>
-        </Card>
-      </Section>
-
-      {/* FINAL CTA */}
-      <FinalCta
-        eyebrow="Risk-free"
-        heading="Experience our work with"
-        accent="zero commitment."
-        body="See why businesses choose us. Get your free design mockup and experience our quality firsthand."
-        ctaLabel="Get my free design"
-        onCta={goContact}
+    {/* ── THE TWO OF US ─────────────────────────────────────────────────────
+        Full-width ruled rows, one per person. Not a team grid of headshot
+        cards — there are two of us and a card grid would be pretending. */}
+    <Section tone="default" padding="lg">
+      <SectionHeading
+        eyebrow="Who does what"
+        heading="Two people."
+        accent="That is the whole company"
+        sub="We do this alongside other work, building something of our own — the same thing our clients are doing. The person you talk to is the person doing the work."
       />
-    </>
-  )
-}
+
+      <div className="mt-14 grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 items-start">
+        <div className="relative">
+          <div className="rounded-xl3 overflow-hidden ring-1 ring-ink-900/10 bg-cream-200">
+            <img
+              src="/rhyan.jpg"
+              alt="Rhyan of Ace Web Designers"
+              className="block w-full h-[420px] object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          {/* Placeholder note: replace with a photo of Rhyan AND Valerie when
+              supplied. Do not fill this with stock or generated imagery. */}
+          <p className="mt-3 label-mono text-ink-700/60">Rhyan</p>
+        </div>
+
+        <ul className="border-t border-ink-900/10">
+          <li className="grid gap-3 py-8 border-b border-ink-900/10 sm:grid-cols-[8rem_1fr] sm:gap-8">
+            <span className="label-mono text-signal-600">Rhyan</span>
+            <div>
+              <h3 className="font-display text-xl text-ink-900">Designs the sites, runs the calls</h3>
+              <p className="mt-2 text-ink-800 leading-relaxed">
+                He builds the mockup before you turn up, sits on the call, and does the site
+                itself. He grew up watching his dad do excellent work that nobody online could
+                find, and separately watching him pay thousands a month for software that was
+                worse than what we could make. Both of those are why this exists.
+              </p>
+            </div>
+          </li>
+          <li className="grid gap-3 py-8 border-b border-ink-900/10 sm:grid-cols-[8rem_1fr] sm:gap-8">
+            <span className="label-mono text-signal-600">Valerie</span>
+            <div>
+              <h3 className="font-display text-xl text-ink-900">Does every bit of the social</h3>
+              <p className="mt-2 text-ink-800 leading-relaxed">
+                She is also an esthetician, and she says beautifying a social page works the same
+                way as beautifying anything else. She wants things to look genuine and feel
+                good, and she likes watching people do well. One reviewer put it more directly
+                than we would: Valerie made my social media explode.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </Section>
+
+    {/* ── WHAT WE WON'T DO ──────────────────────────────────────────────────
+        Built from Rhyan's own answer. Kept short — a long list of refusals
+        starts to sound like posturing. */}
+    <Section tone="muted" padding="lg">
+      <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
+        <div>
+          <Eyebrow tone="muted">What we turn down</Eyebrow>
+          <h2 className="mt-6 font-display text-3xl sm:text-4xl leading-tight text-ink-900">
+            We say no to work that looks like a scam, and to lazy websites.
+          </h2>
+        </div>
+        <div className="space-y-5 text-ink-800 leading-relaxed lg:pt-16">
+          <p>
+            If a business looks like it is set up to take advantage of people, or it goes against
+            what we think is right, we do not take it. That has cost us jobs and it will again.
+          </p>
+          <p>
+            The other one is lazier and more common: sites with nothing in them. Somebody
+            generates the photos, generates the page, ships it, and never looks at it again.
+          </p>
+          <p>
+            We are not precious about the tools — that is not the problem. The problem is when
+            nobody put any care in and nobody is being genuine. You can usually tell within about
+            five seconds, and so can your customers.
+          </p>
+          <p className="text-ink-900 font-medium">
+            Business and profit are not everything. You are a person trying to do work you are
+            proud of, provide for the people you care about, and still be there for them. We are
+            trying to do the same thing. That is the actual job.
+          </p>
+        </div>
+      </div>
+    </Section>
+
+    <Section tone="default" padding="md">
+      <div className="flex flex-col items-start gap-6">
+        <p className="max-w-2xl font-display text-2xl sm:text-3xl leading-snug text-ink-900">
+          &ldquo;Take care of the customer and business will come ten fold, and everyone will be
+          happy.&rdquo;
+        </p>
+        <p className="label-mono text-ink-700/70">Rhyan&rsquo;s dad</p>
+        <PhoneCta showLabels />
+      </div>
+    </Section>
+
+    <FinalCta
+      eyebrow="Book a time"
+      heading="Come look at what we made you"
+      accent="before you decide"
+      body="Fifteen minutes. We show you a custom made website mockup for your business. Nothing owed if you walk away."
+      ctaLabel="See available times"
+      onCta={goContact}
+    />
+  </>
+)
 
 export default AboutUs

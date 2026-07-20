@@ -3,9 +3,17 @@ import { ArrowRight } from 'lucide-react'
 import Section from './Section'
 import Eyebrow from './Eyebrow'
 import GradientHeading from './GradientHeading'
-import Reveal from './Reveal'
-import TrustStack from './TrustStack'
 
+/**
+ * The one section on the site that is still a centred stack, on purpose. It is
+ * the close, and after a page of left-aligned ruled rows a centred block reads
+ * as a deliberate stop rather than the default.
+ *
+ * The TrustStack was removed from here 2026-07-20. It already renders in every
+ * page hero, so repeating it inside every FinalCta put the same four claims in
+ * front of the visitor twice per page — which is how a small true rating starts
+ * to feel like an inflated one.
+ */
 interface FinalCtaProps {
   eyebrow?: React.ReactNode
   heading: React.ReactNode
@@ -13,7 +21,6 @@ interface FinalCtaProps {
   body?: React.ReactNode
   ctaLabel: string
   onCta: () => void
-  showTrustBar?: boolean
 }
 
 const FinalCta: React.FC<FinalCtaProps> = ({
@@ -23,10 +30,13 @@ const FinalCta: React.FC<FinalCtaProps> = ({
   body,
   ctaLabel,
   onCta,
-  showTrustBar = true,
 }) => (
   <Section tone="inverted" padding="lg" containerSize="md">
-    <Reveal variant="up" className="text-center">
+    {/* No Reveal wrapper. Scroll-reveal held this at opacity-0 until an
+        IntersectionObserver fired, so the closing CTA rendered as an empty black
+        block in every full-page screenshot — including the ones generate-site
+        produces for client previews. Nothing below the fold animates. */}
+    <div className="text-center">
       <hr className="border-cream-50/15 mb-12 max-w-xs mx-auto" />
       {eyebrow && <Eyebrow tone="inverted">{eyebrow}</Eyebrow>}
       <GradientHeading level={2} size="xl" tone="inverted" className="mt-5" accent={accent}>
@@ -44,12 +54,7 @@ const FinalCta: React.FC<FinalCtaProps> = ({
         {ctaLabel}
         <ArrowRight className="h-5 w-5" aria-hidden />
       </button>
-      {showTrustBar && (
-        <div className="mt-10 flex justify-center">
-          <TrustStack tone="inverted" />
-        </div>
-      )}
-    </Reveal>
+    </div>
   </Section>
 )
 

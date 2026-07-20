@@ -19,7 +19,7 @@ const NAV_LINKS: Array<{ label: string; page: string }> = [
   { label: 'Social Media', page: 'socialmedia' },
   { label: 'Our Work', page: 'work' },
   { label: 'Contact', page: 'contact' },
-  { label: 'Refer & Earn', page: 'refer' },
+  { label: 'Refer', page: 'refer' },
 ]
 
 const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
@@ -113,7 +113,7 @@ const SiteHeader: React.FC<SiteHeaderProps> = ({ onNavigate, currentPage }) => {
                 onClick={() => go('contact')}
                 className="group ml-2 inline-flex items-center gap-1.5 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-5 py-2 text-sm font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300 ease-premium"
               >
-                Free Design
+                Book a call
                 <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
               </button>
             </div>

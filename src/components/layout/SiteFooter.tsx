@@ -16,14 +16,14 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
         <div className="md:col-span-5">
           <Logo tone="inverted" size="lg" />
           <p className="mt-6 max-w-md text-base text-cream-100/70 leading-relaxed">
-            Beautiful websites, built for small business. Based in Leominster, MA — serving owners
-            <span className="text-editorial-italic text-signal-300"> nationwide</span>.
+            Rhyan and Valerie. We build websites for contractors and the people who do the
+            work themselves, anywhere in the United States.
           </p>
           <button
             onClick={() => onNavigate('contact')}
             className="group mt-8 inline-flex items-center gap-2 rounded-full bg-signal-500 hover:bg-signal-600 text-white px-6 py-3 text-sm font-semibold shadow-glow-signal magnetic-btn ring-focus-signal transition-colors duration-300"
           >
-            Get a free design
+            See available times
             <ArrowRight className="h-4 w-4 icon-nudge" aria-hidden />
           </button>
         </div>
@@ -37,7 +37,7 @@ const SiteFooter: React.FC<SiteFooterProps> = ({ onNavigate }) => (
               { label: 'Services', page: 'services' },
               { label: 'Social Media', page: 'socialmedia' },
               { label: 'Our Work', page: 'work' },
-              { label: 'Refer & Earn', page: 'refer' },
+              { label: 'Refer', page: 'refer' },
             ].map(l => (
               <li key={l.page}>
                 <button

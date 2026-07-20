@@ -14,11 +14,16 @@ export interface TrustStackProps {
   className?: string
 }
 
+// Every item must be true and checkable.
+// "Same-day launch available" was removed 2026-07-20 — nobody could confirm it,
+// and an unverified speed claim is exactly what makes the rest look invented.
+// The review COUNT is deliberately absent: the rating stands on its own and the
+// quotes carry the proof (owner decision).
 const DEFAULT_ITEMS: TrustStackItem[] = [
   { icon: 'star',     label: '5.0 on Google' },
-  { icon: 'shield',   label: 'No payment until you love it' },
-  { icon: 'sparkles', label: 'Built for small businesses' },
-  { icon: 'clock',    label: 'Same-day launch available' },
+  { icon: 'shield',   label: 'Nothing due to get on the call' },
+  { icon: 'sparkles', label: 'Basic SEO on every site' },
+  { icon: 'clock',    label: '10–15 minutes' },
 ]
 
 const ICON_MAP = {
@@ -51,7 +56,9 @@ const TrustStack: React.FC<TrustStackProps> = ({
             <Icon
               className={`h-4 w-4 shrink-0 ${
                 filled
-                  ? 'text-amber-500 fill-amber-500'
+                  ? isDark
+                    ? 'text-cream-50 fill-cream-50'
+                    : 'text-ink-900 fill-ink-900'
                   : isDark
                   ? 'text-signal-300'
                   : 'text-signal-600'
