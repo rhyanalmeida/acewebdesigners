@@ -51,6 +51,7 @@ Supabase Edge Functions (supabase/functions, Deno)
   slots          open slots = availability − booked − Google busy (30-min slots; 4h min notice, 2-day window)
   lead           gate-form step: upsert contact (durable attribution) → CAPI Lead
   book           validate slot → upsert contact → insert appointment → CAPI Schedule → GCal event → GHL relay → fire generate-site
+  qualify        post-booking qualifying answers → contacts + appt notes + GHL fields + GCal invite
   result         admin: No-Show / Showed / Purchase → CAPI CompleteRegistration / Purchase; No-Show also tags funnel-noshow in GHL
   admin-data     admin: dashboard payload (health + stats + lists)
   capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
@@ -123,6 +124,16 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   to `book`, which stamps `contacts.business_name/_type` before triggering generate-site. `lead`/`book`
   treat business fields as optional, so the preview-site chain stays intact. (Slimmed 2026-07-17 — the
   old 6-field gate converted at 0.2%; the contractor ad's problem was 100% post-click, delivery is fine.)
+- **Qualifying questions** (2026-07-21, show-rate work): asked on the **done screen**, AFTER the
+  appointment is saved — years in business + has-a-website-now, two optional `<select>`s with a Skip.
+  Trade is NOT re-asked (`businessType` already covers it). Deliberately post-booking: poor
+  qualification is the top no-show driver, but the gate is kept minimal and the confirm step converts
+  booked-from-lead at 100%, so nothing that could cost a booking goes in front of one. `qualify` fn
+  writes `contacts.years_in_business/has_website`, appends `appointments.notes`, mirrors to GHL custom
+  fields (**no tag change** — a repeated stage tag would re-enter workflows) and appends to the Google
+  Calendar invite, which is where the call gets prepped from. The `appointmentId` uuid returned by
+  `book` is the capability token, so there's no new auth surface. Test appointments write the DB rows
+  and skip every external sink.
 - **Conversion optimizations (2026-07-17, research-backed — see evidence notes in git history):**
   form-first order is deliberate (Chili Piper + Meta native lead-ads both converged on it — do NOT
   switch to calendar-first); phone field has inline justification microcopy (Baymard: unexplained
@@ -195,7 +206,8 @@ contractor/main. Self-serve wizard with live preview → monthly Stripe **subscr
 ## Verification tooling & DB access
 - `scripts/funnel-verify.mjs` (calls slots/lead/book with the anon key + capi retry-dedup check),
   `scripts/funnel-admin.mjs` (mints a short-lived admin session → `result`). `meta-ads-status.mjs`
-  looks up campaign/adset/ad by ID and reports url_tags.
+  reports the campaign/ad set by id and **lists every ad in the ad set** with status, url_tags and
+  per-ad 7-day spend/leads (it used to pin one ad id, which silently reported the paused creative).
 - **DB reads/writes: use the Management API SQL endpoint** with `SUPABASE_ACCESS_TOKEN` —
   `POST https://api.supabase.com/v1/projects/dwsmrruzufqpopdzlszw/database/query`. The **Supabase MCP
   points at the wrong project** — don't use it for this DB.
@@ -232,12 +244,17 @@ stay in the Ace Web Designers portfolio.)
   languages 0 (no Spanish dub of Rhyan's voice), browser add-ons None (an Instant Form default would
   have bypassed our scheduler + CAPI). *Meta's "Essential enhancements (5/5)" — incl. Relevant
   comments and Enhance CTA — cannot be disabled.*
+  **Verified ACTIVE + delivering 2026-07-21** ($11.80 / 149 impr / 28 video views on day one).
+  ⚠️ It launched **without a `url_tags` UTM template** (the paused old ad has one) — so its clicks
+  arrive with only `source=landing-contractors` and `withDefaultAdIds` is what attributes them.
 - Ad **"funny hook"** id `120242709687350259` — **PAUSED 2026-07-21** (replaced). All other
   campaigns/ad sets stay PAUSED. The **Restaurant Builder** campaign/ad set/ad sit as 3 unpublished
   drafts in this account — publishing from Ads Manager can sweep them live; leave them alone.
 - Destination `https://acewebdesigners.com/contractorlanding?source=landing-contractors` (+ UTM template
   appended at click). `_shared/attribution.ts` `withDefaultAdIds` stamps known campaign/adset/ad ids on
-  `source=landing-contractors` URLs lacking utm (real params win when present).
+  `source=landing-contractors` URLs lacking utm (real params win when present). **Its `CONTRACTOR_AD_DEFAULTS`
+  must name whichever ad is ACTIVE** — it was still pointing at "funny hook" after the 7/21 relaunch,
+  which would have credited every new lead to the paused creative. Re-check after any relaunch.
 - The old "spend / 0 leads" bug was the ad set optimizing a pixel the page never fired. Keep the ad set
   bound to the pixel the page fires.
 - `META_ADS_TOKEN` (`.env.local`) is **READ-ONLY** — can't create/update ads/creatives/pixels; do that
@@ -294,15 +311,28 @@ contact with the same enriched attribution we send Meta (into custom fields by i
 (`MseWjwAf3rDlJRoj1p75`, contractor) → drives native Appointment-Created + reminders.
 - Same email = **one** contact (upsert dedupes). Tags are **added** via `POST /contacts/{id}/tags`
   (accumulates), NOT the upsert `tags` field (which replaces). A closed deal carries all stage tags.
+- **Custom fields** are driven entirely by `GHL_CUSTOM_FIELD_IDS` — `buildGhlCustomFields` only emits
+  keys present in that map, so adding one is additive and safe. Beyond attribution it now carries the
+  sales-context `qualifiers`: `business_type`, `years_in_business`, `has_website` (added 2026-07-21;
+  `business_type` was collected and stored but had never reached GHL). Re-run
+  `node scripts/ghl-setup-custom-fields.mjs` (idempotent) → `supabase secrets set GHL_CUSTOM_FIELD_IDS`.
+- `ghlUpdateContactFields()` writes custom fields **without touching tags** — use it for anything
+  post-booking. Re-running `ghlSyncStage` with an already-fired stage would re-add the tag and can
+  re-enter a tag-triggered workflow.
 - **You build workflows in the GHL UI** (API can't create them; the PIT also lacks `workflows.readonly`
   — use Playwright UI for anything workflow-related). **Remove any CAPI action from GHL workflows** —
   CAPI is ours; leaving GHL's double-fires. Keep workflow **re-entry OFF** (both `stripe-webhook` and
   `result` add `funnel-purchased`; CAPI dedupes via `purchase_<appt>`).
 - **Gotcha:** in the workflow builder, the Publish toggle is a *pending* change — click **Save** after
   toggling/editing or it silently reverts to draft.
-- **Live workflows:** A "Appointment — Confirmation & Reminders" (Appointment-Created on the contractor
-  calendar; confirmation immediate, 1h nudge, 24h reminder that skips for sub-24h bookings — copy uses
-  consequence framing + preview-site tease, rewritten 2026-07-17 per RCT evidence), B "Nurture — New
+- **Live workflows:** A "Appointment — Confirmation & Reminders" (id `cffe1e9e-9d67-4c5d-b9da-285e225c6ac9`;
+  trigger = Customer-booked-appointment on "Contractors - Free Design Meeting"; 7 steps: Confirmation
+  SMS + Email → wait-until-24h-before → 24h Reminder SMS + Email → wait-until-**2h**-before → 2h SMS
+  Nudge. Copy uses consequence framing + preview-site tease, rewritten 2026-07-17 per RCT evidence.
+  **Show-rate edits 2026-07-21:** the confirmation SMS now asks *"Reply YES to confirm your spot"* — a
+  reply converts a tentative tap into a commitment — and the final nudge moved **1h → 2h before**,
+  because both no-shows booked on the 4h minimum, so a 1h touch fires while they're still on a job.
+  4 texts inside a few hours is why it was moved, not added), B "Nurture — New
   Lead" (`funnel-lead`, goal `funnel-booked`→END; 3 touches: 15min SMS → day-2 email → day-4 SMS →
   day-6 final SMS), C "Post-Meeting — Showed Follow-up" (`funnel-showed`), D "Onboarding — Purchased"
   (`funnel-purchased`), "No-Show — Rebook Follow-up" (`funnel-noshow` tag → immediate missed-you SMS →

@@ -66,17 +66,23 @@ export function mergeAttribution(
  * The live contractor ad's URL carries only `source=landing-contractors` until
  * its UTM template is published in Ads Manager, so those clicks would arrive
  * with no campaign context. When that marker is present and nothing else was
- * captured, stamp the known ids of the one running ad ("funny hook"). Real UTM
- * params, once the template is live, are present and win — this then never fires.
+ * captured, stamp the known ids of the one running ad. Real UTM params, once the
+ * template is live, are present and win — this then never fires.
+ *
+ * ⚠️ MUST track whichever ad is ACTIVE. The 7/21 captioned ad launched WITHOUT a
+ * url_tags template (verified via the Marketing API), so this fallback is what
+ * attributes its leads — left pointing at the paused "funny hook" it would have
+ * credited every new lead to the old creative. Re-check with `npm run meta-ads:status`
+ * after any relaunch.
  */
 const CONTRACTOR_AD_DEFAULTS: Record<string, string> = {
   utm_source: 'Facebook',
   utm_medium: 'Contractors — US — Advantage+ Audience — $20/day - Copy',
   utm_campaign: 'Free Website Offer For Contractors (6/1/26)',
-  utm_content: 'funny hook',
+  utm_content: 'Rhyan captioned — free site offer (7/21/26)',
   campaign_id: '120241554190170259',
   adset_id: '120242709687340259',
-  ad_id: '120242709687350259',
+  ad_id: '120247255043930259',
 }
 
 export function withDefaultAdIds(

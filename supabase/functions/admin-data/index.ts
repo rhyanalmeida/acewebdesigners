@@ -20,6 +20,8 @@ interface ContactEmbed {
   last_name?: string
   business_name?: string
   business_type?: string
+  years_in_business?: string
+  has_website?: string
   city?: string
   state?: string
   zip?: string
@@ -154,7 +156,7 @@ Deno.serve(async (req: Request) => {
         'id, start_ts, status, calendar, value, upfront_value, recurring_value, recurring_interval, ' +
           'plan_name, purchased_at, resulted_at, resulted_by, event_id, notes, utm, created_at, is_test, ' +
           'preview_url, netlify_site_id, site_status, site_error, site_generated_at, updated_at, ' +
-          'contacts:contact_id ( email, phone, first_name, last_name, business_name, business_type, city, state, zip, fbclid )',
+          'contacts:contact_id ( email, phone, first_name, last_name, business_name, business_type, years_in_business, has_website, city, state, zip, fbclid )',
       )
       .order('start_ts', { ascending: false })
       .limit(500),
@@ -162,7 +164,7 @@ Deno.serve(async (req: Request) => {
     supa.from('ghl_messages').select('*').order('received_at', { ascending: false }).limit(50),
     supa
       .from('contacts')
-      .select('id, first_name, last_name, business_name, business_type, email, phone, city, state, created_at, fbclid, landing_url, utm')
+      .select('id, first_name, last_name, business_name, business_type, years_in_business, has_website, email, phone, city, state, created_at, fbclid, landing_url, utm')
       .order('created_at', { ascending: false })
       .limit(300),
   ])

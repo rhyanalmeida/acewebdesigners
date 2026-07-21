@@ -111,13 +111,19 @@ function customFieldIdMap(): Record<string, string> {
 }
 
 /**
- * Map attribution → GHL `customFields: [{ id, value }]`. Driven by the id map:
- * only keys present in GHL_CUSTOM_FIELD_IDS are sent, and blanks are dropped (so a
- * later stage missing a value never wipes a stored one). Pure — unit-testable.
+ * Map attribution (+ optional qualifiers) → GHL `customFields: [{ id, value }]`.
+ * Driven by the id map: only keys present in GHL_CUSTOM_FIELD_IDS are sent, and
+ * blanks are dropped (so a later stage missing a value never wipes a stored one).
+ * Pure — unit-testable.
+ *
+ * `qualifiers` is kept separate from `attr` on purpose: GhlAttribution means ad
+ * attribution, and business_type / years_in_business / has_website are sales
+ * context, not ad context.
  */
 export function buildGhlCustomFields(
   attr: GhlAttribution,
   idMap: Record<string, string>,
+  qualifiers?: Record<string, string | undefined>,
 ): { id: string; value: string }[] {
   const flat: Record<string, string | undefined> = {
     fbc: attr.fbc,
@@ -131,6 +137,7 @@ export function buildGhlCustomFields(
     recurring_value: attr.recurringValue != null ? String(attr.recurringValue) : undefined,
     recurring_interval: attr.recurringInterval,
     plan_name: attr.planName,
+    ...(qualifiers ?? {}),
   }
   const out: { id: string; value: string }[] = []
   for (const [key, id] of Object.entries(idMap)) {
@@ -154,6 +161,8 @@ export interface GhlStageInput {
   zip?: string
   country?: string
   attribution?: GhlAttribution
+  /** Sales context (business_type / years_in_business / has_website) → custom fields. */
+  qualifiers?: Record<string, string | undefined>
 }
 
 /**
@@ -185,7 +194,7 @@ export async function ghlSyncStage(input: GhlStageInput): Promise<string | null>
     if (input.state) body.state = input.state
     if (input.zip) body.postalCode = input.zip
     if (input.country) body.country = input.country
-    const cf = buildGhlCustomFields(input.attribution ?? {}, customFieldIdMap())
+    const cf = buildGhlCustomFields(input.attribution ?? {}, customFieldIdMap(), input.qualifiers)
     if (cf.length) body.customFields = cf
 
     const resp = await fetch(`${GHL_API}/contacts/upsert`, {
@@ -220,6 +229,44 @@ export async function ghlSyncStage(input: GhlStageInput): Promise<string | null>
   } catch (err) {
     console.error('[ghl] ghlSyncStage error', err)
     return null
+  }
+}
+
+/**
+ * Update a contact's custom fields WITHOUT touching tags.
+ *
+ * Deliberately not `ghlSyncStage` with a repeated stage: that re-adds the stage tag,
+ * which can re-enter a tag-triggered workflow. Qualifying answers arrive after the
+ * booking has already fired funnel-booked, so they must be a pure field write.
+ * No-ops when unconfigured; never throws.
+ */
+export async function ghlUpdateContactFields(input: {
+  email?: string
+  phone?: string
+  qualifiers: Record<string, string | undefined>
+}): Promise<boolean> {
+  if (!ghlConfigured()) return false
+  if (!input.email && !input.phone) return false
+  const cf = buildGhlCustomFields({}, customFieldIdMap(), input.qualifiers)
+  if (!cf.length) return false
+  try {
+    const body: Record<string, unknown> = { locationId: locationId(), customFields: cf }
+    if (input.email) body.email = input.email
+    if (input.phone) body.phone = input.phone
+    const resp = await fetch(`${GHL_API}/contacts/upsert`, {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify(body),
+    })
+    if (!resp.ok) {
+      console.error('[ghl] field update failed', resp.status, (await resp.text()).slice(0, 200))
+      return false
+    }
+    console.log(`[ghl] updated ${cf.length} custom field(s), no tag change`)
+    return true
+  } catch (err) {
+    console.error('[ghl] ghlUpdateContactFields error', err)
+    return false
   }
 }
 

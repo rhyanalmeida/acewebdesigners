@@ -199,6 +199,43 @@ export async function createEvent(input: CreateEventInput): Promise<string | nul
   }
 }
 
+/**
+ * Appends text to an event's description. Best-effort — returns false when
+ * unconfigured or on any failure. Used to surface qualifying answers on the
+ * invite, which is where the call actually gets prepped from.
+ */
+export async function appendEventDescription(
+  calendar: 'main' | 'contractor',
+  eventId: string,
+  text: string,
+): Promise<boolean> {
+  const calId = calendarIdFor(calendar)
+  const token = await getAccessToken()
+  if (!calId || !token || !eventId || !text.trim()) return false
+  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events/${encodeURIComponent(eventId)}`
+  try {
+    const cur = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    if (!cur.ok) {
+      console.error('[google] read event failed', cur.status)
+      return false
+    }
+    const { description = '' } = (await cur.json()) as { description?: string }
+    const resp = await fetch(url, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: description ? `${description}\n\n${text}` : text }),
+    })
+    if (!resp.ok) {
+      console.error('[google] patch event failed', resp.status, (await resp.text()).slice(0, 300))
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error('[google] appendEventDescription error', err)
+    return false
+  }
+}
+
 /** Deletes a calendar event. Best-effort. */
 export async function deleteEvent(calendar: 'main' | 'contractor', eventId: string): Promise<void> {
   const calId = calendarIdFor(calendar)

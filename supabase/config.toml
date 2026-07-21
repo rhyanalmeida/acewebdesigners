@@ -19,6 +19,11 @@ verify_jwt = false
 [functions.book]
 verify_jwt = false
 
+# Post-booking qualifying answers. Public like book — the appointment uuid returned
+# by `book` is the capability token (unguessable, scoped to one appointment).
+[functions.qualify]
+verify_jwt = false
+
 # Stripe calls this with its own signature; verified inside the function.
 [functions.stripe-webhook]
 verify_jwt = false

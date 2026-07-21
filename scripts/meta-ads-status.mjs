@@ -10,7 +10,8 @@ const API_BASE = 'https://graph.facebook.com/v21.0'
 // renamed "Free Website Offer For Contractors (6/1/26)" which broke name-matching).
 const CAMPAIGN_ID = '120241554190170259'
 const ADSET_ID = '120242709687340259'
-const AD_ID = '120242709687350259'
+// Ads are listed from the ad set, never hardcoded — a pinned ad id silently reports a
+// PAUSED creative after every relaunch (it did, for the 7/21 captioned ad).
 
 function loadEnvLocal() {
   const here = path.dirname(fileURLToPath(import.meta.url))
@@ -41,7 +42,22 @@ const adAccount = process.env.META_AD_ACCOUNT_ID
 
 const c = await fb(`/${CAMPAIGN_ID}?fields=id,name,status,effective_status`)
 const s = await fb(`/${ADSET_ID}?fields=id,name,status,effective_status,daily_budget,bid_strategy`).catch(() => null)
-const ad = await fb(`/${AD_ID}?fields=id,name,status,effective_status,creative{url_tags}`).catch(() => null)
+const adList = await fb(
+  `/${ADSET_ID}/ads?fields=id,name,status,effective_status,creative{url_tags}&limit=50`,
+).catch(() => ({ data: [] }))
+const ads = adList.data || []
+
+/** Per-ad last-7d insights, so a relaunch is judged on the ad that's actually running. */
+const adInsights = Object.fromEntries(
+  await Promise.all(
+    ads.map(async (a) => {
+      const r = await fb(
+        `/${a.id}/insights?fields=spend,impressions,clicks,actions&date_preset=last_7d`,
+      ).catch(() => ({ data: [] }))
+      return [a.id, r.data?.[0] || {}]
+    }),
+  ),
+)
 
 const insights = await fb(
   `/${c.id}/insights?fields=spend,impressions,clicks,actions,cost_per_action_type&date_preset=last_7d`,
@@ -60,11 +76,16 @@ if (s) {
   console.log('  daily budget:      ', s.daily_budget ? `$${(Number(s.daily_budget) / 100).toFixed(2)}` : 'n/a (campaign budget)')
   console.log('  bid strategy:      ', s.bid_strategy || 'n/a')
 }
-console.log('Ad:      ', ad?.name || '(none)')
-if (ad) {
-  console.log('  id:                ', ad.id)
-  console.log('  status:            ', ad.status, `(effective: ${ad.effective_status})`)
-  console.log('  UTM url_tags:      ', ad.creative?.url_tags ? 'SET ✓' : 'MISSING — set in Ads Manager → Tracking')
+console.log(`Ads in ad set: ${ads.length}`)
+for (const a of ads) {
+  const ai = adInsights[a.id] || {}
+  const adLeads = (ai.actions || []).find((x) => x.action_type === 'lead')?.value || '0'
+  const live = a.effective_status === 'ACTIVE'
+  console.log(`  ${live ? '▶' : '⏸'} ${a.name}`)
+  console.log('     id:              ', a.id)
+  console.log('     status:          ', a.status, `(effective: ${a.effective_status})`)
+  console.log('     UTM url_tags:    ', a.creative?.url_tags ? 'SET ✓' : 'MISSING — set in Ads Manager → Tracking')
+  console.log('     last 7d:         ', `$${ai.spend || '0.00'} · ${ai.impressions || 0} impr · ${ai.clicks || 0} clicks · ${adLeads} leads`)
 }
 console.log('Last 7d:')
 console.log('  spend:             ', i.spend ? `$${i.spend}` : '$0.00')

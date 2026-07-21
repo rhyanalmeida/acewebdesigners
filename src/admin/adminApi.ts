@@ -52,6 +52,8 @@ export interface ApptContact {
   last_name?: string
   business_name?: string
   business_type?: string
+  years_in_business?: string
+  has_website?: string
   city?: string
   state?: string
   zip?: string
@@ -127,6 +129,8 @@ export interface AdminContact {
   last_name?: string | null
   business_name?: string | null
   business_type?: string | null
+  years_in_business?: string | null
+  has_website?: string | null
   email?: string | null
   phone?: string | null
   city?: string | null

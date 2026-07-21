@@ -159,6 +159,7 @@ Deno.serve(async (req: Request) => {
       zip: b.zip,
       country: b.country,
       attribution: { fbc: b.fbc, fbp: b.fbp, fbclid: b.fbclid, clientIp, clientUserAgent: clientUa, landingUrl, utm },
+      qualifiers: { business_type: b.businessType },
     })
   } catch (err) {
     console.error('[lead] ghl sync failed (lead kept)', err)

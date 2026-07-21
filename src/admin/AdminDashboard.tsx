@@ -37,6 +37,16 @@ const timeAgo = (iso: string) => {
 type NameLike = { first_name?: string | null; last_name?: string | null; email?: string | null } | null
 const fullName = (c?: NameLike) =>
   `${c?.first_name ?? ''} ${c?.last_name ?? ''}`.trim() || c?.email || 'Lead'
+/**
+ * Qualifying answers from the scheduler's done screen. Rendered wherever a contact
+ * is listed — the whole point of collecting them is that they're visible before the call.
+ */
+type QualifierLike = { years_in_business?: string | null; has_website?: string | null } | null
+const Qualifiers: React.FC<{ c?: QualifierLike }> = ({ c }) => {
+  const parts = [c?.years_in_business, c?.has_website].filter(Boolean)
+  if (!parts.length) return null
+  return <div className="truncate text-xs text-slate-400">{parts.join(' · ')}</div>
+}
 const initials = (c?: NameLike) => {
   const f = c?.first_name?.[0] ?? c?.email?.[0] ?? '?'
   const l = c?.last_name?.[0] ?? ''
@@ -387,6 +397,7 @@ const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; 
                           </div>
                         )}
                         <div className="truncate text-xs text-slate-400">{a.contacts?.email}{a.contacts?.phone ? ` · ${a.contacts.phone}` : ''}</div>
+                        <Qualifiers c={a.contacts} />
                       </div>
                     </div>
                   </td>
@@ -516,6 +527,7 @@ const LeadsTable: React.FC<{ contacts: AdminContact[]; stageOf: (email?: string 
                         </div>
                       )}
                       <div className="truncate text-xs text-slate-400">{c.email}{c.phone ? ` · ${c.phone}` : ''}</div>
+                      <Qualifiers c={c} />
                     </div>
                   </div>
                 </td>

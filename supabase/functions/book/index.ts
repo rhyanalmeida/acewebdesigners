@@ -240,6 +240,7 @@ Deno.serve(async (req: Request) => {
       zip: b.zip,
       country: b.country,
       attribution: { fbc: b.fbc, fbp: b.fbp, fbclid: b.fbclid, clientIp, clientUserAgent: clientUa, landingUrl, utm },
+      qualifiers: { business_type: b.businessType },
     })
     if (ghlContactId) await createGhlAppointment({ contactId: ghlContactId, startISO, endISO, title })
     // We pass appointmentId so GHL can echo it back to ghl-webhook for tracking.

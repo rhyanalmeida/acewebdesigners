@@ -102,6 +102,20 @@ const BUSINESS_TYPES = [
   'General Contractor',
 ]
 
+/**
+ * Qualifying questions, asked on the DONE screen — after the appointment is saved.
+ * Poor qualification is the biggest driver of no-shows, but the gate form is kept
+ * minimal on purpose and the confirm step converts at 100%; asking here can't cost
+ * a booking. Trade is not repeated — `businessType` already captures it.
+ */
+const YEARS_IN_BUSINESS = ['Less than 1 year', '1–3 years', '3–10 years', '10+ years']
+const HAS_WEBSITE = [
+  'No website',
+  "Yes, but it's outdated",
+  "Yes, and I'm happy with it",
+  'Social media only',
+]
+
 const newEventId = (prefix: string) =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
@@ -134,6 +148,13 @@ export const Scheduler: React.FC<SchedulerProps> = ({
   const [booking, setBooking] = useState(false)
   const [bookError, setBookError] = useState('')
   const [confirmed, setConfirmed] = useState<Slot | null>(null)
+
+  // post-booking qualification (done screen)
+  const [appointmentId, setAppointmentId] = useState('')
+  const [yearsInBusiness, setYearsInBusiness] = useState('')
+  const [hasWebsite, setHasWebsite] = useState('')
+  const [qualifySubmitting, setQualifySubmitting] = useState(false)
+  const [qualifyDone, setQualifyDone] = useState(false)
 
   const visitorTz = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'your timezone',
@@ -338,6 +359,7 @@ export const Scheduler: React.FC<SchedulerProps> = ({
       trackSchedule(eventId, { content_name: calendarName ?? `${calendar} booking` })
 
       const result = data as { appointmentId: string; startISO: string }
+      setAppointmentId(result.appointmentId)
       setConfirmed(selectedSlot)
       setStep('done')
       onBooked?.({ appointmentId: result.appointmentId, startISO: result.startISO })
@@ -348,6 +370,27 @@ export const Scheduler: React.FC<SchedulerProps> = ({
       setBooking(false)
     }
   }, [selectedSlot, form, calendar, calendarName, businessTz, loadSlots, onBooked])
+
+  // ── Post-booking: qualifying answers ────────────────────────────────────────
+  // The booking is already saved, so this is best-effort: any failure just closes
+  // the card. Never show the visitor an error for an optional extra.
+  const handleQualify = useCallback(async () => {
+    if (!appointmentId || (!yearsInBusiness && !hasWebsite)) {
+      setQualifyDone(true)
+      return
+    }
+    setQualifySubmitting(true)
+    try {
+      await supabase.functions.invoke('qualify', {
+        body: { appointmentId, yearsInBusiness, hasWebsite },
+      })
+    } catch (err) {
+      console.error('[Scheduler] qualify failed', err)
+    } finally {
+      setQualifySubmitting(false)
+      setQualifyDone(true)
+    }
+  }, [appointmentId, yearsInBusiness, hasWebsite])
 
   // ── confirmation ──────────────────────────────────────────────────────────────
   if (step === 'done' && confirmed) {
@@ -371,6 +414,60 @@ export const Scheduler: React.FC<SchedulerProps> = ({
             Our team is now building your <strong>free homepage preview</strong> for this call —
             it'll be ready when we meet. See you then!
           </p>
+
+          {!qualifyDone && (
+            <div className="mt-6 border-t border-ink-900/10 pt-5 text-left">
+              <p className="text-sm font-semibold text-ink-900">
+                Two quick questions so we build the right thing
+              </p>
+              <p className="mt-1 text-xs text-ink-700/70">Takes 10 seconds — optional.</p>
+              <div className="mt-3 space-y-3">
+                <select
+                  value={yearsInBusiness}
+                  onChange={(e) => setYearsInBusiness(e.target.value)}
+                  className={inputClass}
+                  aria-label="Years in business"
+                >
+                  <option value="">How long have you been in business?</option>
+                  {YEARS_IN_BUSINESS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={hasWebsite}
+                  onChange={(e) => setHasWebsite(e.target.value)}
+                  className={inputClass}
+                  aria-label="Do you have a website now?"
+                >
+                  <option value="">Do you have a website now?</option>
+                  {HAS_WEBSITE.map((w) => (
+                    <option key={w} value={w}>
+                      {w}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={handleQualify}
+                  disabled={qualifySubmitting || (!yearsInBusiness && !hasWebsite)}
+                >
+                  {qualifySubmitting ? 'Sending…' : 'Send'}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setQualifyDone(true)}
+                  className="text-sm text-ink-700/70 underline underline-offset-2 hover:text-ink-900"
+                >
+                  Skip
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )

@@ -38,6 +38,10 @@ const FIELDS = [
   { key: 'recurring_value', name: 'Recurring Value', dataType: 'NUMERICAL' },
   { key: 'recurring_interval', name: 'Recurring Interval', dataType: 'TEXT' },
   { key: 'plan_name', name: 'Plan Name', dataType: 'TEXT' },
+  // sales context, not ad attribution — see ghl.ts buildGhlCustomFields(qualifiers)
+  { key: 'business_type', name: 'Business Type / Trade', dataType: 'TEXT' },
+  { key: 'years_in_business', name: 'Years In Business', dataType: 'TEXT' },
+  { key: 'has_website', name: 'Has Website Now', dataType: 'TEXT' },
 ]
 
 function readEnv(file) {
