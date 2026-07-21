@@ -314,6 +314,50 @@ waiting.
 Tap below.
 ```
 
+### ✅ SHIPPED ASSET — filmed + captioned (2026-07-20)
+
+**Final video: `C:\Users\rhyan\Downloads\IMG_1174_captioned.mp4`** — approved, ready to upload.
+1080×1920 · H.264 High · yuv420p · 30fps · AAC 192k stereo · 28.95s · faststart. Source take
+`IMG_1174.MOV` (untouched).
+
+**What Rhyan actually says** (differs from Script C v2 below — he improvised):
+```
+Attention contractors, your website is the first thing that people see.
+And if it's ugly and outdated, they're going to call someone else.
+Hi, my name is Ryan. I own Ace Web Designers, and I've been working with contractors for years now.
+We build fast, clean, modern, mobile-friendly sites that work anywhere.
+So what are you waiting for? Book down below to go on a free discovery call,
+where we can show you a website design.
+No strings attached, no obligation. You only pay if you love it. There's nothing to lose. We'll talk soon.
+```
+⚠️ **Known weakness, accepted for this run:** it sells the *discovery call*, not the *free website*,
+and uses "we"+features rather than "I build them myself". That's the one thing Script C v2 fixes —
+worth a retake later, but this take still beats the failing "funny hook" ad on every count.
+
+**Captions** — source of truth: `docs/ad-assets/contractor-ad-captions.ass` (re-burnable any time).
+Built from Whisper `medium.en` **word-level** timestamps, then hand-grouped into 22 phrases and
+manually stamped. Style: Montserrat Bold 68px, white, semi-transparent dark bar (`&H33000000`,
+BorderStyle 3), bottom-center, `MarginV 470` (above Instagram's ~420px bottom UI zone, clear of the
+right-side buttons, never over his face), 3–5 words per line, static.
+- Money-lines render **fully yellow** (`for a FREE discovery call`, `No strings attached`,
+  `No obligation`, `You only pay if you love it`, `There's nothing to lose`).
+  **Do NOT switch colour mid-line** — two runs = two overlapping semi-transparent boxes = a visible
+  darker seam. One run per line keeps every bar uniform. This was the fix that made it ship.
+- Caption text corrects the brand: **"Rhyan"** (he says "Ryan") and **"Ace Web Designers"**.
+
+Re-burn command (font: Montserrat-Bold.ttf via `fontsdir`):
+```
+ffmpeg -y -i IMG_1174.MOV -vf "subtitles=contractor-ad-captions.ass:fontsdir=fonts" \
+  -map 0:v:0 -map 0:1 -c:v libx264 -profile:v high -pix_fmt yuv420p -crf 18 -r 30 \
+  -c:a aac -b:a 192k -ac 2 -movflags +faststart IMG_1174_captioned.mp4
+```
+
+**Ad set + copy to run it with: `docs/AD_SET_PLAN_2026-07-20.md`** (settings table, build sequence,
+copy options). Note the old headline `Free Website for Contractors` is **28 chars and truncates** —
+use `Free Site for Contractors` (25).
+
+---
+
 ### Script C v2 — research-tuned, modular hook test (2026-07-20) — RECORD THIS
 
 Supersedes the first Script C draft. A fresh **9:16 selfie of Rhyan's face**, proven "build & show

@@ -37,11 +37,14 @@ export async function computeOpenSlots(opts: {
   maxAdvanceMinutes?: number
 }): Promise<{ tz: string; slots: Slot[] }> {
   const days = Math.min(Math.max(opts.days ?? 21, 1), 60)
-  // Booking window: min 4h notice, max 7 days out. `book` validates against these
-  // same slots, so both bounds are enforced server-side too. (7-day window keeps
-  // the calendar full — a 24h max left it empty all weekend and killed bookings.)
+  // Booking window: min 4h notice, max 2 days out. `book` validates against these
+  // same slots, so both bounds are enforced server-side too.
+  // 2-day cap (2026-07-21, owner decision): show rate peaks at next-day and declines
+  // with distance, so far-out slots are the ones people ghost. Watch booking VOLUME —
+  // a 24h max previously left the calendar empty all weekend and killed bookings, so
+  // if volume drops, widen back toward 4_320 (3 days) rather than returning to 7.
   const leadMinutes = opts.leadMinutes ?? 240
-  const maxAdvanceMinutes = opts.maxAdvanceMinutes ?? 10_080
+  const maxAdvanceMinutes = opts.maxAdvanceMinutes ?? 2_880
   const supa = admin()
 
   const { data: rules, error } = await supa

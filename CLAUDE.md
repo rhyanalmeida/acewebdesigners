@@ -48,7 +48,7 @@ React (Netlify)
         │  VITE_SUPABASE_URL / ANON_KEY
         ▼
 Supabase Edge Functions (supabase/functions, Deno)
-  slots          open slots = availability − booked − Google busy (30-min slots; 4h min notice, 7-day window)
+  slots          open slots = availability − booked − Google busy (30-min slots; 4h min notice, 2-day window)
   lead           gate-form step: upsert contact (durable attribution) → CAPI Lead
   book           validate slot → upsert contact → insert appointment → CAPI Schedule → GCal event → GHL relay → fire generate-site
   result         admin: No-Show / Showed / Purchase → CAPI CompleteRegistration / Purchase; No-Show also tags funnel-noshow in GHL
@@ -109,9 +109,12 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
 # Current state
 
 ## Booking funnel (contractor + main) — LIVE
-- **Window:** 4h min notice, **7-day** max advance; 30-min slots. Defaults in
-  `_shared/availability.ts` (`leadMinutes 240`, `maxAdvanceMinutes 10080`); both `slots` (display) and
+- **Window:** 4h min notice, **2-day** max advance; 30-min slots. Defaults in
+  `_shared/availability.ts` (`leadMinutes 240`, `maxAdvanceMinutes 2880`); both `slots` (display) and
   `book` (validation) call `computeOpenSlots` with no override, so they move together.
+  2-day cap set 2026-07-21 (owner decision) — show rate peaks next-day and declines with distance, so
+  far-out slots are the ones people ghost. **Watch booking VOLUME:** a 24h max previously emptied the
+  calendar all weekend and killed bookings; if volume drops, widen to `4_320` (3 days), not back to 7.
 - **Availability hours** (`availability` DB rows, both calendars): weekdays **7am–8pm** (420–1200),
   **Saturday 8am–12pm** (weekday 6), tz America/New_York. Google freeBusy trims real conflicts live, so
   the rows are the outer envelope. Edit rows directly (Management API SQL) — no deploy needed.
@@ -214,13 +217,24 @@ stay in the Ace Web Designers portfolio.)
 | `1575254990791923` (Restaurant Builder CAPI) | **RESTAURANT dataset** — `/buildyoursite` (pending launch) |
 | `1548487516424971` | **DEAD** — do not use (caused the old 0-leads bug) |
 
-- Campaign **"Free Website Offer For Contractors (6/1/26)"** id `120241554190170259` — **ACTIVE**.
+- Campaign **"Free Website Offer For Contractors (6/1/26)"** id `120241554190170259` — **ACTIVE**
+  (relaunched 2026-07-21; it had been switched OFF and this file wrongly said ACTIVE — re-verify in
+  Ads Manager before trusting status here). Budget is now **CBO $20/day at campaign level**, bid
+  strategy Highest volume. Advantage+ leads campaign = On.
 - Ad set `120242709687340259` — `OFFSITE_CONVERSIONS`/`LEAD`, `promoted_object.pixel_id =
-  4230021860577001` ✅, $20/day, **ACTIVE**. **Fully broad targeting** (US + `advantage_audience:1`,
-  no custom detailed targeting — let Advantage+ decide). **Conversion event stays Lead — owner
-  decision (2026-07-17); do not switch to Schedule or ViewContent.**
-- Ad **"funny hook"** id `120242709687350259` — 2 videos (flexible media auto-picks), all Advantage+
-  creative enhancements on, UTM url_tags published. All other campaigns/ad sets stay PAUSED.
+  4230021860577001` ✅, uses campaign budget, **ACTIVE**. **Fully broad targeting** (US +
+  `advantage_audience:1`, no custom detailed targeting — let Advantage+ decide). **Conversion event
+  stays Lead — owner decision (2026-07-17); do not switch to Schedule or ViewContent.**
+- **LIVE AD: "Rhyan captioned — free site offer (7/21/26)"** id `120247255043930259` — the captioned
+  9:16 talking-head (`IMG_1174_captioned.mp4`). Headline `Free Site for Contractors` (25 chars — the
+  old 28-char one truncated), description `Real designer. No pressure.`, CTA **Book now**.
+  All 5 optional Advantage+ creative enhancements OFF, AI text generation applied 0-of-5, translation
+  languages 0 (no Spanish dub of Rhyan's voice), browser add-ons None (an Instant Form default would
+  have bypassed our scheduler + CAPI). *Meta's "Essential enhancements (5/5)" — incl. Relevant
+  comments and Enhance CTA — cannot be disabled.*
+- Ad **"funny hook"** id `120242709687350259` — **PAUSED 2026-07-21** (replaced). All other
+  campaigns/ad sets stay PAUSED. The **Restaurant Builder** campaign/ad set/ad sit as 3 unpublished
+  drafts in this account — publishing from Ads Manager can sweep them live; leave them alone.
 - Destination `https://acewebdesigners.com/contractorlanding?source=landing-contractors` (+ UTM template
   appended at click). `_shared/attribution.ts` `withDefaultAdIds` stamps known campaign/adset/ad ids on
   `source=landing-contractors` URLs lacking utm (real params win when present).
@@ -238,6 +252,13 @@ stay in the Ace Web Designers portfolio.)
 - Current diagnosis + priorities: `docs/FUNNEL_AUDIT_2026-07-20.md`. Headline: the ad's
   `quality_ranking` is `BELOW_AVERAGE_35` driving a $54 CPM (~3-4x median), and the creative ignores
   its own spec in `docs/contractor-ad-creative.md`. Creative is the top lever, not the funnel.
+- **Go-forward plan: `docs/MASTER_PLAN_2026-07-20.md`** (prioritized funnel turnaround; supersedes the
+  action lists in the audit). Show rate is **0%** — fix that before raising budget, or every extra
+  dollar multiplies by zero.
+- **Dataset `4230021860577001` verified healthy 2026-07-20 — do NOT replace it.** `capi_events` holds
+  **8 rows lifetime** (2 test, 4 live-sent, 2 known main-pixel errors). It is not polluted, it is nearly
+  empty — the constraint is absence of signal, not bad signal. A new dataset would discard the only real
+  events + EMQ and restart learning for zero gain. New ad set spec + copy: `docs/AD_SET_PLAN_2026-07-20.md`.
 
 ---
 
@@ -327,7 +348,7 @@ project after granting hello@ Org Policy Admin; Workspace external Calendar shar
 |---|---|
 | No server Lead in Test Events | `META_CAPI_TOKEN` set + bound to `4230021860577001`? `capi` returns ok? |
 | Booking fails / "unavailable" | `VITE_SUPABASE_*` set? `slots`/`book` deployed? `availability` rows exist + in window? |
-| Calendar looks empty | check window (4h min / 7-day) + `availability` hours vs. now; Google freeBusy may be blocking |
+| Calendar looks empty | check window (4h min / 2-day) + `availability` hours vs. now; Google freeBusy may be blocking |
 | Low match quality / `fbp` blank | form sending fbc/fbp (same-origin cookies)? see `getAttribution` |
 | Preview site stuck building | /admin Retry (mints admin JWT); check `ANTHROPIC_API_KEY` credits + `site_status` |
 | GHL messages not firing | workflow Appointment-Created trigger on `GHL_CALENDAR_ID`? `book` created the GHL appt? Save-after-Publish? |

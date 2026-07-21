@@ -1,0 +1,37 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+YCbCr Matrix: TV.709
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Main,Montserrat,68,&H00FFFFFF,&H000000FF,&H33000000,&H33000000,-1,0,0,0,100,100,0,0,3,14,0,2,130,130,470,1
+Style: Money,Montserrat,68,&H0000FFFF,&H000000FF,&H33000000,&H33000000,-1,0,0,0,100,100,0,0,3,14,0,2,130,130,470,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,0:00:01.32,Main,,0,0,0,,Attention contractors
+Dialogue: 0,0:00:01.32,0:00:02.54,Main,,0,0,0,,your website is
+Dialogue: 0,0:00:02.54,0:00:03.90,Main,,0,0,0,,the first thing people see
+Dialogue: 0,0:00:03.90,0:00:05.46,Main,,0,0,0,,And if it's ugly and outdated
+Dialogue: 0,0:00:05.46,0:00:07.02,Main,,0,0,0,,they're gonna call someone else
+Dialogue: 0,0:00:07.02,0:00:08.60,Main,,0,0,0,,Hi, my name is Rhyan
+Dialogue: 0,0:00:08.70,0:00:09.86,Main,,0,0,0,,I own Ace Web Designers
+Dialogue: 0,0:00:09.86,0:00:10.74,Main,,0,0,0,,and I've been working with
+Dialogue: 0,0:00:10.74,0:00:12.12,Main,,0,0,0,,contractors for years now
+Dialogue: 0,0:00:12.12,0:00:13.92,Main,,0,0,0,,We build fast, clean,
+Dialogue: 0,0:00:13.92,0:00:15.46,Main,,0,0,0,,modern, mobile-friendly
+Dialogue: 0,0:00:15.46,0:00:16.86,Main,,0,0,0,,sites that work anywhere
+Dialogue: 0,0:00:16.86,0:00:18.52,Main,,0,0,0,,So what are you waiting for?
+Dialogue: 0,0:00:18.52,0:00:19.94,Main,,0,0,0,,Book down below
+Dialogue: 0,0:00:19.94,0:00:20.84,Money,,0,0,0,,for a FREE discovery call
+Dialogue: 0,0:00:20.84,0:00:21.60,Main,,0,0,0,,where we can show you
+Dialogue: 0,0:00:21.60,0:00:22.44,Main,,0,0,0,,a website design
+Dialogue: 0,0:00:22.44,0:00:23.70,Money,,0,0,0,,No strings attached
+Dialogue: 0,0:00:23.76,0:00:24.44,Money,,0,0,0,,No obligation
+Dialogue: 0,0:00:24.46,0:00:25.72,Money,,0,0,0,,You only pay if you love it
+Dialogue: 0,0:00:25.74,0:00:26.70,Money,,0,0,0,,There's nothing to lose
+Dialogue: 0,0:00:26.98,0:00:28.40,Main,,0,0,0,,We'll talk soon
