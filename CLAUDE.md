@@ -128,8 +128,18 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   (lead-time is the top no-show predictor); confirm + done screens name the concrete stake ("we're
   building your free homepage preview for this call"). Landing CTA scrolls to the FORM
   (`landing-contractors-form-container`), not the section heading; BookingSection renders the widget
-  above the what-to-expect copy. **Ad set stays optimized on Lead** (owner decision — never switch to
-  Schedule/ViewContent).
+  above the what-to-expect copy, with an opt-in `valueItems` panel beside it (lg+) that stacks BELOW
+  the form on mobile — form-first survives the two-column layout. **Ad set stays optimized on Lead**
+  (owner decision — never switch to Schedule/ViewContent).
+- **Proof row is trades-only** (`EXAMPLES` in `LandingContractors.tsx`): Dunn Construction's website +
+  the two trade social accounts we run (Luxury Makeover, 911 Local Plumbing) — both halves of the offer.
+  Restaurant clients (Conuco, Hot Pot One) were pulled 2026-07-21; they still lead `/work` +
+  `/socialmedia`, they were just the wrong proof for someone who clicked a contractor ad. Card images
+  are crops of the live TikTok **video grid, never the profile header** — those accounts are 198 and 55
+  followers, and cold ad traffic won't stop to read why that isn't the point; the views (519.2K, 71.3K)
+  and the client's $20,000+ contract are the honest, stronger numbers. Figures + the date they were
+  read live in `SocialMedia.tsx` — re-read them when stale, never nudge them upward. "5.0 on Google"
+  in the hero + footer links to the live listing; **no review count** — we don't have a verified one.
 - **Attribution persistence:** `getAttribution()` stores first-touch fbclid/fbc/utm in session+local
   storage (7-day TTL, key `awd_attribution`); `LandingContractors` calls it on mount so ad params are
   captured before any navigation loses them (3 of the first 5 leads had arrived without fbc).
