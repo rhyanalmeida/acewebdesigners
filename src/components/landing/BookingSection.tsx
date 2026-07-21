@@ -23,6 +23,10 @@ interface BookingSectionProps {
   whatToExpect?: string[]
   /** Soft scarcity microcopy rendered just above the calendar (no numbers). */
   scarcityNote?: React.ReactNode
+  /** Opt-in value panel beside the form (lg+) / below it (mobile). Omit and the
+   *  section renders exactly as it did before the prop existed. */
+  valueItems?: string[]
+  valueTitle?: string
   padding?: SectionPadding
 }
 
@@ -48,6 +52,8 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
       reminder,
       whatToExpect,
       scarcityNote,
+      valueItems,
+      valueTitle = "What you'll receive",
       padding = 'lg',
     },
     forwardedRef
@@ -83,12 +89,36 @@ const BookingSection = React.forwardRef<HTMLElement, BookingSectionProps>(
           </div>
         </div>
 
-        {/* Form first — the CTA drops visitors here; supporting copy reads below. */}
-        <div className="mt-8 bg-cream-50 border border-ink-900/15 shadow-lift p-3 sm:p-6 md:p-10">
-          <BookingWidget
-            calendarConfig={calendarConfig}
-            containerId={containerId}
-          />
+        {/* Form first — the CTA drops visitors here; supporting copy reads below.
+            The value panel is second in the DOM on purpose: on mobile it stacks
+            BELOW the form, so form-first order survives the two-column layout. */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+          <div className="bg-cream-50 border border-ink-900/15 shadow-lift p-3 sm:p-6 md:p-10">
+            <BookingWidget
+              calendarConfig={calendarConfig}
+              containerId={containerId}
+            />
+          </div>
+
+          {valueItems && valueItems.length > 0 && (
+            <div className="bg-cream-50 border border-ink-900/15 p-5 sm:p-6">
+              <p className="label-mono text-ink-700/70">{valueTitle}</p>
+              <ul className="mt-4 space-y-3">
+                {valueItems.map(item => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-2 text-sm sm:text-base text-ink-800 leading-relaxed"
+                  >
+                    <span
+                      aria-hidden
+                      className="mt-1.5 inline-block h-2 w-2 shrink-0 bg-signal-500"
+                    />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {scarcityNote && (

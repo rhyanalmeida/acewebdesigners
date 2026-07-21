@@ -98,7 +98,7 @@ const BlueprintReveal: React.FC<BlueprintRevealProps> = ({
           <div>
             <Eyebrow tone="inverted">Website + Social Media</Eyebrow>
             <GradientHeading level={2} size="lg" tone="inverted" className="mt-5" accent="that work together">
-              Two channels,
+              Two channels
             </GradientHeading>
             <p className="mt-5 text-base sm:text-lg text-cream-100/85 leading-relaxed max-w-xl">
               Your website turns clicks into booked jobs. Your social keeps you top-of-mind for the

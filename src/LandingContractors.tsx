@@ -30,31 +30,51 @@ import { fadeUpHero } from './lib/motion'
 // a live link, which is stronger proof than a quote anyway — it can be checked.
 // Previously two of these carried invented names ('Local Plumbing Co.', 'Trade
 // Specialist') attached to real clients' screenshots.
+// Trades only, because the ad sending traffic here is a trades ad. The row shows
+// BOTH halves of the offer: one contractor website, and the two trade social
+// accounts we actually run. It used to carry two restaurants (Conuco, Hot Pot
+// One) — real clients, real work, but the wrong proof for a contractor who just
+// clicked a contractor ad. They still lead /work and /socialmedia.
+//
+// Every figure below is read off the live account and is checkable via the link
+// on the card. Follower counts are deliberately absent from the SCREENSHOTS too
+// (they are crops of the video grid, not the profile header): the accounts are
+// small — 198 and 55 — and cold ad traffic will not stop to read why that is not
+// the point. The views and the client's contract value are the honest, stronger
+// numbers. See src/SocialMedia.tsx for the full figures and the date they were
+// read. If those go stale, re-read them; do not nudge them upward.
 const EXAMPLES = [
-  {
-    imageUrl: '/work/conuco.webp',
-    imageAlt: 'Conuco Takeout website — menu, online ordering and food photography',
-    quote:
-      'Ace Web Designers built an amazing website for my business! Working with Rhyan and Valerie was a great experience. They delivered a website that truly represents my restaurant.',
-    authorName: 'Pedro Dipre-Rojas — Conuco Takeout',
-    href: 'https://conucotakeout.com/',
-    rating: 5 as const,
-  },
   {
     imageUrl: '/work/dunn.webp',
     imageAlt: 'Dunn Construction website — project gallery and quote form',
     caption: 'Project gallery, service listings and a quote form that reaches the owner’s phone.',
-    authorName: 'Dunn Construction',
+    authorName: 'Dunn Construction — website',
     href: 'https://dunnconstructionma.com/',
+    linkLabel: 'Visit site',
   },
   {
-    imageUrl: '/work/hotpot.webp',
-    imageAlt: 'Hot Pot One website — menu system and online ordering',
-    caption: 'Menu system, online ordering and a mobile experience built for a phone in one hand.',
-    authorName: 'Hot Pot One',
-    href: 'https://hotpotone.net/',
+    imageUrl: '/work/luxury-makeover-social.webp',
+    imageAlt: 'Bathroom remodel videos we produce and post for Luxury Makeover',
+    caption:
+      'Bathroom remodel content we shoot, write and post. It booked the owner two jobs worth over $20,000.',
+    authorName: 'Luxury Makeover — social',
+    href: 'https://www.tiktok.com/@luxurymakeover_official',
+    linkLabel: 'See the account',
+  },
+  {
+    imageUrl: '/work/911-plumbing-social.webp',
+    imageAlt: 'Plumbing job videos we produce and post for 911 Local Plumbing',
+    caption:
+      'Plumbing jobs turned into posts, built from scratch. Top video: 71.3K views.',
+    authorName: '911 Local Plumbing — social',
+    href: 'https://www.tiktok.com/@911localplumbing',
+    linkLabel: 'See the account',
   },
 ]
+
+/** Public Google review listing. Used by the proof chips so the 5.0 can be checked
+ *  rather than just claimed. No review count is shown — we don't have a verified one. */
+const GOOGLE_REVIEWS_URL = 'https://share.google/w0mwRq1gix3xAbYkk'
 
 const FAQS = [
   {
@@ -211,8 +231,8 @@ function LandingContractors() {
               <div className="p-6 sm:p-8">
                 <div className="mx-auto max-w-3xl text-center">
                   <HeroReveal>
-                    <GradientHeading level={1} size="display" accent="for free to start">
-                      Get a website + social media that bring jobs in
+                    <GradientHeading level={1} size="display" accent="— free to start">
+                      Get a website + social media built to bring in more jobs
                     </GradientHeading>
                   </HeroReveal>
                   <motion.p
@@ -240,13 +260,22 @@ function LandingContractors() {
                     </a>
                   </motion.p>
 
-                  <div className="mt-5 flex items-center justify-center gap-3 text-sm text-ink-700">
-                    <div className="flex items-center gap-0.5 text-ink-900" aria-label="5 out of 5 stars">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
-                      ))}
-                    </div>
-                    <span className="font-medium text-ink-800">Rated 5.0 / 5 on Google</span>
+                  <div className="mt-5 flex items-center justify-center text-sm text-ink-700">
+                    <a
+                      href={GOOGLE_REVIEWS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 hover:text-signal-700"
+                    >
+                      <span className="flex items-center gap-0.5 text-ink-900" aria-label="5 out of 5 stars">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
+                        ))}
+                      </span>
+                      <span className="font-medium text-ink-800 underline decoration-ink-900/25 underline-offset-4 hover:decoration-signal-500">
+                        Rated 5.0 / 5 on Google
+                      </span>
+                    </a>
                   </div>
                 </div>
               </div>
@@ -255,7 +284,7 @@ function LandingContractors() {
         </section>
 
         <LandingExamples
-          eyebrow="Real contractor websites"
+          eyebrow="Real work for trades"
           heading="See the work"
           accent="we've done"
           examples={EXAMPLES}
@@ -274,12 +303,12 @@ function LandingContractors() {
         <Section tone="muted" padding="md" className="pb-4 sm:pb-6">
           <div className="max-w-2xl">
             <Eyebrow tone="brand">Who you'll actually talk to</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-5" accent="That's the whole company">
-              Two people.
+            <GradientHeading level={2} size="lg" className="mt-5" accent="Direct access.">
+              Small team.
             </GradientHeading>
             <p className="mt-5 text-base sm:text-lg text-ink-700 leading-relaxed">
-              A two-person team in Leominster, MA — 5.0 on Google. The person you talk to is the
-              person doing the work.
+              We're a two-person team based in Leominster, MA. You work directly with the people
+              designing your website and managing your social media.
             </p>
           </div>
 
@@ -288,13 +317,13 @@ function LandingContractors() {
               src="/team/rhyan.webp"
               alt="Rhyan, who designs and builds the sites at Ace Web Designers"
               name="Rhyan"
-              role="Designs and builds the sites, and runs the calls."
+              role="Designs your website, leads strategy and handles your calls."
             />
             <TeamMember
               src="/team/valerie.webp"
               alt="Valerie, who runs all the social media at Ace Web Designers"
               name="Valerie"
-              role="Does every bit of the social."
+              role="Plans, creates and manages your social media."
             />
           </div>
         </Section>
@@ -308,6 +337,12 @@ function LandingContractors() {
           sub="Pick a 15-minute slot. We'll cover your business, jobs, and service area, then send a free homepage mockup AND a sample social post within 24 hours."
           calendarConfig={CONTRACTOR_CALENDAR}
           containerId="landing-contractors-form-container"
+          valueItems={[
+            'Free homepage concept',
+            'Sample social post',
+            'Clear pricing',
+            'No obligation',
+          ]}
           conversionType="free_design_contractors"
           trackerId="contractor-conversion-tracker"
           whatToExpect={[
@@ -356,10 +391,15 @@ function LandingContractors() {
         tagline="Websites + social media built for contractors and home service pros across the United States."
         showTerms
         extras={
-          <span className="label-mono inline-flex items-center gap-2 border border-cream-50/25 text-cream-100/80 px-3 py-1.5">
+          <a
+            href={GOOGLE_REVIEWS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="label-mono inline-flex items-center gap-2 border border-cream-50/25 text-cream-100/80 px-3 py-1.5 hover:border-cream-50/50 hover:text-cream-50"
+          >
             <Star className="h-3 w-3 fill-current" aria-hidden />
             5.0 on Google
-          </span>
+          </a>
         }
       />
     </div>

@@ -18,6 +18,9 @@ export interface LandingExample {
   caption?: string
   /** Live URL, so the work can be verified rather than just claimed. */
   href?: string
+  /** Overrides the link text. Defaults to 'Visit site' — set it when the target
+   *  is not a website (e.g. a social account we run). */
+  linkLabel?: string
   rating?: 1 | 2 | 3 | 4 | 5
 }
 
@@ -92,7 +95,7 @@ const LandingExamples: React.FC<LandingExamplesProps> = ({
                     rel="noopener noreferrer"
                     className="label-mono text-signal-600 underline decoration-signal-300 underline-offset-4 hover:text-signal-700"
                   >
-                    Visit site
+                    {ex.linkLabel ?? 'Visit site'}
                   </a>
                 )}
               </div>

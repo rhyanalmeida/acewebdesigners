@@ -76,7 +76,7 @@ export const ROUTE_META: Record<string, RouteMeta> = {
   '/contractorlanding': baseMeta('/contractorlanding', {
     title: 'Contractor Website + Social Media | Free Design First | Ace Web Designers',
     description:
-      'Websites and social media that bring jobs in for contractors and home service pros. Free homepage design + first week of posts free. Same-day launches available.',
+      'Websites and social media built to bring in more jobs for contractors and home service pros. Free homepage design + first week of posts free. Same-day launches available.',
     keywords:
       'contractor website design, contractor social media, home service website, construction website, plumber website, electrician website, free contractor website design',
   }),
