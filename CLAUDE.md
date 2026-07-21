@@ -86,6 +86,17 @@ client_ip/client_user_agent/landing_url/utm (jsonb). `utm` captures the Ads Mana
 `contacts.ts` + `attribution.ts`); every downstream event replays it. Match *quality* comes from
 user_data (email/phone/fbc/fbp/ip/ua); ad ids are attribution context in custom_data.
 
+**CAPI `user_data` — all 13 fields Meta can use for us are already sent** on all four events
+(`em ph fn ln ct st zp country external_id fbc fbp client_ip_address client_user_agent`; `external_id`
+= contact uuid). `lead`/`book` pass them inline, `result`/`stripe-webhook` via
+`loadAppointmentIdentity`. Not sent because we genuinely lack them: `ge`/`db` (never collected),
+`lead_id`/`fb_login_id`/`madid` (N/A — no Instant Forms, no FB Login, no app). **`ct`/`st`/`zp` are
+wired but arrive empty** — the contractor gate form collects name/email/phone only (deliberate: the
+old 6-field gate converted at 0.2%). Don't backfill them from IP — inferred values mismatch Meta's
+profile data and LOWER match quality. Phones are normalized to digits **with the country code**
+(bare 10-digit US numbers get a leading `1`, per Meta's spec) — before 2026-07-21 they were hashed
+without it, so phone matched nothing.
+
 **Test mode:** `test: true` flags the appointment + its `capi_events` `is_test`, routes every
 downstream event (Lead AND later CR/Purchase/Stripe) to Meta **Test Events**, skips GCal + GHL +
 generate-site, and is excluded from all `/admin` stats (badged `TEST`). `META_TEST_EVENT_CODE` is read
@@ -248,17 +259,26 @@ stay in the Ace Web Designers portfolio.)
   languages 0 (no Spanish dub of Rhyan's voice), browser add-ons None (an Instant Form default would
   have bypassed our scheduler + CAPI). *Meta's "Essential enhancements (5/5)" — incl. Relevant
   comments and Enhance CTA — cannot be disabled.*
-  **Verified ACTIVE + delivering 2026-07-21** ($11.80 / 149 impr / 28 video views on day one).
+  **ACTIVE (effective ACTIVE) verified 2026-07-21**, but `meta-ads:status` reports **$0.00 / 0 impr /
+  0 clicks** for it — an earlier note here claimed "$11.80 / 149 impr day one". Treat delivery as
+  UNCONFIRMED until insights show spend; re-check before concluding the creative is being tested.
   ⚠️ It launched **without a `url_tags` UTM template** (the paused old ad has one) — so its clicks
   arrive with only `source=landing-contractors` and `withDefaultAdIds` is what attributes them.
+  Setting the template in Ads Manager → Tracking is the durable fix, but it edits a creative mid
+  learning phase — owner decision, not taken.
 - Ad **"funny hook"** id `120242709687350259` — **PAUSED 2026-07-21** (replaced). All other
   campaigns/ad sets stay PAUSED. The **Restaurant Builder** campaign/ad set/ad sit as 3 unpublished
   drafts in this account — publishing from Ads Manager can sweep them live; leave them alone.
 - Destination `https://acewebdesigners.com/contractorlanding?source=landing-contractors` (+ UTM template
-  appended at click). `_shared/attribution.ts` `withDefaultAdIds` stamps known campaign/adset/ad ids on
-  `source=landing-contractors` URLs lacking utm (real params win when present). **Its `CONTRACTOR_AD_DEFAULTS`
-  must name whichever ad is ACTIVE** — it was still pointing at "funny hook" after the 7/21 relaunch,
-  which would have credited every new lead to the paused creative. Re-check after any relaunch.
+  appended at click). `_shared/attribution.ts` `withDefaultAdIds` back-fills `source=landing-contractors`
+  URLs that arrive with no utm; real params always win when present (unit-tested in
+  `_shared/attribution.test.ts`). **`CONTRACTOR_AD_DEFAULTS` deliberately holds ONLY what cannot go
+  stale** — `utm_source` + `campaign_id` + `adset_id` + a `utm_fallback:'1'` marker. No `ad_id` and no
+  name fields: the creative rotates on every relaunch and names rot on rename, and a stale `ad_id`
+  silently credits new leads to a PAUSED ad (which is what happened after the 7/21 relaunch). Ad-level
+  attribution rides on fbc/fbclid anyway. Find fallback-attributed rows with
+  `select * from contacts where utm->>'utm_fallback' = '1'`; `npm run meta-ads:status` prints
+  `url_tags: MISSING` per ad and is the canary for the underlying gap.
 - The old "spend / 0 leads" bug was the ad set optimizing a pixel the page never fired. Keep the ad set
   bound to the pixel the page fires.
 - `META_ADS_TOKEN` (`.env.local`) is **READ-ONLY** — can't create/update ads/creatives/pixels; do that
@@ -374,7 +394,8 @@ project after granting hello@ Org Policy Admin; Workspace external Calendar shar
 4. **Result form:** /admin → Showed → `CompleteRegistration`; Purchase + upfront/recurring → `Purchase`.
    These are `system_generated` (offline) — verify in Events Manager → live Activity / the CAPI log,
    NOT Test Events.
-5. **Regression:** `npm run build`, `npm run lint`, `npm run test`.
+5. **Regression:** `npm run build`, `npm run lint`, `npm run test`. Vitest also covers pure
+   `supabase/functions/_shared/*.test.ts` modules (no Deno APIs in them) — see `vitest.config.ts`.
 
 # Troubleshooting
 

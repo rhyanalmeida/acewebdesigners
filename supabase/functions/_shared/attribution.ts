@@ -63,26 +63,31 @@ export function mergeAttribution(
 }
 
 /**
- * The live contractor ad's URL carries only `source=landing-contractors` until
- * its UTM template is published in Ads Manager, so those clicks would arrive
+ * The live contractor ad's URL carries only `source=landing-contractors` when its
+ * creative has no url_tags template set in Ads Manager, so those clicks arrive
  * with no campaign context. When that marker is present and nothing else was
- * captured, stamp the known ids of the one running ad. Real UTM params, once the
- * template is live, are present and win — this then never fires.
+ * captured, stamp what we can. Real UTM params, when a template IS live, are
+ * present and win — this then never fires.
  *
- * ⚠️ MUST track whichever ad is ACTIVE. The 7/21 captioned ad launched WITHOUT a
- * url_tags template (verified via the Marketing API), so this fallback is what
- * attributes its leads — left pointing at the paused "funny hook" it would have
- * credited every new lead to the old creative. Re-check with `npm run meta-ads:status`
- * after any relaunch.
+ * Deliberately contains ONLY structurally stable values: the campaign and ad set
+ * are long-lived, so their ids cannot go stale. Everything that rots is omitted
+ * on purpose:
+ *   - `ad_id` — the creative rotates on every relaunch. A snapshot here silently
+ *     credits new leads to a PAUSED ad, which is strictly worse than no ad id.
+ *     Ad-level attribution inside Meta rides on fbc/fbclid regardless; these ids
+ *     are reporting context (see the header note above).
+ *   - `utm_medium` / `utm_campaign` / `utm_content` — these are *names*, which
+ *     rot on any rename. The ids resolve to current names via the Marketing API.
+ *
+ * `utm_fallback` marks every row attributed this way, so they are one SQL query
+ * away (`where utm->>'utm_fallback' = '1'`). `npm run meta-ads:status` reports
+ * `url_tags: MISSING` per ad and is the standing canary for the underlying gap.
  */
 const CONTRACTOR_AD_DEFAULTS: Record<string, string> = {
   utm_source: 'Facebook',
-  utm_medium: 'Contractors — US — Advantage+ Audience — $20/day - Copy',
-  utm_campaign: 'Free Website Offer For Contractors (6/1/26)',
-  utm_content: 'Rhyan captioned — free site offer (7/21/26)',
   campaign_id: '120241554190170259',
   adset_id: '120242709687340259',
-  ad_id: '120247255043930259',
+  utm_fallback: '1',
 }
 
 export function withDefaultAdIds(

@@ -72,7 +72,14 @@ async function sha256(v: string): Promise<string> {
 }
 
 const normEmail = (v: string) => v.trim().toLowerCase()
-const normPhone = (v: string) => v.replace(/[^0-9]/g, '') // digits only, no "+"
+// Digits only, no "+". Meta's spec requires the COUNTRY CODE be included even
+// when all data is single-country — a bare 10-digit US number hashes to a value
+// Meta can't match, so phone contributed nothing to EMQ. Bare 10-digit numbers
+// get the US "1"; anything already carrying a country code is left alone.
+const normPhone = (v: string) => {
+  const digits = v.replace(/[^0-9]/g, '')
+  return digits.length === 10 ? `1${digits}` : digits
+}
 const cap = (s: string, n = 256) => (typeof s === 'string' ? s.slice(0, n) : '')
 
 function datasetId(dataset: Dataset): string {

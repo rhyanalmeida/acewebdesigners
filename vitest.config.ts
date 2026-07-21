@@ -9,7 +9,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // _shared Edge modules are pure TS (no Deno APIs), so their tests run here
+    // rather than needing a separate Deno test runner.
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'supabase/functions/_shared/*.{test,spec}.ts'],
     exclude: [
       'node_modules/**',
       'dist/**',
