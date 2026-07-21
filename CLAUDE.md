@@ -28,6 +28,10 @@ module (`_shared/ghl.ts`) so they can be cut later.
 
 > First-time Supabase: `npx supabase link --project-ref dwsmrruzufqpopdzlszw` (needs `SUPABASE_ACCESS_TOKEN`).
 > Netlify deploy token = `NETLIFY_AUTH_TOKEN` from `supabase/.env` (`export` it first).
+> ⚠️ **Netlify's production branch is `master`, but work happens on `redesign/marketing-site`** — so
+> `git push` does NOT ship the frontend. Any `src/` change needs the direct deploy command above.
+> Verify after: fetch `https://acewebdesigners.com/` → the `assets/js/index-*.js` it references →
+> grep for a string you just added.
 
 ## Engineering standards
 
