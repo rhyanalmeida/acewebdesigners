@@ -259,16 +259,27 @@ stay in the Ace Web Designers portfolio.)
   languages 0 (no Spanish dub of Rhyan's voice), browser add-ons None (an Instant Form default would
   have bypassed our scheduler + CAPI). *Meta's "Essential enhancements (5/5)" — incl. Relevant
   comments and Enhance CTA — cannot be disabled.*
-  **ACTIVE (effective ACTIVE) verified 2026-07-21**, but `meta-ads:status` reports **$0.00 / 0 impr /
-  0 clicks** for it — an earlier note here claimed "$11.80 / 149 impr day one". Treat delivery as
-  UNCONFIRMED until insights show spend; re-check before concluding the creative is being tested.
-  ⚠️ It launched **without a `url_tags` UTM template** (the paused old ad has one) — so its clicks
-  arrive with only `source=landing-contractors` and `withDefaultAdIds` is what attributes them.
-  Setting the template in Ads Manager → Tracking is the durable fix, but it edits a creative mid
-  learning phase — owner decision, not taken.
+  **ACTIVE, delivering, verified 2026-07-21.** Its `$0.00 / 0 impr` in `meta-ads:status` is a
+  REPORTING-WINDOW artifact, not a delivery problem — the ad launched 7/21 and both the script's 7d
+  window and Ads Manager's default `Last 30 days` ended 7/20. Widen the date range before concluding
+  an ad isn't delivering.
+  ✅ **`url_tags` UTM template SET 2026-07-21** (was missing at launch) — same template as the paused
+  ad, applied via Ads Manager → Tracking → URL parameters:
+  `utm_source=Facebook&utm_medium={{adset.name}}&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&campaign_id={{campaign.id}}&adset_id={{adset.id}}&ad_id={{ad.id}}`
+  Publishing that edit puts the ad back through review (`effective: IN_PROCESS`, "Processing" in the
+  UI) for a while — expected, not a fault. Every param it appends is one `ATTRIBUTION_KEYS` parses, so
+  new clicks land with full real utm and `withDefaultAdIds` should now never fire. Meta snapshots the
+  campaign/adset/ad NAMES at publish and keeps using them after a rename — another reason ids beat
+  names.
 - Ad **"funny hook"** id `120242709687350259` — **PAUSED 2026-07-21** (replaced). All other
   campaigns/ad sets stay PAUSED. The **Restaurant Builder** campaign/ad set/ad sit as 3 unpublished
   drafts in this account — publishing from Ads Manager can sweep them live; leave them alone.
+  ⚠️ **Any Ads Manager edit shares one account-wide draft queue with those 3.** The toolbar
+  "Review and publish (N)" dialog is the control point: it has PER-ITEM checkboxes across three tabs
+  (Campaign / Ad set / Ads). Uncheck the Restaurant campaign — the ad set cascades — and its ad, so
+  the tabs read `0 of 1` / `0 of 1` / `1 of 2` before clicking Publish. Verified working 2026-07-21:
+  the tracking edit shipped and the counter returned to `(3)` with the drafts intact. Do NOT use the
+  ad editor's own inline Publish (scope unclear), and leave "Try to publish items with errors" OFF.
 - Destination `https://acewebdesigners.com/contractorlanding?source=landing-contractors` (+ UTM template
   appended at click). `_shared/attribution.ts` `withDefaultAdIds` back-fills `source=landing-contractors`
   URLs that arrive with no utm; real params always win when present (unit-tested in
@@ -278,7 +289,9 @@ stay in the Ace Web Designers portfolio.)
   silently credits new leads to a PAUSED ad (which is what happened after the 7/21 relaunch). Ad-level
   attribution rides on fbc/fbclid anyway. Find fallback-attributed rows with
   `select * from contacts where utm->>'utm_fallback' = '1'`; `npm run meta-ads:status` prints
-  `url_tags: MISSING` per ad and is the canary for the underlying gap.
+  `url_tags: MISSING` per ad and is the canary for the underlying gap. With the template now SET on
+  the live ad, the fallback is a safety net that should never fire — a row carrying `utm_fallback`
+  means an ad is running without its template again.
 - The old "spend / 0 leads" bug was the ad set optimizing a pixel the page never fired. Keep the ad set
   bound to the pixel the page fires.
 - `META_ADS_TOKEN` (`.env.local`) is **READ-ONLY** — can't create/update ads/creatives/pixels; do that
