@@ -160,6 +160,11 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   above the what-to-expect copy, with an opt-in `valueItems` panel beside it (lg+) that stacks BELOW
   the form on mobile — form-first survives the two-column layout. **Ad set stays optimized on Lead**
   (owner decision — never switch to Schedule/ViewContent).
+- **Message-match pass (2026-07-21, deployed):** hero mirrors the live ad's promise — heading names
+  contractors ("Contractors: we build your website first — before you pay a dollar"), sub sells the
+  built-before-the-call homepage; BookingSection moved ABOVE the Team strip (order: hero → examples →
+  blueprint → booking → team → FAQ), cutting ~1 mobile screen off ad-click → form. Hold further page
+  edits until the new ad's 14-day read (~2026-08-04) so the creative gets an unconfounded measure.
 - **Proof row is trades-only** (`EXAMPLES` in `LandingContractors.tsx`): Dunn Construction's website +
   the two trade social accounts we run (Luxury Makeover, 911 Local Plumbing) — both halves of the offer.
   Restaurant clients (Conuco, Hot Pot One) were pulled 2026-07-21; they still lead `/work` +
@@ -313,6 +318,14 @@ stay in the Ace Web Designers portfolio.)
   **8 rows lifetime** (2 test, 4 live-sent, 2 known main-pixel errors). It is not polluted, it is nearly
   empty — the constraint is absence of signal, not bad signal. A new dataset would discard the only real
   events + EMQ and restart learning for zero gain. New ad set spec + copy: `docs/AD_SET_PLAN_2026-07-20.md`.
+- **1-vs-2 lead gap explained (2026-07-21):** DB has 2 server Leads (`events_received:1` both), Meta
+  insights count exactly 1 (`lead:1` on 7/09 only; 7/10 shows nothing). Both leads had full
+  fbc/fbp/phone/utm. The unattributed one (Sean, 7/10) differs from the attributed one (Eric, 7/09,
+  Facebook-iOS `Iw…` click ID) in three ways: **Instagram in-app click with a `PA…`-prefixed click ID**,
+  a **Starlink CGNAT IP** (geo unreliable), and pre-fix phone hashing (no country code — affected both).
+  Received-but-unattributed, most probably the IG `PA…` click ID failing Meta's ad-click match with the
+  weaker fallback signals unable to rescue it. **Not a code bug — do not re-fire events.** Both of
+  Sean's events (Lead AND Schedule) went unattributed; both of Eric's attributed.
 
 ---
 
@@ -323,7 +336,12 @@ stay in the Ace Web Designers portfolio.)
   (read-only), `META_AD_ACCOUNT_ID`.
 - **Supabase Edge secrets** (`supabase/.env` → `supabase secrets set`; template `supabase/.env.example`):
   `META_CAPI_TOKEN`, `META_DATASET_ID` (=4230021860577001), `META_DATASET_ID_MAIN`,
-  `META_DATASET_ID_RESTAURANT`, `META_TEST_EVENT_CODE` (while verifying), `CAPI_INTERNAL_SECRET`,
+  `META_DATASET_ID_RESTAURANT`, `META_TEST_EVENT_CODE` (= `TEST20757`, the dataset's real Test Events
+  code — deployed + in local `supabase/.env`, both synced 2026-07-21; test-mode events now actually
+  reach the Test Events tab), `CAPI_INTERNAL_SECRET` (rotated 2026-07-21 — deployed and local
+  `supabase/.env` match, verified via `capi` 200 + events_received. The old deployed value was
+  unrecoverable: Supabase stores secrets write-only, dashboard/CLI expose only sha256 digests.
+  ⚠️ Never run `secrets set --env-file` if any local key is empty — it overwrites the deployed value),
   `GHL_API_TOKEN` (PIT) / `GHL_LOCATION_ID` / `GHL_CALENDAR_ID` / `GHL_ASSIGNED_USER_ID` /
   `GHL_CUSTOM_FIELD_IDS` (JSON id map) / `GHL_INBOUND_WEBHOOK_URL` + `GHL_LEGACY_WEBHOOK`,
   `GOOGLE_SERVICE_ACCOUNT_B64` / `GOOGLE_CALENDAR_ID_CONTRACTOR` / `_MAIN`, `STRIPE_SECRET_KEY` /

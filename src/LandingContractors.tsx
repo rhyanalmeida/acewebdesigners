@@ -231,16 +231,16 @@ function LandingContractors() {
               <div className="p-6 sm:p-8">
                 <div className="mx-auto max-w-3xl text-center">
                   <HeroReveal>
-                    <GradientHeading level={1} size="display" accent="— free to start">
-                      Get a website + social media built to bring in more jobs
+                    <GradientHeading level={1} size="display" accent="— before you pay a dollar">
+                      Contractors: we build your website first
                     </GradientHeading>
                   </HeroReveal>
                   <motion.p
                     className="mt-5 text-lg sm:text-xl text-ink-800 leading-relaxed mx-auto max-w-xl"
                     variants={fadeUpHero}
                   >
-                    We design your homepage <strong>and</strong> your first week of social posts — free.
-                    Pay only if you love it.
+                    Book a 15-minute call and we'll have a free homepage built for your business before
+                    we talk — plus your first week of social posts. Pay only if you love it.
                   </motion.p>
 
                   <HeroReveal className="mt-7 flex flex-col sm:flex-row justify-center gap-3">
@@ -293,41 +293,6 @@ function LandingContractors() {
 
         <BlueprintReveal onCta={scrollToBooking} />
 
-        {/* ── TEAM STRIP — the two real faces right before the ask ───────────────
-            Cold ad traffic doesn't know us; the portraits (real, same ones as the
-            About page) do the trust work the removed sections used to. Kept at
-            identifier scale on purpose — blown up they read as a corporate team
-            page. No invented facts or quotes. */}
-        {/* pb trimmed: BookingSection below shares the muted ground, so its own
-            top padding provides the breathing room — full md padding doubles up. */}
-        <Section tone="muted" padding="md" className="pb-4 sm:pb-6">
-          <div className="max-w-2xl">
-            <Eyebrow tone="brand">Who you'll actually talk to</Eyebrow>
-            <GradientHeading level={2} size="lg" className="mt-5" accent="Direct access.">
-              Small team.
-            </GradientHeading>
-            <p className="mt-5 text-base sm:text-lg text-ink-700 leading-relaxed">
-              We're a two-person team based in Leominster, MA. You work directly with the people
-              designing your website and managing your social media.
-            </p>
-          </div>
-
-          <div className="mt-8 grid gap-8 sm:grid-cols-2 max-w-3xl">
-            <TeamMember
-              src="/team/rhyan.webp"
-              alt="Rhyan, who designs and builds the sites at Ace Web Designers"
-              name="Rhyan"
-              role="Designs your website, leads strategy and handles your calls."
-            />
-            <TeamMember
-              src="/team/valerie.webp"
-              alt="Valerie, who runs all the social media at Ace Web Designers"
-              name="Valerie"
-              role="Plans, creates and manages your social media."
-            />
-          </div>
-        </Section>
-
         <BookingSection
           ref={bookingFormRef}
           padding="md"
@@ -363,6 +328,40 @@ function LandingContractors() {
             </>
           }
         />
+
+        {/* ── TEAM STRIP — the two real faces right after the ask ────────────────
+            Moved below BookingSection 2026-07-21 to cut the ad-click → form distance
+            by a screen; the portraits (real, same ones as the About page) now back up
+            the booking decision for anyone who scrolled past without converting.
+            Kept at identifier scale on purpose — blown up they read as a corporate
+            team page. No invented facts or quotes. */}
+        <Section tone="muted" padding="md">
+          <div className="max-w-2xl">
+            <Eyebrow tone="brand">Who you'll actually talk to</Eyebrow>
+            <GradientHeading level={2} size="lg" className="mt-5" accent="Direct access.">
+              Small team.
+            </GradientHeading>
+            <p className="mt-5 text-base sm:text-lg text-ink-700 leading-relaxed">
+              We're a two-person team based in Leominster, MA. You work directly with the people
+              designing your website and managing your social media.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-8 sm:grid-cols-2 max-w-3xl">
+            <TeamMember
+              src="/team/rhyan.webp"
+              alt="Rhyan, who designs and builds the sites at Ace Web Designers"
+              name="Rhyan"
+              role="Designs your website, leads strategy and handles your calls."
+            />
+            <TeamMember
+              src="/team/valerie.webp"
+              alt="Valerie, who runs all the social media at Ace Web Designers"
+              name="Valerie"
+              role="Plans, creates and manages your social media."
+            />
+          </div>
+        </Section>
 
         <LandingFaq
           eyebrow="Questions"
