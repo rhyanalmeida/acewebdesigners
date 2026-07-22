@@ -27,6 +27,8 @@ import { admin } from '../_shared/supabaseAdmin.ts'
 import { ghlUpdateContactFields } from '../_shared/ghl.ts'
 import { appendEventDescription } from '../_shared/google.ts'
 
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 interface QualifyBody {
@@ -124,6 +126,28 @@ Deno.serve(async (req: Request) => {
     if (appt.gcal_event_id) await appendEventDescription(cal, appt.gcal_event_id as string, summary)
   } catch (err) {
     console.error('[qualify] calendar append failed', err)
+  }
+
+  // ── 6) regenerate the sales brief with the new qualifying signal ────────────
+  // force:true overwrites the booking-time brief; the closer always sees the
+  // enriched version. Fire-and-forget — a failed brief never fails this request.
+  if (Deno.env.get('ANTHROPIC_API_KEY')) {
+    try {
+      const trigger = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-brief`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        },
+        body: JSON.stringify({ appointmentId, force: true }),
+      }).then(
+        (r) => r.body?.cancel(),
+        (e) => console.error('[qualify] generate-brief trigger failed', e),
+      )
+      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(trigger)
+    } catch (err) {
+      console.error('[qualify] generate-brief queue failed', err)
+    }
   }
 
   console.log(`[qualify] saved for appointment=${appointmentId} — ${summary}`)

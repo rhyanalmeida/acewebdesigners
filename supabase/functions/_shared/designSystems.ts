@@ -320,6 +320,24 @@ export const DEFAULT_DESIGN_SYSTEMS: DesignSystem[] = [
 
 // ── Selection ────────────────────────────────────────────────────────────────
 
+/**
+ * Loose trade matching shared by design-system selection AND niche-playbook
+ * selection (nichePlaybooks.ts), so both resolve a booking's trade the same way.
+ * A tag matches when: it's a whole word of the trade (handles short tags like
+ * "bar"/"it"/"ev" without matching mid-word), OR — for tags of 4+ chars — the
+ * trade contains the tag phrase, or the tag contains the (4+ char) trade.
+ */
+export function matchesTrade(tags: string[], trade: string | undefined | null): boolean {
+  const t = (trade ?? '').toLowerCase().trim()
+  if (!t) return false
+  const words = t.split(/[^a-z]+/).filter(Boolean)
+  return tags.some(
+    (tag) =>
+      words.includes(tag) ||
+      (tag.length >= 4 && (t.includes(tag) || (t.length >= 4 && tag.includes(t)))),
+  )
+}
+
 /** Deterministic 32-bit djb2 hash — stable across isolates and runs (no RNG). */
 function hash(s: string): number {
   let h = 5381
@@ -349,16 +367,8 @@ export function selectDesignSystem(
   trade?: string | null,
 ): DesignSystem {
   const pool0 = systems.length ? systems : DEFAULT_DESIGN_SYSTEMS
-  const t = (trade ?? '').toLowerCase().trim()
-  const words = t.split(/[^a-z]+/).filter(Boolean)
-  // A tag matches when: it's a whole word of the trade (handles short tags like
-  // "bar"/"it"/"ev" without matching mid-word), OR — for tags of 4+ chars — the
-  // trade contains the tag phrase, or the tag contains the (4+ char) trade.
-  const tagMatches = (tag: string): boolean =>
-    words.includes(tag) ||
-    (tag.length >= 4 && (t.includes(tag) || (t.length >= 4 && tag.includes(t))))
   const universal = pool0.filter((d) => d.trades.length === 0)
-  const matched = t ? pool0.filter((d) => d.trades.some(tagMatches)) : []
+  const matched = pool0.filter((d) => matchesTrade(d.trades, trade))
   // dedup while preserving order: matched (trade-fit) first, then universal
   const pool = matched.length
     ? [...new Map([...matched, ...universal].map((d) => [d.id, d])).values()]

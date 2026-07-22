@@ -60,6 +60,7 @@ export interface ApptContact {
 }
 
 export type SiteStatus = 'queued' | 'generating' | 'deployed' | 'failed' | 'deleted'
+export type BriefStatus = 'queued' | 'generating' | 'ready' | 'failed'
 export interface Appt {
   id: string
   start_ts: string
@@ -81,6 +82,10 @@ export interface Appt {
   site_status?: SiteStatus | null
   site_error?: string | null
   site_generated_at?: string | null
+  sales_brief?: string | null
+  brief_status?: BriefStatus | null
+  brief_error?: string | null
+  brief_generated_at?: string | null
   updated_at?: string | null
   contacts?: ApptContact | null
 }
@@ -248,6 +253,18 @@ export async function retrySiteGeneration(appointmentId: string): Promise<{ ok: 
   })
   if (error) {
     const { message } = await errorMessage(error, 'Could not re-queue site build')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}
+
+/** (Re)generate the pre-meeting sales brief for an appointment (generate-brief fn). */
+export async function regenerateBrief(appointmentId: string): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', {
+    body: { action: 'regenerateBrief', appointmentId },
+  })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not start the brief')
     throw new Error(message)
   }
   return data as { ok: boolean }

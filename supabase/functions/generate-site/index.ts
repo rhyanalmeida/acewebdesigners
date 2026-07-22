@@ -43,6 +43,12 @@ import {
   renderArtDirection,
   selectDesignSystem,
 } from '../_shared/designSystems.ts'
+import {
+  FALLBACK_PLAYBOOK,
+  type NichePlaybook,
+  renderPlaybookForPrompt,
+  selectNichePlaybook,
+} from '../_shared/nichePlaybooks.ts'
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
@@ -84,7 +90,7 @@ URL pattern: https://images.unsplash.com/photo-<id>?auto=format&fit=crop&w=1600&
 // (renderArtDirection), so every generated site is visually unique. The shared
 // page ingredients (hero, marquee, stat band, service cards, splits, CTA band,
 // footer) stay required in the STAGES instructions; the art direction restyles them.
-function buildSystemPrompt(ds: DesignSystem): string {
+function buildSystemPrompt(ds: DesignSystem, pb: NichePlaybook): string {
   return `You are an elite web designer and front-end developer producing a preview website that will be shown to a small local business owner in a sales meeting to win their business. Quality bar: the owner should think "this looks better than sites I'd pay thousands for" and find it hard to say no. The benchmark is a $10k agency build: rich, confident, deliberate — never a flat template.
 
 OUTPUT CONTRACT — follow exactly:
@@ -101,6 +107,8 @@ OUTPUT CONTRACT — follow exactly:
 ${PHOTO_LIBRARY}
 
 ${renderArtDirection(ds)}
+
+${renderPlaybookForPrompt(pb)}
 
 MOTION CRAFT — motion is part of the quality bar (vanilla only, GPU-friendly transform/opacity, ALWAYS respect prefers-reduced-motion):
 - Execute this style's MOTION SIGNATURE above as the memorable moments; keep everything smooth and intentional, never janky or gratuitous.
@@ -141,6 +149,27 @@ async function resolveDesignSystem(
     designSystemById(systems, styleOverride) ??
     selectDesignSystem(systems, appt.id, appt.contacts?.business_type)
   )
+}
+
+/** Load the matched niche playbook for trade-aware copy guidance. Never blocks a build. */
+async function resolveNichePlaybook(
+  supa: ReturnType<typeof admin>,
+  trade: string | null | undefined,
+): Promise<NichePlaybook> {
+  try {
+    const { data, error } = await supa
+      .from('niche_playbooks')
+      .select(
+        'id, display_name, trades, how_customers_buy, must_have_site_features, credibility_levers, pitch_angles, upsell_ladder, common_objections, pricing, sources, researched_at',
+      )
+      .eq('active', true)
+      .order('sort', { ascending: true })
+      .order('id', { ascending: true })
+    if (error || !data) return FALLBACK_PLAYBOOK
+    return selectNichePlaybook(data as unknown as NichePlaybook[], trade) ?? FALLBACK_PLAYBOOK
+  } catch {
+    return FALLBACK_PLAYBOOK
+  }
 }
 
 interface StageSpec {
@@ -218,6 +247,8 @@ interface Body {
   style?: string
   /** Resolved design system, threaded internally to stages 2-3 so they don't re-query/re-pick. */
   ds?: DesignSystem
+  /** Resolved niche playbook, threaded internally like `ds`. */
+  pb?: NichePlaybook
 }
 
 interface ApptRow {
@@ -256,6 +287,7 @@ async function generateStage(
   appt: ApptRow,
   priorFiles: Record<string, string>,
   ds: DesignSystem,
+  pb: NichePlaybook,
 ): Promise<Record<string, string>> {
   const spec = STAGES[stage]
   let userMsg = `${businessBrief(appt)}\n${spec.instruction}`
@@ -271,7 +303,7 @@ async function generateStage(
   const stream = anthropic.messages.stream({
     model: MODEL,
     max_tokens: spec.maxTokens,
-    system: buildSystemPrompt(ds),
+    system: buildSystemPrompt(ds, pb),
     messages: [{ role: 'user', content: userMsg }],
   })
   const msg = await stream.finalMessage()
@@ -292,6 +324,7 @@ async function invokeNextStage(
   stage: number,
   files: Record<string, string>,
   ds: DesignSystem,
+  pb: NichePlaybook,
 ): Promise<void> {
   const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-site`, {
     method: 'POST',
@@ -299,7 +332,7 @@ async function invokeNextStage(
       'content-type': 'application/json',
       'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     },
-    body: JSON.stringify({ appointmentId, stage, files, ds }),
+    body: JSON.stringify({ appointmentId, stage, files, ds, pb }),
   })
   if (!resp.ok) throw new Error(`stage ${stage} handoff failed (${resp.status}) ${(await resp.text()).slice(0, 150)}`)
   await resp.body?.cancel()
@@ -311,13 +344,15 @@ async function runStage(
   priorFiles: Record<string, string>,
   threadedDs?: DesignSystem,
   styleOverride?: string,
+  threadedPb?: NichePlaybook,
 ): Promise<void> {
   const supa = admin()
   const save = (fields: Record<string, unknown>) =>
     supa.from('appointments').update(fields).eq('id', appt.id)
 
-  // Stages 2-3 receive the resolved style; stage 1 resolves it (DB, else fallback).
+  // Stages 2-3 receive the resolved style + playbook; stage 1 resolves them (DB, else fallback).
   const ds = threadedDs ?? (await resolveDesignSystem(supa, appt, styleOverride))
+  const pb = threadedPb ?? (await resolveNichePlaybook(supa, appt.contacts?.business_type))
 
   try {
     if (stage === 1) {
@@ -325,10 +360,10 @@ async function runStage(
       console.log(`[generate-site] appt=${appt.id} style="${ds.id}" (${ds.name}) trade="${appt.contacts?.business_type ?? ''}"`)
     }
 
-    const files = { ...priorFiles, ...(await generateStage(stage, appt, priorFiles, ds)) }
+    const files = { ...priorFiles, ...(await generateStage(stage, appt, priorFiles, ds, pb)) }
 
     if (stage < FINAL_STAGE) {
-      await invokeNextStage(appt.id, stage + 1, files, ds)
+      await invokeNextStage(appt.id, stage + 1, files, ds, pb)
       console.log(`[generate-site] stage ${stage} done appt=${appt.id} → stage ${stage + 1}`)
       return
     }
@@ -408,7 +443,7 @@ Deno.serve(async (req: Request) => {
     if (appt.site_status === 'deployed' && !b.force) return json({ ok: true, skipped: 'already deployed' })
   }
 
-  const task = runStage(stage, appt, b.files ?? {}, b.ds, b.style)
+  const task = runStage(stage, appt, b.files ?? {}, b.ds, b.style, b.pb)
   if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) {
     EdgeRuntime.waitUntil(task)
   } else {

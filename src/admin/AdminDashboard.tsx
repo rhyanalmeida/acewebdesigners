@@ -9,14 +9,15 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import ReactMarkdown from 'react-markdown'
 import {
   CheckCircle2, XCircle, AlertTriangle, Info, RefreshCw, LogOut, Globe, Share2, LayoutDashboard,
   Users, CalendarCheck, CircleDollarSign, Target, Zap, Clock, ArrowRight, Activity, Sparkles,
-  Repeat, ChevronRight, TrendingUp, Wifi, Link2, Copy, ExternalLink,
+  Repeat, ChevronRight, TrendingUp, Wifi, Link2, Copy, ExternalLink, FileText,
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
-  fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration,
+  fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration, regenerateBrief,
   type AdminData, type AdminContact, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat,
 } from './adminApi'
 
@@ -362,7 +363,7 @@ const PreviewSiteCell: React.FC<{ appt: Appt }> = ({ appt }) => {
   return <span className="text-slate-300">—</span>
 }
 
-const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; onPaymentLink: (a: Appt) => void; emptyHint?: string }> = ({ appts, onResult, onPaymentLink, emptyHint }) => {
+const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; onPaymentLink: (a: Appt) => void; onBrief?: (a: Appt) => void; emptyHint?: string }> = ({ appts, onResult, onPaymentLink, onBrief, emptyHint }) => {
   const now = Date.now()
   return (
     <div className={`overflow-hidden ${card}`}>
@@ -426,6 +427,12 @@ const AppointmentsTable: React.FC<{ appts: Appt[]; onResult: (a: Appt) => void; 
                   </td>
                   <td className="px-4 py-3 text-right align-top">
                     <div className="flex items-center justify-end gap-2">
+                      {onBrief && (
+                        <button onClick={() => onBrief(a)} title="Pre-meeting sales brief for this appointment"
+                          className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-sm font-medium transition ${a.brief_status === 'ready' ? 'border-violet-300 text-violet-700 hover:bg-violet-50' : 'border-slate-300 text-slate-700 hover:bg-slate-50'}`}>
+                          <FileText size={14} /> Brief
+                        </button>
+                      )}
                       {!a.is_test && (
                         <button onClick={() => onPaymentLink(a)} title="Create a Stripe payment link to send this client"
                           className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
@@ -704,6 +711,77 @@ const PaymentLinkModal: React.FC<{ appt: Appt; onClose: () => void }> = ({ appt,
   )
 }
 
+// ── sales brief modal ──────────────────────────────────────────────────────────
+// Tailwind preflight strips element styles, so give the markdown explicit ones.
+const MD_COMPONENTS: React.ComponentProps<typeof ReactMarkdown>['components'] = {
+  h2: (p) => <h2 className="mb-2 mt-5 text-sm font-bold uppercase tracking-wide text-slate-900 first:mt-0" {...p} />,
+  h3: (p) => <h3 className="mb-1.5 mt-4 text-sm font-semibold text-slate-800" {...p} />,
+  p: (p) => <p className="mb-2 text-sm leading-relaxed text-slate-700" {...p} />,
+  ul: (p) => <ul className="mb-3 list-disc space-y-1 pl-5 text-sm text-slate-700" {...p} />,
+  ol: (p) => <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm text-slate-700" {...p} />,
+  li: (p) => <li className="leading-relaxed" {...p} />,
+  strong: (p) => <strong className="font-semibold text-slate-900" {...p} />,
+  a: (p) => <a className="text-indigo-600 hover:underline" target="_blank" rel="noreferrer" {...p} />,
+  table: (p) => <div className="mb-3 overflow-x-auto"><table className="min-w-full border-collapse text-sm" {...p} /></div>,
+  th: (p) => <th className="border-b border-slate-300 px-2 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500" {...p} />,
+  td: (p) => <td className="border-b border-slate-100 px-2 py-1.5 align-top text-slate-700" {...p} />,
+}
+
+const BriefModal: React.FC<{ appt: Appt; onClose: () => void; onRefresh: () => void }> = ({ appt, onClose, onRefresh }) => {
+  const [busy, setBusy] = useState(false)
+  const [started, setStarted] = useState(false)
+  const [err, setErr] = useState('')
+
+  const regenerate = async () => {
+    setBusy(true); setErr('')
+    try { await regenerateBrief(appt.id); setStarted(true) }
+    catch (e) { setErr(e instanceof Error ? e.message : 'Failed to start') }
+    finally { setBusy(false) }
+  }
+
+  const status = appt.brief_status
+  const name = fullName(appt.contacts)
+  const business = [appt.contacts?.business_name, appt.contacts?.business_type].filter(Boolean).join(' · ')
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between border-b border-slate-100 px-6 py-4">
+          <div>
+            <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900"><FileText size={18} className="text-violet-500" /> Sales brief</h3>
+            <p className="text-sm text-slate-500">{name}{business ? ` · ${business}` : ''} · {dateTime(appt.start_ts)}</p>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-lg px-2 py-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600">✕</button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          {started || status === 'queued' || status === 'generating' ? (
+            <p className="flex items-center gap-2 text-sm text-slate-500"><RefreshCw size={14} className="animate-spin" /> Generating the brief — researching the niche and this business. Refresh in a minute or two.</p>
+          ) : status === 'ready' && appt.sales_brief ? (
+            <ReactMarkdown components={MD_COMPONENTS}>{appt.sales_brief}</ReactMarkdown>
+          ) : status === 'failed' ? (
+            <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              Brief generation failed{appt.brief_error ? `: ${appt.brief_error}` : ''}.
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">No brief yet for this appointment.</p>
+          )}
+          {err && <p className="mt-3 text-sm text-rose-600">{err}</p>}
+        </div>
+        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3">
+          <span className="text-xs text-slate-400">{appt.brief_generated_at ? `Generated ${timeAgo(appt.brief_generated_at)}` : ''}</span>
+          <div className="flex gap-2">
+            <button type="button" onClick={regenerate} disabled={busy || started}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+              <RefreshCw size={13} className={busy ? 'animate-spin' : ''} /> {started ? 'Started…' : 'Regenerate'}
+            </button>
+            <button type="button" onClick={() => { onRefresh(); onClose() }} className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── result modal ───────────────────────────────────────────────────────────────
 const OutcomeLine: React.FC<{ label: string; o?: CapiOutcome }> = ({ label, o }) => {
   if (!o) return null
@@ -820,6 +898,7 @@ const AdminDashboard: React.FC = () => {
   const [tab, setTab] = useState<Tab>('overview')
   const [resulting, setResulting] = useState<Appt | null>(null)
   const [payLinking, setPayLinking] = useState<Appt | null>(null)
+  const [briefing, setBriefing] = useState<Appt | null>(null)
   const [showResolved, setShowResolved] = useState(true)
 
   useEffect(() => {
@@ -982,7 +1061,7 @@ const AdminDashboard: React.FC = () => {
                   <button onClick={() => setShowResolved((v) => !v)} className="text-xs font-medium text-indigo-600 hover:underline">{showResolved ? 'Show only un-resulted' : 'Show all'}</button>
                 </div>
               </div>
-              <AppointmentsTable appts={websiteAppts} onResult={setResulting} onPaymentLink={setPayLinking} emptyHint={showResolved ? 'No appointments yet.' : 'Nothing waiting to be resulted. 🎉'} />
+              <AppointmentsTable appts={websiteAppts} onResult={setResulting} onPaymentLink={setPayLinking} onBrief={setBriefing} emptyHint={showResolved ? 'No appointments yet.' : 'Nothing waiting to be resulted. 🎉'} />
             </section>
             <section>
               <h2 className={`${sectionTitle} mb-2`}>Recent messages (GHL)</h2>
@@ -1034,6 +1113,7 @@ const AdminDashboard: React.FC = () => {
 
       {resulting && <ResultModal appt={resulting} onClose={() => setResulting(null)} onSaved={() => { setResulting(null); load() }} />}
       {payLinking && <PaymentLinkModal appt={payLinking} onClose={() => setPayLinking(null)} />}
+      {briefing && <BriefModal appt={briefing} onClose={() => setBriefing(null)} onRefresh={load} />}
     </div>
   )
 }

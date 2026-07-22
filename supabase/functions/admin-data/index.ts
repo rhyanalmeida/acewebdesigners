@@ -45,6 +45,8 @@ interface ApptRow {
   utm: Record<string, string> | null
   created_at: string
   is_test: boolean | null
+  sales_brief?: string | null
+  brief_status?: string | null
   contacts: ContactEmbed | ContactEmbed[] | null
 }
 
@@ -137,6 +139,29 @@ Deno.serve(async (req: Request) => {
       .eq('id', body.appointmentId)
     return error ? json({ error: error.message }, 500) : json({ ok: true })
   }
+  // Regenerate the pre-meeting sales brief (generate-brief fn, force overwrite).
+  if (body.action === 'regenerateBrief') {
+    if (!body.appointmentId) return json({ error: 'appointmentId required' }, 400)
+    await supa
+      .from('appointments')
+      .update({ brief_status: 'queued', brief_error: null })
+      .eq('id', body.appointmentId)
+    try {
+      const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-brief`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        },
+        body: JSON.stringify({ appointmentId: body.appointmentId, force: true }),
+      })
+      if (!resp.ok) return json({ error: `generate-brief ${resp.status}` }, 502)
+      await resp.body?.cancel()
+    } catch (err) {
+      return json({ error: String(err).slice(0, 200) }, 502)
+    }
+    return json({ ok: true })
+  }
   if (body.action === 'discardTests') {
     const capiDel = await supa.from('capi_events').delete({ count: 'exact' }).eq('is_test', true)
     if (capiDel.error) return json({ error: capiDel.error.message }, 500)
@@ -156,6 +181,7 @@ Deno.serve(async (req: Request) => {
         'id, start_ts, status, calendar, value, upfront_value, recurring_value, recurring_interval, ' +
           'plan_name, purchased_at, resulted_at, resulted_by, event_id, notes, utm, created_at, is_test, ' +
           'preview_url, netlify_site_id, site_status, site_error, site_generated_at, updated_at, ' +
+          'sales_brief, brief_status, brief_error, brief_generated_at, ' +
           'contacts:contact_id ( email, phone, first_name, last_name, business_name, business_type, years_in_business, has_website, city, state, zip, fbclid )',
       )
       .order('start_ts', { ascending: false })

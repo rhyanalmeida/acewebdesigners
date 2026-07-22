@@ -292,5 +292,30 @@ Deno.serve(async (req: Request) => {
     }
   }
 
+  // ── 8) queue the pre-meeting sales brief (never blocks) ───────────────────────
+  // generate-brief resolves the trade's niche_playbooks row (researching it live
+  // on first encounter), looks up the business online, and writes the markdown
+  // brief onto the appointment for /admin. qualify re-fires it with force once
+  // the lead answers the qualifying questions.
+  if (!b.test && Deno.env.get('ANTHROPIC_API_KEY')) {
+    try {
+      await supa.from('appointments').update({ brief_status: 'queued' }).eq('id', appointmentId)
+      const trigger = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-brief`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        },
+        body: JSON.stringify({ appointmentId }),
+      }).then(
+        (r) => r.body?.cancel(),
+        (e) => console.error('[book] generate-brief trigger failed', e),
+      )
+      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(trigger)
+    } catch (err) {
+      console.error('[book] generate-brief queue failed (booking kept)', err)
+    }
+  }
+
   return json({ ok: true, appointmentId, startISO })
 })

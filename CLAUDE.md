@@ -55,7 +55,8 @@ Supabase Edge Functions (supabase/functions, Deno)
   slots          open slots = availability − booked − Google busy (30-min slots; 4h min notice, 2-day window)
   lead           gate-form step: upsert contact (durable attribution) → CAPI Lead
   book           validate slot → upsert contact → insert appointment → CAPI Schedule → GCal event → GHL relay → fire generate-site
-  qualify        post-booking qualifying answers → contacts + appt notes + GHL fields + GCal invite
+  qualify        post-booking qualifying answers → contacts + appt notes + GHL fields + GCal invite + re-fires generate-brief
+  generate-brief pre-meeting sales brief (Sonnet 5 + web search) from the niche_playbooks knowledge base → appointments.sales_brief
   result         admin: No-Show / Showed / Purchase → CAPI CompleteRegistration / Purchase; No-Show also tags funnel-noshow in GHL
   admin-data     admin: dashboard payload (health + stats + lists)
   capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
@@ -65,9 +66,9 @@ Supabase Edge Functions (supabase/functions, Deno)
   ghl-webhook    logs GHL messaging sends (visibility)
   _shared/*      meta.ts (CAPI engine), contacts.ts, attribution.ts, availability.ts, google.ts,
                  ghl.ts (ghlSyncStage/createGhlAppointment/pushLegacyBooking), netlify.ts,
-                 designSystems.ts, identity.ts, adminAuth.ts
+                 designSystems.ts, nichePlaybooks.ts, identity.ts, adminAuth.ts
         ▼
-Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems
+Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks
         ▼ external sinks
 Meta CAPI · Google Calendar · Stripe · GHL (messaging only) · Netlify (preview sites) · Anthropic API
 ```
@@ -205,6 +206,37 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   screenshots show blank sections (opacity-0 until IntersectionObserver fires) — real visitors see it.
 - `generate-copy`: optional "Write my copy with AI" in the restaurant wizard, `claude-haiku-4-5`,
   max_tokens 400, 5 uses/session client cap; no-ops 503 without `ANTHROPIC_API_KEY`.
+
+## Niche playbooks + pre-meeting sales briefs (`generate-brief`) — DEPLOYED, ⚠️ blocked on Anthropic credits
+- **`niche_playbooks` table** (migration `0009`) = per-trade sales knowledge: how customers buy,
+  must-have site features, credibility levers, pitch angles (named frameworks), upsell ladder,
+  objections, **pricing ranges with sources + `as_of`** (never invented figures). Rows are written by
+  `generate-brief`'s research stage (Sonnet 5 + `web_search_20260209` server tool), NOT hand-seeded —
+  auto-researched on first booking in an unknown niche, re-researched when > 120 days stale
+  (`PLAYBOOK_STALE_DAYS`). `_shared/nichePlaybooks.ts` holds the interface + generic
+  `FALLBACK_PLAYBOOK` (no pricing — deliberate) + `selectNichePlaybook`, which reuses the SAME trade
+  matcher as design systems (`matchesTrade`, extracted in `designSystems.ts`; vitest-covered in
+  `nichePlaybooks.test.ts`).
+- **`generate-brief` fn** (auth/shape cloned from generate-site: internal-key OR admin JWT, deployed
+  `--no-verify-jwt`, 503 without `ANTHROPIC_API_KEY`): resolves/researches the playbook, then writes a
+  ≤450-word markdown brief (playbook supplies niche guidance + pricing; web search scoped to looking
+  up THIS business) to `appointments.sales_brief` (`brief_status` queued/generating/ready/failed).
+  Triggers: `book` fire-and-forgets it (skipped for test bookings); `qualify` re-fires with
+  `force:true` so answered qualifying questions regenerate an enriched brief; /admin
+  `{action:'regenerateBrief'}`. Research-only mode `{action:'research', trade}` is what
+  `node scripts/seed-niche-playbooks.mjs` calls (11 contractor trades, `--force` to re-research,
+  ~$0.15-0.35/trade; briefs ~$0.03-0.08).
+- **generate-site consumes the playbook too**: stage 1 resolves the matched row (fallback if none —
+  never blocks a build) and threads it to stages 2-3 like the design system; `renderPlaybookForPrompt`
+  injects a TRADE INSIGHT block into the system prompt so preview sites hit trade-specific needs.
+- **/admin**: Website tab rows have a **Brief** button (violet when ready) → markdown modal
+  (`react-markdown`, new dep, admin chunk only) with status states + Regenerate.
+- ⚠️ **NOT yet seeded/verified live: the Anthropic org has NO API credits** (top up at
+  platform.claude.com, hello@ Google login). Until then generate-brief AND generate-site fail at the
+  API call (booking itself unaffected). After topping up: `node scripts/seed-niche-playbooks.mjs`,
+  then run one `businessType:'plumber'` test booking end-to-end. Note: the first seed attempt also
+  returned a one-off `WORKER_RESOURCE_LIMIT` (546) — if it recurs with credits present, the sync
+  research call may need the 202+poll pattern.
 
 ## Restaurant self-serve funnel — BUILT, DEPLOY PENDING
 A third, fully isolated ad funnel (own pixel + dataset + tags + page) — nothing crosses into
