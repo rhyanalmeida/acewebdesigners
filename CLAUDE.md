@@ -282,13 +282,18 @@ stay in the Ace Web Designers portfolio.)
 | `1548487516424971` | **DEAD** — do not use (caused the old 0-leads bug) |
 
 - Campaign **"Free Website Offer For Contractors (6/1/26)"** id `120241554190170259` — **ACTIVE**
-  (relaunched 2026-07-21; it had been switched OFF and this file wrongly said ACTIVE — re-verify in
-  Ads Manager before trusting status here). Budget is now **CBO $20/day at campaign level**, bid
-  strategy Highest volume. Advantage+ leads campaign = On.
+  (relaunched 2026-08-03; owner had paused it 7/23 at $53.52 / 0 leads — half the pre-agreed
+  **$100-with-0-leads kill line** in `docs/contractor-ad-creative.md`. Status here rots — re-verify
+  via API before trusting it). Budget is **CBO $20/day at campaign level**, bid strategy Highest
+  volume. Advantage+ leads campaign = On.
 - Ad set `120242709687340259` — `OFFSITE_CONVERSIONS`/`LEAD`, `promoted_object.pixel_id =
   4230021860577001` ✅, uses campaign budget, **ACTIVE**. **Fully broad targeting** (US +
-  `advantage_audience:1`, no custom detailed targeting — let Advantage+ decide). **Conversion event
-  stays Lead — owner decision (2026-07-17); do not switch to Schedule or ViewContent.**
+  `advantage_audience:1`, no custom detailed targeting — let Advantage+ decide) with an **age
+  suggestion 25–55** (set 2026-08-03 to match the 2025 winner; the prior 25–65 sent 18% of spend to
+  the 65 bucket for 0 leads). With Advantage+ audience the suggestion lives in `targeting.age_range
+  [25,55]` — the legacy `age_min/age_max` fields still read 25/65; that is NOT a failed edit.
+  **Conversion event stays Lead — owner decision (2026-07-17); do not switch to Schedule or
+  ViewContent.**
 - **LIVE AD: "Rhyan captioned — free site offer (7/21/26)"** id `120247255043930259` — the captioned
   9:16 talking-head (`IMG_1174_captioned.mp4`). Headline `Free Site for Contractors` (25 chars — the
   old 28-char one truncated), description `Real designer. No pressure.`, CTA **Book now**.
@@ -296,10 +301,16 @@ stay in the Ace Web Designers portfolio.)
   languages 0 (no Spanish dub of Rhyan's voice), browser add-ons None (an Instant Form default would
   have bypassed our scheduler + CAPI). *Meta's "Essential enhancements (5/5)" — incl. Relevant
   comments and Enhance CTA — cannot be disabled.*
-  **ACTIVE, delivering, verified 2026-07-21.** Its `$0.00 / 0 impr` in `meta-ads:status` is a
-  REPORTING-WINDOW artifact, not a delivery problem — the ad launched 7/21 and both the script's 7d
-  window and Ads Manager's default `Last 30 days` ended 7/20. Widen the date range before concluding
-  an ad isn't delivering.
+  **ACTIVE; back in review (`PENDING_REVIEW`) after the 2026-08-03 ad-set publish — expected.**
+  First flight 7/21–7/23 (explicit `time_range`, not the script's 7d window): **$53.52 · 728 impr ·
+  $73.5 CPM · 5.6% CTR · 14 link clicks · 21 LPV · 0 leads · quality BELOW_AVERAGE_20** (engagement
+  ABOVE_AVERAGE, conversion AVERAGE — rankings noisy at <1k impr). 2026-08-03 diagnostic: funnel
+  verified healthy end-to-end (bundle current, pixel fired 18 ViewContent, slots open, zero form
+  submissions = zero leads occurred); at 21 LPVs zero leads is the expected outcome even for a
+  9x-better creative — the sample proves nothing. **Commitment: let it run to $100 total spend
+  before judging; judge on LEADS, not CPM/CTR/hold** (the 2025 winner lost every attention metric
+  and converted 9x). `meta-ads:status`'s hardcoded 7d window caused a false alarm before — widen the
+  date range before concluding an ad isn't delivering.
   ✅ **`url_tags` UTM template SET 2026-07-21** (was missing at launch) — same template as the paused
   ad, applied via Ads Manager → Tracking → URL parameters:
   `utm_source=Facebook&utm_medium={{adset.name}}&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&campaign_id={{campaign.id}}&adset_id={{adset.id}}&ad_id={{ad.id}}`
