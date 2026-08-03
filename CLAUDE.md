@@ -132,6 +132,15 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   2-day cap set 2026-07-21 (owner decision) — show rate peaks next-day and declines with distance, so
   far-out slots are the ones people ghost. **Watch booking VOLUME:** a 24h max previously emptied the
   calendar all weekend and killed bookings; if volume drops, widen to `4_320` (3 days), not back to 7.
+  **Pre-committed trigger (2026-08-03):** 7 consecutive days of open slots + ad LPVs but 0 bookings →
+  widen to 3 days; never past 4 (show rate holds ~75% through day 4, cliffs day 5+ — Reply.io/Altisales
+  data). Min notice stays 4h — same-day is the best-attended slot in every dataset; do NOT raise it.
+  Show-rate benchmark for cold paid-social free consults: **40–70%**; 0/2 shows is statistically
+  uninformative (P=0.36 even at a 40% true rate). Evidence audit: `docs/MASTER_PLAN_2026-07-20.md`
+  §"Show-rate research read".
+  **Mechanical widen-trigger (2026-08-03):** 7 consecutive days with open slots + LPVs flowing but 0
+  bookings → widen to 3 days. Never past ~4 days (show rate holds ~75% through day 4, cliff at day 5+).
+  The 4h minimum stays — literature uniformly shows short-notice/same-day slots are the BEST attended.
 - **Availability hours** (`availability` DB rows, both calendars): weekdays **7am–8pm** (420–1200),
   **Saturday 8am–12pm** (weekday 6), tz America/New_York. Google freeBusy trims real conflicts live, so
   the rows are the outer envelope. Edit rows directly (Management API SQL) — no deploy needed.
@@ -285,7 +294,9 @@ stay in the Ace Web Designers portfolio.)
   (relaunched 2026-08-03; owner had paused it 7/23 at $53.52 / 0 leads — half the pre-agreed
   **$100-with-0-leads kill line** in `docs/contractor-ad-creative.md`. Status here rots — re-verify
   via API before trusting it). Budget is **CBO $20/day at campaign level**, bid strategy Highest
-  volume. Advantage+ leads campaign = On.
+  volume. Note: API `advantage_state` reads `DISABLED` (audience + budget levers ENABLED, placement
+  lever DISABLED — probable cause the account-level AN block; the ad set itself has zero placement
+  restrictions). Labeling only, no documented delivery penalty — the AN block stays regardless.
 - Ad set `120242709687340259` — `OFFSITE_CONVERSIONS`/`LEAD`, `promoted_object.pixel_id =
   4230021860577001` ✅, uses campaign budget, **ACTIVE**. **Fully broad targeting** (US +
   `advantage_audience:1`, no custom detailed targeting — let Advantage+ decide) with an **age
@@ -356,7 +367,16 @@ stay in the Ace Web Designers portfolio.)
   its own spec in `docs/contractor-ad-creative.md`. Creative is the top lever, not the funnel.
 - **Go-forward plan: `docs/MASTER_PLAN_2026-07-20.md`** (prioritized funnel turnaround; supersedes the
   action lists in the audit). Show rate is **0%** — fix that before raising budget, or every extra
-  dollar multiplies by zero.
+  dollar multiplies by zero. Working benchmark: cold-social free consults show **40–70%** with good
+  ops; 0-of-2 is statistical noise (P(0/2)=0.36 even at a true 40%), not a verdict.
+- **Research audit 2026-08-03: `docs/FUNNEL_RESEARCH_AUDIT_2026-08-03.md`** — every funnel area
+  cross-checked vs source-graded 2026 best practice + live API. **Zero unexplained deviations**; all
+  locked owner decisions supported. Post-flight levers ranked there (value rules on 65+;
+  placement/site_source url_tags params; truthful reminder-copy strengthening). Key expectation: the
+  25–55 age *suggestion* barely steers delivery (Loomer measured >78% of spend outside a suggested
+  range) — value rules are the fix that keeps Advantage+ on. ⚠️ **Never put an invented social-proof
+  stat in ad/reminder copy** ("contractors show up", review counts) — owner rule; we claim only what
+  our data supports.
 - **Dataset `4230021860577001` verified healthy 2026-07-20 — do NOT replace it.** `capi_events` holds
   **8 rows lifetime** (2 test, 4 live-sent, 2 known main-pixel errors). It is not polluted, it is nearly
   empty — the constraint is absence of signal, not bad signal. A new dataset would discard the only real

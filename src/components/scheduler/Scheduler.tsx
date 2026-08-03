@@ -460,13 +460,28 @@ export const Scheduler: React.FC<SchedulerProps> = ({
                 </Button>
                 <button
                   type="button"
-                  onClick={() => setQualifyDone(true)}
+                  onClick={() => {
+                    // Clear any half-picked answers so the post-submit echo below
+                    // only renders for answers that were actually sent.
+                    setYearsInBusiness('')
+                    setHasWebsite('')
+                    setQualifyDone(true)
+                  }}
                   className="text-sm text-ink-700/70 underline underline-offset-2 hover:text-ink-900"
                 >
                   Skip
                 </button>
               </div>
             </div>
+          )}
+
+          {qualifyDone && (yearsInBusiness || hasWebsite) && (
+            <p className="mt-4 text-sm text-ink-700">
+              Got it — we'll tailor your preview to a{' '}
+              <strong>{form.businessType.trim() || 'contracting'}</strong> business
+              {yearsInBusiness ? ` ${yearsInBusiness.toLowerCase()} in` : ''}
+              {yearsInBusiness ? ' the trade.' : '.'}
+            </p>
           )}
         </div>
       </div>
