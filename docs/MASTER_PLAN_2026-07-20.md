@@ -180,8 +180,46 @@ sale** against a $999 upfront. The economics work — *if* show rate gets fixed.
    worse people — exactly the Audience Network failure, deliberately. Standing decision is **Lead**.
    *(Note: Meta's "conversion leads" quality optimization is Instant-Forms-only + needs a CRM
    integration — unavailable to us on conversion-location=Website.)*
-3. **Minimum booking notice 4h → 24h** — §Priority 1. Experiment, not a fix.
+3. **Minimum booking notice 4h → 24h** — §Priority 1. ~~Experiment, not a fix.~~ **Recommend NO
+   (2026-08-03 research):** every credible dataset runs the other way — same-day is the best-attended
+   slot everywhere measured (healthcare ~2% no-show same-day; Reply.io ~2,900 demos: 6.9% same-day vs
+   9.6% next-day). No source anywhere shows short-notice bookings no-showing more. The "both no-shows
+   booked at the 4h minimum" pattern is n=2 noise. Keep 4h.
 4. **Script C v2 retake** — sells the website instead of the discovery call.
+
+---
+
+## Show-rate research read — 2026-08-03 (evidence audit of P1)
+
+Full-source web audit of every show-rate lever (peer-reviewed no-show literature + named practitioner
+datasets). Verdict: **the funnel already matches best practice on every point where credible evidence
+exists.** Key sources: Cochrane 2013 (SMS reminders −29–39% no-shows) · JRSM 2012 Martin/Bassi/
+Dunbar-Rees (owned commitment −18%, + social norms −31.7%) · Am J Med meta-analysis (two-way SMS
+RR 1.23 vs one-way 1.04) · PMC4370946 ophthalmology (lead time = #1 no-show predictor) ·
+Reply.io/Altisales ~2,900 demos (show peaks day 1 at 80.8%, holds ~75% through day 4, cliff day 5+).
+
+**Confirmed correct, do not touch:** cadence shape (confirm → 24h → 2–4h window), Reply-YES,
+SMS-primary dual-channel, 4h min notice, 2-day cap direction, post-booking qualification, named
+deliverable, no deposits, exactly 3 touches (measured sweet spot — a 4th adds spam, not shows).
+
+**Changes adopted:**
+1. **Social-norm line: REJECTED for now (owner rule, 2026-08-03).** The tactic is the best-evidenced
+   one available (commitment −18%; + norms −31.7%) but any norm claim ("nearly every contractor
+   shows up") would be a fabricated statistic against a 0/2 actual show record. A briefly-live norm
+   line was removed from the 24h SMS the same day. Revisit only once real show data supports a
+   truthful version.
+2. **Deliverable named in the 24h SMS + 2h nudge** with truthful process framing ("the homepage
+   preview we're building for your business" — no "built and ready" claim, which is false while the
+   Anthropic org has no API credits and generate-site fails). Reminders that restate the
+   reason-to-attend beat bare time reminders.
+3. **Pre-committed widening trigger:** if 7 consecutive days show open slots + ad LPVs but 0 bookings,
+   widen max-advance 2 → 3 days (`maxAdvanceMinutes 2880 → 4320`). Show holds ~75% through day 4, so
+   3 days is near-free; never exceed 4 days (day-5+ is the measured cliff). Mechanical trigger, like
+   the $100 kill line.
+4. **Benchmark recalibrated:** expect **40–70% show** for cold paid-social free consultations
+   (<50% = investigate ops). At a pessimistic 40% true rate, P(0 shows in 2) = 36% — **0/2 is
+   uninformative; do not redesign anything off it.** Show-rate interventions are unmeasurable until
+   there's lead volume; creative remains the binding constraint.
 
 ---
 

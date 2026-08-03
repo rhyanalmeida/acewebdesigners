@@ -450,7 +450,12 @@ contact with the same enriched attribution we send Meta (into custom fields by i
   **Show-rate edits 2026-07-21:** the confirmation SMS now asks *"Reply YES to confirm your spot"* — a
   reply converts a tentative tap into a commitment — and the final nudge moved **1h → 2h before**,
   because both no-shows booked on the 4h minimum, so a 1h touch fires while they're still on a job.
-  4 texts inside a few hours is why it was moved, not added), B "Nurture — New
+  4 texts inside a few hours is why it was moved, not added. **2026-08-03:** 24h SMS + 2h nudge both
+  name the preview deliverable with truthful process framing ("the homepage preview we're building for
+  your business") — a briefly-live social-norm line ("Nearly every contractor who books makes this
+  call") was REMOVED same day: with a 0/2 show record it was a fabricated stat (owner rule: never
+  invent social proof). Revisit a norm line only once real show data supports one. Cadence is
+  complete — do NOT add a 4th touch), B "Nurture — New
   Lead" (`funnel-lead`, goal `funnel-booked`→END; 3 touches: 15min SMS → day-2 email → day-4 SMS →
   day-6 final SMS), C "Post-Meeting — Showed Follow-up" (`funnel-showed`), D "Onboarding — Purchased"
   (`funnel-purchased`), "No-Show — Rebook Follow-up" (`funnel-noshow` tag → immediate missed-you SMS →
