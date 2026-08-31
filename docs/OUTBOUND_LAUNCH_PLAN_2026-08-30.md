@@ -123,18 +123,29 @@ Status: in progress (2026-08-31 — all CLAUDE-doable work done: webhook endpoin
 end-to-end incl. GHL tag, sequence drafted; DNS + Instantly-side config blocked on the three
 OWNER purchases below — the 3-week warm-up clock has NOT started)
 
-- [ ] **OWNER** Buy 2–3 lookalike sending domains at Porkbun (~$33/yr total), e.g.
-      `acewebdesign.co`, `aceweb-designers.com`, `getacewebdesigners.com`. NEVER cold-send
+- [x] **OWNER** Buy 2–3 lookalike sending domains at Porkbun. NEVER cold-send
       from acewebdesigners.com — a burned lookalike is disposable, the main domain is not.
-      *(2026-08-31 verified NOT done: Porkbun `domain/listAll` returns zero domains.)*
-- [ ] **OWNER** Google Workspace Business Starter: **2 inboxes per sending domain**
-      (~$28–42/mo total), e.g. rhyan@ + hello@ on each. *(Blocked by no domains.)*
+      *(2026-08-31 BOUGHT: **getacewebdesigners.com** + **acewebdesignershq.com**, $11.08/yr
+      each ($22.16 total, lean 2-domain plan), WHOIS privacy on, auto-renew on, expire
+      2027-08-31. Agent staged cart via Playwright, owner paid via Stripe Checkout.)*
+- [ ] **OWNER** Google Workspace: **1 inbox per sending domain** to start (lean plan ≈
+      $14/mo, 2 seats; scale to 2/domain at ramp). Sign up at workspace.google.com with
+      primary domain `getacewebdesigners.com`, add `acewebdesignershq.com` as a secondary
+      domain, create one user on each. *(2026-08-31: next owner purchase.)*
 - [ ] **OWNER** Instantly.ai account (Growth ~$37/mo): connect every inbox, enable warm-up on
       all. **The 3-week warm-up clock starts here.** *(2026-08-31: no Instantly session in the
       Playwright profile — no account exists/accessible yet.)*
-- [ ] **CLAUDE** Per sending domain: SPF + DKIM (from Workspace) + aligned DMARC (`p=none`)
+- [~] **CLAUDE** Per sending domain: SPF + DKIM (from Workspace) + aligned DMARC (`p=none`)
       records and a 301 redirect to acewebdesigners.com — set via Porkbun, verify with dig +
-      an auth checker. *(2026-08-31: ⛔ blocked — zero domains in the Porkbun account.)*
+      an auth checker. *(2026-08-31 DONE except DKIM on both domains: SPF root TXT
+      `v=spf1 include:_spf.google.com ~all` (replaced Porkbun's default `_spf.porkbun.com`
+      SPF — gotcha: new domains ship parking DNS incl. a temporary l.ink URL forward, which
+      was deleted), DMARC `_dmarc` TXT `v=DMARC1; p=none; rua=mailto:hello@acewebdesigners.com;
+      aspf=r; adkim=r`, permanent wildcard URL forward → https://acewebdesigners.com. Verified
+      via nslookup @1.1.1.1 (both TXT pairs resolve) + curl (301 + Location live on
+      getacewebdesigners.com; acewebdesignershq.com forwarder provisioning at check time —
+      re-curl it). REMAINING once Workspace exists: DKIM TXT from Admin console, and swap MX
+      from fwd1/fwd2.porkbun.com to Google's.)*
 - [~] **CLAUDE** Configure the Instantly webhook →
       `https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/instantly-webhook?secret=<value>`;
       fire test events; verify `suppressions` rows + `outbound-lead` tag land.

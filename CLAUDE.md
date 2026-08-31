@@ -288,6 +288,12 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   --batch b1` (stamps emailed_at; `--no-stamp` = dry) → upload CSV to Instantly, `{{demo_url}}` in
   template. /admin **Outbound** tab: funnel KPIs + per-prospect status + Retry build / Retry
   provisioning / Fix domain (taken_after_checkout recovery: sets new `chosen_domain` + re-runs).
+- **Sending domains (bought 2026-08-31, lean 2-domain plan):** `getacewebdesigners.com` +
+  `acewebdesignershq.com` — Porkbun, $11.08/yr each, WHOIS privacy + auto-renew on. SPF
+  (`include:_spf.google.com`), DMARC (`p=none`, rua hello@), and a permanent wildcard 301 →
+  acewebdesigners.com are set (Porkbun defaults — parking SPF + temporary l.ink forward —
+  were replaced). Pending: Google Workspace (1 inbox/domain to start), then DKIM TXT + swap
+  MX from fwdN.porkbun.com to Google. NEVER cold-send from acewebdesigners.com.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
   warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).
