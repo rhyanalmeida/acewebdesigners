@@ -149,11 +149,11 @@ sequence draft owner approval + postal address, Workspace plan downgrade decisio
       Instantly's OAuth app ("Instantly oAuth Email v1") configured as Trusted in Workspace
       App Access Control (one-time, org-wide). **Inbox 1 rhyan@getacewebdesigners.com
       CONNECTED via OAuth + WARM-UP ON → clock started 2026-08-31.** Two leftovers:
-      (a) inbox 2 rhyan@acewebdesignershq.com NOT connected — Google risk engine hard-blocked
-      its first-ever sign-in from the automated browser twice ("someone else might be trying");
-      admin-reset password is in the secrets file, "change at next sign-in" OFF. FIX: owner
-      signs into gmail.com as that user once from their PHONE (different device clears the
-      block), then agent redoes Instantly connect + warm-up toggle (~2 min).
+      (a) RESOLVED same day: inbox 2 rhyan@acewebdesignershq.com was hard-blocked by Google's
+      new-account risk engine (2 rejections even with correct SMS codes); owner signed in once
+      from their phone, which cleared it — **inbox 2 then CONNECTED via OAuth + WARM-UP ON,
+      so BOTH inboxes are warming from 2026-08-31**. Lesson for future sending domains: after
+      creating a Workspace user, sign into it once from a real device before OAuth connects.
       (b) **Webhooks are plan-gated**: "Add Webhook" pops an upgrade dialog (Hyper Growth
       $97/mo) on the trial. Not needed until sending starts (Phase 5/6) — when picking the
       paid plan, verify whether Growth (~$37/mo) includes webhooks; if truly Hyper-Growth-only,

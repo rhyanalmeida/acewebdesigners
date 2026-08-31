@@ -298,10 +298,10 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   DKIM set, MX = smtp.google.com. ⚠️ Plan = Business Plus 14-day trial, bills $19.80/user
   from Sep 14 — owner to keep or downgrade to Starter in Admin console → Billing.
   **Instantly live on free trial (2026-08-31):** login rhyan@getacewebdesigners.com, creds in
-  `~/.secrets/instantly-credentials.txt`; its OAuth app is Trusted in Workspace; inbox 1
-  connected, **warm-up ON → 3-week clock started 2026-08-31**. Leftovers: inbox 2 blocked by a
-  Google new-account risk cool-down (owner: one gmail.com sign-in from phone clears it, then
-  reconnect in Instantly); Instantly org webhooks are plan-gated (upgrade dialog names Hyper
+  `~/.secrets/instantly-credentials.txt`; its OAuth app is Trusted in Workspace; **BOTH inboxes
+  connected via OAuth, warm-up ON → 3-week clock started 2026-08-31** (gotcha: a brand-new
+  Workspace user must sign in once from a real device before Google allows the OAuth flow).
+  Leftover: Instantly org webhooks are plan-gated (upgrade dialog names Hyper
   Growth $97/mo) — resolve when the paid plan is chosen, not needed until sending. NEVER
   cold-send from acewebdesigners.com.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
