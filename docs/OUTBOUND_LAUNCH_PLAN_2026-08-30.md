@@ -45,23 +45,44 @@ probed same day: API still returns "credit balance is too low")
       preview for quality, then delete the row.
 
 ## Phase 2 — Money + domain rails
-Status: not started
+Status: in progress (2026-08-31 — all CLAUDE tasks done incl. a required registerDomain API
+fix; remaining OWNER action: $50 Porkbun balance + auto top-up, blocked on no card on file)
 
-- [ ] **OWNER** Porkbun: create account → API Access → generate API key + secret (and sandbox
-      keys) → load **$50** balance → enable auto top-up. Put the values in `supabase/.env`
-      (gitignored) — never in chat or committed files.
-- [ ] **CLAUDE** Set secrets `PORKBUN_API_KEY` / `PORKBUN_SECRET_API_KEY` /
-      `PORKBUN_API_BASE=https://api-sandbox.porkbun.com/api/json/v3` (sandbox FIRST).
-      ⚠️ Setting secrets restarts every isolate — never while a build is in flight, and never
-      run `secrets set --env-file` with any empty local key.
-- [ ] **CLAUDE** Stripe via API (existing `STRIPE_SECRET_KEY`): create Product + recurring
-      **$49/mo** Price → set `STRIPE_PRICE_DEMO_MONTHLY`; add `customer.subscription.deleted`
-      to the existing webhook endpoint's enabled events.
-- [ ] **CLAUDE** Sandbox provisioning test: insert `is_test` prospect, stamp `purchased_at` +
-      `chosen_domain` via SQL, invoke `provision-domain` → verify status walk
-      `registering → dns_set → attached`, and that sandbox-stalled SSL parks at `ssl_pending`
-      via the attempt cap. Clean up, then set `PORKBUN_API_BASE` empty (prod) — real
-      purchases wait for Phase 5.
+- [x] **OWNER→CLAUDE** Porkbun: agent created the account 2026-08-30 (username
+      `acewebdesigners`, hello@; registrant = owner's real EIN-listing address; password in
+      `~/.secrets/porkbun-credentials.txt`) → API Access enabled for all domains → prod +
+      sandbox keys generated (titles `supabase-prod`/`sbx`) into `supabase/.env`.
+      ⚠️ **$50 balance + auto top-up still OWNER**: account has no card on file — add a card
+      at porkbun.com → Account → Billing, load $50, enable auto top-up (needed before
+      Phase 5's real registration; sandbox needed none). Note: 3 stray untitled API keys
+      ("code") were created by a UI misfire — secrets unseen/unrecoverable; delete at leisure.
+- [x] **CLAUDE** Porkbun secrets set individually 2026-08-30. ⚠️ Reality changed vs plan:
+      the `api-sandbox.porkbun.com` host is DEAD (403). Sandbox is now **key-driven**:
+      `pk1_sb_*` keys against the SAME `https://api.porkbun.com/api/json/v3` (responses carry
+      `"sandbox": true`, $1,000 fake credit). For the test, deployed keys = sandbox keys with
+      `PORKBUN_API_BASE` set to the main URL (satisfies provision-domain's is_test guard);
+      flipped to prod keys + `PORKBUN_API_BASE` unset at end of phase. Ping verified both.
+- [x] **CLAUDE** Stripe done 2026-08-30 via restricted key `claude-ops` (Products/Prices/
+      Webhook Endpoints write; in `supabase/.env` — the full deployed `STRIPE_SECRET_KEY` is
+      write-only and was NOT recoverable): product `prod_VAfN7P63mmSbnl` + price
+      `price_1UAK4BJHIJK0EFOzqlk5VOaJ` ($49/mo USD, active) → `STRIPE_PRICE_DEMO_MONTHLY`
+      secret set; `customer.subscription.deleted` added to existing endpoint
+      `we_1TniowJHIJK0EFOzumhuA7xu` (kept `checkout.session.completed`); verified by API
+      read-back.
+- [x] **CLAUDE** Sandbox provisioning test 2026-08-30: is_test prospect + throwaway Netlify
+      site → `provision-domain` → **found + fixed a real bug**: Porkbun `/domain/create` now
+      requires `cost` (integer cents, must equal checkDomain's price) + `agreeToTerms` —
+      `registerDomain` sent neither ("Cost must be a valid integer"). Fix in
+      `_shared/porkbun.ts` (+ provision-domain passes `check.price`), deployed. After fix:
+      sandbox register + DNS + Netlify attach walked `registering → dns_set → attached`.
+      ⚠️ The `ssl_pending` park was NOT observed: the self-invoking SSL poll chain died
+      silently (row still `attached` 9h later; `step:'ssl'` can't be re-entered from
+      outside — internal-key only, and the Mgmt-API service_role ≠ runtime key). Not a
+      launch blocker (an `attached`-stuck row is recoverable via /admin Retry and Netlify
+      keeps retrying SSL itself once DNS resolves) — but watch the Phase 5 dry run: if it
+      also stalls at `attached`, the selfInvoke chain needs hardening. Test row +
+      throwaway site deleted; prod keys live, `PORKBUN_API_BASE` unset — real purchases
+      still wait for Phase 5 (and the $50 balance).
 
 ## Phase 3 — GHL wiring (parallel with Phase 2)
 Status: not started

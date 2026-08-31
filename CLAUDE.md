@@ -275,7 +275,12 @@ distinguish "we own it" via `domainIsOurs`). **NO Meta pixel/CAPI anywhere** (no
 `outbound-purchased` (workflows still to be built in GHL UI). `instantly-webhook` fn
 (`INSTANTLY_WEBHOOK_SECRET` via header or `?secret=`) handles reply/bounce/unsub → `suppressions`
 table (CAN-SPAM source of truth, enforced by both scripts). Test prospects (`is_test`): skip GHL,
-provision only against the Porkbun sandbox (`PORKBUN_API_BASE`).
+provision only when `PORKBUN_API_BASE` is set. ⚠️ Porkbun's `api-sandbox` host is DEAD (403) —
+sandbox is now key-driven: `pk1_sb_*` keys on the MAIN URL (responses carry `sandbox:true`,
+$1,000 fake credit). Sandbox mode = deploy the sb keys (`PORKBUN_SB_*` in `supabase/.env`) AND
+set `PORKBUN_API_BASE=https://api.porkbun.com/api/json/v3` to satisfy the guard. Verified
+end-to-end 2026-08-30 (`registering → dns_set → attached`); `registerDomain` sends the current
+API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
 - **Ops:** `node scripts/import-prospects.mjs --file x.csv --batch b1 --trade plumber` (skips
   suppressed/non-US/no-email; upserts on gmaps_place_id) → `node scripts/export-instantly.mjs
   --batch b1` (stamps emailed_at; `--no-stamp` = dry) → upload CSV to Instantly, `{{demo_url}}` in
@@ -448,8 +453,11 @@ stay in the Ace Web Designers portfolio.)
   `GOOGLE_SERVICE_ACCOUNT_B64` / `GOOGLE_CALENDAR_ID_CONTRACTOR` / `_MAIN`, `STRIPE_SECRET_KEY` /
   `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_*` (incl. `STRIPE_PRICE_DEMO_MONTHLY`),
   `GHL_WEBHOOK_SECRET`, `ADMIN_EMAILS`, `NETLIFY_AUTH_TOKEN`, `ANTHROPIC_API_KEY`,
-  `PORKBUN_API_KEY` / `PORKBUN_SECRET_API_KEY` / `PORKBUN_API_BASE` (unset = prod; sandbox
-  `https://api-sandbox.porkbun.com/api/json/v3`), `INSTANTLY_WEBHOOK_SECRET` (outbound funnel).
+  `PORKBUN_API_KEY` / `PORKBUN_SECRET_API_KEY` (prod `pk1_/sk1_`; sandbox `pk1_sb_/sk1_sb_`
+  kept as `PORKBUN_SB_*` in `supabase/.env`) / `PORKBUN_API_BASE` (unset = prod; setting it —
+  to the SAME main URL — is what marks sandbox mode, see outbound funnel section),
+  `INSTANTLY_WEBHOOK_SECRET` (outbound funnel). Porkbun account: username `acewebdesigners`,
+  hello@, password in `~/.secrets/porkbun-credentials.txt`; ⚠️ no card/balance yet (owner).
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_ANON_KEY` are auto-injected — don't set.
 - Everything degrades gracefully: Google/GHL/Stripe/Netlify/Anthropic each **no-op when unset**.
 - ⚠️ **Setting Edge secrets restarts ALL function isolates and kills in-flight generate-site builds** —

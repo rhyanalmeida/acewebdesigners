@@ -71,10 +71,26 @@ export async function checkDomain(domain: string): Promise<DomainCheck> {
 /**
  * Register a domain for 1 year from the prepaid balance. NON-REFUNDABLE — the
  * caller is responsible for having confirmed the exact spelling with the buyer.
+ *
+ * The API requires `cost` (integer USD cents, exactly matching checkDomain's
+ * price) + `agreeToTerms` — pass the price from a just-run checkDomain, or it
+ * is re-fetched here.
  */
-export async function registerDomain(domain: string): Promise<{ ok: boolean; error?: string }> {
+export async function registerDomain(
+  domain: string,
+  priceUsd?: string,
+): Promise<{ ok: boolean; error?: string }> {
   if (!porkbunConfigured()) return { ok: false, error: 'Porkbun not configured' }
-  const data = await pb(`/domain/create/${domain}`, { years: '1' })
+  let price = priceUsd
+  if (!price) {
+    const check = await checkDomain(domain)
+    if (!check.ok || !check.price) return { ok: false, error: `price lookup failed: ${check.error ?? 'no price'}` }
+    price = check.price
+  }
+  const data = await pb(`/domain/create/${domain}`, {
+    cost: Math.round(parseFloat(price) * 100),
+    agreeToTerms: 'yes',
+  })
   if (!data || data.status !== 'SUCCESS') return { ok: false, error: data?.message ?? 'register failed' }
   console.log(`[porkbun] registered ${domain}`)
   return { ok: true }

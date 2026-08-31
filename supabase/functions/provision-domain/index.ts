@@ -128,7 +128,7 @@ async function provision(supa: ReturnType<typeof admin>, p: ProspectRow): Promis
           return void (await fail('taken_after_checkout — pick a new domain in /admin and retry'))
         }
       } else {
-        const reg = await registerDomain(domain)
+        const reg = await registerDomain(domain, check.price)
         if (!reg.ok) return void (await fail(`register failed: ${reg.error ?? ''}`))
       }
     }
