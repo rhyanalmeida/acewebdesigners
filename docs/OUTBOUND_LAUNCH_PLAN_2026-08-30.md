@@ -119,25 +119,40 @@ Status: DONE (2026-08-31)
       after a second 0-builds-in-flight check; value never echoed.)*
 
 ## Phase 4 — Sending infrastructure (start ASAP — warm-up ≈ 3 weeks)
-Status: not started
+Status: in progress (2026-08-31 — all CLAUDE-doable work done: webhook endpoint verified
+end-to-end incl. GHL tag, sequence drafted; DNS + Instantly-side config blocked on the three
+OWNER purchases below — the 3-week warm-up clock has NOT started)
 
 - [ ] **OWNER** Buy 2–3 lookalike sending domains at Porkbun (~$33/yr total), e.g.
       `acewebdesign.co`, `aceweb-designers.com`, `getacewebdesigners.com`. NEVER cold-send
       from acewebdesigners.com — a burned lookalike is disposable, the main domain is not.
+      *(2026-08-31 verified NOT done: Porkbun `domain/listAll` returns zero domains.)*
 - [ ] **OWNER** Google Workspace Business Starter: **2 inboxes per sending domain**
-      (~$28–42/mo total), e.g. rhyan@ + hello@ on each.
+      (~$28–42/mo total), e.g. rhyan@ + hello@ on each. *(Blocked by no domains.)*
 - [ ] **OWNER** Instantly.ai account (Growth ~$37/mo): connect every inbox, enable warm-up on
-      all. **The 3-week warm-up clock starts here.**
+      all. **The 3-week warm-up clock starts here.** *(2026-08-31: no Instantly session in the
+      Playwright profile — no account exists/accessible yet.)*
 - [ ] **CLAUDE** Per sending domain: SPF + DKIM (from Workspace) + aligned DMARC (`p=none`)
       records and a 301 redirect to acewebdesigners.com — set via Porkbun, verify with dig +
-      an auth checker.
-- [ ] **CLAUDE** Configure the Instantly webhook →
+      an auth checker. *(2026-08-31: ⛔ blocked — zero domains in the Porkbun account.)*
+- [~] **CLAUDE** Configure the Instantly webhook →
       `https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/instantly-webhook?secret=<value>`;
       fire test events; verify `suppressions` rows + `outbound-lead` tag land.
-- [ ] **BOTH** Cold sequence (2–3 touches): CLAUDE drafts, OWNER approves. Hard rules: no
+      *(2026-08-31: ENDPOINT HALF DONE — curl bounce + unsubscribe (fake @example.com) → 200 +
+      correct `suppressions` rows; curl reply on a throwaway non-is_test prospect → `replied_at`
+      stamped + GHL contact created with tag `outbound-lead` + Demo Preview URL field carrying
+      the `/demo/<token>` URL (verified via GHL API). All test rows + the GHL contact deleted.
+      Side effect: the reply test fired one staff SMS/email via "Outbound — Interested Lead" —
+      expected. REMAINING: paste the URL into Instantly → campaign → webhooks (reply/bounce/
+      unsub events) once the account exists; secret value is in `supabase/.env`.)*
+- [~] **BOTH** Cold sequence (2–3 touches): CLAUDE drafts, OWNER approves. Hard rules: no
       invented stats or social proof (owner rule), truthful free-preview framing, physical
       postal address in the footer (**OWNER: provide it**), Instantly unsubscribe link,
       `{{demo_url}}` as the CTA.
+      *(2026-08-31: CLAUDE draft done → `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` — 3 touches
+      Day 0/3/7, plain text, `{{demo_url}}` sole CTA, `{{unsubscribe}}` + postal-address
+      placeholder in every footer, merge fields limited to what `export-instantly.mjs` emits.
+      OWNER: approve the draft + provide the postal address.)*
 
 ## Phase 5 — Full-pipeline dry run (gate: before ANY cold email)
 Status: not started
