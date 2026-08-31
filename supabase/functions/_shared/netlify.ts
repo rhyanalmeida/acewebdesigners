@@ -153,6 +153,82 @@ export async function deployFiles(
   }
 }
 
+/** The site's Netlify subdomain name (e.g. "preview-acme-a1b2c3") — CNAME target is `<name>.netlify.app`. */
+export async function getSiteName(siteId: string): Promise<string | null> {
+  if (!netlifyConfigured()) return null
+  try {
+    const resp = await fetch(`${NETLIFY_API}/sites/${siteId}`, { headers: headers(false) })
+    if (!resp.ok) {
+      console.error('[netlify] get site failed', resp.status, (await resp.text()).slice(0, 200))
+      return null
+    }
+    const data = (await resp.json()) as { name?: string }
+    return data.name ?? null
+  } catch (err) {
+    console.error('[netlify] get site error', err)
+    return null
+  }
+}
+
+/**
+ * Attach a purchased custom domain (+ www alias) to a site. Netlify provisions
+ * Let's Encrypt automatically once DNS resolves; use provisionSsl/getSslState to
+ * kick and poll. Pass null to detach (cancellation cleanup).
+ */
+export async function setCustomDomain(
+  siteId: string,
+  domain: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!netlifyConfigured()) return { ok: false, error: 'NETLIFY_AUTH_TOKEN unset' }
+  try {
+    const resp = await fetch(`${NETLIFY_API}/sites/${siteId}`, {
+      method: 'PATCH',
+      headers: headers(),
+      body: JSON.stringify({
+        custom_domain: domain,
+        domain_aliases: domain ? [`www.${domain}`] : [],
+      }),
+    })
+    if (!resp.ok) {
+      return { ok: false, error: `set custom_domain failed (${resp.status}) ${(await resp.text()).slice(0, 200)}` }
+    }
+    await resp.body?.cancel()
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: String(err).slice(0, 200) }
+  }
+}
+
+/** Ask Netlify to (re)provision the Let's Encrypt cert. Fails until DNS propagates — retry later. */
+export async function provisionSsl(siteId: string): Promise<{ ok: boolean; error?: string }> {
+  if (!netlifyConfigured()) return { ok: false, error: 'NETLIFY_AUTH_TOKEN unset' }
+  try {
+    const resp = await fetch(`${NETLIFY_API}/sites/${siteId}/ssl`, { method: 'POST', headers: headers() })
+    if (!resp.ok) {
+      return { ok: false, error: `ssl provision failed (${resp.status}) ${(await resp.text()).slice(0, 200)}` }
+    }
+    await resp.body?.cancel()
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: String(err).slice(0, 200) }
+  }
+}
+
+/** Current cert state ('issued' once live). */
+export async function getSslState(siteId: string): Promise<{ ok: boolean; state?: string; error?: string }> {
+  if (!netlifyConfigured()) return { ok: false, error: 'NETLIFY_AUTH_TOKEN unset' }
+  try {
+    const resp = await fetch(`${NETLIFY_API}/sites/${siteId}/ssl`, { headers: headers(false) })
+    if (!resp.ok) {
+      return { ok: false, error: `ssl state failed (${resp.status}) ${(await resp.text()).slice(0, 200)}` }
+    }
+    const data = (await resp.json()) as { state?: string }
+    return { ok: true, state: data.state }
+  } catch (err) {
+    return { ok: false, error: String(err).slice(0, 200) }
+  }
+}
+
 /** Delete a Netlify site (used when an appointment is marked No-Show). 404 = already gone. */
 export async function deleteNetlifySite(siteId: string): Promise<{ ok: boolean; error?: string }> {
   if (!netlifyConfigured()) return { ok: false, error: 'NETLIFY_AUTH_TOKEN unset' }

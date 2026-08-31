@@ -587,7 +587,9 @@
     <!-- The main-site pixel is skipped on /contractorlanding AND /buildyoursite —
          those pages each load their OWN pixel (contractor in LandingContractors.tsx,
          restaurant in BuildYourSite.tsx) so we don't double-fire events to two
-         pixels on the same page. Each ad funnel is fully isolated to one pixel. -->
+         pixels on the same page. Each ad funnel is fully isolated to one pixel.
+         /demo/ (outbound cold-email funnel) loads NO pixel at all — it isn't
+         ad-driven and fires no Meta events anywhere. -->
     <script>
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return
@@ -605,7 +607,7 @@
         s = b.getElementsByTagName(e)[0]
         s.parentNode.insertBefore(t, s)
       })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
-      if (!/\/(contractorlanding|buildyoursite)(\/|$|\?)/i.test(window.location.pathname + window.location.search)) {
+      if (!/\/(contractorlanding|buildyoursite)(\/|$|\?)|\/demo\//i.test(window.location.pathname + window.location.search)) {
         fbq('init', '1703925480259996')
         fbq('track', 'PageView')
       }

@@ -18,7 +18,8 @@ import {
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
   fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration, regenerateBrief,
-  type AdminData, type AdminContact, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat,
+  retryProspectSite, retryProvisioning,
+  type AdminData, type AdminContact, type Appt, type CapiOutcome, type Prospect, type ResultKind, type ResultResponse, type ServerEventStat,
 } from './adminApi'
 
 // ── formatting helpers ────────────────────────────────────────────────────────
@@ -885,7 +886,149 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
   )
 }
 
-type Tab = 'overview' | 'customers' | 'website' | 'conversions' | 'social'
+// ── outbound (cold-email demo funnel) tab ────────────────────────────────────
+const SITE_CHIP: Record<string, string> = {
+  none: 'bg-slate-100 text-slate-500',
+  generating: 'bg-sky-50 text-sky-700',
+  deployed: 'bg-emerald-50 text-emerald-700',
+  failed: 'bg-rose-50 text-rose-700',
+}
+const DOMAIN_CHIP: Record<string, string> = {
+  none: 'bg-slate-100 text-slate-400',
+  registering: 'bg-sky-50 text-sky-700',
+  dns_set: 'bg-sky-50 text-sky-700',
+  attached: 'bg-violet-50 text-violet-700',
+  ssl_pending: 'bg-amber-50 text-amber-700',
+  live: 'bg-emerald-50 text-emerald-700',
+  failed: 'bg-rose-50 text-rose-700',
+  cancelled: 'bg-slate-100 text-slate-500',
+}
+
+const OutboundTab: React.FC<{ prospects: Prospect[]; onChanged: () => void }> = ({ prospects, onChanged }) => {
+  const [busy, setBusy] = useState<string | null>(null)
+  const [rowErr, setRowErr] = useState<Record<string, string>>({})
+  const real = prospects.filter((p) => !p.is_test)
+
+  const act = async (id: string, fn: () => Promise<unknown>) => {
+    setBusy(id); setRowErr((e) => ({ ...e, [id]: '' }))
+    try { await fn(); onChanged() }
+    catch (e) { setRowErr((prev) => ({ ...prev, [id]: e instanceof Error ? e.message : 'Action failed' })) }
+    finally { setBusy(null) }
+  }
+  const fixDomain = (p: Prospect) => {
+    const domain = window.prompt(
+      `"${p.chosen_domain}" failed (${p.domain_error ?? 'unknown'}).\nEnter a replacement .com domain to register:`,
+      p.chosen_domain ?? '',
+    )
+    if (!domain) return
+    void act(p.id, () => retryProvisioning(p.id, domain.trim().toLowerCase()))
+  }
+
+  const stats = {
+    total: real.length,
+    emailed: real.filter((p) => p.emailed_at).length,
+    viewed: real.filter((p) => p.demo_first_viewed_at).length,
+    built: real.filter((p) => p.site_status === 'deployed').length,
+    purchased: real.filter((p) => p.purchased_at).length,
+    live: real.filter((p) => p.domain_status === 'live').length,
+  }
+
+  return (
+    <>
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <Kpi icon={Users} label="Prospects" value={stats.total} accent="indigo" />
+        <Kpi icon={ArrowRight} label="Emailed" value={stats.emailed} accent="sky" />
+        <Kpi icon={Globe} label="Viewed demo page" value={stats.viewed} accent="violet" />
+        <Kpi icon={Sparkles} label="Demos built" value={stats.built} accent="amber" />
+        <Kpi icon={Target} label="Purchased" value={stats.purchased} accent="emerald" />
+        <Kpi icon={CheckCircle2} label="Sites live" value={stats.live} accent="emerald" />
+      </section>
+      <section>
+        <h2 className={`${sectionTitle} mb-2`}>Prospects</h2>
+        <div className={`${card} overflow-x-auto p-1.5`}>
+          {prospects.length === 0 ? (
+            <p className="p-4 text-sm text-slate-400">
+              No prospects yet — import a batch with <code className="rounded bg-slate-100 px-1">node scripts/import-prospects.mjs</code>.
+            </p>
+          ) : (
+            <table className="w-full min-w-[900px] text-sm">
+              <thead>
+                <tr className="text-left text-xs text-slate-400">
+                  <th className="px-3 py-2 font-medium">Business</th>
+                  <th className="px-3 py-2 font-medium">Batch</th>
+                  <th className="px-3 py-2 font-medium">Funnel</th>
+                  <th className="px-3 py-2 font-medium">Demo site</th>
+                  <th className="px-3 py-2 font-medium">Domain</th>
+                  <th className="px-3 py-2 font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {prospects.map((p) => (
+                  <tr key={p.id} className="border-t border-slate-100 align-top">
+                    <td className="px-3 py-2.5">
+                      <div className="font-medium text-slate-800">
+                        {p.business_name}
+                        {p.is_test && <span className="ml-1.5 rounded bg-amber-100 px-1 py-0.5 text-[10px] font-semibold text-amber-700">TEST</span>}
+                        {p.suppressed && <span className="ml-1.5 rounded bg-rose-100 px-1 py-0.5 text-[10px] font-semibold text-rose-700">{p.suppressed_reason ?? 'suppressed'}</span>}
+                      </div>
+                      <div className="text-xs text-slate-400">{[p.email, [p.city, p.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ')}</div>
+                    </td>
+                    <td className="px-3 py-2.5 text-xs text-slate-500">{p.batch ?? '—'}</td>
+                    <td className="px-3 py-2.5 text-xs text-slate-500">
+                      {p.purchased_at ? `Purchased ${timeAgo(p.purchased_at)}`
+                        : p.replied_at ? `Replied ${timeAgo(p.replied_at)}`
+                        : p.demo_first_viewed_at ? `Viewed ${timeAgo(p.demo_first_viewed_at)} (${p.demo_view_count ?? 0}×)`
+                        : p.emailed_at ? `Emailed ${timeAgo(p.emailed_at)}`
+                        : 'Imported'}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${SITE_CHIP[p.site_status] ?? SITE_CHIP.none}`}>{p.site_status}</span>
+                      {p.preview_url && p.site_status === 'deployed' && (
+                        <a href={p.preview_url} target="_blank" rel="noreferrer" className="ml-2 inline-flex items-center gap-0.5 text-xs text-indigo-600 hover:underline"><ExternalLink size={12} />open</a>
+                      )}
+                      {p.site_status === 'failed' && p.site_error && <div className="mt-1 max-w-[220px] truncate text-[11px] text-rose-500" title={p.site_error}>{p.site_error}</div>}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      {p.chosen_domain ? (
+                        <>
+                          <div className="text-xs font-medium text-slate-700">{p.chosen_domain}</div>
+                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${DOMAIN_CHIP[p.domain_status] ?? DOMAIN_CHIP.none}`}>{p.domain_status}</span>
+                          {p.domain_error && <div className="mt-1 max-w-[220px] truncate text-[11px] text-rose-500" title={p.domain_error}>{p.domain_error}</div>}
+                        </>
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-right">
+                      <div className="flex flex-col items-end gap-1">
+                        {(p.site_status === 'failed' || p.site_status === 'generating') && (
+                          <button onClick={() => void act(p.id, () => retryProspectSite(p.id))} disabled={busy === p.id} className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50">
+                            {busy === p.id ? 'Working…' : 'Retry build'}
+                          </button>
+                        )}
+                        {p.purchased_at && p.domain_status === 'failed' && (
+                          <button onClick={() => fixDomain(p)} disabled={busy === p.id} className="text-xs font-medium text-rose-600 hover:underline disabled:opacity-50">Fix domain…</button>
+                        )}
+                        {p.purchased_at && ['registering', 'dns_set', 'attached', 'ssl_pending'].includes(p.domain_status) && (
+                          <button onClick={() => void act(p.id, () => retryProvisioning(p.id))} disabled={busy === p.id} className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50">
+                            {busy === p.id ? 'Working…' : 'Retry provisioning'}
+                          </button>
+                        )}
+                        {rowErr[p.id] && <span className="max-w-[180px] text-right text-[11px] text-rose-500">{rowErr[p.id]}</span>}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </section>
+    </>
+  )
+}
+
+type Tab = 'overview' | 'customers' | 'website' | 'conversions' | 'social' | 'outbound'
 
 // ── dashboard ───────────────────────────────────────────────────────────────────
 const AdminDashboard: React.FC = () => {
@@ -960,6 +1103,7 @@ const AdminDashboard: React.FC = () => {
     { id: 'website', label: 'Website', icon: <Globe size={16} /> },
     { id: 'conversions', label: 'Conversion Log', icon: <Activity size={16} /> },
     { id: 'social', label: 'Social', icon: <Share2 size={16} /> },
+    { id: 'outbound', label: 'Outbound', icon: <Zap size={16} /> },
   ]
 
   return (
@@ -1032,6 +1176,8 @@ const AdminDashboard: React.FC = () => {
           </>
         ) : tab === 'customers' ? (
           <CustomerOverview data={data} onResult={setResulting} onPaymentLink={setPayLinking} />
+        ) : tab === 'outbound' ? (
+          <OutboundTab prospects={data.prospects ?? []} onChanged={load} />
         ) : tab === 'conversions' ? (
           <>
             {data.serverEvents && <ConversionFlow se={data.serverEvents} />}

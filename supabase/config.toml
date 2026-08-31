@@ -47,3 +47,20 @@ verify_jwt = true
 
 [functions.result]
 verify_jwt = true
+
+# ── Outbound cold-email demo funnel ───────────────────────────────────────────
+# Public demo-page endpoint; the 32-hex prospect token is the capability.
+[functions.demo-site]
+verify_jwt = false
+
+# Public domain-availability check (token-gated inside).
+[functions.domain-search]
+verify_jwt = false
+
+# Internal (x-internal-key from stripe-webhook / self-chain) or admin JWT.
+[functions.provision-domain]
+verify_jwt = false
+
+# Instantly.ai posts here — guarded by INSTANTLY_WEBHOOK_SECRET, not JWT.
+[functions.instantly-webhook]
+verify_jwt = false

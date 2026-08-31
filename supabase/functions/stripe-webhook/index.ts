@@ -6,14 +6,18 @@
  * `purchase_<appt>`, so it dedupes against a manual result-form Purchase.
  *
  * Configure in Stripe → Developers → Webhooks → endpoint
- *   $SUPABASE_URL/functions/v1/stripe-webhook   (event: checkout.session.completed)
+ *   $SUPABASE_URL/functions/v1/stripe-webhook
+ *   events: checkout.session.completed, customer.subscription.deleted
+ * (subscription.deleted powers the outbound demo-site cancellation flow.)
  */
 
 import Stripe from 'npm:stripe@17.0.0'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { sendCapiEvent } from '../_shared/meta.ts'
 import { loadAppointmentIdentity, loadContactIdentity } from '../_shared/identity.ts'
-import { ghlSyncStage } from '../_shared/ghl.ts'
+import { ghlSyncStage, ghlUpdateContactFields } from '../_shared/ghl.ts'
+
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
 const reply = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { 'Content-Type': 'application/json' } })
@@ -40,6 +44,81 @@ Deno.serve(async (req: Request) => {
     const session = event.data.object as Stripe.Checkout.Session
     const amount = (session.amount_total ?? 0) / 100
     const currency = (session.currency || 'usd').toUpperCase()
+
+    // ── Outbound demo-site purchase (prospect, no contact/appointment) ───────
+    // MUST precede the restaurant branch — its mode==='subscription' catch would
+    // swallow this session. No Meta CAPI (the outbound funnel is not ad-driven).
+    // Idempotency: only the delivery that stamps purchased_at (conditional
+    // update) triggers domain provisioning; redeliveries no-op.
+    if (session.metadata?.kind === 'demo_site') {
+      const prospectId = session.metadata?.prospect_id || session.client_reference_id || ''
+      const domain = (session.metadata?.domain || '').toLowerCase()
+      const subId = typeof session.subscription === 'string' ? session.subscription : session.id
+      if (prospectId && domain) {
+        const supa = admin()
+        const { data: won } = await supa
+          .from('prospects')
+          .update({
+            purchased_at: new Date().toISOString(),
+            plan: session.metadata?.plan || 'demo_monthly',
+            chosen_domain: domain,
+            stripe_subscription_id: subId,
+            stripe_customer_id: typeof session.customer === 'string' ? session.customer : null,
+            domain_status: 'registering',
+          })
+          .eq('id', prospectId)
+          .is('purchased_at', null)
+          .select('id, is_test, email, phone, first_name, last_name, business_name, business_type, city, state')
+          .maybeSingle()
+
+        if (won) {
+          const w = won as {
+            id: string; is_test: boolean; email: string | null; phone: string | null
+            first_name: string | null; last_name: string | null; business_name: string
+            business_type: string | null; city: string | null; state: string | null
+          }
+          if (!w.is_test) try {
+            await ghlSyncStage({
+              stage: 'purchased',
+              funnel: 'outbound',
+              email: w.email ?? undefined,
+              phone: w.phone ?? undefined,
+              firstName: w.first_name ?? undefined,
+              lastName: w.last_name ?? undefined,
+              businessName: w.business_name,
+              city: w.city ?? undefined,
+              state: w.state ?? undefined,
+              attribution: { dealValue: amount, recurringValue: amount, recurringInterval: 'month', planName: session.metadata?.plan },
+              qualifiers: { business_type: w.business_type ?? undefined, chosen_domain: domain },
+            })
+          } catch (err) {
+            console.error('[stripe-webhook] ghl demo_site sync failed', err)
+          }
+
+          // Fire-and-forget the domain purchase + go-live chain.
+          const provision = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/provision-domain`, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+            },
+            body: JSON.stringify({ prospectId: w.id }),
+          }).then(
+            async (r) => {
+              if (!r.ok) console.error('[stripe-webhook] provision-domain trigger failed', r.status)
+              await r.body?.cancel()
+            },
+            (err) => console.error('[stripe-webhook] provision-domain trigger error', err),
+          )
+          if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(provision)
+          else await provision
+          console.log(`[stripe-webhook] demo_site purchased prospect=${w.id} domain=${domain}`)
+        } else {
+          console.log(`[stripe-webhook] demo_site redelivery ignored prospect=${prospectId}`)
+        }
+      }
+      return reply({ received: true })
+    }
 
     // ── Restaurant self-serve subscription (no appointment) ──────────────────
     // Tied to a contact via metadata; fire Purchase from the contact's stored
@@ -166,6 +245,35 @@ Deno.serve(async (req: Request) => {
         // 23505: already claimed → leave the existing row alone.
         if (insErr && (insErr as { code?: string }).code === '23503') {
           await supa.from('capi_events').insert({ ...errRow, appointment_id: null })
+        }
+      }
+    }
+  }
+
+  // ── Outbound demo-site cancellation ────────────────────────────────────────
+  // Teardown is deliberately manual: mark the row + note it in GHL; the domain
+  // is simply not renewed (Porkbun registrations are non-refundable) and /admin
+  // detaches the custom domain after a grace period.
+  if (event.type === 'customer.subscription.deleted') {
+    const sub = event.data.object as Stripe.Subscription
+    if (sub.metadata?.kind === 'demo_site') {
+      const supa = admin()
+      const { data } = await supa
+        .from('prospects')
+        .update({ cancelled_at: new Date().toISOString(), domain_status: 'cancelled' })
+        .eq('stripe_subscription_id', sub.id)
+        .is('cancelled_at', null)
+        .select('id, is_test, email, phone')
+        .maybeSingle()
+      const p = data as { id: string; is_test: boolean; email: string | null; phone: string | null } | null
+      if (p) {
+        console.log(`[stripe-webhook] demo_site subscription cancelled prospect=${p.id}`)
+        if (!p.is_test && (p.email || p.phone)) {
+          await ghlUpdateContactFields({
+            email: p.email ?? undefined,
+            phone: p.phone ?? undefined,
+            qualifiers: { plan_name: 'cancelled' },
+          })
         }
       }
     }

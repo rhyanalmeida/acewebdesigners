@@ -29,6 +29,12 @@
  *
  * POST { appointmentId, force? }                       → start (stage 1), 202
  * POST { appointmentId, stage: 2, files } (internal)   → continue the chain
+ *
+ * SUBJECT ADAPTER (2026-08-30): the chain also builds demo sites for the
+ * outbound cold-email funnel — POST { prospectId } instead of { appointmentId }.
+ * The model input was only ever the business brief (name/trade/city/phone), so a
+ * `prospects` row works identically; its site columns mirror appointments'.
+ * The `demo-site` fn is the public trigger (per-prospect token, one build ever).
  */
 
 import Anthropic from 'npm:@anthropic-ai/sdk@0.40.1'
@@ -138,16 +144,16 @@ async function loadDesignSystems(supa: ReturnType<typeof admin>): Promise<Design
   }
 }
 
-/** Resolve the design system for a booking: explicit override id, else deterministic by appt id + trade. */
+/** Resolve the design system: explicit override id, else deterministic by subject id + trade. */
 async function resolveDesignSystem(
   supa: ReturnType<typeof admin>,
-  appt: ApptRow,
+  subject: Subject,
   styleOverride?: string,
 ): Promise<DesignSystem> {
   const systems = await loadDesignSystems(supa)
   return (
     designSystemById(systems, styleOverride) ??
-    selectDesignSystem(systems, appt.id, appt.contacts?.business_type)
+    selectDesignSystem(systems, subject.id, subject.brief.business_type)
   )
 }
 
@@ -239,6 +245,8 @@ function stripFences(raw: string): string {
 
 interface Body {
   appointmentId?: string
+  /** Outbound-funnel subject: build for a `prospects` row instead (demo-site trigger). */
+  prospectId?: string
   force?: boolean
   /** Internal chain state (stage 2 self-invocation only). */
   stage?: number
@@ -251,23 +259,89 @@ interface Body {
   pb?: NichePlaybook
 }
 
-interface ApptRow {
+interface SubjectBrief {
+  first_name: string | null
+  business_name: string | null
+  business_type: string | null
+  city: string | null
+  state: string | null
+  phone: string | null
+}
+
+/**
+ * The thing a site is built FOR: an appointment (contractor booking funnel) or a
+ * prospect (outbound cold-email funnel). Only the brief reaches the model; the
+ * row otherwise just gates (is_test/site_status) and stores the site fields —
+ * prospect columns mirror appointments', so `save` only switches the table.
+ */
+interface Subject {
+  kind: 'appointment' | 'prospect'
   id: string
   is_test: boolean
   site_status: string | null
   netlify_site_id: string | null
-  contacts: {
-    first_name: string | null
-    business_name: string | null
-    business_type: string | null
-    city: string | null
-    state: string | null
-    phone: string | null
-  } | null
+  brief: SubjectBrief
 }
 
-function businessBrief(appt: ApptRow): string {
-  const c = appt.contacts
+async function loadSubject(supa: ReturnType<typeof admin>, b: Body): Promise<Subject | null> {
+  if (b.appointmentId) {
+    const { data, error } = await supa
+      .from('appointments')
+      .select(
+        'id, is_test, site_status, netlify_site_id, contacts:contact_id ( first_name, business_name, business_type, city, state, phone )',
+      )
+      .eq('id', b.appointmentId)
+      .single()
+    if (error || !data) return null
+    const row = data as unknown as {
+      id: string
+      is_test: boolean
+      site_status: string | null
+      netlify_site_id: string | null
+      contacts: SubjectBrief | null
+    }
+    return {
+      kind: 'appointment',
+      id: row.id,
+      is_test: row.is_test,
+      site_status: row.site_status,
+      netlify_site_id: row.netlify_site_id,
+      brief: row.contacts ?? {
+        first_name: null, business_name: null, business_type: null, city: null, state: null, phone: null,
+      },
+    }
+  }
+  const { data, error } = await supa
+    .from('prospects')
+    .select('id, is_test, site_status, netlify_site_id, first_name, business_name, business_type, city, state, phone')
+    .eq('id', b.prospectId!)
+    .single()
+  if (error || !data) return null
+  const row = data as unknown as {
+    id: string
+    is_test: boolean
+    site_status: string | null
+    netlify_site_id: string | null
+  } & SubjectBrief
+  return {
+    kind: 'prospect',
+    id: row.id,
+    is_test: row.is_test,
+    site_status: row.site_status,
+    netlify_site_id: row.netlify_site_id,
+    brief: {
+      first_name: row.first_name,
+      business_name: row.business_name,
+      business_type: row.business_type,
+      city: row.city,
+      state: row.state,
+      phone: row.phone,
+    },
+  }
+}
+
+function businessBrief(subject: Subject): string {
+  const c = subject.brief
   const businessName = c?.business_name?.trim() || `${c?.first_name ?? 'Local'}'s Business`
   const trade = c?.business_type?.trim() || 'general contracting'
   const place = [c?.city, c?.state].filter(Boolean).join(', ')
@@ -284,13 +358,13 @@ function businessBrief(appt: ApptRow): string {
 /** Run one Sonnet stage; returns the newly generated files. Throws on bad output. */
 async function generateStage(
   stage: number,
-  appt: ApptRow,
+  subject: Subject,
   priorFiles: Record<string, string>,
   ds: DesignSystem,
   pb: NichePlaybook,
 ): Promise<Record<string, string>> {
   const spec = STAGES[stage]
-  let userMsg = `${businessBrief(appt)}\n${spec.instruction}`
+  let userMsg = `${businessBrief(subject)}\n${spec.instruction}`
   if (stage > 1) {
     const ctx = ['/styles.css', '/main.js', '/index.html']
       .filter((p) => priorFiles[p])
@@ -320,19 +394,20 @@ async function generateStage(
 
 /** Fire the next stage as a fresh invocation (fresh isolate = fresh time budget). */
 async function invokeNextStage(
-  appointmentId: string,
+  subject: Subject,
   stage: number,
   files: Record<string, string>,
   ds: DesignSystem,
   pb: NichePlaybook,
 ): Promise<void> {
+  const idField = subject.kind === 'prospect' ? { prospectId: subject.id } : { appointmentId: subject.id }
   const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-site`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     },
-    body: JSON.stringify({ appointmentId, stage, files, ds, pb }),
+    body: JSON.stringify({ ...idField, stage, files, ds, pb }),
   })
   if (!resp.ok) throw new Error(`stage ${stage} handoff failed (${resp.status}) ${(await resp.text()).slice(0, 150)}`)
   await resp.body?.cancel()
@@ -340,38 +415,39 @@ async function invokeNextStage(
 
 async function runStage(
   stage: number,
-  appt: ApptRow,
+  subject: Subject,
   priorFiles: Record<string, string>,
   threadedDs?: DesignSystem,
   styleOverride?: string,
   threadedPb?: NichePlaybook,
 ): Promise<void> {
   const supa = admin()
+  const table = subject.kind === 'prospect' ? 'prospects' : 'appointments'
   const save = (fields: Record<string, unknown>) =>
-    supa.from('appointments').update(fields).eq('id', appt.id)
+    supa.from(table).update(fields).eq('id', subject.id)
 
   // Stages 2-3 receive the resolved style + playbook; stage 1 resolves them (DB, else fallback).
-  const ds = threadedDs ?? (await resolveDesignSystem(supa, appt, styleOverride))
-  const pb = threadedPb ?? (await resolveNichePlaybook(supa, appt.contacts?.business_type))
+  const ds = threadedDs ?? (await resolveDesignSystem(supa, subject, styleOverride))
+  const pb = threadedPb ?? (await resolveNichePlaybook(supa, subject.brief.business_type))
 
   try {
     if (stage === 1) {
       await save({ site_status: 'generating', site_error: null })
-      console.log(`[generate-site] appt=${appt.id} style="${ds.id}" (${ds.name}) trade="${appt.contacts?.business_type ?? ''}"`)
+      console.log(`[generate-site] ${subject.kind}=${subject.id} style="${ds.id}" (${ds.name}) trade="${subject.brief.business_type ?? ''}"`)
     }
 
-    const files = { ...priorFiles, ...(await generateStage(stage, appt, priorFiles, ds, pb)) }
+    const files = { ...priorFiles, ...(await generateStage(stage, subject, priorFiles, ds, pb)) }
 
     if (stage < FINAL_STAGE) {
-      await invokeNextStage(appt.id, stage + 1, files, ds, pb)
-      console.log(`[generate-site] stage ${stage} done appt=${appt.id} → stage ${stage + 1}`)
+      await invokeNextStage(subject, stage + 1, files, ds, pb)
+      console.log(`[generate-site] stage ${stage} done ${subject.kind}=${subject.id} → stage ${stage + 1}`)
       return
     }
 
     // ── final stage: create the Netlify site (reuse a previous one) + deploy ────
-    const c = appt.contacts
+    const c = subject.brief
     const businessName = c?.business_name?.trim() || `${c?.first_name ?? 'preview'}'s business`
-    let siteId = appt.netlify_site_id
+    let siteId = subject.netlify_site_id
     let siteUrl: string | null = null
     if (!siteId) {
       const site = await createNetlifySite(businessName)
@@ -390,9 +466,9 @@ async function runStage(
       site_generated_at: new Date().toISOString(),
       site_error: null,
     })
-    console.log(`[generate-site] deployed appt=${appt.id} site=${siteId} files=${Object.keys(files).length}`)
+    console.log(`[generate-site] deployed ${subject.kind}=${subject.id} site=${siteId} files=${Object.keys(files).length}`)
   } catch (err) {
-    console.error(`[generate-site] stage ${stage} failed`, appt.id, err)
+    console.error(`[generate-site] stage ${stage} failed`, subject.id, err)
     await save({ site_status: 'failed', site_error: `stage ${stage}: ${String(err).slice(0, 280)}` }).then(
       () => {},
       () => {},
@@ -422,28 +498,24 @@ Deno.serve(async (req: Request) => {
   } catch {
     return json({ error: 'invalid JSON' }, 400)
   }
-  if (!b.appointmentId) return json({ error: 'appointmentId required' }, 400)
+  if (!b.appointmentId && !b.prospectId) return json({ error: 'appointmentId or prospectId required' }, 400)
+  if (b.appointmentId && b.prospectId) return json({ error: 'pass exactly one of appointmentId / prospectId' }, 400)
   const stage = b.stage ?? 1
   if (!STAGES[stage]) return json({ error: 'invalid stage' }, 400)
   if (stage > 1 && !internal) return json({ error: 'stages are internal' }, 403) // chain only
 
   const supa = admin()
-  const { data, error } = await supa
-    .from('appointments')
-    .select(
-      'id, is_test, site_status, netlify_site_id, contacts:contact_id ( first_name, business_name, business_type, city, state, phone )',
-    )
-    .eq('id', b.appointmentId)
-    .single()
-  if (error || !data) return json({ error: 'appointment not found' }, 404)
-  const appt = data as unknown as ApptRow
+  const subject = await loadSubject(supa, b)
+  if (!subject) return json({ error: `${b.prospectId ? 'prospect' : 'appointment'} not found` }, 404)
 
   if (stage === 1) {
-    if (appt.is_test && !b.force) return json({ ok: true, skipped: 'test booking' })
-    if (appt.site_status === 'deployed' && !b.force) return json({ ok: true, skipped: 'already deployed' })
+    if (subject.is_test && subject.kind === 'appointment' && !b.force) {
+      return json({ ok: true, skipped: 'test booking' })
+    }
+    if (subject.site_status === 'deployed' && !b.force) return json({ ok: true, skipped: 'already deployed' })
   }
 
-  const task = runStage(stage, appt, b.files ?? {}, b.ds, b.style, b.pb)
+  const task = runStage(stage, subject, b.files ?? {}, b.ds, b.style, b.pb)
   if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) {
     EdgeRuntime.waitUntil(task)
   } else {

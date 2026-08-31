@@ -62,15 +62,19 @@ Supabase Edge Functions (supabase/functions, Deno)
   capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
   generate-site  3-stage Opus 4.8 chain → builds+deploys a preview website (see Current state)
   generate-copy  restaurant wizard AI copy (claude-haiku-4-5)
+  demo-site      outbound: /demo/<token> status + the one-click (one-EVER) demo build gate
+  domain-search  outbound: Porkbun .com availability for the checkout domain picker (token-gated)
+  provision-domain outbound: post-purchase Porkbun register + DNS → Netlify custom_domain → SSL poll
+  instantly-webhook outbound: Instantly reply/bounce/unsub → prospects + suppressions + GHL tag
   create-subscription / create-checkout / stripe-webhook   Stripe → Purchase CAPI
   ghl-webhook    logs GHL messaging sends (visibility)
   _shared/*      meta.ts (CAPI engine), contacts.ts, attribution.ts, availability.ts, google.ts,
                  ghl.ts (ghlSyncStage/createGhlAppointment/pushLegacyBooking), netlify.ts,
                  designSystems.ts, nichePlaybooks.ts, identity.ts, adminAuth.ts
         ▼
-Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks
+Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks · prospects · suppressions
         ▼ external sinks
-Meta CAPI · Google Calendar · Stripe · GHL (messaging only) · Netlify (preview sites) · Anthropic API
+Meta CAPI · Google Calendar · Stripe · GHL (messaging only) · Netlify (preview sites) · Anthropic API · Porkbun (domains) · Instantly (cold email)
 ```
 
 **Funnel + dedup model:** four events, each at its logical moment:
@@ -247,6 +251,40 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   returned a one-off `WORKER_RESOURCE_LIMIT` (546) — if it recurs with credits present, the sync
   research call may need the 202+poll pattern.
 
+## Outbound cold-email demo funnel — BUILT; launching per `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md`
+**Launch = 6 phases, ONE phase per session, checklist lives in that doc — read it first and
+check items off there.** Price locked $49/mo; Supabase keep-alive = scheduled ping; lead list =
+Apify CSV from owner.
+A fourth funnel (2026-08-30): scraped contractor lists → cold email via **Instantly.ai** (NOT GHL —
+LC Email bans scraped lists; 3 ESP blocks in 7 days = permanent suspension that would kill booking
+comms. Instantly sends from 2–3 warmed lookalike domains, ~30/inbox/day; replies webhook back) →
+per-prospect `/demo/<token>` page (token = 32-hex capability, only key the page ever sends) →
+demo builds **on first click only** (explicit button + atomic `site_status none→generating` gate —
+one Opus build EVER per prospect, ~$0.60-1.10) via `generate-site` **subject adapter**
+(`{prospectId}` instead of `{appointmentId}`; same 3-stage chain, saves to `prospects`) → customer
+picks their .com at checkout (`domain-search` → Porkbun availability; re-checked at session create
+AND before register — registrations are NON-refundable) → `create-subscription` plan
+`demo_monthly` (`STRIPE_PRICE_DEMO_MONTHLY`) → `stripe-webhook` `kind:'demo_site'` branch
+(**placed BEFORE the restaurant `mode==='subscription'` catch — order matters**; idempotent via
+conditional `purchased_at is null` stamp) → `provision-domain` fn: Porkbun register (prepaid
+balance) → DNS (A @→75.2.60.5, CNAME www→`<site>.netlify.app`) → Netlify `custom_domain` PATCH →
+SSL poll (self-reinvoking rounds, ~1h cap → `ssl_pending`, admin Retry re-enters; retries
+distinguish "we own it" via `domainIsOurs`). **NO Meta pixel/CAPI anywhere** (not ad-driven;
+`/demo/` excluded in index.html + App.tsx). GHL isolation via `outbound-*` tag set in
+`STAGE_TAGS`; demo-page first view + Instantly replies fire `outbound-lead`, purchase fires
+`outbound-purchased` (workflows still to be built in GHL UI). `instantly-webhook` fn
+(`INSTANTLY_WEBHOOK_SECRET` via header or `?secret=`) handles reply/bounce/unsub → `suppressions`
+table (CAN-SPAM source of truth, enforced by both scripts). Test prospects (`is_test`): skip GHL,
+provision only against the Porkbun sandbox (`PORKBUN_API_BASE`).
+- **Ops:** `node scripts/import-prospects.mjs --file x.csv --batch b1 --trade plumber` (skips
+  suppressed/non-US/no-email; upserts on gmaps_place_id) → `node scripts/export-instantly.mjs
+  --batch b1` (stamps emailed_at; `--no-stamp` = dry) → upload CSV to Instantly, `{{demo_url}}` in
+  template. /admin **Outbound** tab: funnel KPIs + per-prospect status + Retry build / Retry
+  provisioning / Fix domain (taken_after_checkout recovery: sets new `chosen_domain` + re-runs).
+- **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
+  checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
+  warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).
+
 ## Restaurant self-serve funnel — BUILT, DEPLOY PENDING
 A third, fully isolated ad funnel (own pixel + dataset + tags + page) — nothing crosses into
 contractor/main. Self-serve wizard with live preview → monthly Stripe **subscription** (no booking).
@@ -408,8 +446,10 @@ stay in the Ace Web Designers portfolio.)
   `GHL_API_TOKEN` (PIT) / `GHL_LOCATION_ID` / `GHL_CALENDAR_ID` / `GHL_ASSIGNED_USER_ID` /
   `GHL_CUSTOM_FIELD_IDS` (JSON id map) / `GHL_INBOUND_WEBHOOK_URL` + `GHL_LEGACY_WEBHOOK`,
   `GOOGLE_SERVICE_ACCOUNT_B64` / `GOOGLE_CALENDAR_ID_CONTRACTOR` / `_MAIN`, `STRIPE_SECRET_KEY` /
-  `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_*`, `GHL_WEBHOOK_SECRET`, `ADMIN_EMAILS`,
-  `NETLIFY_AUTH_TOKEN`, `ANTHROPIC_API_KEY`.
+  `STRIPE_WEBHOOK_SECRET` / `STRIPE_PRICE_*` (incl. `STRIPE_PRICE_DEMO_MONTHLY`),
+  `GHL_WEBHOOK_SECRET`, `ADMIN_EMAILS`, `NETLIFY_AUTH_TOKEN`, `ANTHROPIC_API_KEY`,
+  `PORKBUN_API_KEY` / `PORKBUN_SECRET_API_KEY` / `PORKBUN_API_BASE` (unset = prod; sandbox
+  `https://api-sandbox.porkbun.com/api/json/v3`), `INSTANTLY_WEBHOOK_SECRET` (outbound funnel).
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_ANON_KEY` are auto-injected — don't set.
 - Everything degrades gracefully: Google/GHL/Stripe/Netlify/Anthropic each **no-op when unset**.
 - ⚠️ **Setting Edge secrets restarts ALL function isolates and kills in-flight generate-site builds** —

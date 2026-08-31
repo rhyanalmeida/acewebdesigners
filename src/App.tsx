@@ -18,6 +18,8 @@ import Home from './pages/Home'
 
 // Admin dashboard is lazy-loaded so it never ships in the landing-page bundles.
 const AdminDashboard = React.lazy(() => import('./admin/AdminDashboard'))
+// Outbound demo page — lazy for the same reason (cold-email traffic only).
+const DemoPage = React.lazy(() => import('./pages/DemoPage'))
 
 import { PageShell } from './components/layout'
 import { useScrollReveal } from './hooks/useScrollReveal'
@@ -37,9 +39,10 @@ type PageKey =
   | 'privacy'
   | 'termsofservice'
   | 'admin'
+  | 'demo'
 
 /** Pages that should render without the standard header/footer/sticky CTA chrome. */
-const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'buildyoursite', 'refer', 'termsofservice', 'admin']
+const BARE_PAGES: PageKey[] = ['landing', 'contractorlanding', 'buildyoursite', 'refer', 'termsofservice', 'admin', 'demo']
 
 function App() {
   const [currentPage, setCurrentPage] = React.useState<PageKey>('home')
@@ -54,6 +57,7 @@ function App() {
       // doesn't get caught by "/landing", and "/socialmedia" doesn't get caught
       // by "/services". Default falls through to 'home'.
       if (path.includes('/admin')) setCurrentPage('admin')
+      else if (path.includes('/demo/')) setCurrentPage('demo')
       else if (path.includes('/contractorlanding')) setCurrentPage('contractorlanding')
       else if (path.includes('/buildyoursite')) setCurrentPage('buildyoursite')
       else if (path.includes('/landing')) setCurrentPage('landing')
@@ -111,7 +115,8 @@ function App() {
       currentPage === 'landing' ||
       currentPage === 'contractorlanding' ||
       currentPage === 'buildyoursite' ||
-      currentPage === 'admin'
+      currentPage === 'admin' ||
+      currentPage === 'demo' // outbound funnel: no Meta events at all
     )
       return
     trackEvent('PageView')
@@ -156,6 +161,12 @@ function App() {
         return (
           <React.Suspense fallback={<div className="p-10 text-center text-gray-500">Loading…</div>}>
             <AdminDashboard />
+          </React.Suspense>
+        )
+      case 'demo':
+        return (
+          <React.Suspense fallback={<div className="p-10 text-center text-gray-500">Loading…</div>}>
+            <DemoPage />
           </React.Suspense>
         )
       case 'home':

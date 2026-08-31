@@ -123,7 +123,7 @@ Deno.serve(async (req: Request) => {
   const supa = admin()
 
   // ── maintenance action: purge all test data (capi rows first — FK on appointments)
-  let body: { action?: string; appointmentId?: string } = {}
+  let body: { action?: string; appointmentId?: string; prospectId?: string; chosenDomain?: string } = {}
   try {
     body = await req.json()
   } catch {
@@ -162,6 +162,55 @@ Deno.serve(async (req: Request) => {
     }
     return json({ ok: true })
   }
+  // ── outbound funnel actions ────────────────────────────────────────────────
+  // Retry a prospect's demo build (force restarts even after failure/deploy).
+  if (body.action === 'retryProspectSite') {
+    if (!body.prospectId) return json({ error: 'prospectId required' }, 400)
+    try {
+      const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/generate-site`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        },
+        body: JSON.stringify({ prospectId: body.prospectId, force: true }),
+      })
+      if (!resp.ok) return json({ error: `generate-site ${resp.status}` }, 502)
+      await resp.body?.cancel()
+    } catch (err) {
+      return json({ error: String(err).slice(0, 200) }, 502)
+    }
+    return json({ ok: true })
+  }
+  // Retry domain provisioning (register → DNS → attach → SSL). Optionally fix
+  // the domain first (the taken_after_checkout recovery path).
+  if (body.action === 'retryProvisioning') {
+    if (!body.prospectId) return json({ error: 'prospectId required' }, 400)
+    if (body.chosenDomain) {
+      const domain = String(body.chosenDomain).trim().toLowerCase()
+      if (!/^[a-z0-9-]{3,60}\.com$/.test(domain)) return json({ error: 'invalid domain' }, 400)
+      const { error } = await supa
+        .from('prospects')
+        .update({ chosen_domain: domain, domain_status: 'registering', domain_error: null })
+        .eq('id', body.prospectId)
+      if (error) return json({ error: error.message }, 500)
+    }
+    try {
+      const resp = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/provision-domain`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        },
+        body: JSON.stringify({ prospectId: body.prospectId }),
+      })
+      if (!resp.ok) return json({ error: `provision-domain ${resp.status}: ${(await resp.text()).slice(0, 150)}` }, 502)
+      await resp.body?.cancel()
+    } catch (err) {
+      return json({ error: String(err).slice(0, 200) }, 502)
+    }
+    return json({ ok: true })
+  }
   if (body.action === 'discardTests') {
     const capiDel = await supa.from('capi_events').delete({ count: 'exact' }).eq('is_test', true)
     if (capiDel.error) return json({ error: capiDel.error.message }, 500)
@@ -194,6 +243,16 @@ Deno.serve(async (req: Request) => {
       .order('created_at', { ascending: false })
       .limit(300),
   ])
+  // Outbound funnel prospects (separate query — table may not exist pre-migration).
+  const prospectsRes = await supa
+    .from('prospects')
+    .select(
+      'id, business_name, business_type, first_name, last_name, email, phone, city, state, batch, is_test, ' +
+        'suppressed, suppressed_reason, site_status, site_error, preview_url, demo_first_viewed_at, demo_view_count, ' +
+        'plan, chosen_domain, domain_status, domain_error, purchased_at, cancelled_at, emailed_at, replied_at, created_at',
+    )
+    .order('created_at', { ascending: false })
+    .limit(500)
 
   const leads = leadsRes.count ?? 0
   const availabilityRows = availRes.count ?? 0
@@ -264,5 +323,6 @@ Deno.serve(async (req: Request) => {
     }),
     ghlMessages: ghlMessagesRes.data ?? [],
     contactsList: contactsRes.data ?? [],
+    prospects: prospectsRes.data ?? [],
   })
 })

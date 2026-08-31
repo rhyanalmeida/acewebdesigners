@@ -145,6 +145,45 @@ export interface AdminContact {
   landing_url?: string | null
   utm?: Record<string, string> | null
 }
+/** Outbound cold-email funnel prospect (see migration 0010). */
+export interface Prospect {
+  id: string
+  business_name: string
+  business_type?: string | null
+  first_name?: string | null
+  last_name?: string | null
+  email?: string | null
+  phone?: string | null
+  city?: string | null
+  state?: string | null
+  batch?: string | null
+  is_test?: boolean
+  suppressed?: boolean
+  suppressed_reason?: string | null
+  site_status: 'none' | 'generating' | 'deployed' | 'failed'
+  site_error?: string | null
+  preview_url?: string | null
+  demo_first_viewed_at?: string | null
+  demo_view_count?: number
+  plan?: string | null
+  chosen_domain?: string | null
+  domain_status:
+    | 'none'
+    | 'registering'
+    | 'dns_set'
+    | 'attached'
+    | 'ssl_pending'
+    | 'live'
+    | 'failed'
+    | 'cancelled'
+  domain_error?: string | null
+  purchased_at?: string | null
+  cancelled_at?: string | null
+  emailed_at?: string | null
+  replied_at?: string | null
+  created_at: string
+}
+
 export interface AdminData {
   health: AdminHealth
   warnings: Warning[]
@@ -156,6 +195,7 @@ export interface AdminData {
   capiEvents: CapiEvent[]
   ghlMessages: GhlMessage[]
   contactsList?: AdminContact[] // optional: old function payloads omit it
+  prospects?: Prospect[] // optional: old function payloads omit it
 }
 
 async function errorMessage(error: unknown, fallback: string): Promise<{ status: number; message: string }> {
@@ -265,6 +305,37 @@ export async function regenerateBrief(appointmentId: string): Promise<{ ok: bool
   })
   if (error) {
     const { message } = await errorMessage(error, 'Could not start the brief')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}
+
+/** Outbound funnel: force-retry a prospect's demo-site build (generate-site). */
+export async function retryProspectSite(prospectId: string): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', {
+    body: { action: 'retryProspectSite', prospectId },
+  })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not restart the demo build')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}
+
+/**
+ * Outbound funnel: re-run domain provisioning (register → DNS → attach → SSL).
+ * Pass `chosenDomain` to change the domain first — the taken-after-checkout
+ * recovery path (e.g. "acmeplumbingfl.com").
+ */
+export async function retryProvisioning(
+  prospectId: string,
+  chosenDomain?: string,
+): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', {
+    body: { action: 'retryProvisioning', prospectId, ...(chosenDomain ? { chosenDomain } : {}) },
+  })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not restart provisioning')
     throw new Error(message)
   }
   return data as { ok: boolean }

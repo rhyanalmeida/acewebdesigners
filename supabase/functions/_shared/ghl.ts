@@ -43,8 +43,10 @@ export type FunnelStage = 'lead' | 'booked' | 'showed' | 'noshow' | 'purchased'
  * separate accounts. 'default' = contractor/main; 'restaurant' = the self-serve
  * restaurant funnel. A restaurant lead gets `restaurant-lead` (NOT `funnel-lead`),
  * so it only enrolls in restaurant workflows — never the contractor nurture.
+ * 'outbound' = the cold-email demo-site funnel (Instantly sends the cold email;
+ * GHL only handles interested prospects, tagged here).
  */
-export type GhlFunnel = 'default' | 'restaurant'
+export type GhlFunnel = 'default' | 'restaurant' | 'outbound'
 
 /** Per-funnel, per-stage tag. GHL workflows trigger on "Contact Tag" added. */
 const STAGE_TAGS: Record<GhlFunnel, Record<FunnelStage, string>> = {
@@ -61,6 +63,13 @@ const STAGE_TAGS: Record<GhlFunnel, Record<FunnelStage, string>> = {
     showed: 'restaurant-showed',
     noshow: 'restaurant-noshow',
     purchased: 'restaurant-purchased',
+  },
+  outbound: {
+    lead: 'outbound-lead',
+    booked: 'outbound-booked',
+    showed: 'outbound-showed',
+    noshow: 'outbound-noshow',
+    purchased: 'outbound-purchased',
   },
 }
 

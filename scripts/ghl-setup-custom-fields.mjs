@@ -42,6 +42,9 @@ const FIELDS = [
   { key: 'business_type', name: 'Business Type / Trade', dataType: 'TEXT' },
   { key: 'years_in_business', name: 'Years In Business', dataType: 'TEXT' },
   { key: 'has_website', name: 'Has Website Now', dataType: 'TEXT' },
+  // outbound demo-site funnel (cold email → /demo/<token> → purchase)
+  { key: 'preview_url', name: 'Demo Preview URL', dataType: 'LARGE_TEXT' },
+  { key: 'chosen_domain', name: 'Purchased Domain', dataType: 'TEXT' },
 ]
 
 function readEnv(file) {
