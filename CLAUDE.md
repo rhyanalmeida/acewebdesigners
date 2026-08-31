@@ -335,10 +335,11 @@ stay in the Ace Web Designers portfolio.)
 | `1575254990791923` (Restaurant Builder CAPI) | **RESTAURANT dataset** — `/buildyoursite` (pending launch) |
 | `1548487516424971` | **DEAD** — do not use (caused the old 0-leads bug) |
 
-- Campaign **"Free Website Offer For Contractors (6/1/26)"** id `120241554190170259` — **ACTIVE**
-  (relaunched 2026-08-03; owner had paused it 7/23 at $53.52 / 0 leads — half the pre-agreed
-  **$100-with-0-leads kill line** in `docs/contractor-ad-creative.md`. Status here rots — re-verify
-  via API before trusting it). Budget is **CBO $20/day at campaign level**, bid strategy Highest
+- Campaign **"Free Website Offer For Contractors (6/1/26)"** id `120241554190170259` — **PAUSED**
+  (verified via API 2026-08-31, $0 spend last 7d; owner paused for cash reasons — total spend
+  ~$54 of the pre-agreed **$100-with-0-leads kill line** in `docs/contractor-ad-creative.md`, so
+  the creative is still unjudged. Outbound funnel is the acquisition channel while paused. Status
+  here rots — re-verify via API before trusting it). Budget is **CBO $20/day at campaign level**, bid strategy Highest
   volume. Note: API `advantage_state` reads `DISABLED` (audience + budget levers ENABLED, placement
   lever DISABLED — probable cause the account-level AN block; the ad set itself has zero placement
   restrictions). Labeling only, no documented delivery penalty — the AN block stays regardless.
