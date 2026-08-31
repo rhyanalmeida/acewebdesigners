@@ -292,8 +292,13 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   `acewebdesignershq.com` — Porkbun, $11.08/yr each, WHOIS privacy + auto-renew on. SPF
   (`include:_spf.google.com`), DMARC (`p=none`, rua hello@), and a permanent wildcard 301 →
   acewebdesigners.com are set (Porkbun defaults — parking SPF + temporary l.ink forward —
-  were replaced). Pending: Google Workspace (1 inbox/domain to start), then DKIM TXT + swap
-  MX from fwdN.porkbun.com to Google. NEVER cold-send from acewebdesigners.com.
+  were replaced). **Google Workspace live (2026-08-31):** org "Ace Web Designers", admin
+  `rhyan@getacewebdesigners.com` + second inbox `rhyan@acewebdesignershq.com` (creds in
+  `~/.secrets/google-workspace-credentials.txt`); both domains verified, Gmail activated,
+  DKIM set, MX = smtp.google.com. ⚠️ Plan = Business Plus 14-day trial, bills $19.80/user
+  from Sep 14 — owner to keep or downgrade to Starter in Admin console → Billing.
+  Pending: Instantly account + warm-up (starts the 3-week clock). NEVER cold-send from
+  acewebdesigners.com.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
   warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).

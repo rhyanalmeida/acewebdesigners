@@ -128,24 +128,32 @@ OWNER purchases below — the 3-week warm-up clock has NOT started)
       *(2026-08-31 BOUGHT: **getacewebdesigners.com** + **acewebdesignershq.com**, $11.08/yr
       each ($22.16 total, lean 2-domain plan), WHOIS privacy on, auto-renew on, expire
       2027-08-31. Agent staged cart via Playwright, owner paid via Stripe Checkout.)*
-- [ ] **OWNER** Google Workspace: **1 inbox per sending domain** to start (lean plan ≈
-      $14/mo, 2 seats; scale to 2/domain at ramp). Sign up at workspace.google.com with
-      primary domain `getacewebdesigners.com`, add `acewebdesignershq.com` as a secondary
-      domain, create one user on each. *(2026-08-31: next owner purchase.)*
+- [x] **OWNER+CLAUDE** Google Workspace: **1 inbox per sending domain** (scale to 2/domain at
+      ramp). *(2026-08-31 DONE: agent drove signup via Playwright, owner paid. Org "Ace Web
+      Designers", admin `rhyan@getacewebdesigners.com` (creds in
+      `~/.secrets/google-workspace-credentials.txt`), secondary domain `acewebdesignershq.com`
+      + second user `rhyan@acewebdesignershq.com` (temp password in same file, forced change
+      on first sign-in). Both domains verified + Gmail activated + DKIM keys generated/confirmed
+      in the wizard. ⚠️ Plan is **Business Plus** (Google preselected; no Starter option surfaced
+      at checkout) — 14-day trial, $0 until Sep 14, then $19.80/user/mo (promo) → $26.40. OWNER
+      DECISION: downgrade to Business Starter (~$7/user) in Admin console → Billing before
+      Sep 14, or keep Plus. Agent offered; owner said "stop messing with it" mid-checkout, so
+      left as-is.)*
 - [ ] **OWNER** Instantly.ai account (Growth ~$37/mo): connect every inbox, enable warm-up on
       all. **The 3-week warm-up clock starts here.** *(2026-08-31: no Instantly session in the
       Playwright profile — no account exists/accessible yet.)*
-- [~] **CLAUDE** Per sending domain: SPF + DKIM (from Workspace) + aligned DMARC (`p=none`)
+- [x] **CLAUDE** Per sending domain: SPF + DKIM (from Workspace) + aligned DMARC (`p=none`)
       records and a 301 redirect to acewebdesigners.com — set via Porkbun, verify with dig +
-      an auth checker. *(2026-08-31 DONE except DKIM on both domains: SPF root TXT
+      an auth checker. *(2026-08-31 FULLY DONE — same session as Workspace setup: DKIM
+      `google._domainkey` TXT set + confirmed in the wizard for BOTH domains, MX swapped to
+      `smtp.google.com` prio 1 (stale fwd2.porkbun.com rows removed; verified via
+      nslookup @8.8.8.8) on BOTH. Earlier same day: SPF root TXT
       `v=spf1 include:_spf.google.com ~all` (replaced Porkbun's default `_spf.porkbun.com`
       SPF — gotcha: new domains ship parking DNS incl. a temporary l.ink URL forward, which
       was deleted), DMARC `_dmarc` TXT `v=DMARC1; p=none; rua=mailto:hello@acewebdesigners.com;
       aspf=r; adkim=r`, permanent wildcard URL forward → https://acewebdesigners.com. Verified
       via nslookup @1.1.1.1 (both TXT pairs resolve) + curl (301 + Location live on
-      getacewebdesigners.com; acewebdesignershq.com forwarder provisioning at check time —
-      re-curl it). REMAINING once Workspace exists: DKIM TXT from Admin console, and swap MX
-      from fwd1/fwd2.porkbun.com to Google's.)*
+      getacewebdesigners.com; acewebdesignershq.com's 301 confirmed live later same day).)*
 - [~] **CLAUDE** Configure the Instantly webhook →
       `https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/instantly-webhook?secret=<value>`;
       fire test events; verify `suppressions` rows + `outbound-lead` tag land.
