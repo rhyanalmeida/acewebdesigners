@@ -153,7 +153,10 @@ Deno.serve(async (req: Request) => {
       businessName: p.business_name,
       city: p.city ?? undefined,
       state: p.state ?? undefined,
-      qualifiers: { business_type: p.business_type ?? undefined },
+      qualifiers: {
+        business_type: p.business_type ?? undefined,
+        preview_url: `https://acewebdesigners.com/demo/${token}`,
+      },
     }).then(async (ghlId) => {
       if (ghlId) await supa.from('prospects').update({ ghl_contact_id: ghlId }).eq('id', p.id)
     })

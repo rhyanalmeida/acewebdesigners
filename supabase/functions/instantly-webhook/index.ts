@@ -56,12 +56,13 @@ Deno.serve(async (req: Request) => {
   const supa = admin()
   const { data } = await supa
     .from('prospects')
-    .select('id, is_test, suppressed, email, phone, first_name, last_name, business_name, business_type, city, state, replied_at')
+    .select('id, token, is_test, suppressed, email, phone, first_name, last_name, business_name, business_type, city, state, replied_at')
     .ilike('email', email)
     .maybeSingle()
   const p = data as
     | {
         id: string
+        token: string
         is_test: boolean
         suppressed: boolean
         email: string | null
@@ -108,7 +109,10 @@ Deno.serve(async (req: Request) => {
           businessName: p.business_name,
           city: p.city ?? undefined,
           state: p.state ?? undefined,
-          qualifiers: { business_type: p.business_type ?? undefined },
+          qualifiers: {
+            business_type: p.business_type ?? undefined,
+            preview_url: `https://acewebdesigners.com/demo/${p.token}`,
+          },
         })
         if (ghlId) await supa.from('prospects').update({ ghl_contact_id: ghlId }).eq('id', p.id)
       }

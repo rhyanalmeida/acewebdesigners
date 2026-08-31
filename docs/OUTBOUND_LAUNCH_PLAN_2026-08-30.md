@@ -85,20 +85,38 @@ fix; remaining OWNER action: $50 Porkbun balance + auto top-up, blocked on no ca
       still wait for Phase 5 (and the $50 balance).
 
 ## Phase 3 — GHL wiring (parallel with Phase 2)
-Status: not started
+Status: DONE (2026-08-31)
 
-- [ ] **CLAUDE** `node scripts/ghl-setup-custom-fields.mjs` (idempotent; now includes
+- [x] **CLAUDE** `node scripts/ghl-setup-custom-fields.mjs` (idempotent; now includes
       `preview_url` + `chosen_domain`) → set the printed `GHL_CUSTOM_FIELD_IDS` secret.
-- [ ] **CLAUDE** (Playwright, GHL UI — workflows can't be created via API) Workflow
+      *(2026-08-31: 21 fields matched, 2 created — Demo Preview URL `ywQp2gT8RhVEFGFjHq5b`
+      / fieldKey `contact.demo_preview_url`, Purchased Domain `MKwDW5R9q5ZOCuqRtYu7` /
+      `contact.purchased_domain`. Secret set via single `secrets set` after 0-builds-in-flight
+      check; local supabase/.env synced. Also fixed a gap: nothing populated `preview_url` in
+      GHL — added the `/demo/<token>` URL as a qualifier in demo-site + instantly-webhook
+      `ghlSyncStage` calls, both deployed.)*
+- [x] **CLAUDE** (Playwright, GHL UI — workflows can't be created via API) Workflow
       **"Outbound — Interested Lead"**, trigger tag `outbound-lead`: staff SMS + email alert
       (prospect name, business, demo link from the `preview_url` custom field). NO
       prospect-facing sends — Instantly owns the sequence until pilot data says otherwise.
       Re-entry OFF. Gotcha: the Publish toggle is a pending change — click **Save** after.
-- [ ] **CLAUDE** (Playwright) Workflow **"Outbound — Purchased (Onboarding)"**, trigger tag
+      *(2026-08-31: id `be242a43-d61d-4931-b7b7-cccd26181540` — Published (verified in list
+      after save + re-open), re-entry OFF, staff SMS to +17743293117 + staff email to hello@,
+      both merge in `{{contact.demo_preview_url}}`. Zero prospect-facing sends. Tags
+      `outbound-lead`/`outbound-purchased` created in GHL via the trigger picker.)*
+- [x] **CLAUDE** (Playwright) Workflow **"Outbound — Purchased (Onboarding)"**, trigger tag
       `outbound-purchased`: customer welcome email (what happens next; site live within ~1h)
       + staff alert. Re-entry OFF. Never touch/re-enable the old disabled CAPI workflow.
-- [ ] **CLAUDE** Generate a random `INSTANTLY_WEBHOOK_SECRET` → set secret (consumed in
-      Phase 4).
+      *(2026-08-31: id `edd5c23c-5e48-4c25-8ac1-96dea2cfa9b5` — Published (verified),
+      re-entry OFF. Welcome email from hello@: domain + ~1h go-live + reply-for-changes +
+      $49/mo coverage, truthful framing, no invented stats. Staff SMS with
+      `{{contact.purchased_domain}}`. Old CAPI workflow untouched. Builder gotcha found:
+      the email editor autolinks `{{contact.name}}`-style tags — .name/.email/.phone/.company
+      parse as TLDs — breaking "custom variables" validation; fix = select-all + unlink
+      before saving.)*
+- [x] **CLAUDE** Generate a random `INSTANTLY_WEBHOOK_SECRET` → set secret (consumed in
+      Phase 4). *(2026-08-31: 48-hex value written to supabase/.env + set as Edge secret
+      after a second 0-builds-in-flight check; value never echoed.)*
 
 ## Phase 4 — Sending infrastructure (start ASAP — warm-up ≈ 3 weeks)
 Status: not started

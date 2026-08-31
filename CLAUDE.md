@@ -271,8 +271,10 @@ balance) → DNS (A @→75.2.60.5, CNAME www→`<site>.netlify.app`) → Netlify
 SSL poll (self-reinvoking rounds, ~1h cap → `ssl_pending`, admin Retry re-enters; retries
 distinguish "we own it" via `domainIsOurs`). **NO Meta pixel/CAPI anywhere** (not ad-driven;
 `/demo/` excluded in index.html + App.tsx). GHL isolation via `outbound-*` tag set in
-`STAGE_TAGS`; demo-page first view + Instantly replies fire `outbound-lead`, purchase fires
-`outbound-purchased` (workflows still to be built in GHL UI). `instantly-webhook` fn
+`STAGE_TAGS`; demo-page first view + Instantly replies fire `outbound-lead` (qualifiers include
+`preview_url` = the `/demo/<token>` URL → GHL "Demo Preview URL" field), purchase fires
+`outbound-purchased` (+ `chosen_domain` → "Purchased Domain"); both GHL workflows live (see
+Live workflows). `instantly-webhook` fn
 (`INSTANTLY_WEBHOOK_SECRET` via header or `?secret=`) handles reply/bounce/unsub → `suppressions`
 table (CAN-SPAM source of truth, enforced by both scripts). Test prospects (`is_test`): skip GHL,
 provision only when `PORKBUN_API_BASE` is set. ⚠️ Porkbun's `api-sandbox` host is DEAD (403) —
@@ -507,8 +509,17 @@ contact with the same enriched attribution we send Meta (into custom fields by i
   Lead" (`funnel-lead`, goal `funnel-booked`→END; 3 touches: 15min SMS → day-2 email → day-4 SMS →
   day-6 final SMS), C "Post-Meeting — Showed Follow-up" (`funnel-showed`), D "Onboarding — Purchased"
   (`funnel-purchased`), "No-Show — Rebook Follow-up" (`funnel-noshow` tag → immediate missed-you SMS →
-  wait 2d → rebook SMS; tag set by `result` fn on No-Show), and "Internal — New Booking Alerts (Staff)"
-  (staff SMS/email). The old "contractor appointment workflow" (had GHL-side CAPI, double-fired) stays
+  wait 2d → rebook SMS; tag set by `result` fn on No-Show), "Internal — New Booking Alerts (Staff)"
+  (staff SMS/email), **"Outbound — Interested Lead"** (2026-08-31, id
+  `be242a43-d61d-4931-b7b7-cccd26181540`; `outbound-lead` tag → staff SMS +17743293117 + staff
+  email hello@ with `{{contact.demo_preview_url}}` — NO prospect-facing sends, Instantly owns the
+  sequence; re-entry OFF), and **"Outbound — Purchased (Onboarding)"** (2026-08-31, id
+  `edd5c23c-5e48-4c25-8ac1-96dea2cfa9b5`; `outbound-purchased` tag → customer welcome email from
+  hello@ (domain + ~1h go-live + reply-for-changes, truthful framing) + staff SMS with
+  `{{contact.purchased_domain}}`; re-entry OFF). ⚠️ Workflow-builder gotcha: the email editor
+  AUTOLINKS `{{contact.name}}`-style merge tags (.name/.email/.phone/.company parse as TLDs),
+  failing save validation ("issues in your custom variables") — select-all + unlink before saving.
+  The old "contractor appointment workflow" (had GHL-side CAPI, double-fired) stays
   **disabled** — do not re-enable. The calendar's native "Appointment booked" notification has
   **Contact** unchecked (Workflow A owns lead comms; staff alerts kept).
 - **Verified 2026-07-17:** Workflow A delivers end-to-end (SMS "Delivered" in execution logs for both
