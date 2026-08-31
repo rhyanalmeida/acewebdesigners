@@ -119,9 +119,11 @@ Status: DONE (2026-08-31)
       after a second 0-builds-in-flight check; value never echoed.)*
 
 ## Phase 4 — Sending infrastructure (start ASAP — warm-up ≈ 3 weeks)
-Status: in progress (2026-08-31 — all CLAUDE-doable work done: webhook endpoint verified
-end-to-end incl. GHL tag, sequence drafted; DNS + Instantly-side config blocked on the three
-OWNER purchases below — the 3-week warm-up clock has NOT started)
+Status: in progress (2026-08-31 — domains bought + full DNS/auth stack live on both, Workspace
+live with both inboxes, Instantly trial live with inbox 1 connected + warm-up ON —
+**⏱ 3-WEEK WARM-UP CLOCK STARTED 2026-08-31**. Remaining: inbox 2 Google sign-in block
+(owner: one phone sign-in), Instantly webhook plan gating (decide at plan purchase),
+sequence draft owner approval + postal address, Workspace plan downgrade decision by Sep 14)
 
 - [x] **OWNER** Buy 2–3 lookalike sending domains at Porkbun. NEVER cold-send
       from acewebdesigners.com — a burned lookalike is disposable, the main domain is not.
@@ -139,9 +141,24 @@ OWNER purchases below — the 3-week warm-up clock has NOT started)
       DECISION: downgrade to Business Starter (~$7/user) in Admin console → Billing before
       Sep 14, or keep Plus. Agent offered; owner said "stop messing with it" mid-checkout, so
       left as-is.)*
-- [ ] **OWNER** Instantly.ai account (Growth ~$37/mo): connect every inbox, enable warm-up on
-      all. **The 3-week warm-up clock starts here.** *(2026-08-31: no Instantly session in the
-      Playwright profile — no account exists/accessible yet.)*
+- [~] **OWNER+CLAUDE** Instantly.ai account: connect every inbox, enable warm-up on all.
+      **The 3-week warm-up clock starts here.**
+      *(2026-08-31 MOSTLY DONE — agent-driven: account created on FREE TRIAL (login
+      rhyan@getacewebdesigners.com, password in `~/.secrets/instantly-credentials.txt`; email
+      verified; NO PLAN PAID YET — owner pays when trial ends or a gated feature is needed).
+      Instantly's OAuth app ("Instantly oAuth Email v1") configured as Trusted in Workspace
+      App Access Control (one-time, org-wide). **Inbox 1 rhyan@getacewebdesigners.com
+      CONNECTED via OAuth + WARM-UP ON → clock started 2026-08-31.** Two leftovers:
+      (a) inbox 2 rhyan@acewebdesignershq.com NOT connected — Google risk engine hard-blocked
+      its first-ever sign-in from the automated browser twice ("someone else might be trying");
+      admin-reset password is in the secrets file, "change at next sign-in" OFF. FIX: owner
+      signs into gmail.com as that user once from their PHONE (different device clears the
+      block), then agent redoes Instantly connect + warm-up toggle (~2 min).
+      (b) **Webhooks are plan-gated**: "Add Webhook" pops an upgrade dialog (Hyper Growth
+      $97/mo) on the trial. Not needed until sending starts (Phase 5/6) — when picking the
+      paid plan, verify whether Growth (~$37/mo) includes webhooks; if truly Hyper-Growth-only,
+      alternatives: poll Instantly API from a scheduled script into `instantly-webhook`, or
+      budget the higher plan. Endpoint side is already tested and live either way.)*
 - [x] **CLAUDE** Per sending domain: SPF + DKIM (from Workspace) + aligned DMARC (`p=none`)
       records and a 301 redirect to acewebdesigners.com — set via Porkbun, verify with dig +
       an auth checker. *(2026-08-31 FULLY DONE — same session as Workspace setup: DKIM

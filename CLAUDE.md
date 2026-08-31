@@ -297,8 +297,13 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   `~/.secrets/google-workspace-credentials.txt`); both domains verified, Gmail activated,
   DKIM set, MX = smtp.google.com. ⚠️ Plan = Business Plus 14-day trial, bills $19.80/user
   from Sep 14 — owner to keep or downgrade to Starter in Admin console → Billing.
-  Pending: Instantly account + warm-up (starts the 3-week clock). NEVER cold-send from
-  acewebdesigners.com.
+  **Instantly live on free trial (2026-08-31):** login rhyan@getacewebdesigners.com, creds in
+  `~/.secrets/instantly-credentials.txt`; its OAuth app is Trusted in Workspace; inbox 1
+  connected, **warm-up ON → 3-week clock started 2026-08-31**. Leftovers: inbox 2 blocked by a
+  Google new-account risk cool-down (owner: one gmail.com sign-in from phone clears it, then
+  reconnect in Instantly); Instantly org webhooks are plan-gated (upgrade dialog names Hyper
+  Growth $97/mo) — resolve when the paid plan is chosen, not needed until sending. NEVER
+  cold-send from acewebdesigners.com.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
   warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).
