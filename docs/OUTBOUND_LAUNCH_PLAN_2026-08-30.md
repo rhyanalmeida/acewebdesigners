@@ -23,15 +23,19 @@ Phase 6, and never before Phase 5 is fully green.
 ---
 
 ## Phase 1 — Infrastructure unblock
-Status: not started
+Status: in progress (2026-08-30 — tasks 1–2 DONE; remainder blocked on OWNER Anthropic credits,
+probed same day: API still returns "credit balance is too low")
 
-- [ ] **CLAUDE** Supabase keep-alive: daily Windows scheduled task (pattern: the existing
+- [x] **CLAUDE** Supabase keep-alive: daily Windows scheduled task (pattern: the existing
       Clean-Caches task) curling the public `slots` endpoint so the free-tier project never
       auto-pauses again (it sat INACTIVE ~early-Aug → 8/30; bookings were dead). Script in
       `scripts/`, register via `schtasks`, verify one manual run.
-- [ ] **CLAUDE** Price display: `src/config/outboundPlan.ts` `monthly: 149 → 49`; `npm run
+      *(2026-08-30: `scripts/supabase-keepalive.ps1`, task "Supabase Keep-Alive" daily 9:00 AM,
+      manual run OK 200; logs to `%LOCALAPPDATA%\supabase-keepalive.log`.)*
+- [x] **CLAUDE** Price display: `src/config/outboundPlan.ts` `monthly: 149 → 49`; `npm run
       build` + direct Netlify deploy (git push does NOT ship the frontend); grep the live
       bundle for the change.
+      *(2026-08-30: deployed; live `DemoPage-*.js` chunk greps `monthly:49`.)*
 - [ ] **OWNER** Anthropic credits: top up at platform.claude.com (hello@ Google login). This
       blocks demo builds AND the booking funnel's preview sites + sales briefs.
 - [ ] **CLAUDE** (after credits) Seed niche playbooks: `node scripts/seed-niche-playbooks.mjs`

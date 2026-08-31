@@ -21,7 +21,7 @@ export interface OutboundPlan {
 export const OUTBOUND_PLAN: OutboundPlan = {
   key: 'demo_monthly',
   name: 'Your Website, Live',
-  monthly: 149,
+  monthly: 49,
   tagline: 'The site you just previewed — on your own domain, handled for you.',
   features: [
     'The exact website from your preview, refined and taken live',
