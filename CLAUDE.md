@@ -319,8 +319,10 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   via API by `scripts/instantly-create-campaign.mjs`, which parses
   `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` (single source of copy; `--dry` prints the payload,
   `--update <id>` re-pushes copy/settings, pure logic in `scripts/lib/instantly-campaign.mjs`).
-  Status **Draft — NOT launched** (Launch = owner click in the UI, only after Phase 5 + postal
-  address). Settings verified in UI: both inboxes, 20/day, weekdays 08–17 ET (Instantly's
+  Status **Draft — NOT launched** (Launch = owner click in the UI, only after Phase 5). Footer
+  postal address = the office, 30 North Main St, Leominster, MA 01453 (supplied 2026-09-14;
+  CAN-SPAM 16 CFR 316.2 requires a street address, USPS PO Box, or CMRA box — no exemption
+  for B2B cold email). Settings verified in UI: both inboxes, 20/day, weekdays 08–17 ET (Instantly's
   enum has no America/New_York → `America/Detroit`), stop-on-reply, text-only, open + link
   tracking OFF (demo_url must stay raw — the /demo page logs views itself), unsubscribe
   header ON, gap 10 min + 15 random. Follow-ups 2–3 send with an EMPTY subject (Instantly

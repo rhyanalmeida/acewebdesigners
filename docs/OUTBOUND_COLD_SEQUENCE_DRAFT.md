@@ -1,6 +1,8 @@
 # Outbound cold sequence — DRAFT v2 for owner approval (2026-09-01)
 
-**Status: DRAFT — nothing loads into Instantly until Rhyan approves this file.**
+**Status: APPROVED by owner 2026-09-14 (copy as-is) and loaded into Instantly campaign
+`46657029-fdd6-4567-b5fe-2165bb298367` via `scripts/instantly-create-campaign.mjs`. Edit here,
+then `--update <id>` to re-push — the doc is the single source of copy.**
 
 Revised 2026-09-01 per owner request ("no pricing on day 0; let the research decide the
 structure"). Changes vs v1: price removed from Emails 1–2 and named exactly once (Email 3, the
@@ -38,8 +40,9 @@ MailReach, Whali & imisofts follow-up-count studies; Breakcold reply-rate guide;
   with decent sites, that opener must change before sending to them.
 - `{{demo_url}}` is the **only** CTA link in every email.
 - Instantly's unsubscribe link (`{{unsubscribe}}`) in every email.
-- Footer carries a `[OWNER: physical postal address]` placeholder — **owner must supply the real
-  postal address before launch** (CAN-SPAM requires it).
+- Footer carries the CAN-SPAM postal address (owner-supplied 2026-09-14: 30 North Main St,
+  Leominster, MA 01453 — the office; a street address is one of the three forms 16 CFR 316.2
+  accepts).
 - Plain text only, no images/attachments (deliverability + honesty).
 
 Merge fields (from `scripts/export-instantly.mjs` — the only ones that exist):
@@ -74,7 +77,7 @@ Rhyan
 Ace Web Designers
 
 {{unsubscribe}}
-[OWNER: physical postal address]
+Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ---
 
@@ -95,7 +98,7 @@ Rhyan
 Ace Web Designers
 
 {{unsubscribe}}
-[OWNER: physical postal address]
+Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ---
 
@@ -116,7 +119,7 @@ Rhyan
 Ace Web Designers
 
 {{unsubscribe}}
-[OWNER: physical postal address]
+Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ---
 
@@ -139,12 +142,12 @@ Rhyan
 Ace Web Designers
 
 {{unsubscribe}}
-[OWNER: physical postal address]
+Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ---
 
 ## Owner review checklist (before loading into Instantly)
-- [ ] Supply the real physical postal address (replaces every `[OWNER: ...]` placeholder).
+- [x] Supply the real physical postal address (done 2026-09-14 — in all four footers).
 - [ ] Confirm tone/wording of all four touches (edit freely — resend for re-check if claims change).
 - [ ] Confirm the $49/month placement (named once, Email 3 only) and its wording.
 - [ ] Confirm cadence (Day 0 / 3 / 7 / 14) or adjust in the Instantly campaign settings.

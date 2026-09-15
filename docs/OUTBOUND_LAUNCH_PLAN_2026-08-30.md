@@ -204,10 +204,10 @@ sequence draft owner approval + postal address, Workspace plan downgrade decisio
       manual run + first scheduled run both exit 0 (0 events, nothing sent yet). Campaign
       **"Outbound — Contractors v2"** (`46657029-fdd6-4567-b5fe-2165bb298367`) created via
       API from the approved v2 draft, status Draft/not launched, settings verified in UI.
-      Owner approved v2 copy as-is 2026-09-14; postal address still pending → re-run
+      Owner approved v2 copy as-is 2026-09-14; postal address (30 North Main St, Leominster, MA 01453 — the office) supplied same day and pushed with
       `node scripts/instantly-create-campaign.mjs --update 46657029-fdd6-4567-b5fe-2165bb298367`
-      after editing the doc.)*
-- [~] **BOTH** Cold sequence (2–3 touches): CLAUDE drafts, OWNER approves. Hard rules: no
+      — no placeholders remain in the campaign.)*
+- [x] **BOTH** Cold sequence (2–3 touches): CLAUDE drafts, OWNER approves. Hard rules: no
       invented stats or social proof (owner rule), truthful free-preview framing, physical
       postal address in the footer (**OWNER: provide it**), Instantly unsubscribe link,
       `{{demo_url}}` as the CTA.
@@ -216,7 +216,9 @@ sequence draft owner approval + postal address, Workspace plan downgrade decisio
       merge fields limited to what `export-instantly.mjs` emits.
       2026-09-01: draft revised to v2 per research (owner-requested): 4 touches Day 0/3/7/14,
       price removed from Day 0 and named once in Email 3, "Re:" threading on 2–3.
-      OWNER: approve the draft + provide the postal address.)*
+      2026-09-14: OWNER approved v2 as-is and supplied the office address (30 North Main St,
+      Leominster, MA 01453) after a CAN-SPAM check — 16 CFR 316.2 allows street / USPS PO
+      Box / CMRA only, no hidden-address option. Doc + campaign updated, zero placeholders.)*
 
 ## Phase 5 — Full-pipeline dry run (gate: before ANY cold email)
 Status: not started
