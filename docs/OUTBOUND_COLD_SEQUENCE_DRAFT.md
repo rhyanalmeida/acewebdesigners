@@ -1,11 +1,41 @@
-# Outbound cold sequence — DRAFT for owner approval (2026-08-31)
+# Outbound cold sequence — DRAFT v2 for owner approval (2026-09-01)
 
 **Status: DRAFT — nothing loads into Instantly until Rhyan approves this file.**
 
-Rules honored (locked owner rules + CAN-SPAM):
+Revised 2026-09-01 per owner request ("no pricing on day 0; let the research decide the
+structure"). Changes vs v1: price removed from Emails 1–2 and named exactly once (Email 3, the
+objection-handling touch); sequence extended 3 → 4 touches (Day 0/3/7/14); "Re:" threading on
+follow-ups 2–3 with a fresh subject on the breakup; `{{city}}` used for personalization.
+
+## Why this structure (research, multiple sources, 2026)
+- **No price in the first email.** Sources uniformly favor a short (<80-word), problem-focused
+  first touch with one low-friction ask; hard offers/pricing up front depress replies. Emails
+  that open on a concrete verifiable gap ("no website") report 15–20% replies vs 1–3% generic.
+  Price still appears in the sequence (Email 3) because hiding it entirely until checkout
+  conflicts with our truthful-framing rule — and it pre-qualifies before a demo build is spent.
+- **4 touches, widening gaps (Day 0/3/7/14).** 3–4 emails is the SMB sweet spot: ~40–55% of
+  replies come from follow-ups, but spam-complaint risk roughly triples from the 4th follow-up
+  onward and each email past the third loses ~30% effectiveness. On a scraped list, 4 is the cap.
+- **One job per touch:** hook → value-add → objection pre-handle (price lands here) → clean
+  breakup with no guilt language (guilt CTAs trigger spam reports).
+- **Subjects:** Emails 2–3 thread as "Re:" (context + opens); Email 4 breaks the thread with a
+  fresh subject in case the earlier thread went unseen.
+- Skipped as not applicable: multichannel steps (this funnel is Instantly email-only) and
+  social-proof touches (owner rule: no invented stats; we have no citable proof yet — the free
+  demo itself is the value-add).
+
+Sources: Instantly Cold Email Benchmark Report 2026; Autobound Cold Email Guide 2026; Allegrow
+Cold Email Sequences knowledge base; B2BLeadFinder web-design agency templates (2026); lemlist,
+MailReach, Whali & imisofts follow-up-count studies; Breakcold reply-rate guide; Woodpecker
+20M-email statistics.
+
+## Rules honored (locked owner rules + CAN-SPAM)
 - No invented stats, review counts, or social proof of any kind.
 - Truthful preview framing: the demo is built on the prospect's **first click**, so the copy says
   we "set up a preview page" — never "we already built your site".
+- ⚠️ Email 1's opener ("couldn't find much of a website") depends on the LIST: it's true for the
+  no-/weak-website contractor targeting we scrape for. If a future batch includes businesses
+  with decent sites, that opener must change before sending to them.
 - `{{demo_url}}` is the **only** CTA link in every email.
 - Instantly's unsubscribe link (`{{unsubscribe}}`) in every email.
 - Footer carries a `[OWNER: physical postal address]` placeholder — **owner must supply the real
@@ -15,30 +45,30 @@ Rules honored (locked owner rules + CAN-SPAM):
 Merge fields (from `scripts/export-instantly.mjs` — the only ones that exist):
 `{{email}} {{first_name}} {{company_name}} {{city}} {{state}} {{demo_url}}`.
 `first_name` can be blank in the scraped data — in Instantly, set a fallback of `there` on the
-variable (Instantly supports per-variable fallbacks in the template editor) or leave greetings
-name-free as written below.
+variable; set a fallback of `your area` on `city` (Instantly supports per-variable fallbacks in
+the template editor).
 
-Cadence suggestion: Day 0 → Day 3 → Day 7. Stop on reply (Instantly default) — replies flow to
-the `outbound-lead` GHL staff alert; the webhook suppresses bounces/unsubs automatically.
+Cadence: **Day 0 → Day 3 → Day 7 → Day 14.** Stop on reply (Instantly default) — replies flow
+to the `outbound-lead` GHL staff alert; the webhook suppresses bounces/unsubs automatically.
 
 ---
 
-## Email 1 — Day 0
+## Email 1 — Day 0 (hook — no price)
 
-**Subject:** a homepage for {{company_name}}
+**Subject:** quick question about {{company_name}}
 
 Hi {{first_name}},
 
-I run a small web design studio. I came across {{company_name}} and noticed you don't have
-much of a website presence, so I set up a preview page for your business.
+I looked for {{company_name}} online and couldn't find much of a website — which usually
+means customers in {{city}} can't either.
 
-Open it and click the button, and it puts together a homepage design based on your company —
-takes about a minute, nothing to install, no payment info asked:
+I run a small web design studio, so I set up a preview page for your business. One click and
+it puts together a homepage design based on your company — takes about a minute, nothing to
+install, no payment info asked:
 
 {{demo_url}}
 
-If you like what you see, it's $49/month for us to put it live on your own .com and keep it
-running. If not, no harm done — the preview is free either way.
+Worth a look?
 
 Rhyan
 Ace Web Designers
@@ -48,19 +78,18 @@ Ace Web Designers
 
 ---
 
-## Email 2 — Day 3
+## Email 2 — Day 3 (value-add, threaded — no price)
 
-**Subject:** re: a homepage for {{company_name}}
+**Subject:** Re: quick question about {{company_name}}
 
 Hi {{first_name}},
 
-Quick follow-up — the preview page I set up for {{company_name}} is still there if you want to
-take a look:
+In case the last note got buried — the preview page for {{company_name}} is still live:
 
 {{demo_url}}
 
-One click and it generates a homepage design for your business. Free to look at; $49/month only
-if you decide you want it live on your own domain.
+It's free to generate and takes about a minute. Even if you never hire anyone, it'll show
+you what a modern homepage for your business could look like — useful either way.
 
 Rhyan
 Ace Web Designers
@@ -70,20 +99,41 @@ Ace Web Designers
 
 ---
 
-## Email 3 — Day 7 (final)
+## Email 3 — Day 7 (objection pre-handle, threaded — price lands here, once)
 
-**Subject:** last one from me
+**Subject:** Re: quick question about {{company_name}}
 
 Hi {{first_name}},
 
-I'll keep this short — this is the last email I'll send you.
-
-The preview page for {{company_name}} stays up here if you ever want to see what a homepage
-for your business could look like:
+Guessing the hesitation is time or cost, so to answer both up front: the preview takes one
+click and is free. If you like it and want it live, it's $49/month — that covers your own
+.com domain, hosting, and us keeping it running. Cancel anytime. If not, the preview cost
+you nothing.
 
 {{demo_url}}
 
-If a website isn't a priority right now, totally understood. Good luck with the season.
+Rhyan
+Ace Web Designers
+
+{{unsubscribe}}
+[OWNER: physical postal address]
+
+---
+
+## Email 4 — Day 14 (breakup, fresh subject — no price, no guilt)
+
+**Subject:** closing the file on {{company_name}}
+
+Hi {{first_name}},
+
+Last email from me — I won't keep filling your inbox.
+
+The preview page for {{company_name}} stays up if you ever want to see what a homepage for
+your business could look like:
+
+{{demo_url}}
+
+If a website isn't a priority right now, completely understood. Good luck out there.
 
 Rhyan
 Ace Web Designers
@@ -95,6 +145,8 @@ Ace Web Designers
 
 ## Owner review checklist (before loading into Instantly)
 - [ ] Supply the real physical postal address (replaces every `[OWNER: ...]` placeholder).
-- [ ] Confirm tone/wording of all three touches (edit freely — resend for re-check if claims change).
-- [ ] Confirm the $49/month price is stated the way you want it (it's named in emails 1–2).
-- [ ] Confirm cadence (Day 0 / 3 / 7) or adjust in the Instantly campaign settings.
+- [ ] Confirm tone/wording of all four touches (edit freely — resend for re-check if claims change).
+- [ ] Confirm the $49/month placement (named once, Email 3 only) and its wording.
+- [ ] Confirm cadence (Day 0 / 3 / 7 / 14) or adjust in the Instantly campaign settings.
+- [ ] When setting up in Instantly: fallbacks `there` (first_name) and `your area` (city);
+      thread Emails 2–3 as replies; Email 4 as a new thread.

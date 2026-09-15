@@ -185,9 +185,11 @@ sequence draft owner approval + postal address, Workspace plan downgrade decisio
       invented stats or social proof (owner rule), truthful free-preview framing, physical
       postal address in the footer (**OWNER: provide it**), Instantly unsubscribe link,
       `{{demo_url}}` as the CTA.
-      *(2026-08-31: CLAUDE draft done → `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` — 3 touches
-      Day 0/3/7, plain text, `{{demo_url}}` sole CTA, `{{unsubscribe}}` + postal-address
-      placeholder in every footer, merge fields limited to what `export-instantly.mjs` emits.
+      *(2026-08-31: CLAUDE draft done → `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` — plain text,
+      `{{demo_url}}` sole CTA, `{{unsubscribe}}` + postal-address placeholder in every footer,
+      merge fields limited to what `export-instantly.mjs` emits.
+      2026-09-01: draft revised to v2 per research (owner-requested): 4 touches Day 0/3/7/14,
+      price removed from Day 0 and named once in Email 3, "Re:" threading on 2–3.
       OWNER: approve the draft + provide the postal address.)*
 
 ## Phase 5 — Full-pipeline dry run (gate: before ANY cold email)

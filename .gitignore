@@ -51,3 +51,6 @@ creative/
 *.sw?
 .playwright-mcp/
 coverage/
+
+# Playwright accessibility snapshots saved to repo root by mistake
+/*.yml
