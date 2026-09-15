@@ -141,11 +141,18 @@ sequence draft owner approval + postal address, Workspace plan downgrade decisio
       DECISION: downgrade to Business Starter (~$7/user) in Admin console → Billing before
       Sep 14, or keep Plus. Agent offered; owner said "stop messing with it" mid-checkout, so
       left as-is.)*
+      *(2026-09-14 RESOLVED: Admin console → Billing shows **Business Starter**, Flexible,
+      $8.40/user, est. $16.80/mo, 2 licenses, Visa ••8765 on file, next bill Oct 1. No Plus
+      subscription exists — nothing to downgrade.)*
 - [~] **OWNER+CLAUDE** Instantly.ai account: connect every inbox, enable warm-up on all.
       **The 3-week warm-up clock starts here.**
       *(2026-08-31 MOSTLY DONE — agent-driven: account created on FREE TRIAL (login
       rhyan@getacewebdesigners.com, password in `~/.secrets/instantly-credentials.txt`; email
-      verified; NO PLAN PAID YET — owner pays when trial ends or a gated feature is needed).
+      verified; NO PLAN PAID YET — owner pays when trial ends or a gated feature is needed.
+      **2026-09-14: trial EXPIRED** — app redirects to `/expired` paywall; both inboxes still
+      list Active / 100% health / "standard warmup pool" but warm-up is unverified while locked.
+      Owner chose **Growth $47/mo monthly** (webhooks stay Hyper-Growth-only → polling script,
+      see CLAUDE.md); agent staged the purchase dialog, owner to confirm.)
       Instantly's OAuth app ("Instantly oAuth Email v1") configured as Trusted in Workspace
       App Access Control (one-time, org-wide). **Inbox 1 rhyan@getacewebdesigners.com
       CONNECTED via OAuth + WARM-UP ON → clock started 2026-08-31.** Two leftovers:

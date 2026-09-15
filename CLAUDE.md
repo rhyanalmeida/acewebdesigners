@@ -295,14 +295,18 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   were replaced). **Google Workspace live (2026-08-31):** org "Ace Web Designers", admin
   `rhyan@getacewebdesigners.com` + second inbox `rhyan@acewebdesignershq.com` (creds in
   `~/.secrets/google-workspace-credentials.txt`); both domains verified, Gmail activated,
-  DKIM set, MX = smtp.google.com. ⚠️ Plan = Business Plus 14-day trial, bills $19.80/user
-  from Sep 14 — owner to keep or downgrade to Starter in Admin console → Billing.
-  **Instantly live on free trial (2026-08-31):** login rhyan@getacewebdesigners.com, creds in
-  `~/.secrets/instantly-credentials.txt`; its OAuth app is Trusted in Workspace; **BOTH inboxes
-  connected via OAuth, warm-up ON → 3-week clock started 2026-08-31** (gotcha: a brand-new
-  Workspace user must sign in once from a real device before Google allows the OAuth flow).
-  Leftover: Instantly org webhooks are plan-gated (upgrade dialog names Hyper
-  Growth $97/mo) — resolve when the paid plan is chosen, not needed until sending. NEVER
+  DKIM set, MX = smtp.google.com. Plan = **Business Starter, Flexible, $8.40/user
+  (~$16.80/mo), Visa on file, next bill Oct 1** (verified in Admin console 2026-09-14 — the
+  "Business Plus trial" noted at signup never billed).
+  **Instantly (login rhyan@getacewebdesigners.com, creds in `~/.secrets/instantly-credentials.txt`):**
+  OAuth app Trusted in Workspace; **BOTH inboxes connected, warm-up ON since 2026-08-31**
+  (gotcha: a brand-new Workspace user must sign in once from a real device before Google allows
+  the OAuth flow). ⚠️ **Free trial EXPIRED by 2026-09-14** — workspace
+  `b8362bc8-3628-4609-b0c4-457a054aaff9` is behind the upgrade paywall; inboxes still read
+  Active/100% health but treat warm-up as unverified until a plan is paid. Owner decision
+  2026-09-14: **Growth ($47/mo monthly), NOT Hyper Growth** — webhooks are Hyper-Growth-only,
+  so replies/bounces/unsubs will come via a scheduled API-polling script
+  (`scripts/instantly-poll.mjs`, to build) feeding the existing `instantly-webhook` fn. NEVER
   cold-send from acewebdesigners.com.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
