@@ -301,13 +301,15 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   **Instantly (login rhyan@getacewebdesigners.com, creds in `~/.secrets/instantly-credentials.txt`):**
   OAuth app Trusted in Workspace; **BOTH inboxes connected, warm-up ON since 2026-08-31**
   (gotcha: a brand-new Workspace user must sign in once from a real device before Google allows
-  the OAuth flow). ⚠️ **Free trial EXPIRED by 2026-09-14** — workspace
-  `b8362bc8-3628-4609-b0c4-457a054aaff9` is behind the upgrade paywall; inboxes still read
-  Active/100% health but treat warm-up as unverified until a plan is paid. Owner decision
-  2026-09-14: **Growth ($47/mo monthly), NOT Hyper Growth** — webhooks are Hyper-Growth-only,
-  so replies/bounces/unsubs will come via a scheduled API-polling script
-  (`scripts/instantly-poll.mjs`, to build) feeding the existing `instantly-webhook` fn. NEVER
-  cold-send from acewebdesigners.com.
+  the OAuth flow). **Plan = Growth $47/mo monthly (bought 2026-09-14, renews Oct 14;
+  1,000 contacts / 5,000 emails per month)** — workspace `b8362bc8-3628-4609-b0c4-457a054aaff9`.
+  Warm-up verified live post-purchase (60 sent / 41 received / 0 spam in the prior week on
+  inbox 1; API reports `warmup_status:1`, score 100 on both). Webhooks are Hyper-Growth-only
+  ($97) — deliberately NOT bought: replies/bounces/unsubs come via a scheduled API-polling
+  script (`scripts/instantly-poll.mjs`, to build) feeding the existing `instantly-webhook` fn.
+  v2 API key `supabase-poll (read-only)`, scope `all:read`, in `supabase/.env` as
+  `INSTANTLY_API_KEY` (local script only — never an Edge secret; verified 200 on
+  `/api/v2/accounts`). NEVER cold-send from acewebdesigners.com.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
   warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).
