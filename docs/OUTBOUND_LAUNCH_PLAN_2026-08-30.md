@@ -38,6 +38,12 @@ probed same day: API still returns "credit balance is too low")
       *(2026-08-30: deployed; live `DemoPage-*.js` chunk greps `monthly:49`.)*
 - [ ] **OWNER** Anthropic credits: top up at platform.claude.com (hello@ Google login). This
       blocks demo builds AND the booking funnel's preview sites + sales briefs.
+      *(2026-09-14 OWNER DECISION: deferred, together with the Porkbun balance, until the
+      funnel is "rolling" — the FIRST client's demo build + domain get done BY HAND. Consequence
+      to remember: a prospect who clicks "Build my free preview" with no credits lands on the
+      existing `failed` state copy — "hit a snag on our side… reply to our email and we'll
+      build it for you" — so replies still flow to the GHL staff alert. Acceptable for a
+      hand-held pilot, NOT for scale: top up before the ramp.)*
 - [ ] **CLAUDE** (after credits) Seed niche playbooks: `node scripts/seed-niche-playbooks.mjs`
       (~$0.15–0.35/trade; pending since 8/03; watch for the one-off WORKER_RESOURCE_LIMIT).
 - [ ] **CLAUDE** (after credits) One real demo build on an `is_test` prospect (~$1) — insert
@@ -182,7 +188,7 @@ sequence draft owner approval + postal address, Workspace plan downgrade decisio
       aspf=r; adkim=r`, permanent wildcard URL forward → https://acewebdesigners.com. Verified
       via nslookup @1.1.1.1 (both TXT pairs resolve) + curl (301 + Location live on
       getacewebdesigners.com; acewebdesignershq.com's 301 confirmed live later same day).)*
-- [~] **CLAUDE** Configure the Instantly webhook →
+- [x] **CLAUDE** Configure the Instantly webhook →
       `https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/instantly-webhook?secret=<value>`;
       fire test events; verify `suppressions` rows + `outbound-lead` tag land.
       *(2026-08-31: ENDPOINT HALF DONE — curl bounce + unsubscribe (fake @example.com) → 200 +
@@ -192,6 +198,15 @@ sequence draft owner approval + postal address, Workspace plan downgrade decisio
       Side effect: the reply test fired one staff SMS/email via "Outbound — Interested Lead" —
       expected. REMAINING: paste the URL into Instantly → campaign → webhooks (reply/bounce/
       unsub events) once the account exists; secret value is in `supabase/.env`.)*
+      *(2026-09-14 DONE VIA POLLING instead: Instantly webhooks are Hyper-Growth-only and
+      we bought Growth. `scripts/instantly-poll.mjs` + scheduled task "Instantly Poll"
+      (15 min) forward reply/bounce/unsub to the same endpoint — see CLAUDE.md. Verified:
+      manual run + first scheduled run both exit 0 (0 events, nothing sent yet). Campaign
+      **"Outbound — Contractors v2"** (`46657029-fdd6-4567-b5fe-2165bb298367`) created via
+      API from the approved v2 draft, status Draft/not launched, settings verified in UI.
+      Owner approved v2 copy as-is 2026-09-14; postal address still pending → re-run
+      `node scripts/instantly-create-campaign.mjs --update 46657029-fdd6-4567-b5fe-2165bb298367`
+      after editing the doc.)*
 - [~] **BOTH** Cold sequence (2–3 touches): CLAUDE drafts, OWNER approves. Hard rules: no
       invented stats or social proof (owner rule), truthful free-preview framing, physical
       postal address in the footer (**OWNER: provide it**), Instantly unsubscribe link,

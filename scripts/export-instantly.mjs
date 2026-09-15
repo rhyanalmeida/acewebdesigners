@@ -71,10 +71,22 @@ const esc = (v) => {
   const s = String(v ?? '')
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
 }
+// Merge-field fallbacks are baked in HERE rather than relying on Instantly's
+// per-variable fallback UI: scraped data often lacks a first name or city, and a
+// template line like "Hi ," or "customers in  can't" would go out otherwise.
+const FALLBACK_FIRST_NAME = 'there'
+const FALLBACK_CITY = 'your area'
 const lines = ['email,first_name,company_name,city,state,demo_url']
 for (const p of rows) {
   lines.push(
-    [p.email, p.first_name ?? '', p.business_name, p.city ?? '', p.state ?? '', `${SITE}/demo/${p.token}`]
+    [
+      p.email,
+      (p.first_name ?? '').trim() || FALLBACK_FIRST_NAME,
+      p.business_name,
+      (p.city ?? '').trim() || FALLBACK_CITY,
+      p.state ?? '',
+      `${SITE}/demo/${p.token}`,
+    ]
       .map(esc)
       .join(','),
   )

@@ -305,11 +305,32 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   1,000 contacts / 5,000 emails per month)** — workspace `b8362bc8-3628-4609-b0c4-457a054aaff9`.
   Warm-up verified live post-purchase (60 sent / 41 received / 0 spam in the prior week on
   inbox 1; API reports `warmup_status:1`, score 100 on both). Webhooks are Hyper-Growth-only
-  ($97) — deliberately NOT bought: replies/bounces/unsubs come via a scheduled API-polling
-  script (`scripts/instantly-poll.mjs`, to build) feeding the existing `instantly-webhook` fn.
-  v2 API key `supabase-poll (read-only)`, scope `all:read`, in `supabase/.env` as
-  `INSTANTLY_API_KEY` (local script only — never an Edge secret; verified 200 on
-  `/api/v2/accounts`). NEVER cold-send from acewebdesigners.com.
+  ($97) — deliberately NOT bought. **Polling replaces webhooks (built 2026-09-14):**
+  `scripts/instantly-poll.mjs` runs as Windows scheduled task **"Instantly Poll"** (every 15
+  min, indefinitely; verified firing, exit 0) — GET `/emails?email_type=received` since a
+  watermark + POST `/leads/list` with `FILTER_VAL_BOUNCED` / `FILTER_VAL_UNSUBSCRIBED`, maps
+  each to `{event_type, lead_email, campaign_id}` and POSTs it to the UNCHANGED
+  `instantly-webhook` fn (so a real webhook can replace the script with zero server changes).
+  State `%LOCALAPPDATA%\instantly-poll.json` (reply watermark + forwarded keys, so a reply
+  never re-fires the GHL staff alert), log `instantly-poll.log`; `--dry` = fetch only. Pure
+  mapping in `scripts/lib/instantly-events.mjs` (vitest; `scripts/lib/*.test.mjs` is in
+  `vitest.config.ts`). Auto-replies + non-campaign mail are ignored.
+  **Campaign "Outbound — Contractors v2" id `46657029-fdd6-4567-b5fe-2165bb298367`** — created
+  via API by `scripts/instantly-create-campaign.mjs`, which parses
+  `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` (single source of copy; `--dry` prints the payload,
+  `--update <id>` re-pushes copy/settings, pure logic in `scripts/lib/instantly-campaign.mjs`).
+  Status **Draft — NOT launched** (Launch = owner click in the UI, only after Phase 5 + postal
+  address). Settings verified in UI: both inboxes, 20/day, weekdays 08–17 ET (Instantly's
+  enum has no America/New_York → `America/Detroit`), stop-on-reply, text-only, open + link
+  tracking OFF (demo_url must stay raw — the /demo page logs views itself), unsubscribe
+  header ON, gap 10 min + 15 random. Follow-ups 2–3 send with an EMPTY subject (Instantly
+  threads natively); Email 4 breaks the thread on purpose. Soft-wrapped doc lines are
+  unwrapped (`unwrapSoftBreaks`: a newline survives only before a capital/digit/`{{`/`[`).
+  Merge fallbacks (`first_name`→"there", `city`→"your area") are baked into
+  `export-instantly.mjs`, not Instantly's UI. Keys in `supabase/.env` (local scripts only,
+  never Edge secrets): `INSTANTLY_API_KEY` (`all:read`, poller) + `INSTANTLY_ADMIN_API_KEY`
+  (`campaigns:all` + `leads:all` + `account_campaign_mappings:all`, campaign script).
+  NEVER cold-send from acewebdesigners.com.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
   warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).

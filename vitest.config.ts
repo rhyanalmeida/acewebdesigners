@@ -11,7 +11,12 @@ export default defineConfig({
     css: true,
     // _shared Edge modules are pure TS (no Deno APIs), so their tests run here
     // rather than needing a separate Deno test runner.
-    include: ['src/**/*.{test,spec}.{ts,tsx}', 'supabase/functions/_shared/*.{test,spec}.ts'],
+    include: [
+      'src/**/*.{test,spec}.{ts,tsx}',
+      'supabase/functions/_shared/*.{test,spec}.ts',
+      // pure helpers for the Node ops scripts (no I/O in the tested modules)
+      'scripts/lib/*.{test,spec}.mjs',
+    ],
     exclude: [
       'node_modules/**',
       'dist/**',
