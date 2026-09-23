@@ -17,6 +17,9 @@
 // template footer, and keep Instantly's unsubscribe link in every email.
 
 import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { loadNames, greetingName } from './lib/first-name.mjs'
 
 const REF = 'dwsmrruzufqpopdzlszw'
 const URL = `https://${REF}.supabase.co`
@@ -78,14 +81,17 @@ const esc = (v) => {
 // Merge-field fallbacks are baked in HERE rather than relying on Instantly's
 // per-variable fallback UI: scraped data often lacks a first name or city, and a
 // template line like "Hi ," or "customers in  can't" would go out otherwise.
-const FALLBACK_FIRST_NAME = 'there'
+// first_name: stored value → else derived from the email local part (validated against a real
+// first-name list) → else the trimmed business name ("Hi Gardner Road,"). Owner decision 2026-09-22:
+// the Apify lists carry no first names and "Hi there," reads like a mail merge.
+const NAMES = loadNames(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), 'data', 'first-names.txt'), 'utf8'))
 const FALLBACK_CITY = 'your area'
 const lines = ['email,first_name,company_name,city,state,demo_url']
 for (const p of rows) {
   lines.push(
     [
       p.email,
-      (p.first_name ?? '').trim() || FALLBACK_FIRST_NAME,
+      (p.first_name ?? '').trim() || greetingName({ email: p.email, businessName: p.business_name, names: NAMES }),
       p.business_name,
       (p.city ?? '').trim() || FALLBACK_CITY,
       p.state ?? '',
