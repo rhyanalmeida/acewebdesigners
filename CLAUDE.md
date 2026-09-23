@@ -608,9 +608,16 @@ contact with the same enriched attribution we send Meta (into custom fields by i
   `be242a43-d61d-4931-b7b7-cccd26181540`; `outbound-lead` tag → staff SMS +17743293117 + staff
   email hello@ with `{{contact.demo_preview_url}}` — NO prospect-facing sends, Instantly owns the
   sequence; re-entry OFF), and **"Outbound — Purchased (Onboarding)"** (2026-08-31, id
-  `edd5c23c-5e48-4c25-8ac1-96dea2cfa9b5`; `outbound-purchased` tag → customer welcome email from
-  hello@ (domain + ~1h go-live + reply-for-changes, truthful framing) + staff SMS with
-  `{{contact.purchased_domain}}`; re-entry OFF). ⚠️ Workflow-builder gotcha: the email editor
+  `edd5c23c-5e48-4c25-8ac1-96dea2cfa9b5`; `outbound-purchased` tag → staff SMS with
+  `{{contact.purchased_domain}}` → customer welcome email from hello@ (domain + ~1h go-live +
+  **"updates are unlimited and included — email hello@, that's your support line"**, 2026-09-22)
+  → **Wait 5 days** → **"Review Ask — 5 days after purchase"** email (how's the site + unlimited
+  updates reminder + Google review link `https://share.google/zIg87wr3mBcAgLpDv`, owner-supplied
+  2026-09-22; asked AFTER purchase only — never in cold copy); re-entry OFF. The same two
+  messages (unlimited updates via hello@, review ask) also live on the demo page's post-purchase
+  thank-you state (`DemoPage.tsx`, `SUPPORT_EMAIL` / `GOOGLE_REVIEW_URL` in `outboundPlan.ts`).
+  Builder gotcha 2026-09-22: "Add action" connectors are ordered by DOM, not canvas position —
+  after inserting, read the `Edge from … to …` list to confirm order before saving.) ⚠️ Workflow-builder gotcha: the email editor
   AUTOLINKS `{{contact.name}}`-style merge tags (.name/.email/.phone/.company parse as TLDs),
   failing save validation ("issues in your custom variables") — select-all + unlink before saving.
   The old "contractor appointment workflow" (had GHL-side CAPI, double-fired) stays
