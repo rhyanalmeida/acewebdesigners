@@ -69,6 +69,8 @@ function col(headers, ...names) {
   return -1
 }
 
+// Scraper placeholders that are not a real inbox (filler@godaddy.com, wix/sentry noise, image names).
+const JUNK_EMAIL = /@(godaddy|sentry|wix|wixpress|squarespace|example)\.|^(filler|noreply|no-reply|test)@|\.(png|jpe?g|gif|webp|svg)$/i
 const US_STATES = new Set('AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC'.split(' '))
 
 // ── load + map ───────────────────────────────────────────────────────────────
@@ -77,7 +79,7 @@ if (rows.length < 2) { console.error('CSV has no data rows'); process.exit(1) }
 const H = rows[0]
 const c = {
   name: col(H, 'name', 'business name', 'company', 'title'),
-  email: col(H, 'email', 'email 1', 'email_1'),
+  email: col(H, 'email', 'email 1', 'email_1', 'emails/0'), // Apify contact-details export → emails/0
   phone: col(H, 'phone', 'phone number', 'phone 1'),
   first: col(H, 'first name', 'owner first name', 'contact first name'),
   last: col(H, 'last name', 'owner last name', 'contact last name'),
@@ -89,7 +91,9 @@ const c = {
   placeId: col(H, 'place id', 'google id', 'place_id', 'cid'),
   rating: col(H, 'rating', 'stars'),
   reviews: col(H, 'reviews', 'review count', 'reviews count'),
-  type: col(H, 'type', 'category', 'main category'),
+  type: col(H, 'type', 'category', 'main category', 'categoryName'),
+  rating: col(H, 'rating', 'stars', 'totalScore'),
+  reviews: col(H, 'reviews', 'review count', 'reviews count', 'reviewsCount'),
 }
 if (c.name < 0) { console.error(`No business-name column found. Headers: ${H.join(', ')}`); process.exit(1) }
 const get = (r, i) => (i >= 0 ? (r[i] ?? '').trim() : '')
@@ -127,7 +131,7 @@ let skipNoEmail = 0, skipSuppressed = 0, skipNonUs = 0, skipDup = 0
 
 for (const r of rows.slice(1)) {
   const email = get(r, c.email).toLowerCase()
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { skipNoEmail++; continue }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || JUNK_EMAIL.test(email)) { skipNoEmail++; continue }
   if (suppressed.has(email)) { skipSuppressed++; continue }
   const country = get(r, c.country).toUpperCase()
   if (country && country !== 'US' && country !== 'USA' && country !== 'UNITED STATES') { skipNonUs++; continue }

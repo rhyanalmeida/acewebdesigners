@@ -54,3 +54,6 @@ coverage/
 
 # Playwright accessibility snapshots saved to repo root by mistake
 /*.yml
+
+# Instantly exports contain prospect emails (PII) — never commit
+instantly-*.csv

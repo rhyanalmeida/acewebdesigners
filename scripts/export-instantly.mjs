@@ -32,8 +32,11 @@ const opt = (name) => {
 const batch = opt('batch')
 const campaign = opt('campaign')
 const stamp = !args.includes('--no-stamp')
+// --limit N: export in waves (Woodpecker 20M-email data: <200-contact campaigns reply ~2x
+// 500+). Rows are ordered by created_at, and stamping means the next run continues the batch.
+const limit = Number(opt('limit') ?? 0)
 if (!batch) {
-  console.error('Usage: node scripts/export-instantly.mjs --batch <label> [--campaign <id>] [--no-stamp]')
+  console.error('Usage: node scripts/export-instantly.mjs --batch <label> [--campaign <id>] [--limit N] [--no-stamp]')
   process.exit(1)
 }
 
@@ -61,7 +64,8 @@ const rest = (path, init = {}) =>
 const q =
   `prospects?select=id,token,email,first_name,business_name,city,state` +
   `&batch=eq.${encodeURIComponent(batch)}&suppressed=is.false&is_test=is.false` +
-  `&emailed_at=is.null&email=not.is.null&order=created_at.asc`
+  `&emailed_at=is.null&email=not.is.null&order=created_at.asc` +
+  (limit > 0 ? `&limit=${limit}` : '')
 const resp = await rest(q)
 if (!resp.ok) { console.error(`query failed (${resp.status}):`, (await resp.text()).slice(0, 300)); process.exit(1) }
 const rows = await resp.json()

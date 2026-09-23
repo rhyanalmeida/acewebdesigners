@@ -319,10 +319,13 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   via API by `scripts/instantly-create-campaign.mjs`, which parses
   `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` (single source of copy; `--dry` prints the payload,
   `--update <id>` re-pushes copy/settings, pure logic in `scripts/lib/instantly-campaign.mjs`).
-  Status **Draft — NOT launched** (Launch = owner click in the UI, only after Phase 5). Footer
+  **Status 2026-09-22: v4 copy pushed, wave 1 (100 leads) uploaded, WAITING FOR OWNER TO
+  CLICK LAUNCH** (API activation is permission-gated for the agent — by design). Footer
   postal address = the office, 30 North Main St, Leominster, MA 01453 (supplied 2026-09-14;
   CAN-SPAM 16 CFR 316.2 requires a street address, USPS PO Box, or CMRA box — no exemption
-  for B2B cold email). Settings verified in UI: both inboxes, 20/day, weekdays 08–17 ET (Instantly's
+  for B2B cold email; owner asked to drop it 2026-09-22 — not legal, alternatives are a USPS
+  PO Box or CMRA box). Settings verified via API readback: both inboxes, 20/day, weekdays
+  **06–11 ET** (Belkins 7.5M-email data: early morning ≈4x the meeting rate of afternoon; Instantly's
   enum has no America/New_York → `America/Detroit`), stop-on-reply, text-only, open + link
   tracking OFF (demo_url must stay raw — the /demo page logs views itself), unsubscribe
   header ON, gap 10 min + 15 random. Follow-ups 2–3 send with an EMPTY subject (Instantly
@@ -333,6 +336,25 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   never Edge secrets): `INSTANTLY_API_KEY` (`all:read`, poller) + `INSTANTLY_ADMIN_API_KEY`
   (`campaigns:all` + `leads:all` + `account_campaign_mappings:all`, campaign script).
   NEVER cold-send from acewebdesigners.com.
+  **Sequence v4 (2026-09-22, owner-approved "let's start", live on the campaign): demo is
+  REPLY-GATED** — no `{{demo_url}}` in any email, the CTA is an interest question + "reply
+  yes"; a reply → `outbound-lead` staff alert → build from /admin Outbound (or open
+  `/demo/<token>` and click Build) → send the link by hand. `validateSteps` accepts a reply
+  ask OR `{{demo_url}}` as the CTA (it caught a v4 Email 2 without the word "reply" — keep it).
+  v4 = deep-research rewrite: subject `{{company_name}} homepage?` (2–4 words, no "free"/number),
+  no pitch paragraph, Email 2 carries new content not a bump, Email 4 two-option breakup,
+  56–76 words each; per-line evidence in `docs/OUTBOUND_COLD_SEQUENCE_v4_DRAFT_2026-09-22.md`,
+  research in `docs/MASTER_PLAN_OUTBOUND_REDESIGN_2026-09-22.md`. Opener is the **redesign**
+  angle (every prospect has a live site; the v2 no-website opener is in git history).
+  ⚠️ **The Apify list has ZERO first names** — every row falls back to "there", so
+  `{{first_name}}` must never appear in a subject. **Batch `2026-09-newengland-gc`, 241
+  prospects** (ME/VT/NH, mixed trades, slug `general-contractor`); `import-prospects.mjs` maps
+  Apify's `emails/0`/`categoryName`/`totalScore`/`reviewsCount`, drops placeholder emails.
+  **Waves:** `export-instantly.mjs --limit N` exports the next N un-emailed rows (stamps them);
+  `scripts/instantly-upload-leads.mjs --file <csv> --campaign <id>` bulk-adds them via
+  `POST /leads/add` (`skip_if_in_campaign`) — no manual CSV upload. Wave 1 = 100 rows
+  (2026-09-22); wave 2 = the remaining 141 after wave 1's first replies are read. Owner
+  deferred Anthropic credits + Porkbun balance until someone replies — a "yes" is built by hand.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
   warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).

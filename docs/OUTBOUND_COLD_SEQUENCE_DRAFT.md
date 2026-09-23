@@ -1,77 +1,59 @@
-# Outbound cold sequence — DRAFT v2 for owner approval (2026-09-01)
+# Outbound cold sequence — v4 (evidence-optimized, redesign angle, reply-gated) — APPROVED to launch 2026-09-22
 
-**Status: APPROVED by owner 2026-09-14 (copy as-is) and loaded into Instantly campaign
-`46657029-fdd6-4567-b5fe-2165bb298367` via `scripts/instantly-create-campaign.mjs`. Edit here,
-then `--update <id>` to re-push — the doc is the single source of copy.**
+**Status:** owner said "let's start the email campaign" 2026-09-22 → v4 is the live copy. Pushed to
+campaign `46657029-fdd6-4567-b5fe-2165bb298367` via `scripts/instantly-create-campaign.mjs --update`.
+This doc is the single source of copy: edit here, then `--update <id>` to re-push. The full
+per-line evidence table (22 sources) is in `docs/OUTBOUND_COLD_SEQUENCE_v4_DRAFT_2026-09-22.md`;
+the research behind it is `docs/MASTER_PLAN_OUTBOUND_REDESIGN_2026-09-22.md`.
 
-Revised 2026-09-01 per owner request ("no pricing on day 0; let the research decide the
-structure"). Changes vs v1: price removed from Emails 1–2 and named exactly once (Email 3, the
-objection-handling touch); sequence extended 3 → 4 touches (Day 0/3/7/14); "Re:" threading on
-follow-ups 2–3 with a fresh subject on the breakup; `{{city}}` used for personalization.
+**v4 vs v3 (all research-driven):** subject cut to 2–4 words with the company name and no selling
+word ("free"/"offer") or number (Belkins 5.5M-email subject study; Gong); the "I run a small web
+design studio… " pitch line shortened (Gong 28M: pitching in the body −57% replies); CTA is an
+interest question about their own asset — "Want to see it? Reply yes" (Gong 304k; Salesforge 1M+);
+Email 2 carries NEW content instead of a bump (Gangly: 8.4% vs 1.8%); Email 4 is a two-option
+breakup with no guilt line; bodies 56–74 words at a ~grade-5 reading level (Lavender 231k:
++67% replies); send window moved to **06:00–11:00 ET** (Belkins 7.5M: ~4x the meeting rate of
+afternoon sends). Cadence Day 0/3/7/14 unchanged.
 
-## Why this structure (research, multiple sources, 2026)
-- **No price in the first email.** Sources uniformly favor a short (<80-word), problem-focused
-  first touch with one low-friction ask; hard offers/pricing up front depress replies. Emails
-  that open on a concrete verifiable gap ("no website") report 15–20% replies vs 1–3% generic.
-  Price still appears in the sequence (Email 3) because hiding it entirely until checkout
-  conflicts with our truthful-framing rule — and it pre-qualifies before a demo build is spent.
-- **4 touches, widening gaps (Day 0/3/7/14).** 3–4 emails is the SMB sweet spot: ~40–55% of
-  replies come from follow-ups, but spam-complaint risk roughly triples from the 4th follow-up
-  onward and each email past the third loses ~30% effectiveness. On a scraped list, 4 is the cap.
-- **One job per touch:** hook → value-add → objection pre-handle (price lands here) → clean
-  breakup with no guilt language (guilt CTAs trigger spam reports).
-- **Subjects:** Emails 2–3 thread as "Re:" (context + opens); Email 4 breaks the thread with a
-  fresh subject in case the earlier thread went unseen.
-- Skipped as not applicable: multichannel steps (this funnel is Instantly email-only) and
-  social-proof touches (owner rule: no invented stats; we have no citable proof yet — the free
-  demo itself is the value-add).
-
-Sources: Instantly Cold Email Benchmark Report 2026; Autobound Cold Email Guide 2026; Allegrow
-Cold Email Sequences knowledge base; B2BLeadFinder web-design agency templates (2026); lemlist,
-MailReach, Whali & imisofts follow-up-count studies; Breakcold reply-rate guide; Woodpecker
-20M-email statistics.
+**Parser notes:** `## Email N — Day D` headings + a `**Subject:**` line per email; a subject that
+starts with `Re:` is sent with an EMPTY subject so Instantly threads it natively (Emails 2–3);
+Email 4's fresh subject breaks the thread on purpose. Bodies are written on long single lines on
+purpose — `unwrapSoftBreaks` would otherwise turn a wrap before a capital/digit into a hard break.
 
 ## Rules honored (locked owner rules + CAN-SPAM)
-- No invented stats, review counts, or social proof of any kind.
-- Truthful preview framing: the demo is built on the prospect's **first click**, so the copy says
-  we "set up a preview page" — never "we already built your site".
-- ⚠️ Email 1's opener ("couldn't find much of a website") depends on the LIST: it's true for the
-  no-/weak-website contractor targeting we scrape for. If a future batch includes businesses
-  with decent sites, that opener must change before sending to them.
-- `{{demo_url}}` is the **only** CTA link in every email.
-- Instantly's unsubscribe link (`{{unsubscribe}}`) in every email.
-- Footer carries the CAN-SPAM postal address (owner-supplied 2026-09-14: 30 North Main St,
-  Leominster, MA 01453 — the office; a street address is one of the three forms 16 CFR 316.2
-  accepts).
-- Plain text only, no images/attachments (deliverability + honesty).
+- No invented stats, review counts, or social proof. (The one figure ever considered — BrightLocal's
+  47% / 20-reviews line — lives only in the optional wave-1 variant 1B in the v4 draft doc and is NOT
+  in this live copy.)
+- Truthful preview framing: nothing is built until the prospect says yes ("I'd like to mock up" /
+  "I'll start"), never "we already built your site".
+- Email 1's opener assumes a REDESIGN list (every prospect has a live website — check the batch's
+  `website` column before sending). The v2 no-website opener is in git history.
+- **No link in any email** (reply-gated demo): the CTA is a "yes" reply. The `/demo/<token>` link
+  goes out only in a personal reply after the build.
+- Instantly's unsubscribe link (`{{unsubscribe}}`) + the office postal address (30 North Main St,
+  Leominster, MA 01453 — a street address per 16 CFR 316.2) in every footer.
+- Plain text only.
 
-Merge fields (from `scripts/export-instantly.mjs` — the only ones that exist):
-`{{email}} {{first_name}} {{company_name}} {{city}} {{state}} {{demo_url}}`.
-`first_name` can be blank in the scraped data — in Instantly, set a fallback of `there` on the
-variable; set a fallback of `your area` on `city` (Instantly supports per-variable fallbacks in
-the template editor).
+Merge fields (from `scripts/export-instantly.mjs`): `{{email}} {{first_name}} {{company_name}}
+{{city}} {{state}} {{demo_url}}` — fallbacks `there` / `your area` are baked into the export.
+`{{demo_url}}` is exported but deliberately unused in the copy.
 
-Cadence: **Day 0 → Day 3 → Day 7 → Day 14.** Stop on reply (Instantly default) — replies flow
-to the `outbound-lead` GHL staff alert; the webhook suppresses bounces/unsubs automatically.
+Cadence: **Day 0 → Day 3 → Day 7 → Day 14.** Stop on reply (Instantly default); replies flow to
+the `outbound-lead` GHL staff alert via `scripts/instantly-poll.mjs`.
 
 ---
 
-## Email 1 — Day 0 (hook — no price)
+## Email 1 — Day 0 (hook — reply-gated, no link, no price)
 
-**Subject:** quick question about {{company_name}}
+**Subject:** {{company_name}} homepage?
 
 Hi {{first_name}},
 
-I looked for {{company_name}} online and couldn't find much of a website — which usually
-means customers in {{city}} can't either.
+I came across {{company_name}}'s site while looking at contractors in {{city}}.
 
-I run a small web design studio, so I set up a preview page for your business. One click and
-it puts together a homepage design based on your company — takes about a minute, nothing to
-install, no payment info asked:
+I design websites for contractors. I'd like to mock up a new homepage for {{company_name}} — a real preview built around your work, not a template. It's free, and there's no call.
 
-{{demo_url}}
-
-Worth a look?
+Want to see it? Reply "yes" and I'll have it to you in a day.
 
 Rhyan
 Ace Web Designers
@@ -81,18 +63,15 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ---
 
-## Email 2 — Day 3 (value-add, threaded — no price)
+## Email 2 — Day 3 (new value, threaded — no price)
 
-**Subject:** Re: quick question about {{company_name}}
+**Subject:** Re: {{company_name}} homepage?
 
 Hi {{first_name}},
 
-In case the last note got buried — the preview page for {{company_name}} is still live:
+Adding to my last note. The preview I'd build for {{company_name}} is a homepage that loads fast on a phone, puts a tap-to-call button up top, and shows your best jobs first — built for someone looking you up from their driveway.
 
-{{demo_url}}
-
-It's free to generate and takes about a minute. Even if you never hire anyone, it'll show
-you what a modern homepage for your business could look like — useful either way.
+Want me to put it together? A one-word reply is enough.
 
 Rhyan
 Ace Web Designers
@@ -104,16 +83,13 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ## Email 3 — Day 7 (objection pre-handle, threaded — price lands here, once)
 
-**Subject:** Re: quick question about {{company_name}}
+**Subject:** Re: {{company_name}} homepage?
 
 Hi {{first_name}},
 
-Guessing the hesitation is time or cost, so to answer both up front: the preview takes one
-click and is free. If you like it and want it live, it's $49/month — that covers your own
-.com domain, hosting, and us keeping it running. Cancel anytime. If not, the preview cost
-you nothing.
+In case cost is the hold-up: the preview is free. If you like it and want it live, it's $49 a month — your own .com, hosting, and changes when you need them. Cancel anytime. If you don't like it, you're out nothing.
 
-{{demo_url}}
+Still want to see it? Reply "yes" and I'll start.
 
 Rhyan
 Ace Web Designers
@@ -125,18 +101,15 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ## Email 4 — Day 14 (breakup, fresh subject — no price, no guilt)
 
-**Subject:** closing the file on {{company_name}}
+**Subject:** {{company_name}} — bad timing?
 
 Hi {{first_name}},
 
-Last email from me — I won't keep filling your inbox.
+Last one from me. No reply usually means one of two things — bad timing, or not a fit. Either is fine.
 
-The preview page for {{company_name}} stays up if you ever want to see what a homepage for
-your business could look like:
+If it's timing, reply "later" and I'll check back in a couple of months. If you'd like the preview after all, reply "yes".
 
-{{demo_url}}
-
-If a website isn't a priority right now, completely understood. Good luck out there.
+Good luck out there.
 
 Rhyan
 Ace Web Designers
@@ -146,10 +119,14 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 ---
 
-## Owner review checklist (before loading into Instantly)
-- [x] Supply the real physical postal address (done 2026-09-14 — in all four footers).
-- [ ] Confirm tone/wording of all four touches (edit freely — resend for re-check if claims change).
-- [ ] Confirm the $49/month placement (named once, Email 3 only) and its wording.
-- [ ] Confirm cadence (Day 0 / 3 / 7 / 14) or adjust in the Instantly campaign settings.
-- [ ] When setting up in Instantly: fallbacks `there` (first_name) and `your area` (city);
-      thread Emails 2–3 as replies; Email 4 as a new thread.
+## Hand replies (from the same Instantly inbox, in-thread)
+
+- **"yes":** `On it — you'll have the preview from me within a day. One quick one so it's accurate: which service do you want front and center?` → build from /admin Outbound (or open `/demo/<token>` and click Build; no Anthropic credits = build by hand) → reply with the `/demo/<token>` link + a 15-minute call offer with two concrete times.
+- **"later":** `Got it. I'll check back in [month]. Good luck with the season.` → GHL task; do not re-enter the sequence.
+- **"no":** `Understood — thanks for replying. You're off my list.` → mark unsubscribed in Instantly so the poll suppresses the row.
+
+## Launch record
+- [x] v4 copy approved by owner ("let's start") 2026-09-22.
+- [x] Pushed to campaign 46657029-fdd6-4567-b5fe-2165bb298367 (`--update`).
+- [x] Wave 1 (100 rows) exported + uploaded via `scripts/instantly-upload-leads.mjs` (100/100, 0 dup).
+- [ ] **OWNER: click Launch in Instantly** (API activation was permission-blocked; the scripts never activate).

@@ -69,8 +69,10 @@ export function buildPayload(steps, { name = DEFAULT_NAME, daily = 20, accounts 
     campaign_schedule: {
       schedules: [
         {
-          name: 'Weekdays 8am–5pm ET',
-          timing: { from: '08:00', to: '17:00' },
+          // 06–11 ET: Belkins (7.5M emails, 2025) — 5–8am + 8am–12pm carry the best reply rate and ~4x
+          // the meeting rate of afternoon/evening sends; contractors read email before the first job.
+          name: 'Weekdays 6am–11am ET',
+          timing: { from: '06:00', to: '11:00' },
           days: { 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: false },
           // Instantly's enum has no America/New_York; America/Detroit is the same US Eastern zone.
           timezone: 'America/Detroit',
@@ -97,7 +99,8 @@ export function buildPayload(steps, { name = DEFAULT_NAME, daily = 20, accounts 
 export function validateSteps(steps) {
   const problems = []
   for (const s of steps) {
-    if (!s.body.includes('{{demo_url}}')) problems.push(`Email ${s.n}: missing {{demo_url}} CTA`)
+    // Reply-gated demo (2026-09-22): the CTA is a "reply" ask, not a link. Either form is a valid CTA.
+    if (!s.body.includes('{{demo_url}}') && !/\breply\b/i.test(s.body)) problems.push(`Email ${s.n}: missing CTA ({{demo_url}} or a reply ask)`)
     if (!s.body.includes('{{unsubscribe}}')) problems.push(`Email ${s.n}: missing {{unsubscribe}} link`)
   }
   const placeholders = steps.filter((s) => /\[OWNER:/.test(s.body)).length

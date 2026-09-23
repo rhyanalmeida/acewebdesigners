@@ -102,7 +102,8 @@ describe('buildPayload', () => {
 describe('validateSteps / isThreaded', () => {
   it('flags missing CTA or unsubscribe and counts postal placeholders', () => {
     const r = validateSteps([{ n: 1, body: 'x [OWNER: addr]' }, { n: 2, body: '{{demo_url}} {{unsubscribe}}' }])
-    expect(r.problems).toEqual(['Email 1: missing {{demo_url}} CTA', 'Email 1: missing {{unsubscribe}} link'])
+    expect(r.problems).toEqual(['Email 1: missing CTA ({{demo_url}} or a reply ask)', 'Email 1: missing {{unsubscribe}} link'])
+    expect(validateSteps([{ n: 3, body: 'Just reply "yes" {{unsubscribe}}' }]).problems).toEqual([])
     expect(r.placeholders).toBe(1)
   })
   it('treats "Re:" (any case) as threaded', () => {
