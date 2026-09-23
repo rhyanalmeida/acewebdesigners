@@ -337,10 +337,26 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   (`campaigns:all` + `leads:all` + `account_campaign_mappings:all`, campaign script).
   NEVER cold-send from acewebdesigners.com.
   **Sequence v4 (2026-09-22, owner-approved "let's start", live on the campaign): demo is
-  REPLY-GATED** — no `{{demo_url}}` in any email, the CTA is an interest question + "reply
-  yes"; a reply → `outbound-lead` staff alert → build from /admin Outbound (or open
-  `/demo/<token>` and click Build) → send the link by hand. `validateSteps` accepts a reply
-  ask OR `{{demo_url}}` as the CTA (it caught a v4 Email 2 without the word "reply" — keep it).
+  REPLY-GATED and the loop is FULLY AUTOMATED** (owner: "I want it to send the design if they
+  say yes") — no `{{demo_url}}` in any email, the CTA is an interest question + "reply yes".
+  Flow: poller forwards each reply WITH its text/email id/inbox/subject → `instantly-webhook`
+  classifies it (`_shared/replyClassifier.ts`, mirrored + vitest-covered in
+  `scripts/lib/reply-classifier.mjs`: yes / no / unknown; "not interested" can't read as
+  interest; mixed → unknown) → stores `last_reply`/`reply_sentiment`/`reply_email_id`/
+  `reply_eaccount` (migration `0011`) → on a clear **yes** (non-test, non-suppressed) flips
+  `site_status none→generating` (same atomic gate as demo-site) + fires `generate-site` +
+  sets `auto_send` → when the row is `deployed`, the next poller tick calls the webhook's
+  `auto_send_pending`, replies IN-THREAD from the receiving inbox via `POST /emails/reply`
+  (`demoLinkReply` in `instantly-events.mjs`: greeting name, the `/demo/<token>` link once,
+  $49 line, soft call offer) and stamps `demo_link_sent_at` via `demo_link_sent` — sent
+  exactly once; a failed send is retried next tick, nothing stamped. `no`/`unknown` replies
+  only alert staff (GHL `outbound-lead` tag fires on every reply). Needs
+  `INSTANTLY_SENDER_API_KEY` (scope `emails:all`, key "auto-reply-sender", `supabase/.env`,
+  local only) — without it replies still classify/build, just no auto-send. Without
+  Anthropic credits the build fails → row `failed`, no link goes out, staff alert still
+  fires. /admin Outbound shows YES/no/read-it + snippet + "link sent". `validateSteps`
+  accepts a reply ask OR `{{demo_url}}` as the CTA (it caught a v4 Email 2 without the
+  word "reply" — keep it).
   v4 = deep-research rewrite: subject `{{company_name}} homepage?` (2–4 words, no "free"/number),
   no pitch paragraph, Email 2 carries new content not a bump, Email 4 two-option breakup,
   56–76 words each; per-line evidence in `docs/OUTBOUND_COLD_SEQUENCE_v4_DRAFT_2026-09-22.md`,
@@ -534,8 +550,15 @@ stay in the Ace Web Designers portfolio.)
   never set secrets or redeploy generate-site mid-build.
 - **Credential locations** (never ask the owner — find them): `SUPABASE_ACCESS_TOKEN` = Windows user
   env var (CLI + Management API). `ANTHROPIC_API_KEY` = platform.claude.com org "Ace Web Designers's
-  Individual Org" (Google login hello@) — org needs credits. `NETLIFY_AUTH_TOKEN` = CLI token of
+  Individual Org" (Google login hello@) — org needs credits (still $0 as of 2026-09-22: owner
+  hasn't topped up; pay-as-you-go credits, no subscription). `NETLIFY_AUTH_TOKEN` = CLI token of
   **rhyanalmeida31@gmail.com** (the real Netlify account; the hello@ account is empty, PATs revoked).
+  ⚠️ 2026-09-22: the token in `supabase/.env` returns 401 from Netlify, so the deployed Edge
+  secret (synced from it) is presumed dead too → **demo-site deploys would fail. OWNER TODO
+  (agent's secret write was permission-blocked):** copy the CLI's valid token from
+  `%APPDATA%\netlify\Config\config.json` → `users.*.auth.token` into `supabase/.env`, then
+  `npx supabase secrets set NETLIFY_AUTH_TOKEN=<token>` (single key, never `--env-file`, never
+  mid-build). `npx netlify deploy` with NO `NETLIFY_AUTH_TOKEN` exported uses that login.
   Google SA key JSON at `~/.secrets/ace-booking-calendar-*.json`. Main site Netlify id
   `4ea5b9c0-5a70-406f-a928-7f009290f519` (also git-linked to github.com/rhyanalmeida/acewebdesigners).
 
