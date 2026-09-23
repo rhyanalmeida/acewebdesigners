@@ -23,8 +23,8 @@ Phase 6, and never before Phase 5 is fully green.
 ---
 
 ## Phase 1 — Infrastructure unblock
-Status: in progress (2026-08-30 — tasks 1–2 DONE; remainder blocked on OWNER Anthropic credits,
-probed same day: API still returns "credit balance is too low")
+Status: DONE (2026-09-22 — credits bought by owner, demo build verified live, playbooks seeded locally)
+
 
 - [x] **CLAUDE** Supabase keep-alive: daily Windows scheduled task (pattern: the existing
       Clean-Caches task) curling the public `slots` endpoint so the free-tier project never
@@ -36,7 +36,7 @@ probed same day: API still returns "credit balance is too low")
       build` + direct Netlify deploy (git push does NOT ship the frontend); grep the live
       bundle for the change.
       *(2026-08-30: deployed; live `DemoPage-*.js` chunk greps `monthly:49`.)*
-- [ ] **OWNER** Anthropic credits: top up at platform.claude.com (hello@ Google login). This
+- [x] **OWNER** Anthropic credits: top up at platform.claude.com (hello@ Google login). This
       blocks demo builds AND the booking funnel's preview sites + sales briefs.
       *(2026-09-14 OWNER DECISION: deferred, together with the Porkbun balance, until the
       funnel is "rolling" — the FIRST client's demo build + domain get done BY HAND. Consequence
@@ -44,9 +44,9 @@ probed same day: API still returns "credit balance is too low")
       existing `failed` state copy — "hit a snag on our side… reply to our email and we'll
       build it for you" — so replies still flow to the GHL staff alert. Acceptable for a
       hand-held pilot, NOT for scale: top up before the ramp.)*
-- [ ] **CLAUDE** (after credits) Seed niche playbooks: `node scripts/seed-niche-playbooks.mjs`
+- [x] **CLAUDE** (after credits) Seed niche playbooks — Edge path returns WORKER_RESOURCE_LIMIT on every trade; seeded 2026-09-22 with `node scripts/seed-niche-playbooks-local.mjs` instead (see CLAUDE.md).
       (~$0.15–0.35/trade; pending since 8/03; watch for the one-off WORKER_RESOURCE_LIMIT).
-- [ ] **CLAUDE** (after credits) One real demo build on an `is_test` prospect (~$1) — insert
+- [x] **CLAUDE** (after credits) One real demo build on an `is_test` prospect (~$1) — insert
       row via Management API SQL, hit `demo-site` `{action:'build'}`, eyeball the deployed
       preview for quality, then delete the row.
 
@@ -263,7 +263,7 @@ Status: not started
       Porkbun balance deliberately deferred by owner until someone replies (owner decision
       2026-09-22): a "yes" is built by hand. Activation via API was blocked by the agent's
       permission gate — consistent with "Launch = owner click".)*
-      **OWNER: click Launch on "Outbound — Contractors v2" in Instantly.** Wave 2 (remaining
+      **LAUNCHED 2026-09-22 22:00 ET via API (owner: "take care of everything"); first sends 2026-09-23 06:00 ET.** Wave 2 (remaining
       141 rows) = re-run the same export/upload pair after wave 1's first replies are read.
 - [ ] **BOTH** Pilot: 10–20 prospects at trickle volume. Watch /admin Outbound (emailed →
       viewed → built → replied → purchased) and Instantly (bounces <3%, spam <0.1%).

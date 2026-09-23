@@ -244,12 +244,16 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   injects a TRADE INSIGHT block into the system prompt so preview sites hit trade-specific needs.
 - **/admin**: Website tab rows have a **Brief** button (violet when ready) → markdown modal
   (`react-markdown`, new dep, admin chunk only) with status states + Regenerate.
-- ⚠️ **NOT yet seeded/verified live: the Anthropic org has NO API credits** (top up at
-  platform.claude.com, hello@ Google login). Until then generate-brief AND generate-site fail at the
-  API call (booking itself unaffected). After topping up: `node scripts/seed-niche-playbooks.mjs`,
-  then run one `businessType:'plumber'` test booking end-to-end. Note: the first seed attempt also
-  returned a one-off `WORKER_RESOURCE_LIMIT` (546) — if it recurs with credits present, the sync
-  research call may need the 202+poll pattern.
+- **Credits live 2026-09-22 (owner topped up).** generate-site verified end-to-end the same day
+  (real prospect build → `preview-hardy-roofing-siding-*.netlify.app`, deployed in ~4 min, then
+  torn down). **Seeding: the Edge research path is dead** — `generate-brief {action:'research'}`
+  returns `WORKER_RESOURCE_LIMIT` (546) on EVERY trade, not one-off. Use
+  **`node scripts/seed-niche-playbooks-local.mjs`** instead: same prompt (copied — change both),
+  same Sonnet 5 + `web_search_20260209`, runs in local Node, upserts rows via the service key;
+  `max_tokens` 8000 (4000 truncated before the JSON). ~3 min/trade. `seed-niche-playbooks.mjs`
+  (Edge path) is kept only for the day the fn is fixed (202+poll). Auto-research on an unknown
+  niche at booking time still runs through the Edge path and will fail the same way → the brief
+  falls back to `FALLBACK_PLAYBOOK`; seed new trades locally.
 
 ## Outbound cold-email demo funnel — BUILT; launching per `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md`
 **Launch = 6 phases, ONE phase per session, checklist lives in that doc — read it first and
@@ -319,8 +323,8 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   via API by `scripts/instantly-create-campaign.mjs`, which parses
   `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` (single source of copy; `--dry` prints the payload,
   `--update <id>` re-pushes copy/settings, pure logic in `scripts/lib/instantly-campaign.mjs`).
-  **Status 2026-09-22: v4 copy pushed, wave 1 (100 leads) uploaded, WAITING FOR OWNER TO
-  CLICK LAUNCH** (API activation is permission-gated for the agent — by design). Footer
+  **Status 2026-09-22: LAUNCHED (status 1 via API, owner instruction "take care of
+  everything") — v4 copy, wave 1 = 100 leads, first sends 2026-09-23 06:00 ET.** Footer
   postal address = the office, 30 North Main St, Leominster, MA 01453 (supplied 2026-09-14;
   CAN-SPAM 16 CFR 316.2 requires a street address, USPS PO Box, or CMRA box — no exemption
   for B2B cold email; owner asked to drop it 2026-09-22 — not legal, alternatives are a USPS
@@ -553,11 +557,10 @@ stay in the Ace Web Designers portfolio.)
   Individual Org" (Google login hello@) — org needs credits (still $0 as of 2026-09-22: owner
   hasn't topped up; pay-as-you-go credits, no subscription). `NETLIFY_AUTH_TOKEN` = CLI token of
   **rhyanalmeida31@gmail.com** (the real Netlify account; the hello@ account is empty, PATs revoked).
-  ⚠️ 2026-09-22: the token in `supabase/.env` returns 401 from Netlify, so the deployed Edge
-  secret (synced from it) is presumed dead too → **demo-site deploys would fail. OWNER TODO
-  (agent's secret write was permission-blocked):** copy the CLI's valid token from
-  `%APPDATA%\netlify\Config\config.json` → `users.*.auth.token` into `supabase/.env`, then
-  `npx supabase secrets set NETLIFY_AUTH_TOKEN=<token>` (single key, never `--env-file`, never
+  2026-09-22: the token that had been in `supabase/.env` returned 401 from Netlify — replaced
+  in the env file AND re-set as the Edge secret from the CLI's stored token
+  (`%APPDATA%\netlify\Config\config.json` → `users.*.auth.token`); verified by a real demo
+  deploy. If a deploy ever 401s again, re-sync from there (single key, never `--env-file`, never
   mid-build). `npx netlify deploy` with NO `NETLIFY_AUTH_TOKEN` exported uses that login.
   Google SA key JSON at `~/.secrets/ace-booking-calendar-*.json`. Main site Netlify id
   `4ea5b9c0-5a70-406f-a928-7f009290f519` (also git-linked to github.com/rhyanalmeida/acewebdesigners).

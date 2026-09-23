@@ -129,4 +129,4 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 - [x] v4 copy approved by owner ("let's start") 2026-09-22.
 - [x] Pushed to campaign 46657029-fdd6-4567-b5fe-2165bb298367 (`--update`).
 - [x] Wave 1 (100 rows) exported + uploaded via `scripts/instantly-upload-leads.mjs` (100/100, 0 dup).
-- [ ] **OWNER: click Launch in Instantly** (API activation was permission-blocked; the scripts never activate).
+- [x] **Launched 2026-09-22** via API (`POST /campaigns/{id}/activate`, status 1 read back); the scripts still never activate on their own.
