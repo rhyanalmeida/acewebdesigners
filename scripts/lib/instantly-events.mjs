@@ -23,13 +23,39 @@ export function mapReceivedEmail(item) {
   const lead = String(item.lead ?? item.from_address_email ?? '').trim().toLowerCase()
   if (!lead) return null
   if (!item.campaign_id) return null
+  const body = item.body && typeof item.body === 'object' ? item.body : {}
+  const text = typeof body.text === 'string' && body.text.trim() ? body.text : htmlToText(body.html)
   return {
     event_type: 'reply',
     lead_email: lead,
     campaign_id: String(item.campaign_id),
     key: `reply:${item.id ?? `${lead}:${item.timestamp_created ?? ''}`}`,
     ts: item.timestamp_created ?? item.timestamp_email ?? null,
+    // Carried through to the webhook so it can classify the reply and, on a "yes",
+    // auto-build; email_id + eaccount are what the reply-send needs later.
+    reply_text: text.slice(0, 4000),
+    email_id: item.id ? String(item.id) : null,
+    eaccount: item.eaccount ? String(item.eaccount) : null,
+    subject: typeof item.subject === 'string' ? item.subject : '',
   }
+}
+
+/** Minimal HTML → text for replies that only carry an HTML body. */
+export function htmlToText(html) {
+  if (typeof html !== 'string') return ''
+  return html
+    .replace(/<blockquote[\s\S]*?<\/blockquote>/gi, '')
+    .replace(/<(br|\/p|\/div|\/tr)\b[^>]*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
+}
+
+/** The in-thread reply that carries the demo link — the only email that ever links. */
+export function demoLinkReply({ first_name, business_name, demo_url }) {
+  const name = (first_name ?? '').trim() || (business_name ?? '').trim() || 'there'
+  const text = `Hi ${name},\n\nHere it is: ${demo_url}\n\nIt's a draft — tell me what to change and I'll turn it around. If you want it live on your own .com, the page walks you through it ($49/mo, cancel anytime). Happy to go over it on a quick 15-minute call too — just say when works.\n\nRhyan\nAce Web Designers`
+  return { text, html: `<p>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(demo_url, `<a href="${demo_url}">${demo_url}</a>`).replace(/\n/g, '<br/>')}</p>` }
 }
 
 /** Lead `status` enum from POST /api/v2/leads/list. */
@@ -97,5 +123,8 @@ export function toWebhookBody(ev) {
     lead_email: ev.lead_email,
     campaign_id: ev.campaign_id ?? undefined,
     source: 'instantly-poll',
+    ...(ev.event_type === 'reply'
+      ? { reply_text: ev.reply_text ?? '', email_id: ev.email_id ?? undefined, eaccount: ev.eaccount ?? undefined, subject: ev.subject ?? '' }
+      : {}),
   }
 }

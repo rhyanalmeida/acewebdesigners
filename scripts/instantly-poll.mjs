@@ -24,6 +24,7 @@ import {
   advanceWatermark,
   trimSeen,
   toWebhookBody,
+  demoLinkReply,
 } from './lib/instantly-events.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -56,6 +57,9 @@ function loadDotEnv(file) {
 const env = { ...loadDotEnv(path.join(ROOT, 'supabase', '.env')), ...process.env }
 const API_KEY = env.INSTANTLY_API_KEY
 const SECRET = env.INSTANTLY_WEBHOOK_SECRET
+// emails:all key — sends the demo-link reply once a "yes" prospect's site is deployed.
+// Optional: without it replies are still classified/built, just not auto-sent.
+const SENDER_KEY = env.INSTANTLY_SENDER_API_KEY
 if (!API_KEY) die('INSTANTLY_API_KEY missing (supabase/.env)')
 if (!SECRET && !DRY) die('INSTANTLY_WEBHOOK_SECRET missing (supabase/.env)')
 
@@ -146,16 +150,49 @@ async function fetchLeads(filter) {
   return events
 }
 
-async function forward(ev) {
-  if (DRY) return 'dry'
+async function postWebhook(body) {
   const r = await fetch(`${WEBHOOK}?secret=${encodeURIComponent(SECRET)}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(toWebhookBody(ev)),
+    body: JSON.stringify(body),
   })
-  const txt = (await r.text()).slice(0, 120)
-  if (!r.ok) throw new Error(`webhook ${r.status} ${txt}`)
+  const txt = await r.text()
+  if (!r.ok) throw new Error(`webhook ${r.status} ${txt.slice(0, 120)}`)
   return txt
+}
+
+async function forward(ev) {
+  if (DRY) return 'dry'
+  return (await postWebhook(toWebhookBody(ev))).slice(0, 120)
+}
+
+/**
+ * Send pass: for every "yes" prospect whose demo is now deployed and whose link has not
+ * gone out, reply in the original thread from the inbox that received the reply, then
+ * stamp demo_link_sent_at via the webhook so it is sent exactly once. Failures are
+ * logged and retried next tick (nothing is stamped unless Instantly accepted the send).
+ */
+async function sendDemoLinks() {
+  if (DRY || !SENDER_KEY) return { sent: 0, pending: 0, skipped: !SENDER_KEY ? 'no INSTANTLY_SENDER_API_KEY' : 'dry' }
+  const { items = [] } = JSON.parse(await postWebhook({ event_type: 'auto_send_pending' }))
+  let sent = 0
+  for (const p of items) {
+    try {
+      const subject = p.reply_subject && /^re:/i.test(p.reply_subject) ? p.reply_subject : `Re: ${p.reply_subject || `${p.business_name} homepage?`}`
+      const r = await fetch(`${API}/emails/reply`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${SENDER_KEY}`, 'content-type': 'application/json' },
+        body: JSON.stringify({ reply_to_uuid: p.reply_email_id, eaccount: p.reply_eaccount, subject, body: demoLinkReply(p) }),
+      })
+      if (!r.ok) throw new Error(`emails/reply ${r.status} ${(await r.text()).slice(0, 160)}`)
+      await postWebhook({ event_type: 'demo_link_sent', lead_email: p.email })
+      sent++
+      console.log(`  ✉ demo link sent → ${p.email} (${p.demo_url})`)
+    } catch (e) {
+      console.error(`  ✗ demo link send failed for ${p.email}: ${e.message}`)
+    }
+  }
+  return { sent, pending: items.length - sent }
 }
 
 async function main() {
@@ -191,9 +228,17 @@ async function main() {
     seen: trimSeen(seen),
   }
   saveState(next)
+
+  let send = { sent: 0, pending: 0 }
+  try {
+    send = await sendDemoLinks()
+  } catch (e) {
+    console.error(`  ✗ send pass: ${e.message}`)
+  }
   log(
     `OK${DRY ? ' (dry)' : ''} seen replies=${replies.length} bounced=${bounces.length} unsub=${unsubs.length} ` +
-      `new=${fresh.length} forwarded=${ok} failed=${failed.length} since=${since} → ${next.replies_since}`,
+      `new=${fresh.length} forwarded=${ok} failed=${failed.length} links_sent=${send.sent} links_pending=${send.pending}` +
+      `${send.skipped ? ` (send skipped: ${send.skipped})` : ''} since=${since} → ${next.replies_since}`,
   )
   if (failed.length) process.exitCode = 2
 }

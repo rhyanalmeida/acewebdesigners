@@ -980,6 +980,18 @@ const OutboundTab: React.FC<{ prospects: Prospect[]; onChanged: () => void }> = 
                         : p.demo_first_viewed_at ? `Viewed ${timeAgo(p.demo_first_viewed_at)} (${p.demo_view_count ?? 0}×)`
                         : p.emailed_at ? `Emailed ${timeAgo(p.emailed_at)}`
                         : 'Imported'}
+                      {p.replied_at && !p.purchased_at && (
+                        <div className="mt-0.5" title={p.last_reply ?? undefined}>
+                          <span className={
+                            p.reply_sentiment === 'yes' ? 'text-emerald-600' : p.reply_sentiment === 'no' ? 'text-rose-500' : 'text-amber-600'
+                          }>
+                            {p.reply_sentiment === 'yes' ? 'YES' : p.reply_sentiment === 'no' ? 'no' : 'read it'}
+                          </span>
+                          {p.demo_link_sent_at ? ` · link sent ${timeAgo(p.demo_link_sent_at)}`
+                            : p.auto_send ? ' · auto-sending' : ''}
+                          {p.last_reply && <div className="truncate max-w-[16rem] text-slate-400">“{p.last_reply.slice(0, 80)}”</div>}
+                        </div>
+                      )}
                     </td>
                     <td className="px-3 py-2.5">
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${SITE_CHIP[p.site_status] ?? SITE_CHIP.none}`}>{p.site_status}</span>

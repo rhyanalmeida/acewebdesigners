@@ -6,6 +6,7 @@ import {
   advanceWatermark,
   trimSeen,
   toWebhookBody,
+  demoLinkReply,
 } from './instantly-events.mjs'
 
 const reply = {
@@ -19,7 +20,7 @@ const reply = {
 
 describe('mapReceivedEmail', () => {
   it('maps a genuine campaign reply', () => {
-    expect(mapReceivedEmail(reply)).toEqual({
+    expect(mapReceivedEmail(reply)).toMatchObject({
       event_type: 'reply',
       lead_email: 'owner@example.com',
       campaign_id: 'c1',
@@ -100,5 +101,24 @@ describe('toWebhookBody', () => {
       campaign_id: undefined,
       source: 'instantly-poll',
     })
+  })
+  it('carries the reply text, email id, inbox and subject on replies so the webhook can classify + auto-send', () => {
+    const ev = mapReceivedEmail({
+      id: 'e1', ue_type: 2, lead: 'Todd@Hardy.com', campaign_id: 'c1', eaccount: 'rhyan@getacewebdesigners.com',
+      subject: 'Re: Hardy Construction homepage?', body: { html: '<div>Yes please<br></div><blockquote>Want to see it?</blockquote>' },
+    })
+    expect(toWebhookBody(ev)).toMatchObject({
+      event_type: 'reply', lead_email: 'todd@hardy.com', reply_text: 'Yes please', email_id: 'e1',
+      eaccount: 'rhyan@getacewebdesigners.com', subject: 'Re: Hardy Construction homepage?',
+    })
+  })
+})
+
+describe('demoLinkReply', () => {
+  it('greets by first name, falls back to business, and links exactly once', () => {
+    const r = demoLinkReply({ first_name: '', business_name: 'Hardy Construction', demo_url: 'https://acewebdesigners.com/demo/abc' })
+    expect(r.text.startsWith('Hi Hardy Construction,')).toBe(true)
+    expect(r.text.match(/https:\/\//g)).toHaveLength(1)
+    expect(r.html).toContain('<a href="https://acewebdesigners.com/demo/abc">')
   })
 })

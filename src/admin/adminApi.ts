@@ -181,6 +181,10 @@ export interface Prospect {
   cancelled_at?: string | null
   emailed_at?: string | null
   replied_at?: string | null
+  last_reply?: string | null
+  reply_sentiment?: 'yes' | 'no' | 'unknown' | null
+  auto_send?: boolean | null
+  demo_link_sent_at?: string | null
   created_at: string
 }
 
