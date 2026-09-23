@@ -4,9 +4,13 @@
  * only credential; everything goes through the `demo-site` / `domain-search` /
  * `create-subscription` Edge Functions.
  *
- * Flow: Intro (explicit "Build my free preview" click — builds cost real Opus
- * money, so nothing fires on page view) → Generating (poll every 5s; a build
- * takes ~10-15 min) → Ready (iframe preview + single monthly plan + domain
+ * Flow (reply-gated, 2026-09-22): the link is only ever sent AFTER the site is built
+ * (instantly-webhook auto-builds on a "yes" reply; the poller sends the link once
+ * deployed), so a prospect normally lands straight on Ready. If a link is opened
+ * early (status none) the build starts silently on view — no button, no "AI" —
+ * and the page shows a finishing-touches state (owner rule: the prospect opens a
+ * DONE preview, never a build-it-yourself pitch). Generating polls every 5s (a
+ * build takes ~5-10 min) → Ready (iframe preview + single monthly plan + domain
  * picker; the customer confirms the EXACT domain before paying — registrations
  * are non-refundable) → Purchased (domain being provisioned).
  *
@@ -15,7 +19,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { ArrowRight, Check, Globe, Loader2, Search, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, Globe, Loader2, Search } from 'lucide-react'
 
 import { supabase } from '../lib/supabase'
 import { OUTBOUND_PLAN } from '../config/outboundPlan'
@@ -75,6 +79,13 @@ export default function DemoPage() {
     if (token) void fetchState()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
+
+  // A link opened before the build exists: start it silently (one build ever — the
+  // server's none→generating gate makes repeat views free).
+  useEffect(() => {
+    if (state?.siteStatus === 'none' && !building) void startBuild()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.siteStatus])
 
   // poll while generating
   useEffect(() => {
@@ -222,48 +233,30 @@ export default function DemoPage() {
 
         {state && !state.purchased && !purchasedFromUrl && (
           <>
-            {/* ── Intro: explicit build button ─────────────────────────────── */}
-            {(state.siteStatus === 'none' || state.siteStatus === 'failed') && (
-              <div className="text-center py-16 max-w-2xl mx-auto">
-                <p className="text-signal-400 font-medium mb-3 uppercase tracking-wide text-xs">
-                  Built just for {state.businessName}
-                </p>
-                <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-5">
-                  {state.firstName ? `${state.firstName}, see` : 'See'} what {state.businessName}
-                  's new website could look like
-                </h1>
-                <p className="text-white/70 text-lg mb-8">
-                  Our designer AI builds a complete, custom preview site for your business
-                  {state.city ? ` in ${state.city}${state.state ? `, ${state.state}` : ''}` : ''} — free, no strings.
-                  It takes about 10 minutes. Like it? Take it live on your own domain. Don't? Close the tab.
-                </p>
-                <button
-                  onClick={() => void startBuild()}
-                  disabled={building}
-                  className="inline-flex items-center gap-2 bg-signal-500 hover:bg-signal-400 disabled:opacity-60 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-colors"
-                >
-                  {building ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                  Build my free preview
-                </button>
-                {state.siteStatus === 'failed' && (
-                  <p className="text-amber-400/90 text-sm mt-4">
-                    The last attempt hit a snag on our side — we've been notified. Feel free to reply to our email and
-                    we'll build it for you.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* ── Generating: poll + reassure ──────────────────────────────── */}
-            {state.siteStatus === 'generating' && (
+            {/* ── Not built yet / building: finishing touches (no button, no "AI") ── */}
+            {(state.siteStatus === 'none' || state.siteStatus === 'generating') && (
               <div className="text-center py-20 max-w-xl mx-auto">
                 <Loader2 className="w-10 h-10 animate-spin mx-auto text-signal-400 mb-6" />
                 <h1 className="text-2xl sm:text-3xl font-bold mb-3">
-                  Building {state.businessName}'s website…
+                  Putting the finishing touches on {state.businessName}'s new website…
                 </h1>
                 <p className="text-white/70">
-                  Design system, pages, copy — the whole site is being written for your business right now. This
-                  usually takes about 10 minutes. Keep this tab open, or come back via the same link.
+                  It'll be ready to view here in a few minutes. Keep this tab open or come back to this same link —
+                  it refreshes on its own.
+                </p>
+                {error && <p className="text-amber-400/90 text-sm mt-4">{error}</p>}
+              </div>
+            )}
+
+            {/* ── Failed: never a self-serve retry — staff are alerted ─────── */}
+            {state.siteStatus === 'failed' && (
+              <div className="text-center py-20 max-w-xl mx-auto">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-3">
+                  {state.businessName}'s preview is on its way
+                </h1>
+                <p className="text-white/70">
+                  We hit a snag on our end getting it published and our team has been notified. We'll email you the
+                  finished preview shortly — no need to do anything.
                 </p>
               </div>
             )}

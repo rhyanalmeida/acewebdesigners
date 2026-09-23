@@ -79,7 +79,7 @@ async function research(trade) {
     headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
     body: JSON.stringify({
       model: MODEL,
-      max_tokens: 8000,
+      max_tokens: 12000,
       tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 6 }],
       messages: [{ role: 'user', content: RESEARCH_PROMPT(trade) }],
     }),
