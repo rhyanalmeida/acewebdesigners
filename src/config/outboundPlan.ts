@@ -27,7 +27,13 @@ export const OUTBOUND_PLAN: OutboundPlan = {
     'The exact website from your preview, refined and taken live',
     'Your own .com domain — registered for you, included',
     'Hosting, SSL and security included',
-    'Content updates when you need them',
+    'Unlimited updates — email hello@acewebdesigners.com, we make the change',
     'Cancel anytime',
   ],
 }
+
+/** Where customers send change requests (unlimited, included in the plan). */
+export const SUPPORT_EMAIL = 'hello@acewebdesigners.com'
+
+/** Google review link (owner-supplied 2026-09-22) — asked for AFTER purchase only, never before. */
+export const GOOGLE_REVIEW_URL = 'https://share.google/zIg87wr3mBcAgLpDv'

@@ -22,7 +22,7 @@ import { Helmet } from 'react-helmet-async'
 import { ArrowRight, Check, Globe, Loader2, Search } from 'lucide-react'
 
 import { supabase } from '../lib/supabase'
-import { OUTBOUND_PLAN } from '../config/outboundPlan'
+import { GOOGLE_REVIEW_URL, OUTBOUND_PLAN, SUPPORT_EMAIL } from '../config/outboundPlan'
 
 interface DemoState {
   businessName: string
@@ -215,9 +215,35 @@ export default function DemoPage() {
                 'Your site is being set up right now.'
               )}
             </p>
-            <p className="text-white/50 text-sm">
-              We'll email you as soon as it's live. Questions? Just reply to any of our emails.
-            </p>
+            <p className="text-white/50 text-sm">We'll email you as soon as it's live.</p>
+
+            <div className="mt-8 text-left bg-white/5 border border-white/10 rounded-xl p-5">
+              <h2 className="font-semibold mb-2">Unlimited updates, included</h2>
+              <p className="text-white/70 text-sm">
+                Want a photo swapped, a new service added, hours changed, anything at all? Email{' '}
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="underline text-white">
+                  {SUPPORT_EMAIL}
+                </a>{' '}
+                any time — there's no limit and no extra charge. That's your support line from here on.
+              </p>
+            </div>
+
+            <div className="mt-4 text-left bg-white/5 border border-white/10 rounded-xl p-5">
+              <h2 className="font-semibold mb-2">Once it's live — one small favor</h2>
+              <p className="text-white/70 text-sm mb-3">
+                If we did right by you, a quick Google review helps other contractors find us. No rush — take a
+                look at the finished site first.
+              </p>
+              <a
+                href={GOOGLE_REVIEW_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold underline text-white"
+              >
+                Leave a Google review <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+
             {state.previewUrl && (
               <a
                 href={state.previewUrl}
