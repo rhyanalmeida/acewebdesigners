@@ -287,6 +287,7 @@ $1,000 fake credit). Sandbox mode = deploy the sb keys (`PORKBUN_SB_*` in `supab
 set `PORKBUN_API_BASE=https://api.porkbun.com/api/json/v3` to satisfy the guard. Verified
 end-to-end 2026-08-30 (`registering → dns_set → attached`); `registerDomain` sends the current
 API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
+- **Lead sourcing (Apify, 2026-11-01):** `node scripts/apify-scrape-contractors.mjs --state X --search "general contractor" --max N --out f.csv` runs the Google Maps Scraper (`compass/crawler-google-places`, $0.004/place + $0.001/filter on the FREE plan, **$5/mo cap**, `APIFY_TOKEN` in `supabase/.env`; the `apify` MCP server is registered but needs a CC restart) and classifies `websiteKind` none/social/real. **MA pilot (300 GC listings, $1.20): 20% no website, 1.3% social-only, 0 emails** — Google Maps publishes no emails; `--contacts` only crawls REAL websites for them. A "no-website + email" list is not sourceable this way (they have phones, 92%); the email-bearing segment is real-website contractors (redesign angle).
 - **Ops:** `node scripts/import-prospects.mjs --file x.csv --batch b1 --trade plumber` (skips
   suppressed/non-US/no-email; upserts on gmaps_place_id) → `node scripts/export-instantly.mjs
   --batch b1` (stamps emailed_at; `--no-stamp` = dry) → upload CSV to Instantly, `{{demo_url}}` in
