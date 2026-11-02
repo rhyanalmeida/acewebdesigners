@@ -6,11 +6,12 @@
  *
  * Flow (reply-gated, 2026-09-22): the link is only ever sent AFTER the site is built
  * (instantly-webhook auto-builds on a "yes" reply; the poller sends the link once
- * deployed), so a prospect normally lands straight on Ready. If a link is opened
- * early (status none) the build starts silently on view — no button, no "AI" —
- * and the page shows a finishing-touches state (owner rule: the prospect opens a
- * DONE preview, never a build-it-yourself pitch). Generating polls every 5s (a
- * build takes ~5-10 min).
+ * deployed), so a prospect normally lands straight on Ready. A link opened early
+ * (status none — forwarded / old v2 link / GHL field) renders the offer with ONE
+ * explicit "Build my free preview" button; the ~$1 Opus build starts only from that
+ * click, never on page view (owner, 2026-11-02: frictionless, but no site for
+ * everyone). Generating polls every 10s with an honest 10–20 min ETA (measured
+ * 4–20 min). Copy for both states lives in config/outboundPlan.ts.
  *
  * Ready (2026-11-01 redesign — "a contractor who likes it should have nothing left
  * to figure out"): offer summary + price above the fold, device-toggle preview,
@@ -48,10 +49,12 @@ import {
 import { supabase } from '../lib/supabase'
 import {
   AFTER_LIVE,
+  BUILDING_COPY,
   FAQ,
   GO_LIVE_STEPS,
   GOOGLE_REVIEW_URL,
   OUTBOUND_PLAN,
+  PREVIEW_OFFER,
   SUPPORT_EMAIL,
 } from '../config/outboundPlan'
 
@@ -69,7 +72,7 @@ interface DemoState {
 
 type DomainCheck = { domain: string; available: boolean; price?: string } | null
 
-const POLL_MS = 5000
+const POLL_MS = 10000
 const PURCHASED_POLL_MS = 10000
 
 function tokenFromPath(): string {
@@ -150,12 +153,8 @@ export default function DemoPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
-  // A link opened before the build exists: start it silently (one build ever — the
-  // server's none→generating gate makes repeat views free).
-  useEffect(() => {
-    if (state?.siteStatus === 'none' && !building) void startBuild()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.siteStatus])
+  // NO auto-build on view (2026-11-02): status 'none' renders the offer + a button;
+  // `startBuild` runs only from that click. Opening a link must cost $0.
 
   // poll while generating
   useEffect(() => {
@@ -306,18 +305,47 @@ export default function DemoPage() {
 
         {state && !showPurchased && (
           <>
-            {/* ── Not built yet / building: finishing touches (no button, no "AI") ── */}
-            {(state.siteStatus === 'none' || state.siteStatus === 'generating') && (
+            {/* ── Not built yet: the offer + ONE explicit button (the interest signal) ── */}
+            {state.siteStatus === 'none' && (
+              <div className="text-center py-16 max-w-2xl mx-auto">
+                <p className="text-signal-300 text-sm font-semibold uppercase tracking-wider mb-3">
+                  {PREVIEW_OFFER.eyebrow}
+                </p>
+                <h1 className="text-3xl sm:text-4xl font-bold mb-4">
+                  {PREVIEW_OFFER.heading.replace('{business}', state.businessName)}
+                </h1>
+                <p className="text-white/70 text-lg mb-8">{PREVIEW_OFFER.body}</p>
+                <ul className="text-left inline-block space-y-3 mb-10">
+                  {PREVIEW_OFFER.bullets.map((b) => (
+                    <li key={b} className="flex items-start gap-3 text-white/80">
+                      <Check className="w-5 h-5 text-signal-400 shrink-0 mt-0.5" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div>
+                  <button
+                    onClick={() => void startBuild()}
+                    disabled={building}
+                    className="inline-flex items-center justify-center gap-2 bg-signal-500 hover:bg-signal-400 disabled:opacity-60 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-colors"
+                  >
+                    {building ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+                    {PREVIEW_OFFER.cta}
+                  </button>
+                  <p className="text-white/50 text-sm mt-3">{PREVIEW_OFFER.eta}</p>
+                </div>
+                {error && <p className="text-amber-400/90 text-sm mt-4">{error}</p>}
+              </div>
+            )}
+
+            {/* ── Building: honest wait, page polls and flips to Ready by itself ── */}
+            {state.siteStatus === 'generating' && (
               <div className="text-center py-20 max-w-xl mx-auto">
                 <Loader2 className="w-10 h-10 animate-spin mx-auto text-signal-400 mb-6" />
                 <h1 className="text-2xl sm:text-3xl font-bold mb-3">
-                  Putting the finishing touches on {state.businessName}'s new website…
+                  {BUILDING_COPY.heading.replace('{business}', state.businessName)}
                 </h1>
-                <p className="text-white/70">
-                  It'll be ready to view here in a few minutes. Keep this tab open or come back to this same link —
-                  it refreshes on its own.
-                </p>
-                {error && <p className="text-amber-400/90 text-sm mt-4">{error}</p>}
+                <p className="text-white/70">{BUILDING_COPY.body}</p>
               </div>
             )}
 

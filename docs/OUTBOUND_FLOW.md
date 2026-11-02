@@ -142,8 +142,11 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   platform.claude.com) and `NETLIFY_AUTH_TOKEN`. Admin retry: /admin Outbound → Retry build
   (`admin-data {action:'retryProspectSite', prospectId}`, forces).
 - `/demo/<token>` (`DemoPage.tsx`, copy in `config/outboundPlan.ts`): first view fires
-  `outbound-lead` in GHL with the demo URL; the page's own button is a second build gate for
-  prospects who were never auto-built. Ready state → pre-suggested .com auto-checked
+  `outbound-lead` in GHL with the demo URL. **Status `none` never builds on view** (fixed
+  2026-11-02 — the page used to auto-start the Opus build on open): it renders the offer +
+  one explicit "Build my free preview" button (`PREVIEW_OFFER`); only that click, or a "yes"
+  reply via the webhook, flips `none→generating`. Generating shows an honest 10–20 min ETA
+  (`BUILDING_COPY`) and polls every 10s until deployed. Cost of a non-interested link open = $0. Ready state → pre-suggested .com auto-checked
   (`domain-search` → Porkbun) → Stripe → `create-subscription` plan `demo_monthly`
   (`STRIPE_PRICE_DEMO_MONTHLY`) → `stripe-webhook` `kind:'demo_site'` (before the restaurant
   subscription branch — order matters; idempotent on `purchased_at is null`) → `provision-domain`
@@ -194,17 +197,17 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 - **Wave 2 uploaded + campaign RE-ACTIVATED (status 1) 2026-11-02 ~00:05 ET:** 496 leads = the
   118 September leftovers + 377 new rows + the internal seed (1 invalid, 1 skipped). Campaign now
   holds 596 leads; Instantly reports 404 contacts left in the plan this month. First sends
-  **Monday 2026-11-03 06:00 ET**, ~40/day. 695 rows of `2026-11-ne-gc` remain un-emailed for
+  **Monday 2026-11-02 06:00 ET**, ~40/day. 695 rows of `2026-11-ne-gc` remain un-emailed for
   later waves (`export-instantly.mjs --batch 2026-11-ne-gc --limit N`).
 - **Seed build result:** the webhook-started build deployed to
   `preview-ace-test-builders-668fb4.netlify.app` (HTTP 200) — but it took **~20 min**, not the ~4
   min seen in September. One accidental second build was forced via `funnel-admin.mjs
   prospect-build` right after it finished (the row's `updated_at` doesn't move on status changes, so
   it looked stuck). Treat build time as 5–20 min when designing the prospect-facing wait.
-- **Open problem (owner, 2026-11-02):** a prospect who opens `/demo/<token>` before the build is
-  done sits on "still generating". Goal: frictionless for them, no Opus build for everyone.
-  Direction to evaluate next session: the reply-gated flow already builds BEFORE the link goes out
-  (so yes-repliers never wait); for the page's own build button, show an instant templated preview
-  (no LLM, seconds) and upgrade to the Opus build in the background + notify by email when ready.
+- **Demo-page wait fix SHIPPED 2026-11-02 ~00:20 ET** (frontend deploy, no Edge change): the page
+  no longer auto-builds on open; `none` = offer + explicit button, `generating` = honest 10–20 min
+  wait. Verified on prod with an is_test row: one view → `site_status` stayed `none`, view
+  count 1, row deleted after. Yes-repliers still get built-then-linked, so they never see the wait.
+  Still UNKNOWN: why the seed build took ~20 min vs ~4 in September (Edge logs not yet read).
 - Next: fund Porkbun before the first real purchase; reply "yes" from rhyan@acewebdesignershq.com
   when Email 1 lands Monday to prove the in-thread auto-send; consider 2 more inboxes for 2× volume.

@@ -96,3 +96,33 @@ export const FAQ: { q: string; a: string }[] = [
     a: `${SUPPORT_EMAIL} — that's your support line. A real person reads it and makes the change.`,
   },
 ]
+
+/**
+ * /demo/<token> opened BEFORE a build exists (site_status 'none'). The reply-gated
+ * flow normally builds first and sends the link after, so this state is reached
+ * only via an early/forwarded link. The build is a ~$1 Opus run, so it starts on
+ * an explicit click — never on page view (owner, 2026-11-02: "frictionless, but
+ * we don't make a site for everyone"). Copy claims only what the chain does.
+ */
+export const PREVIEW_OFFER = {
+  eyebrow: 'Free, no strings',
+  /** `{business}` is replaced with the prospect's business name. */
+  heading: 'Want to see {business} with a new website?',
+  body:
+    'We build a complete homepage preview for your business — real pages, your services, your area — and show it to you right here. Free, nothing to sign up for.',
+  bullets: [
+    'A full homepage preview, built around your business',
+    `Like it? $${OUTBOUND_PLAN.monthly}/month puts it live on your own .com — domain, hosting and updates included`,
+    "Don't like it? Close the tab. Nothing to cancel, no charge",
+  ],
+  cta: 'Build my free preview',
+  /** Honest range: measured 4–20 min end-to-end (3-stage build + deploy). */
+  eta: 'Takes about 10–20 minutes.',
+} as const
+
+/** Shown while the build runs — the page polls and flips to Ready by itself. */
+export const BUILDING_COPY = {
+  heading: "Building {business}'s new website…",
+  body:
+    "This usually takes 10–20 minutes. Keep this tab open or come back to this same link any time — it refreshes on its own and the preview stays here once it's done.",
+} as const
