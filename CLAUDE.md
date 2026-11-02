@@ -60,7 +60,7 @@ Supabase Edge Functions (supabase/functions, Deno)
   result         admin: No-Show / Showed / Purchase → CAPI CompleteRegistration / Purchase; No-Show also tags funnel-noshow in GHL
   admin-data     admin: dashboard payload (health + stats + lists)
   capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
-  generate-site  3-stage Opus 4.8 chain → builds+deploys a preview website (see Current state)
+  generate-site  bookings: 3-stage Opus 4.8 chain; prospects: FAST single-page Haiku 5.5 (~50s, ~$0.005)
   generate-copy  restaurant wizard AI copy (claude-haiku-4-5)
   demo-site      outbound: /demo/<token> status + the one-click (one-EVER) demo build gate
   domain-search  outbound: Porkbun .com availability for the checkout domain picker (token-gated)

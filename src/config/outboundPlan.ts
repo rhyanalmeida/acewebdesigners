@@ -98,31 +98,15 @@ export const FAQ: { q: string; a: string }[] = [
 ]
 
 /**
- * /demo/<token> opened BEFORE a build exists (site_status 'none'). The reply-gated
- * flow normally builds first and sends the link after, so this state is reached
- * only via an early/forwarded link. The build is a ~$1 Opus run, so it starts on
- * an explicit click — never on page view (owner, 2026-11-02: "frictionless, but
- * we don't make a site for everyone"). Copy claims only what the chain does.
+ * /demo/<token> opened before a build exists (site_status 'none'): the click on the
+ * email link IS the interest signal, so the page starts the build on open — no button
+ * (owner, 2026-11-02). It runs the FAST single-page path (Haiku 5.5, ~50s, ~$0.005), so
+ * nobody who never clicks costs anything and nobody who clicks waits long.
+ * Copy claims only what the chain does.
  */
-export const PREVIEW_OFFER = {
-  eyebrow: 'Free, no strings',
-  /** `{business}` is replaced with the prospect's business name. */
-  heading: 'Want to see {business} with a new website?',
-  body:
-    'We build a complete homepage preview for your business — real pages, your services, your area — and show it to you right here. Free, nothing to sign up for.',
-  bullets: [
-    'A full homepage preview, built around your business',
-    `Like it? $${OUTBOUND_PLAN.monthly}/month puts it live on your own .com — domain, hosting and updates included`,
-    "Don't like it? Close the tab. Nothing to cancel, no charge",
-  ],
-  cta: 'Build my free preview',
-  /** Honest range: measured 4–20 min end-to-end (3-stage build + deploy). */
-  eta: 'Takes about 10–20 minutes.',
-} as const
-
-/** Shown while the build runs — the page polls and flips to Ready by itself. */
 export const BUILDING_COPY = {
   heading: "Building {business}'s new website…",
-  body:
-    "This usually takes 10–20 minutes. Keep this tab open or come back to this same link any time — it refreshes on its own and the preview stays here once it's done.",
+  body: "This usually takes about a minute. Keep this tab open — it refreshes on its own and the preview stays at this link once it's done.",
+  failed: "We couldn't start the build just now.",
+  retry: 'Try again',
 } as const

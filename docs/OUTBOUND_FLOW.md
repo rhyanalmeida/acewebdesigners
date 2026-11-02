@@ -141,17 +141,20 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 
 ## 6. Demo build, demo page, purchase, provisioning
 
-- `generate-site` **subject adapter** `{prospectId}`: same 3-stage Opus chain as bookings, saves
-  `preview_url` / `netlify_site_id` / `site_status` on `prospects`. ~$0.60–1.10 and ~4 min per
-  site. Needs `ANTHROPIC_API_KEY` credits (org "Ace Web Designers's Individual Org" on
+- `generate-site` **subject adapter** `{prospectId}`: prospects take the **FAST path** (2026-11-02):
+  one Haiku 5.5 call → a single self-contained index.html → Netlify, **~50s and ~$0.005 per site**
+  (measured twice). The prompt carries a fixed mobile-nav pattern (the first Haiku build shipped
+  an always-open mobile menu). `{full:true}` forces the 3-stage Opus chain (~$1, 4–20 min) if a
+  prospect ever needs the multi-page build. Saves `preview_url` / `netlify_site_id` /
+  `site_status` on `prospects`. Needs `ANTHROPIC_API_KEY` credits (org "Ace Web Designers's Individual Org" on
   platform.claude.com) and `NETLIFY_AUTH_TOKEN`. Admin retry: /admin Outbound → Retry build
   (`admin-data {action:'retryProspectSite', prospectId}`, forces).
 - `/demo/<token>` (`DemoPage.tsx`, copy in `config/outboundPlan.ts`): first view fires
-  `outbound-lead` in GHL with the demo URL. **Status `none` never builds on view** (fixed
-  2026-11-02 — the page used to auto-start the Opus build on open): it renders the offer +
-  one explicit "Build my free preview" button (`PREVIEW_OFFER`); only that click, or a "yes"
-  reply via the webhook, flips `none→generating`. Generating shows an honest 10–20 min ETA
-  (`BUILDING_COPY`) and polls every 10s until deployed. Cost of a non-interested link open = $0. Ready state → pre-suggested .com auto-checked
+  `outbound-lead` in GHL with the demo URL. **Status `none` starts the fast build on open** —
+  the click on the email link is the interest signal (owner, 2026-11-02; no button, no
+  "build it" copy); the atomic `none→generating` gate still means one build ever. The page
+  shows "about a minute" (`BUILDING_COPY`), polls every 4s and flips to Ready by itself
+  (verified: open → Ready in 47s). A prospect who never clicks costs $0. Ready state → pre-suggested .com auto-checked
   (`domain-search` → Porkbun) → Stripe → `create-subscription` plan `demo_monthly`
   (`STRIPE_PRICE_DEMO_MONTHLY`) → `stripe-webhook` `kind:'demo_site'` (before the restaurant
   subscription branch — order matters; idempotent on `purchased_at is null`) → `provision-domain`
@@ -209,11 +212,11 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   min seen in September. One accidental second build was forced via `funnel-admin.mjs
   prospect-build` right after it finished (the row's `updated_at` doesn't move on status changes, so
   it looked stuck). Treat build time as 5–20 min when designing the prospect-facing wait.
-- **Demo-page wait fix SHIPPED 2026-11-02 ~00:20 ET** (frontend deploy, no Edge change): the page
-  no longer auto-builds on open; `none` = offer + explicit button, `generating` = honest 10–20 min
-  wait. Verified on prod with an is_test row: one view → `site_status` stayed `none`, view
-  count 1, row deleted after. Yes-repliers still get built-then-linked, so they never see the wait.
-  Still UNKNOWN: why the seed build took ~20 min vs ~4 in September (Edge logs not yet read).
+- **Demo wait SOLVED 2026-11-02 ~00:35 ET:** prospects now build on the FAST Haiku single-page path
+  (~50s, ~$0.005) and the page starts it on open — link click → Ready in 47s end-to-end on prod.
+  Quality checked by eye on desktop + phone (editorial-serif + nocturne styles). An interim
+  "explicit button" version was live for ~15 min and reverted on the owner's ask. The 20-min
+  Opus build mystery is moot for prospects (Opus chain only runs with `full:true` / bookings).
 - **Sending raised 2026-11-02 ~01:30 ET (owner: "you run it yourself"):** campaign PATCHed via API
   → `daily_limit 30`, window 06:00–16:00 ET, 3 steps (verified by GET). Wave-1 read: 394 sent, 3
   replies — ALL hostile ("remove our name", "spam elsewhere", "bug someone else"), all quoting the

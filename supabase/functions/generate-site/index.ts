@@ -59,6 +59,14 @@ import {
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
 const MODEL = 'claude-opus-4-8' // strongest designer; owner accepted ~$0.60-1.10/site for King-Repairs-tier quality
+/**
+ * FAST path (outbound prospects, 2026-11-02): the demo link in the cold email starts the
+ * build on click, so the prospect is WAITING — a single Haiku 5.5 call writes one
+ * self-contained index.html (inline CSS/JS, ~8k tokens) and deploys in the same isolate.
+ * ~$0.005/site, target ≤90s click → live. Owner accepted the smaller model for speed.
+ * Appointments (booking funnel) keep the 3-stage Opus chain — nobody is waiting on those.
+ */
+const FAST_MODEL = 'claude-haiku-5-5'
 
 const FILE_MARKER = /^=====\s*FILE:\s*([\w./-]+)\s*=====\s*$/gm
 
@@ -96,14 +104,17 @@ URL pattern: https://images.unsplash.com/photo-<id>?auto=format&fit=crop&w=1600&
 // (renderArtDirection), so every generated site is visually unique. The shared
 // page ingredients (hero, marquee, stat band, service cards, splits, CTA band,
 // footer) stay required in the STAGES instructions; the art direction restyles them.
-function buildSystemPrompt(ds: DesignSystem, pb: NichePlaybook): string {
+function buildSystemPrompt(ds: DesignSystem, pb: NichePlaybook, singleFile = false): string {
+  const pagesRule = singleFile
+    ? `- The site is ONE self-contained file, index.html: put ALL CSS in one <style> block in <head> and ALL JS in one <script> at the end of <body>. No external stylesheet/script. Nav links are in-page anchors (#services, #about, #contact).`
+    : `- The site is multi-page: / (index.html), /services.html, /about.html, /contact.html. Every page links the shared stylesheet (<link rel="stylesheet" href="/styles.css">) and script (<script src="/main.js" defer></script>) and shares the same nav + footer with working links between pages.`
   return `You are an elite web designer and front-end developer producing a preview website that will be shown to a small local business owner in a sales meeting to win their business. Quality bar: the owner should think "this looks better than sites I'd pay thousands for" and find it hard to say no. The benchmark is a $10k agency build: rich, confident, deliberate — never a flat template.
 
 OUTPUT CONTRACT — follow exactly:
 - Output ONLY the files this request asks for, in the order asked. Before each file, print exactly one marker line:
 ===== FILE: <filename> =====
   followed immediately by that file's raw contents. No markdown fences, no commentary before, between, or after files.
-- The site is multi-page: / (index.html), /services.html, /about.html, /contact.html. Every page links the shared stylesheet (<link rel="stylesheet" href="/styles.css">) and script (<script src="/main.js" defer></script>) and shares the same nav + footer with working links between pages.
+${pagesRule}
 - External requests allowed: Google Fonts + the photo library below. Nothing else (no frameworks, no CDNs). Icons via inline SVG — crafted, not clip-art.
 - Fully responsive, mobile-first (sound at 360px, 768px, 1200px), with a working hamburger nav on mobile. Semantic HTML; every page gets its own <title> and meta description.
 - HARD CODE BUDGET — each file must respect the line caps given in the request. This is a generation-time limit; exceeding it kills the build. Terse selectors, no comments, no dead CSS. Compact beats sprawling.
@@ -220,6 +231,28 @@ const STAGES: Record<number, StageSpec> = {
 }
 const FINAL_STAGE = 3
 
+/** Single-call spec for the fast (prospect) path — one page, inline assets, then deploy. */
+const FAST_STAGE: StageSpec = {
+  files: ['index.html'],
+  maxTokens: 12000,
+  instruction:
+    `For THIS request, output exactly ONE file: index.html — the complete homepage with ALL CSS inline in one <style> block and ALL JS inline in one <script> block.
+` +
+    `Line cap (HARD — the stream is cut off if you run long, destroying the build): index.html ≤ 420 lines total. Terse CSS, no comments.
+` +
+    `Sections in order: nav (wordmark + anchor links + tel: CTA) → photographic hero (badge chip, accent-italic word, dual CTAs, trust chips) → marquee ticker → stat counter band → #services: 4-6 service cards with inline SVG icons → photo+text split (#about: honest generic story, no invented history) → why-choose-us → 2 example-labeled testimonials → #contact: prominent tel: CTA + short styled form (posts nowhere; note that calling is fastest) + service-area line → photo-backed CTA band → footer with tel: link and "Website preview by Ace Web Designers".
+` +
+    `JS: nav toggle + scrolled-nav class, one IntersectionObserver for reveals + counters. Vanilla, defensive.
+` +
+    `MOBILE NAV — NON-NEGOTIABLE (phones are where this preview is judged). Use EXACTLY this markup/CSS/JS, styled to the art direction:
+` +
+    `  markup: <nav class="nav"><div class="nav-in"><a class="mark" href="#top">…</a><div class="links">…anchors…</div><a class="btn btn-primary nav-call" href="tel:…">Call</a><button class="burger" id="burger" aria-label="Menu" aria-expanded="false">…svg…</button></div><div class="menu" id="menu">…anchors + tel link…</div></nav>
+` +
+    `  css: .menu{display:none} .menu.open{display:flex;flex-direction:column} .burger{display:none} @media(max-width:900px){.links,.nav-call{display:none} .burger{display:block} .nav-in{display:flex;align-items:center;justify-content:space-between;gap:12px} .mark{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}}
+` +
+    `  js: burger toggles menu.classList "open" + aria-expanded; any .menu a click closes it. The menu MUST be hidden on first paint at 360-900px wide and the header row MUST fit without overflow at 360px.`,
+}
+
 /** Split the model output on FILE markers into { "/name": content }. */
 export function parseFiles(raw: string): Record<string, string> {
   const out: Record<string, string> = {}
@@ -257,6 +290,8 @@ interface Body {
   ds?: DesignSystem
   /** Resolved niche playbook, threaded internally like `ds`. */
   pb?: NichePlaybook
+  /** Prospects default to the FAST single-page Haiku path; `full: true` forces the Opus chain. */
+  full?: boolean
 }
 
 interface SubjectBrief {
@@ -362,8 +397,9 @@ async function generateStage(
   priorFiles: Record<string, string>,
   ds: DesignSystem,
   pb: NichePlaybook,
+  fast = false,
 ): Promise<Record<string, string>> {
-  const spec = STAGES[stage]
+  const spec = fast ? FAST_STAGE : STAGES[stage]
   let userMsg = `${businessBrief(subject)}\n${spec.instruction}`
   if (stage > 1) {
     const ctx = ['/styles.css', '/main.js', '/index.html']
@@ -375,9 +411,11 @@ async function generateStage(
 
   const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY')! })
   const stream = anthropic.messages.stream({
-    model: MODEL,
+    model: fast ? FAST_MODEL : MODEL,
     max_tokens: spec.maxTokens,
-    system: buildSystemPrompt(ds, pb),
+    // Haiku 5.5 thinks by default; off for speed (allowed at its default effort).
+    ...(fast ? { thinking: { type: 'disabled' as const } } : {}),
+    system: buildSystemPrompt(ds, pb, fast),
     messages: [{ role: 'user', content: userMsg }],
   })
   const msg = await stream.finalMessage()
@@ -420,6 +458,7 @@ async function runStage(
   threadedDs?: DesignSystem,
   styleOverride?: string,
   threadedPb?: NichePlaybook,
+  fast = false,
 ): Promise<void> {
   const supa = admin()
   const table = subject.kind === 'prospect' ? 'prospects' : 'appointments'
@@ -436,9 +475,11 @@ async function runStage(
       console.log(`[generate-site] ${subject.kind}=${subject.id} style="${ds.id}" (${ds.name}) trade="${subject.brief.business_type ?? ''}"`)
     }
 
-    const files = { ...priorFiles, ...(await generateStage(stage, subject, priorFiles, ds, pb)) }
+    const t0 = Date.now()
+    const files = { ...priorFiles, ...(await generateStage(stage, subject, priorFiles, ds, pb, fast)) }
+    if (fast) console.log(`[generate-site] fast page generated ${subject.kind}=${subject.id} in ${Math.round((Date.now() - t0) / 1000)}s`)
 
-    if (stage < FINAL_STAGE) {
+    if (!fast && stage < FINAL_STAGE) {
       await invokeNextStage(subject, stage + 1, files, ds, pb)
       console.log(`[generate-site] stage ${stage} done ${subject.kind}=${subject.id} → stage ${stage + 1}`)
       return
@@ -515,12 +556,13 @@ Deno.serve(async (req: Request) => {
     if (subject.site_status === 'deployed' && !b.force) return json({ ok: true, skipped: 'already deployed' })
   }
 
-  const task = runStage(stage, subject, b.files ?? {}, b.ds, b.style, b.pb)
+  const fast = subject.kind === 'prospect' && !b.full && stage === 1
+  const task = runStage(stage, subject, b.files ?? {}, b.ds, b.style, b.pb, fast)
   if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) {
     EdgeRuntime.waitUntil(task)
   } else {
     // Local dev fallback — no background task API, run inline.
     await task
   }
-  return json({ ok: true, started: true, stage }, 202)
+  return json({ ok: true, started: true, stage, fast }, 202)
 })
