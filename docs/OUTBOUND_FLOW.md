@@ -16,7 +16,7 @@ export-instantly --limit N ──► instantly-upload-leads ──► Instantly 
       (stamps emailed_at)        (POST /leads/add)         3-step v4 sequence, 06–16 ET weekdays, 30/inbox/day
                                                                      │ prospect replies
                                                                      ▼
-Windows task "Instantly Poll" (15 min) ──► instantly-webhook fn ──► classify yes/no/unknown
+instantly-poll fn (pg_cron, 15 min) ──► instantly-webhook fn ──► classify yes/no/unknown
                                                  │                      │
                                                  │                      ├─ every reply → GHL contact + `outbound-lead` tag
                                                  │                      │   → GHL workflow "Outbound — Interested Lead" (staff SMS + email)
@@ -117,8 +117,11 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 
 ## 5. Reply handling (poller → webhook)
 
-- **Windows scheduled task "Instantly Poll"** runs `scripts/instantly-poll.mjs` every 15 min
-  (wrapped in run-hidden.vbs). It GETs `/emails?email_type=received` since a watermark + bounced /
+- **`instantly-poll` Edge fn** (pg_cron `instantly-poll` every 15 min, header `x-cron-key` =
+  CAPI_INTERNAL_SECRET; state in `poll_state`; helpers in `_shared/instantlyEvents.ts` = Deno mirror of
+  `scripts/lib/instantly-events.mjs` — change both). The Windows task "Instantly Poll" running
+  `scripts/instantly-poll.mjs` is the manual/PC fallback only (disable it once the fn is configured).
+  It GETs `/emails?email_type=received` since a watermark + bounced /
   unsubscribed lead lists, maps each (`scripts/lib/instantly-events.mjs`, vitest) to
   `{event_type, lead_email, campaign_id, reply_text, email_id, eaccount, subject}` and POSTs to
   `instantly-webhook` (`?secret=INSTANTLY_WEBHOOK_SECRET`). State in
@@ -238,17 +241,20 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   `prospects.suppressed=true` by hand. TODO: make the webhook auto-suppress on remove/unsubscribe
   language, not just Instantly unsubscribes.
 - **Porkbun funded by owner 2026-11-02** — provisioning is unblocked for the first real sale.
-- **PENDING (classifier blocked the DB step, 2026-11-02 ~01:50 ET):** migration `0013` (site_edits
-  `files`/`release_after`, status `ready`, pg_cron + pg_net) is NOT applied and the held-release
-  `site-edit` build is NOT deployed — the live `site-edit` still applies edits in ~1 min. To finish:
-  run `supabase/migrations/0013_*.sql` via the Management API (or `npx supabase db push`), run
-  `scripts/site-edit-cron.sql` with `<RELEASE_KEY>` = CAPI_INTERNAL_SECRET, then
-  `npx supabase functions deploy site-edit --no-verify-jwt`. Test prospect `Beacon Hill Kitchen &
-  Bath` (is_test, token d4e5…9a1b, purchased_at set, site preview-beacon-hill-kitchen-bath-dfeaad)
-  is left in place for that test — delete the row + Netlify site after.
-- **GHL to-do (owner, UI only — session expired):** add +1 508-308-2714 as a second recipient on the
-  staff SMS in "Outbound — Purchased (Onboarding)" and "Onboarding — Purchased" (SALES ONLY — not on
-  the lead alerts); add "Your website page — bookmark it, send any change from there:
-  {{contact.demo_preview_url}}" to the Outbound welcome email. Remember: Save after Publish.
+- **Change requests fully live 2026-11-02 ~02:05 ET:** migrations 0012-0014 applied, pg_cron +
+  pg_net on, jobs `site-edit-release` (*/5) + `instantly-poll` (*/15) scheduled
+  (`scripts/cron-jobs.sql`), held-release `site-edit` deployed. Verified end-to-end on prod: request
+  → `ready` with a 42-min hold → release → deployed + heading live. Test prospect + its Netlify site
+  deleted (one orphan photo remains in `site-assets/07e2501d-…/` — storage API delete only).
+- **GHL done 2026-11-02:** "Outbound — Purchased (Onboarding)" now has a second staff SMS to
+  +1 508-308-2714 (sales only) and the welcome email carries "Fastest way: your website page —
+  bookmark this link… {{contact.demo_preview_url}}" after step 3. Published + saved.
+- **Poller moved server-side (PENDING two secrets):** `instantly-poll` Edge fn is deployed and cron
+  calls it every 15 min, but it answers `not configured` until the owner runs
+  `npx supabase secrets set INSTANTLY_API_KEY=… INSTANTLY_SENDER_API_KEY=…` (values in
+  supabase/.env; classifier blocks secret writes in-session). Then: one dry tick
+  (`POST /functions/v1/instantly-poll {"dry":true}` with `x-cron-key`), and DISABLE the Windows task
+  (`schtasks /change /tn "Instantly Poll" /disable`) so replies are not forwarded twice. Until then
+  the Windows task is still the live poller.
 - Next: reply "yes" from rhyan@acewebdesignershq.com
   when Email 1 lands Monday to prove the in-thread auto-send; consider 2 more inboxes for 2× volume.

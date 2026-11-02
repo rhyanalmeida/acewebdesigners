@@ -66,6 +66,7 @@ Supabase Edge Functions (supabase/functions, Deno)
   site-edit      outbound: post-purchase change requests (photos → storage) → Sonnet edit → held 30-45 min → pg_cron release
   domain-search  outbound: Porkbun .com availability for the checkout domain picker (token-gated)
   provision-domain outbound: post-purchase Porkbun register + DNS → Netlify custom_domain → SSL poll
+  instantly-poll outbound: pg_cron-driven Instantly poll (replies/bounces/unsubs → instantly-webhook; demo-link sends)
   instantly-webhook outbound: Instantly reply/bounce/unsub → prospects + suppressions + GHL tag
   create-subscription / create-checkout / stripe-webhook   Stripe → Purchase CAPI
   ghl-webhook    logs GHL messaging sends (visibility)
@@ -73,7 +74,7 @@ Supabase Edge Functions (supabase/functions, Deno)
                  ghl.ts (ghlSyncStage/createGhlAppointment/pushLegacyBooking), netlify.ts,
                  designSystems.ts, nichePlaybooks.ts, identity.ts, adminAuth.ts
         ▼
-Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks · prospects · suppressions · site_edits
+Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks · prospects · suppressions · site_edits · poll_state
         ▼ external sinks
 Meta CAPI · Google Calendar · Stripe · GHL (messaging only) · Netlify (preview sites) · Anthropic API · Porkbun (domains) · Instantly (cold email)
 ```
@@ -275,7 +276,7 @@ current status. Only the invariants live here:
   `emailed_at`) → `instantly-upload-leads` → re-activate the campaign if it reads COMPLETED (3).
   Throughput is 2 inboxes × 30/day (3-step sequence, 06–16 ET; raised 2026-11-02); more inboxes,
   not a bigger list, is the volume lever.
-- Replies: Windows task "Instantly Poll" (15 min) → `instantly-webhook` fn. Every reply tags
+- Replies: `instantly-poll` Edge fn (pg_cron every 15 min, state in `poll_state`) → `instantly-webhook` fn; the Windows task "Instantly Poll" is only the fallback. Every reply tags
   `outbound-lead` in GHL; the GHL token in local `supabase/.env` is stale — the deployed secret works.
 - Keys for the local scripts (`APIFY_TOKEN`, `INSTANTLY_*_API_KEY`) live in `supabase/.env` and are
   NEVER Edge secrets — never run `secrets set --env-file`.
