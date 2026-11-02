@@ -156,7 +156,7 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   sent on go-live by code — GHL's onboarding workflow does that.
 - **Porkbun:** account `acewebdesigners` (hello@). Prod keys `PORKBUN_API_KEY/SECRET`; sandbox =
   `pk1_sb_*` keys on the MAIN URL + `PORKBUN_API_BASE` set (the old api-sandbox host is dead).
-  ⚠️ Prepaid balance must be funded before a real purchase can provision.
+  Prepaid balance funded 2026-11-02 (owner); top up when it runs low — a purchase stalls at registration otherwise.
 
 ## 7. GHL (messaging only) — outbound isolation
 
@@ -209,5 +209,6 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   wait. Verified on prod with an is_test row: one view → `site_status` stayed `none`, view
   count 1, row deleted after. Yes-repliers still get built-then-linked, so they never see the wait.
   Still UNKNOWN: why the seed build took ~20 min vs ~4 in September (Edge logs not yet read).
-- Next: fund Porkbun before the first real purchase; reply "yes" from rhyan@acewebdesignershq.com
+- **Porkbun funded by owner 2026-11-02** — provisioning is unblocked for the first real sale.
+- Next: reply "yes" from rhyan@acewebdesignershq.com
   when Email 1 lands Monday to prove the in-thread auto-send; consider 2 more inboxes for 2× volume.
