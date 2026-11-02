@@ -255,143 +255,28 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   niche at booking time still runs through the Edge path and will fail the same way → the brief
   falls back to `FALLBACK_PLAYBOOK`; seed new trades locally.
 
-## Outbound cold-email demo funnel — BUILT; launching per `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md`
-**Launch = 6 phases, ONE phase per session, checklist lives in that doc — read it first and
-check items off there.** Price locked $49/mo; Supabase keep-alive = scheduled ping; lead list =
-Apify CSV from owner.
-A fourth funnel (2026-08-30): scraped contractor lists → cold email via **Instantly.ai** (NOT GHL —
-LC Email bans scraped lists; 3 ESP blocks in 7 days = permanent suspension that would kill booking
-comms. Instantly sends from 2–3 warmed lookalike domains, ~30/inbox/day; replies webhook back) →
-per-prospect `/demo/<token>` page (token = 32-hex capability, only key the page ever sends) →
-demo builds **on first click only** (explicit button + atomic `site_status none→generating` gate —
-one Opus build EVER per prospect, ~$0.60-1.10) via `generate-site` **subject adapter**
-(`{prospectId}` instead of `{appointmentId}`; same 3-stage chain, saves to `prospects`) → customer
-picks their .com at checkout (`domain-search` → Porkbun availability; re-checked at session create
-AND before register — registrations are NON-refundable) → `create-subscription` plan
-`demo_monthly` (`STRIPE_PRICE_DEMO_MONTHLY`) → `stripe-webhook` `kind:'demo_site'` branch
-(**placed BEFORE the restaurant `mode==='subscription'` catch — order matters**; idempotent via
-conditional `purchased_at is null` stamp) → `provision-domain` fn: Porkbun register (prepaid
-balance) → DNS (A @→75.2.60.5, CNAME www→`<site>.netlify.app`) → Netlify `custom_domain` PATCH →
-SSL poll (self-reinvoking rounds, ~1h cap → `ssl_pending`, admin Retry re-enters; retries
-distinguish "we own it" via `domainIsOurs`). **NO Meta pixel/CAPI anywhere** (not ad-driven;
-`/demo/` excluded in index.html + App.tsx). GHL isolation via `outbound-*` tag set in
-`STAGE_TAGS`; demo-page first view + Instantly replies fire `outbound-lead` (qualifiers include
-`preview_url` = the `/demo/<token>` URL → GHL "Demo Preview URL" field), purchase fires
-`outbound-purchased` (+ `chosen_domain` → "Purchased Domain"); both GHL workflows live (see
-Live workflows). `instantly-webhook` fn
-(`INSTANTLY_WEBHOOK_SECRET` via header or `?secret=`) handles reply/bounce/unsub → `suppressions`
-table (CAN-SPAM source of truth, enforced by both scripts). Test prospects (`is_test`): skip GHL,
-provision only when `PORKBUN_API_BASE` is set. ⚠️ Porkbun's `api-sandbox` host is DEAD (403) —
-sandbox is now key-driven: `pk1_sb_*` keys on the MAIN URL (responses carry `sandbox:true`,
-$1,000 fake credit). Sandbox mode = deploy the sb keys (`PORKBUN_SB_*` in `supabase/.env`) AND
-set `PORKBUN_API_BASE=https://api.porkbun.com/api/json/v3` to satisfy the guard. Verified
-end-to-end 2026-08-30 (`registering → dns_set → attached`); `registerDomain` sends the current
-API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
-- **Lead sourcing (Apify, 2026-11-01):** `node scripts/apify-scrape-contractors.mjs --state X --search "general contractor" --max N --out f.csv` runs the Google Maps Scraper (`compass/crawler-google-places`, $0.004/place + $0.001/filter on the FREE plan, **$5/mo cap**, `APIFY_TOKEN` in `supabase/.env`; the `apify` MCP server is registered but needs a CC restart) and classifies `websiteKind` none/social/real. **MA pilot (300 GC listings, $1.20): 20% no website, 1.3% social-only, 0 emails** — Google Maps publishes no emails; `--contacts` only crawls REAL websites for them. A "no-website + email" list is not sourceable this way (they have phones, 92%); the email-bearing segment is real-website contractors (redesign angle).
-- **Ops:** `node scripts/import-prospects.mjs --file x.csv --batch b1 --trade plumber` (skips
-  suppressed/non-US/no-email; upserts on gmaps_place_id) → `node scripts/export-instantly.mjs
-  --batch b1` (stamps emailed_at; `--no-stamp` = dry) → upload CSV to Instantly, `{{demo_url}}` in
-  template. /admin **Outbound** tab: funnel KPIs + per-prospect status + Retry build / Retry
-  provisioning / Fix domain (taken_after_checkout recovery: sets new `chosen_domain` + re-runs).
-- **Sending domains (bought 2026-08-31, lean 2-domain plan):** `getacewebdesigners.com` +
-  `acewebdesignershq.com` — Porkbun, $11.08/yr each, WHOIS privacy + auto-renew on. SPF
-  (`include:_spf.google.com`), DMARC (`p=none`, rua hello@), and a permanent wildcard 301 →
-  acewebdesigners.com are set (Porkbun defaults — parking SPF + temporary l.ink forward —
-  were replaced). **Google Workspace live (2026-08-31):** org "Ace Web Designers", admin
-  `rhyan@getacewebdesigners.com` + second inbox `rhyan@acewebdesignershq.com` (creds in
-  `~/.secrets/google-workspace-credentials.txt`); both domains verified, Gmail activated,
-  DKIM set, MX = smtp.google.com. Plan = **Business Starter, Flexible, $8.40/user
-  (~$16.80/mo), Visa on file, next bill Oct 1** (verified in Admin console 2026-09-14 — the
-  "Business Plus trial" noted at signup never billed).
-  **Instantly (login rhyan@getacewebdesigners.com, creds in `~/.secrets/instantly-credentials.txt`):**
-  OAuth app Trusted in Workspace; **BOTH inboxes connected, warm-up ON since 2026-08-31**
-  (gotcha: a brand-new Workspace user must sign in once from a real device before Google allows
-  the OAuth flow). **Plan = Growth $47/mo monthly (bought 2026-09-14, renews Oct 14;
-  1,000 contacts / 5,000 emails per month)** — workspace `b8362bc8-3628-4609-b0c4-457a054aaff9`.
-  Warm-up verified live post-purchase (60 sent / 41 received / 0 spam in the prior week on
-  inbox 1; API reports `warmup_status:1`, score 100 on both). Webhooks are Hyper-Growth-only
-  ($97) — deliberately NOT bought. **Polling replaces webhooks (built 2026-09-14):**
-  `scripts/instantly-poll.mjs` runs as Windows scheduled task **"Instantly Poll"** (every 15
-  min, indefinitely; verified firing, exit 0) — GET `/emails?email_type=received` since a
-  watermark + POST `/leads/list` with `FILTER_VAL_BOUNCED` / `FILTER_VAL_UNSUBSCRIBED`, maps
-  each to `{event_type, lead_email, campaign_id}` and POSTs it to the UNCHANGED
-  `instantly-webhook` fn (so a real webhook can replace the script with zero server changes).
-  State `%LOCALAPPDATA%\instantly-poll.json` (reply watermark + forwarded keys, so a reply
-  never re-fires the GHL staff alert), log `instantly-poll.log`; `--dry` = fetch only. Pure
-  mapping in `scripts/lib/instantly-events.mjs` (vitest; `scripts/lib/*.test.mjs` is in
-  `vitest.config.ts`). Auto-replies + non-campaign mail are ignored.
-  **Campaign "Outbound — Contractors v2" id `46657029-fdd6-4567-b5fe-2165bb298367`** — created
-  via API by `scripts/instantly-create-campaign.mjs`, which parses
-  `docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md` (single source of copy; `--dry` prints the payload,
-  `--update <id>` re-pushes copy/settings, pure logic in `scripts/lib/instantly-campaign.mjs`).
-  **Status 2026-09-22: LAUNCHED (status 1 via API, owner instruction "take care of
-  everything") — v4 copy, wave 1 = 100 leads, first sends 2026-09-23 06:00 ET.** Footer
-  postal address = the office, 30 North Main St, Leominster, MA 01453 (supplied 2026-09-14;
-  CAN-SPAM 16 CFR 316.2 requires a street address, USPS PO Box, or CMRA box — no exemption
-  for B2B cold email; owner asked to drop it 2026-09-22 — not legal, alternatives are a USPS
-  PO Box or CMRA box). Settings verified via API readback: both inboxes, 20/day, weekdays
-  **06–11 ET** (Belkins 7.5M-email data: early morning ≈4x the meeting rate of afternoon; Instantly's
-  enum has no America/New_York → `America/Detroit`), stop-on-reply, text-only, open + link
-  tracking OFF (demo_url must stay raw — the /demo page logs views itself), unsubscribe
-  header ON, gap 10 min + 15 random. Follow-ups 2–3 send with an EMPTY subject (Instantly
-  threads natively); Email 4 breaks the thread on purpose. Soft-wrapped doc lines are
-  unwrapped (`unwrapSoftBreaks`: a newline survives only before a capital/digit/`{{`/`[`).
-  Merge fallbacks (`first_name`→"there", `city`→"your area") are baked into
-  `export-instantly.mjs`, not Instantly's UI. Keys in `supabase/.env` (local scripts only,
-  never Edge secrets): `INSTANTLY_API_KEY` (`all:read`, poller) + `INSTANTLY_ADMIN_API_KEY`
-  (`campaigns:all` + `leads:all` + `account_campaign_mappings:all`, campaign script).
-  NEVER cold-send from acewebdesigners.com.
-  **Sequence v4 (2026-09-22, owner-approved "let's start", live on the campaign): demo is
-  REPLY-GATED and the loop is FULLY AUTOMATED** (owner: "I want it to send the design if they
-  say yes") — no `{{demo_url}}` in any email, the CTA is an interest question + "reply yes".
-  Flow: poller forwards each reply WITH its text/email id/inbox/subject → `instantly-webhook`
-  classifies it (`_shared/replyClassifier.ts`, mirrored + vitest-covered in
-  `scripts/lib/reply-classifier.mjs`: yes / no / unknown; "not interested" can't read as
-  interest; mixed → unknown) → stores `last_reply`/`reply_sentiment`/`reply_email_id`/
-  `reply_eaccount` (migration `0011`) → on a clear **yes** (non-test, non-suppressed) flips
-  `site_status none→generating` (same atomic gate as demo-site) + fires `generate-site` +
-  sets `auto_send` → when the row is `deployed`, the next poller tick calls the webhook's
-  `auto_send_pending`, replies IN-THREAD from the receiving inbox via `POST /emails/reply`
-  (`demoLinkReply` in `instantly-events.mjs`: greeting name, the `/demo/<token>` link once,
-  $49 line, soft call offer) and stamps `demo_link_sent_at` via `demo_link_sent` — sent
-  exactly once; a failed send is retried next tick, nothing stamped. `no`/`unknown` replies
-  only alert staff (GHL `outbound-lead` tag fires on every reply). Needs
-  `INSTANTLY_SENDER_API_KEY` (scope `emails:all`, key "auto-reply-sender", `supabase/.env`,
-  local only) — without it replies still classify/build, just no auto-send. Without
-  Anthropic credits the build fails → row `failed`, no link goes out, staff alert still
-  fires. /admin Outbound shows YES/no/read-it + snippet + "link sent". `validateSteps`
-  accepts a reply ask OR `{{demo_url}}` as the CTA (it caught a v4 Email 2 without the
-  word "reply" — keep it).
-  v4 = deep-research rewrite: subject `{{company_name}} homepage?` (2–4 words, no "free"/number),
-  no pitch paragraph, Email 2 carries new content not a bump, Email 4 two-option breakup,
-  56–76 words each; per-line evidence in `docs/OUTBOUND_COLD_SEQUENCE_v4_DRAFT_2026-09-22.md`,
-  research in `docs/MASTER_PLAN_OUTBOUND_REDESIGN_2026-09-22.md`. Opener is the **redesign**
-  angle (every prospect has a live site; the v2 no-website opener is in git history).
-  ⚠️ **The Apify list has ZERO first names** — every row falls back to "there", so
-  `{{first_name}}` must never appear in a subject. **Batch `2026-09-newengland-gc`, 241
-  prospects** (ME/VT/NH, mixed trades, slug `general-contractor`); `import-prospects.mjs` maps
-  Apify's `emails/0`/`categoryName`/`totalScore`/`reviewsCount`, drops placeholder emails.
-  **Waves:** `export-instantly.mjs --limit N` exports the next N un-emailed rows (stamps them);
-  `scripts/instantly-upload-leads.mjs --file <csv> --campaign <id>` bulk-adds them via
-  `POST /leads/add` (`skip_if_in_campaign`) — no manual CSV upload. Wave 1 = 100 rows
-  (2026-09-22); wave 2 = the remaining 141 after wave 1's first replies are read. Owner
-  deferred Anthropic credits + Porkbun balance until someone replies — a "yes" is built by hand.
-- **Demo page UX (2026-11-01, deployed):** `DemoPage.tsx` Ready state = offer summary + price above
-  the fold → device-toggle preview → ONE go-live card where the .com is **pre-suggested from the
-  business name and auto-checked on load** (the old flow needed type + Check before Pay enabled;
-  `suggestDomain` strips llc/inc/co) → Stripe button → "What happens when you click pay" (3 steps) →
-  "After it's live" (unlimited updates / hosting+SSL+renewal / cancel by email) → FAQ → sticky
-  bottom CTA. Purchased state polls `domain_status` every 10s and renders a 5-step progress
-  stepper (paid → registering → connecting → SSL → live, with the live link). All copy lives in
-  `config/outboundPlan.ts` (`GO_LIVE_STEPS` / `AFTER_LIVE` / `FAQ`) — claims only what the chain
-  does: **provision-domain sends NO customer email on go-live** (only GHL fields), so the page says
-  "watch it here", never "we'll email you". Gotcha fixed same day: `index.css` gives every
-  heading `color:#111110`, so headings on the dark demo page were invisible — the page root carries
-  `[&_h1]:text-white` etc. `demoLinkReply` (auto-sent yes-reply) now spells out the $49/mo
-  button + what's included + cancel anytime.
-- **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
-  checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
-  warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).
+## Outbound cold-email demo funnel — LIVE (campaign active since 2026-11-02)
+**Full runbook = `docs/OUTBOUND_FLOW.md` — read it before touching anything outbound.** It holds the
+end-to-end diagram, every script/flag, Instantly + GHL + Porkbun specifics, the verification log and the
+current status. Only the invariants live here:
+- Scraped contractor lists → cold email via **Instantly.ai only** (never GHL/LC Email, never from
+  acewebdesigners.com) → reply-gated: a "yes" auto-builds the demo (`generate-site` `{prospectId}`,
+  one Opus build EVER per prospect) and the poller replies in-thread with `/demo/<token>` →
+  $49/mo Stripe → `provision-domain` (Porkbun, NON-refundable) → GHL `outbound-*` tags drive staff
+  alerts + onboarding. **No Meta pixel/CAPI** anywhere in this funnel.
+- `suppressions` is the CAN-SPAM source of truth; `import-prospects.mjs` + `export-instantly.mjs`
+  both enforce it. Footer postal address is required (16 CFR 316.2 — no B2B exemption).
+- Lead sourcing: Apify Google Maps (`scripts/apify-scrape-contractors.mjs`, Starter plan, always
+  `--budget`) + our own `scripts/enrich-emails.mjs` for emails ($0, same yield as the paid add-on).
+  Google Maps publishes no emails, so "no-website" contractors are NOT emailable — the list is
+  real-website contractors and the live v4 copy is the **redesign** angle.
+- Pipeline: scrape → enrich → `import-prospects` (batch) → `export-instantly --limit N` (stamps
+  `emailed_at`) → `instantly-upload-leads` → re-activate the campaign if it reads COMPLETED (3).
+  Throughput is 2 inboxes × 20/day; more inboxes, not a bigger list, is the volume lever.
+- Replies: Windows task "Instantly Poll" (15 min) → `instantly-webhook` fn. Every reply tags
+  `outbound-lead` in GHL; the GHL token in local `supabase/.env` is stale — the deployed secret works.
+- Keys for the local scripts (`APIFY_TOKEN`, `INSTANTLY_*_API_KEY`) live in `supabase/.env` and are
+  NEVER Edge secrets — never run `secrets set --env-file`.
 
 ## Restaurant self-serve funnel — BUILT, DEPLOY PENDING
 A third, fully isolated ad funnel (own pixel + dataset + tags + page) — nothing crosses into

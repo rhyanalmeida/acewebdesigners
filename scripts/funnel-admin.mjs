@@ -74,6 +74,13 @@ if (cmd === 'whoami') {
   const out = await callFn('result', jwt, anon, body)
   console.log('result status:', out.status)
   console.log(JSON.stringify(out.json, null, 2))
+} else if (cmd === 'prospect-build') {
+  // Force (re)build an outbound prospect's demo site — same call as /admin Outbound → Retry build.
+  const prospectId = process.argv[3]
+  if (!prospectId) throw new Error('usage: prospect-build <prospectId>')
+  const out = await callFn('admin-data', jwt, anon, { action: 'retryProspectSite', prospectId })
+  console.log('retryProspectSite status:', out.status)
+  console.log(JSON.stringify(out.json, null, 2))
 } else if (cmd === 'discard-tests') {
   const out = await callFn('admin-data', jwt, anon, { action: 'discardTests' })
   console.log('discard status:', out.status)
