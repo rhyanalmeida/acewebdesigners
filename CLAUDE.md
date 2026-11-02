@@ -375,6 +375,19 @@ API's required `cost` (integer cents = checkDomain price) + `agreeToTerms`.
   `POST /leads/add` (`skip_if_in_campaign`) — no manual CSV upload. Wave 1 = 100 rows
   (2026-09-22); wave 2 = the remaining 141 after wave 1's first replies are read. Owner
   deferred Anthropic credits + Porkbun balance until someone replies — a "yes" is built by hand.
+- **Demo page UX (2026-11-01, deployed):** `DemoPage.tsx` Ready state = offer summary + price above
+  the fold → device-toggle preview → ONE go-live card where the .com is **pre-suggested from the
+  business name and auto-checked on load** (the old flow needed type + Check before Pay enabled;
+  `suggestDomain` strips llc/inc/co) → Stripe button → "What happens when you click pay" (3 steps) →
+  "After it's live" (unlimited updates / hosting+SSL+renewal / cancel by email) → FAQ → sticky
+  bottom CTA. Purchased state polls `domain_status` every 10s and renders a 5-step progress
+  stepper (paid → registering → connecting → SSL → live, with the live link). All copy lives in
+  `config/outboundPlan.ts` (`GO_LIVE_STEPS` / `AFTER_LIVE` / `FAQ`) — claims only what the chain
+  does: **provision-domain sends NO customer email on go-live** (only GHL fields), so the page says
+  "watch it here", never "we'll email you". Gotcha fixed same day: `index.css` gives every
+  heading `color:#111110`, so headings on the dark demo page were invisible — the page root carries
+  `[&_h1]:text-white` etc. `demoLinkReply` (auto-sent yes-reply) now spells out the $49/mo
+  button + what's included + cancel anytime.
 - **To go live:** follow `docs/OUTBOUND_LAUNCH_PLAN_2026-08-30.md` (6 phases with owner/agent
   checklists: credits → Porkbun/Stripe rails → GHL workflows → sending domains + 3-wk Instantly
   warm-up → full dry run → pilot). Code/migration/deploys are already done (2026-08-30).

@@ -54,7 +54,18 @@ export function htmlToText(html) {
 /** The in-thread reply that carries the demo link — the only email that ever links. */
 export function demoLinkReply({ first_name, business_name, demo_url }) {
   const name = (first_name ?? '').trim() || (business_name ?? '').trim() || 'there'
-  const text = `Hi ${name},\n\nHere it is: ${demo_url}\n\nIt's a draft — tell me what to change and I'll turn it around. If you want it live on your own .com, the page walks you through it ($49/mo, cancel anytime). Happy to go over it on a quick 15-minute call too — just say when works.\n\nRhyan\nAce Web Designers`
+  const text = `Hi ${name},
+
+Here it is: ${demo_url}
+
+It's a draft — tell me what to change and I'll turn it around.
+
+If you like it as-is, there's a button on that page that takes it live on your own .com for $49/month. The domain, hosting and every update you ever want are included, and you can cancel anytime. It's usually live within an hour of signing up, and we handle all of it.
+
+Happy to go over it on a quick 15-minute call too — just say when works.
+
+Rhyan
+Ace Web Designers`
   return { text, html: `<p>${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(demo_url, `<a href="${demo_url}">${demo_url}</a>`).replace(/\n/g, '<br/>')}</p>` }
 }
 
