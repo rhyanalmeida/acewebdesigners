@@ -13,7 +13,7 @@ Apify Google Maps scrape ──► enrich emails (our crawler) ──► import-
       │  (scripts/apify-scrape-contractors.mjs)   (scripts/enrich-emails.mjs)   (scripts/import-prospects.mjs)
       ▼
 export-instantly --limit N ──► instantly-upload-leads ──► Instantly campaign "Outbound — Contractors v2"
-      (stamps emailed_at)        (POST /leads/add)         4-step v4 sequence, 06–11 ET weekdays, 20/inbox/day
+      (stamps emailed_at)        (POST /leads/add)         3-step v4 sequence, 06–16 ET weekdays, 30/inbox/day
                                                                      │ prospect replies
                                                                      ▼
 Windows task "Instantly Poll" (15 min) ──► instantly-webhook fn ──► classify yes/no/unknown
@@ -82,12 +82,15 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   Merge fallbacks (`first_name`→"there", `city`→"your area") are baked in here.
 - `instantly-upload-leads.mjs --file <csv> --campaign 46657029-fdd6-4567-b5fe-2165bb298367`
   bulk-adds via `POST /leads/add` with `skip_if_in_campaign`.
-- **Throughput reality:** 2 inboxes × 20/day = **40 new leads/day, ~200/week**. A 1,000-row list
-  is ~5 weeks of sending. The lever for "a sale this week" is more inboxes (Workspace user +
+- **Throughput reality (raised 2026-11-02, owner ask):** 2 inboxes × 30/day = **60 sends/day**; the
+  daily limit counts follow-ups, so with 3 steps that is ~20 fresh leads/day (~100/week) at steady
+  state. The 496-lead wave 2 clears in ~5 weeks. Step-up plan: 40/day after a week if bounces stay
+  <2% and Instantly warm-up health is green (neither API key can read `/accounts` — check the
+  dashboard); never jump straight to 50. Before 2026-11-02 it was 20/day, 06–11 ET, 4 steps. The lever for "a sale this week" is more inboxes (Workspace user +
   connect + 2–3 wk warm-up), not a bigger list. Instantly Growth caps at 1,000 active contacts /
   5,000 emails per month — upload in waves that fit, don't dump the whole table.
 - **Campaign status codes:** 0 draft · 1 active · 2 paused · 3 completed. After every lead
-  finishes the 4 steps the campaign flips to **3 = COMPLETED and must be re-activated**
+  finishes the 3 steps the campaign flips to **3 = COMPLETED and must be re-activated**
   (`POST /campaigns/<id>/activate`) or newly added leads never send.
 
 ## 4. Instantly (sending)
@@ -99,10 +102,12 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   SPF/DKIM/DMARC(p=none) + wildcard 301 → acewebdesigners.com. Warm-up ON since 2026-08-31.
 - **Campaign "Outbound — Contractors v2" `46657029-fdd6-4567-b5fe-2165bb298367`.** Created and
   updated by `scripts/instantly-create-campaign.mjs` (parses the v4 sequence doc; `--dry`,
-  `--update <id>`). Settings: both inboxes, 20/day, **weekdays 06:00–11:00 ET** (tz enum
-  `America/Detroit`), stop-on-reply, text-only, open + link tracking OFF, unsubscribe header ON,
-  gap 10 + 15 random min. Emails 2–3 send with an EMPTY subject (native threading); Email 4
-  breaks the thread on purpose. Footer postal address = 30 North Main St, Leominster, MA 01453
+  `--update <id>`). Settings: both inboxes, **30/day**, **weekdays 06:00–16:00 ET** (tz enum
+  `America/Detroit`; widened 2026-11-02 so the higher cap sends at a human pace), stop-on-reply, text-only, open + link tracking OFF, unsubscribe header ON,
+  gap 10 + 15 random min. Emails 2–3 send with an EMPTY subject (native threading). **Email 4 (the
+  "last one from me" breakup) was REMOVED 2026-11-02** — every wave-1 reply was hostile and came
+  off a follow-up, and dropping it buys a third more fresh leads per day. The v4 draft doc still
+  shows 4 steps; the live campaign is the truth. Footer postal address = 30 North Main St, Leominster, MA 01453
   (CAN-SPAM requires one — no B2B exemption).
 - **Keys** (`supabase/.env`, local only): `INSTANTLY_API_KEY` (`all:read`, poller),
   `INSTANTLY_ADMIN_API_KEY` (campaigns/leads, campaign + upload scripts),
@@ -209,6 +214,14 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   wait. Verified on prod with an is_test row: one view → `site_status` stayed `none`, view
   count 1, row deleted after. Yes-repliers still get built-then-linked, so they never see the wait.
   Still UNKNOWN: why the seed build took ~20 min vs ~4 in September (Edge logs not yet read).
+- **Sending raised 2026-11-02 ~01:30 ET (owner: "you run it yourself"):** campaign PATCHed via API
+  → `daily_limit 30`, window 06:00–16:00 ET, 3 steps (verified by GET). Wave-1 read: 394 sent, 3
+  replies — ALL hostile ("remove our name", "spam elsewhere", "bug someone else"), all quoting the
+  step-2 follow-up, which in wave 1 went out as "Hi ," (blank first name — fixed; all 496 wave-2
+  leads have a greeting, 145 of them the business name, 72 have city "your area"). The three were
+  NOT suppressed (sentiment `unknown`/`no` doesn't auto-suppress) → added to `suppressions` +
+  `prospects.suppressed=true` by hand. TODO: make the webhook auto-suppress on remove/unsubscribe
+  language, not just Instantly unsubscribes.
 - **Porkbun funded by owner 2026-11-02** — provisioning is unblocked for the first real sale.
 - Next: reply "yes" from rhyan@acewebdesignershq.com
   when Email 1 lands Monday to prove the in-thread auto-send; consider 2 more inboxes for 2× volume.

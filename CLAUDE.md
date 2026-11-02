@@ -272,7 +272,8 @@ current status. Only the invariants live here:
   real-website contractors and the live v4 copy is the **redesign** angle.
 - Pipeline: scrape → enrich → `import-prospects` (batch) → `export-instantly --limit N` (stamps
   `emailed_at`) → `instantly-upload-leads` → re-activate the campaign if it reads COMPLETED (3).
-  Throughput is 2 inboxes × 20/day; more inboxes, not a bigger list, is the volume lever.
+  Throughput is 2 inboxes × 30/day (3-step sequence, 06–16 ET; raised 2026-11-02); more inboxes,
+  not a bigger list, is the volume lever.
 - Replies: Windows task "Instantly Poll" (15 min) → `instantly-webhook` fn. Every reply tags
   `outbound-lead` in GHL; the GHL token in local `supabase/.env` is stale — the deployed secret works.
 - Keys for the local scripts (`APIFY_TOKEN`, `INSTANTLY_*_API_KEY`) live in `supabase/.env` and are
