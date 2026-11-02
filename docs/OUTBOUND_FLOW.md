@@ -214,6 +214,15 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 
 ## 9. Current status (update in place)
 
+- **2026-11-02 evening read:** day 1 of wave 2 sent only **30** (16 new leads + 14 follow-ups), 0 replies,
+  0 bounces — because `daily_limit` is a CAMPAIGN-level cap, not per-inbox. PATCHed to **60**
+  (= 2 inboxes × 30) so Tuesday sends the full 60. ⚠️ The pg_cron `instantly-poll` has returned
+  **503 "not configured"** on every run since it was scheduled: the Edge fn requires
+  `INSTANTLY_API_KEY` and that key was never set as an Edge secret (the "never Edge secrets" rule
+  covered the local scripts, not this fn). Fix = `npx supabase secrets set INSTANTLY_API_KEY=<read key
+  from supabase/.env>` (single key, never `--env-file`), then confirm a 200 in `net._http_response`.
+  Until then the Windows task is the only poller and it only runs while the PC is awake (it did not
+  run 00:40 → 18:25 ET today; a manual run found nothing missed).
 - **2026-11-02:** Apify Starter active ($9.83 of $19 used this cycle). Scraped 1,750 places across
   MA/CT/RI/NH/ME (GC + remodeling + home builder) for $8.50; `enrich-emails` found emails on ~60% →
   **batch `2026-11-ne-gc` = 1,072 prospects with emails, all un-emailed except what's below.**
