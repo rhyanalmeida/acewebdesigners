@@ -105,8 +105,41 @@ export const FAQ: { q: string; a: string }[] = [
  * Copy claims only what the chain does.
  */
 export const BUILDING_COPY = {
-  heading: "Building {business}'s new website…",
-  body: "This usually takes about a minute. Keep this tab open — it refreshes on its own and the preview stays at this link once it's done.",
-  failed: "We couldn't start the build just now.",
+  heading: "Putting the finishing touches on {business}'s new website…",
+  body: "It'll be ready to view right here in a minute or two. Keep this tab open — it refreshes on its own, and the preview stays at this link.",
+  failed: "We couldn't open your preview just now.",
   retry: 'Try again',
+} as const
+
+/**
+ * Post-purchase change requests (owner, 2026-11-02): the customer's page has a
+ * "send us a change" form with photos; the edit is applied to the live site and the
+ * status shows here. Copy rule: say "send it to us" — never who or what does the work.
+ */
+export const CHANGE_REQUEST = {
+  heading: 'Want something changed?',
+  body: 'Send it to us right here — new photos, a different headline, a service added, hours, anything. Describe the change and where it goes; attach photos if you have them. Updates are unlimited and included.',
+  placeholder: 'e.g. "Swap the top photo for the attached one, and add Gutter Cleaning to the services list."',
+  photoLabel: 'Add photos',
+  submit: 'Send the change',
+  sending: 'Sending…',
+  statuses: {
+    queued: "Received — we're on it",
+    applying: "Received — we're on it",
+    applied: 'Done — live on your site',
+    failed: "Needs a closer look — we've got it",
+  } as Record<string, string>,
+  afterSubmit: "Got it. We'll have it done within the hour — this page updates when it's live.",
+  emailFallback: `Prefer email? ${SUPPORT_EMAIL} works too.`,
+} as const
+
+/** How a customer finds their way back here (owner, 2026-11-02: "make sure they can save that"). */
+export const KEEP_PAGE = {
+  heading: "Keep this page — it's where you send changes",
+  body: 'Bookmark it, or send the link to yourself. It never expires, and your welcome email has it too.',
+  copy: 'Copy link',
+  copied: 'Copied',
+  email: 'Email it to myself',
+  emailSubject: 'My website page — Ace Web Designers',
+  emailBody: `Your website page (send changes from here any time):\n\n{url}\n\nUpdates are unlimited and included. Questions: ${SUPPORT_EMAIL}`,
 } as const

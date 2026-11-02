@@ -37,11 +37,14 @@ import {
   ChevronDown,
   ExternalLink,
   Globe,
+  ImagePlus,
+  Link2,
   Loader2,
   Lock,
   Mail,
   Monitor,
   Pencil,
+  Send,
   Smartphone,
 } from 'lucide-react'
 
@@ -49,9 +52,11 @@ import { supabase } from '../lib/supabase'
 import {
   AFTER_LIVE,
   BUILDING_COPY,
+  CHANGE_REQUEST,
   FAQ,
   GO_LIVE_STEPS,
   GOOGLE_REVIEW_URL,
+  KEEP_PAGE,
   OUTBOUND_PLAN,
   SUPPORT_EMAIL,
 } from '../config/outboundPlan'
@@ -303,7 +308,7 @@ export default function DemoPage() {
           </div>
         )}
 
-        {state && showPurchased && <PurchasedView state={state} />}
+        {state && showPurchased && <PurchasedView state={state} token={token} />}
 
         {state && !showPurchased && (
           <>
@@ -655,7 +660,7 @@ export default function DemoPage() {
   )
 }
 
-function PurchasedView({ state }: { state: DemoState }) {
+function PurchasedView({ state, token }: { state: DemoState; token: string }) {
   const status = state.domainStatus
   const failed = status === 'failed' || status === 'cancelled'
   const live = status === 'live'
@@ -743,17 +748,9 @@ function PurchasedView({ state }: { state: DemoState }) {
         </a>
       )}
 
-      <div className="mt-8 bg-white/5 border border-white/10 rounded-xl p-5">
-        <h2 className="text-lg font-semibold mb-2">Unlimited updates, included</h2>
-        <p className="text-white/70 text-sm">
-          Want a photo swapped, a new service added, hours changed, anything at all? Email{' '}
-          <a href={`mailto:${SUPPORT_EMAIL}`} className="underline text-white">
-            {SUPPORT_EMAIL}
-          </a>{' '}
-          any time — there's no limit and no extra charge. That's your support line from here on, for changes,
-          questions or cancelling.
-        </p>
-      </div>
+      <ChangeRequests token={token} />
+
+      <KeepThisPage />
 
       <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-5">
         <h2 className="text-lg font-semibold mb-2">Once it's live — one small favor</h2>
@@ -783,6 +780,204 @@ function PurchasedView({ state }: { state: DemoState }) {
           </a>
         </p>
       )}
+    </div>
+  )
+}
+
+// ── Post-purchase change requests ("send it to us") ─────────────────────────
+interface EditItem {
+  id: string
+  request: string
+  photoCount: number
+  status: string
+  createdAt: string
+  appliedAt: string | null
+}
+const EDITS_POLL_MS = 60_000 // changes are held ≥30 min server-side; no need to hammer
+const MAX_PHOTOS = 5
+
+/** Downscale to ≤1600px JPEG in the browser so uploads stay small (phone photos are 3-8 MB). */
+async function shrinkImage(file: File): Promise<{ name: string; type: string; data: string }> {
+  const bitmap = await createImageBitmap(file)
+  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height))
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(bitmap.width * scale)
+  canvas.height = Math.round(bitmap.height * scale)
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.86)
+  return { name: file.name, type: 'image/jpeg', data: dataUrl.slice(dataUrl.indexOf(',') + 1) }
+}
+
+function ChangeRequests({ token }: { token: string }) {
+  const [edits, setEdits] = useState<EditItem[]>([])
+  const [text, setText] = useState('')
+  const [files, setFiles] = useState<File[]>([])
+  const [sending, setSending] = useState(false)
+  const [note, setNote] = useState('')
+  const [err, setErr] = useState('')
+
+  const load = useCallback(async () => {
+    const { data } = await supabase.functions.invoke('site-edit', { body: { token, action: 'list' } })
+    const d = data as { ok?: boolean; edits?: EditItem[] } | null
+    if (d?.ok && d.edits) setEdits(d.edits)
+  }, [token])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  const inFlight = edits.some((e) => e.status === 'queued')
+  useEffect(() => {
+    if (!inFlight) return
+    const t = setInterval(() => void load(), EDITS_POLL_MS)
+    return () => clearInterval(t)
+  }, [inFlight, load])
+
+  const submit = async () => {
+    if (sending || text.trim().length < 3) return
+    setSending(true)
+    setErr('')
+    setNote('')
+    try {
+      const photos = await Promise.all(files.slice(0, MAX_PHOTOS).map(shrinkImage))
+      const { data, error } = await supabase.functions.invoke('site-edit', {
+        body: { token, action: 'request', request: text.trim(), photos },
+      })
+      const d = data as { ok?: boolean; error?: string } | null
+      if (error || !d?.ok) {
+        let msg = d?.error ?? ''
+        if (!msg && error && 'context' in error) {
+          try {
+            msg = ((await (error as { context: Response }).context.json()) as { error?: string }).error ?? ''
+          } catch {
+            /* ignore */
+          }
+        }
+        setErr(msg || "Couldn't send that just now — please try again.")
+        return
+      }
+      setText('')
+      setFiles([])
+      setNote(CHANGE_REQUEST.afterSubmit)
+      await load()
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="mt-8 bg-white/5 border border-white/10 rounded-xl p-5">
+      <h2 className="text-lg font-semibold mb-2">{CHANGE_REQUEST.heading}</h2>
+      <p className="text-white/70 text-sm mb-4">{CHANGE_REQUEST.body}</p>
+
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        maxLength={2000}
+        rows={4}
+        placeholder={CHANGE_REQUEST.placeholder}
+        className="w-full rounded-lg bg-ink-900 border border-white/15 px-3.5 py-3 text-sm text-white placeholder:text-white/35 focus:outline-none focus:border-signal-400"
+      />
+      <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3">
+        <label className="inline-flex items-center gap-2 text-sm text-white/80 cursor-pointer hover:text-white">
+          <ImagePlus className="w-4 h-4" />
+          {files.length ? `${files.length} photo${files.length === 1 ? '' : 's'} attached` : CHANGE_REQUEST.photoLabel}
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, MAX_PHOTOS))}
+          />
+        </label>
+        <button
+          onClick={() => void submit()}
+          disabled={sending || text.trim().length < 3}
+          className="sm:ml-auto inline-flex items-center justify-center gap-2 bg-signal-500 hover:bg-signal-400 disabled:opacity-50 text-white font-semibold px-5 py-2.5 rounded-lg text-sm transition-colors"
+        >
+          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          {sending ? CHANGE_REQUEST.sending : CHANGE_REQUEST.submit}
+        </button>
+      </div>
+      {note && <p className="text-emerald-300/90 text-sm mt-3">{note}</p>}
+      {err && <p className="text-amber-300 text-sm mt-3">{err}</p>}
+
+      {edits.length > 0 && (
+        <ul className="mt-5 space-y-2 border-t border-white/10 pt-4">
+          {edits.map((e) => {
+            const busy = e.status === 'queued'
+            return (
+              <li key={e.id} className="text-sm flex items-start gap-3">
+                <span
+                  className={`mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
+                    e.status === 'applied'
+                      ? 'bg-emerald-500/20 text-emerald-300'
+                      : busy
+                        ? 'bg-signal-500/20 text-signal-200'
+                        : 'bg-white/10 text-white/60'
+                  }`}
+                >
+                  {e.status === 'applied' ? (
+                    <Check className="w-3 h-3" />
+                  ) : busy ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Pencil className="w-3 h-3" />
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="text-white/85 line-clamp-2">{e.request}</span>
+                  <span className="block text-white/50 text-xs mt-0.5">
+                    {CHANGE_REQUEST.statuses[e.status] ?? e.status}
+                    {e.photoCount ? ` · ${e.photoCount} photo${e.photoCount === 1 ? '' : 's'}` : ''}
+                  </span>
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      <p className="text-white/40 text-xs mt-4">{CHANGE_REQUEST.emailFallback}</p>
+    </div>
+  )
+}
+
+/** Bookmark / copy / email-to-self — the customer's way back to the change form. */
+function KeepThisPage() {
+  const [copied, setCopied] = useState(false)
+  const url = typeof window !== 'undefined' ? window.location.origin + window.location.pathname : ''
+  const mailto = `mailto:?subject=${encodeURIComponent(KEEP_PAGE.emailSubject)}&body=${encodeURIComponent(
+    KEEP_PAGE.emailBody.replace('{url}', url),
+  )}`
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      /* clipboard blocked — the link is visible below */
+    }
+  }
+  return (
+    <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-5">
+      <h2 className="text-lg font-semibold mb-2">{KEEP_PAGE.heading}</h2>
+      <p className="text-white/70 text-sm mb-3">{KEEP_PAGE.body}</p>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          onClick={() => void copy()}
+          className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition-colors"
+        >
+          {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Link2 className="w-4 h-4" />}
+          {copied ? KEEP_PAGE.copied : KEEP_PAGE.copy}
+        </button>
+        <a
+          href={mailto}
+          className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition-colors"
+        >
+          <Mail className="w-4 h-4" /> {KEEP_PAGE.email}
+        </a>
+      </div>
+      <p className="text-white/40 text-xs mt-3 break-all">{url}</p>
     </div>
   )
 }

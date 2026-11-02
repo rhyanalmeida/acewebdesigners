@@ -42,6 +42,7 @@ import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { requireAdmin } from '../_shared/adminAuth.ts'
 import { createNetlifySite, deployFiles, netlifyConfigured } from '../_shared/netlify.ts'
+import { parseFiles, stripFences } from '../_shared/siteFiles.ts'
 import {
   type DesignSystem,
   DEFAULT_DESIGN_SYSTEMS,
@@ -68,7 +69,6 @@ const MODEL = 'claude-opus-4-8' // strongest designer; owner accepted ~$0.60-1.1
  */
 const FAST_MODEL = 'claude-haiku-5-5'
 
-const FILE_MARKER = /^=====\s*FILE:\s*([\w./-]+)\s*=====\s*$/gm
 
 // Verified-live Unsplash photos (all curl-checked 200 on 2026-07-13). The model
 // must use ONLY these — hallucinated photo IDs 404 and wreck the design.
@@ -251,29 +251,6 @@ const FAST_STAGE: StageSpec = {
     `  css: .menu{display:none} .menu.open{display:flex;flex-direction:column} .burger{display:none} @media(max-width:900px){.links,.nav-call{display:none} .burger{display:block} .nav-in{display:flex;align-items:center;justify-content:space-between;gap:12px} .mark{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}}
 ` +
     `  js: burger toggles menu.classList "open" + aria-expanded; any .menu a click closes it. The menu MUST be hidden on first paint at 360-900px wide and the header row MUST fit without overflow at 360px.`,
-}
-
-/** Split the model output on FILE markers into { "/name": content }. */
-export function parseFiles(raw: string): Record<string, string> {
-  const out: Record<string, string> = {}
-  const matches = [...raw.matchAll(FILE_MARKER)]
-  for (let i = 0; i < matches.length; i++) {
-    const m = matches[i]
-    const start = (m.index ?? 0) + m[0].length
-    const end = i + 1 < matches.length ? matches[i + 1].index! : raw.length
-    const name = m[1].replace(/^\/+/, '')
-    const content = raw.slice(start, end).trim()
-    if (name && content) out[`/${name}`] = content
-  }
-  return out
-}
-
-function stripFences(raw: string): string {
-  let s = raw.trim()
-  if (s.startsWith('```')) {
-    s = s.replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/, '').trim()
-  }
-  return s
 }
 
 interface Body {

@@ -62,7 +62,8 @@ Supabase Edge Functions (supabase/functions, Deno)
   capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
   generate-site  bookings: 3-stage Opus 4.8 chain; prospects: FAST single-page Haiku 5.5 (~50s, ~$0.005)
   generate-copy  restaurant wizard AI copy (claude-haiku-4-5)
-  demo-site      outbound: /demo/<token> status + the one-click (one-EVER) demo build gate
+  demo-site      outbound: /demo/<token> status + the one-EVER demo build gate (fast Haiku path, on open)
+  site-edit      outbound: post-purchase change requests (photos → storage) → Sonnet edit → held 30-45 min → pg_cron release
   domain-search  outbound: Porkbun .com availability for the checkout domain picker (token-gated)
   provision-domain outbound: post-purchase Porkbun register + DNS → Netlify custom_domain → SSL poll
   instantly-webhook outbound: Instantly reply/bounce/unsub → prospects + suppressions + GHL tag
@@ -72,7 +73,7 @@ Supabase Edge Functions (supabase/functions, Deno)
                  ghl.ts (ghlSyncStage/createGhlAppointment/pushLegacyBooking), netlify.ts,
                  designSystems.ts, nichePlaybooks.ts, identity.ts, adminAuth.ts
         ▼
-Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks · prospects · suppressions
+Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks · prospects · suppressions · site_edits
         ▼ external sinks
 Meta CAPI · Google Calendar · Stripe · GHL (messaging only) · Netlify (preview sites) · Anthropic API · Porkbun (domains) · Instantly (cold email)
 ```

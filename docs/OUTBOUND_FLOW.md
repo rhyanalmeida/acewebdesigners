@@ -162,6 +162,18 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   → DNS A @→75.2.60.5 + CNAME www → Netlify `custom_domain` → SSL poll, ~1h cap → `ssl_pending`,
   admin Retry re-enters). Purchased state polls `domain_status` every 10s. No customer email is
   sent on go-live by code — GHL's onboarding workflow does that.
+- **Post-purchase change requests** (`site-edit` fn + `site_edits` table, 2026-11-02): the purchased
+  state of `/demo/<token>` has a "Want something changed? Send it to us" form (text + up to 5 photos,
+  downsized in-browser) and a "Keep this page" card (copy link / email-to-self). `{token,
+  action:'request'}` stores the row, uploads photos to the public `site-assets` bucket, fetches the
+  live site's files from Netlify, and one Sonnet 5.5 call (photos passed as images) returns the
+  changed files in full. **Owner rule: never look instant** — the result is parked on the row
+  (status `ready`, `release_after` = +30-45 min) and a pg_cron job (`scripts/site-edit-cron.sql`,
+  every 5 min, header `x-release-key` = `CAPI_INTERNAL_SECRET`) deploys due rows in order; a
+  second request while one is pending builds on the pending files. Customer copy says "within the
+  hour" and shows only received / done / needs-a-look. Customers only (purchased_at) or is_test;
+  ≤3 pending per site. Cost ~$0.05-0.15/edit. Verified on prod 2026-11-02 with a photo (56s to
+  ready) BEFORE the hold existed — the held release path + cron are deployed-pending (see §9).
 - **Porkbun:** account `acewebdesigners` (hello@). Prod keys `PORKBUN_API_KEY/SECRET`; sandbox =
   `pk1_sb_*` keys on the MAIN URL + `PORKBUN_API_BASE` set (the old api-sandbox host is dead).
   Prepaid balance funded 2026-11-02 (owner); top up when it runs low — a purchase stalls at registration otherwise.
@@ -226,5 +238,17 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   `prospects.suppressed=true` by hand. TODO: make the webhook auto-suppress on remove/unsubscribe
   language, not just Instantly unsubscribes.
 - **Porkbun funded by owner 2026-11-02** — provisioning is unblocked for the first real sale.
+- **PENDING (classifier blocked the DB step, 2026-11-02 ~01:50 ET):** migration `0013` (site_edits
+  `files`/`release_after`, status `ready`, pg_cron + pg_net) is NOT applied and the held-release
+  `site-edit` build is NOT deployed — the live `site-edit` still applies edits in ~1 min. To finish:
+  run `supabase/migrations/0013_*.sql` via the Management API (or `npx supabase db push`), run
+  `scripts/site-edit-cron.sql` with `<RELEASE_KEY>` = CAPI_INTERNAL_SECRET, then
+  `npx supabase functions deploy site-edit --no-verify-jwt`. Test prospect `Beacon Hill Kitchen &
+  Bath` (is_test, token d4e5…9a1b, purchased_at set, site preview-beacon-hill-kitchen-bath-dfeaad)
+  is left in place for that test — delete the row + Netlify site after.
+- **GHL to-do (owner, UI only — session expired):** add +1 508-308-2714 as a second recipient on the
+  staff SMS in "Outbound — Purchased (Onboarding)" and "Onboarding — Purchased" (SALES ONLY — not on
+  the lead alerts); add "Your website page — bookmark it, send any change from there:
+  {{contact.demo_preview_url}}" to the Outbound welcome email. Remember: Save after Publish.
 - Next: reply "yes" from rhyan@acewebdesignershq.com
   when Email 1 lands Monday to prove the in-thread auto-send; consider 2 more inboxes for 2× volume.
