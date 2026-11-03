@@ -266,6 +266,10 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
 
 ## 9. Current status (update in place)
 
+- **2026-11-03 02:56 UTC:** go-live steps 1–5 landed (Instantly secrets → poller 200 at 03:00, migration 0015,
+  reply-desk + 4 fns deployed, cron reply-desk-release/followups). Classifier was dead on arrival — Sonnet 5.5
+  400s on forced `tool_choice` and `temperature` (fixed, redeployed, dry-run 15/15). Steps 6–8 (flag, v5 copy,
+  /admin bundle) still pending: `node scripts/go-live-reply-desk.mjs --from 6`.
 - **2026-11-02 late:** reply desk built (§5b) — go-live pending `node scripts/go-live-reply-desk.mjs`
   + the GHL "Needs a Person" workflow. Instantly `daily_limit` PATCHed 30→60 (campaign-wide cap).
 - **2026-11-02 evening read:** day 1 of wave 2 sent only **30** (16 new leads + 14 follow-ups), 0 replies,
