@@ -74,7 +74,7 @@ Hospitality cold-email benchmarks (vendor data, directional): 30–40% opens, **
 7. **Go-live:** `node scripts/go-live-restaurants.mjs` (migration → functions → cron → Netlify →
    activate campaign). Everything an agent session can't confirm is in that one script.
 
-## 5. Own-domain checkout (shipped 2026-11-03, deploy pending)
+## 5. Own-domain checkout (LIVE 2026-11-03)
 
 At checkout: "Already have a domain? Keep it." → type `yourrestaurant.com` → Stripe. After payment
 the preview page shows the two DNS records (A @ → 75.2.60.5, CNAME www → `<site>.netlify.app`)

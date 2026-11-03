@@ -269,8 +269,8 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
 - **2026-11-03 late:** owner switched the funnel to RESTAURANTS (`docs/RESTAURANT_OUTBOUND_PLAN_2026-11-03.md`).
   Contractor campaign paused. Restaurant campaign `94ab9d2a-faac-46da-8470-7ade9c9fd55c` created (not running), 283
   leads uploaded (273 site-email + 10 Facebook-email). Restaurant demo spec + food photo library in generate-site
-  (deployed), niche-aware reply desk (deployed), own-domain checkout (migration 0016 + 5 fns + Netlify PENDING:
-  `node scripts/go-live-restaurants.mjs`).
+  (deployed), niche-aware reply desk (deployed), own-domain checkout (migration 0016 + 5 fns + domain-recheck cron +
+  Netlify) ALL LIVE 2026-11-03 ~04:30 UTC; restaurant campaign ACTIVATED. First read ~2026-11-17.
 - **2026-11-03 02:56 UTC:** go-live steps 1–5 landed (Instantly secrets → poller 200 at 03:00, migration 0015,
   reply-desk + 4 fns deployed, cron reply-desk-release/followups). Classifier was dead on arrival — Sonnet 5.5
   400s on forced `tool_choice` and `temperature` (fixed, redeployed, dry-run 15/15). Steps 6–8 landed 03:22 UTC:

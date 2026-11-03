@@ -93,5 +93,5 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 ---
 
 ## Launch record
-- [x] Campaign created in Instantly 2026-11-03 — id `94ab9d2a-faac-46da-8470-7ade9c9fd55c`, NOT running until `go-live-restaurants.mjs` step 5.
+- [x] Campaign created in Instantly 2026-11-03 — id `94ab9d2a-faac-46da-8470-7ade9c9fd55c`, ACTIVATED 2026-11-03 ~04:20 UTC.
 - [x] First batches uploaded 2026-11-03: `2026-11-ma-restaurants` (273) + `2026-11-ma-restaurants-fb` (10 no-website restaurants reached via their Facebook page email).

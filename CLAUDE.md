@@ -266,10 +266,10 @@ current status. Only the invariants live here:
   Contractor campaign `46657029-…` PAUSED (not deleted). Restaurant campaign `94ab9d2a-faac-46da-8470-7ade9c9fd55c`,
   copy `docs/OUTBOUND_COLD_SEQUENCE_RESTAURANTS.md`, sends Mon–Fri 09:30–11 + 14–16 ET. `_shared/niche.ts`
   `isFoodBusiness(business_type)` switches the fast demo spec (menu/call/directions, 44-photo food library,
-  real Google rating only) and the reply-desk summary; contractors keep the old spec. **Go-live pending:**
-  `node scripts/go-live-restaurants.mjs` (migration 0016 → functions → cron → Netlify → activate campaign).
+  real Google rating only) and the reply-desk summary; contractors keep the old spec. **LIVE 2026-11-03** (campaign
+  active, 283 leads, first sends Mon 2026-11-03 09:30 ET). Re-run `node scripts/go-live-restaurants.mjs` after changes.
 - **Own domain at checkout (2026-11-03):** `domain_mode` register|own. Own = no Porkbun; `provision-domain`
-  attaches to Netlify → `awaiting_dns`; /demo shows the 2 DNS records; hourly `domain-recheck` cron → live.
+  attaches to Netlify → `awaiting_dns`; /demo shows the 2 DNS records; hourly `domain-recheck` cron → live. DEPLOYED.
 - Scraped business lists → cold email via **Instantly.ai only** (never GHL/LC Email, never from
   acewebdesigners.com) → reply-gated: a "yes" auto-builds the demo (`generate-site` `{prospectId}`,
   one Opus build EVER per prospect) and the poller replies in-thread with `/demo/<token>` →
