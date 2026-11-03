@@ -526,6 +526,10 @@ contact with the same enriched attribution we send Meta (into custom fields by i
   2026-09-22; asked AFTER purchase only — never in cold copy); re-entry OFF. The same two
   messages (unlimited updates via hello@, review ask) also live on the demo page's post-purchase
   thank-you state (`DemoPage.tsx`, `SUPPORT_EMAIL` / `GOOGLE_REVIEW_URL` in `outboundPlan.ts`).
+  **"Outbound — Needs a Person"** (2026-11-02, id `30f1e52c-4e17-4969-8a6e-2e1cf3d153ad`, PUBLISHED;
+  `outbound-needs-human` tag → staff SMS +17743293117 with `{{contact.company_name}}`, email,
+  `{{contact.last_reply_text}}`, `{{contact.last_reply_intent}}` + /admin link; **re-entry ON** —
+  `reply-desk` removes then re-adds the tag so every hand-off fires; no customer-facing sends).
   Builder gotcha 2026-09-22: "Add action" connectors are ordered by DOM, not canvas position —
   after inserting, read the `Edge from … to …` list to confirm order before saving.) ⚠️ Workflow-builder gotcha: the email editor
   AUTOLINKS `{{contact.name}}`-style merge tags (.name/.email/.phone/.company parse as TLDs),

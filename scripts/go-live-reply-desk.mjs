@@ -85,8 +85,7 @@ if (step(8)) {
 }
 console.log(`
 ✓ Reply desk is live.
-  Next (one-time, in the GHL UI): workflow "Outbound — Needs a Person" — trigger: tag added
-  \`outbound-needs-human\` → SMS to +1 774-329-3117 with {{contact.company_name}}, {{contact.email}},
-  {{contact.last_reply_text}} and https://acewebdesigners.com/admin. Re-entry ON. Save after Publish.
-  Then disable the Windows task "Instantly Poll" (the Edge poller now runs green).
+  The GHL workflow "Outbound — Needs a Person" is already published (2026-11-02).
+  Last step: disable the Windows task "Instantly Poll" — the Edge poller owns it now:
+    schtasks /change /tn "Instantly Poll" /disable
 `)

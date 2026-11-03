@@ -184,8 +184,9 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
   `{action:'dryrun'}` — writes nothing, prints rule / model / decision / draft, exits 1 on a mismatch.
 - **Go-live:** `node scripts/go-live-reply-desk.mjs` (secrets → db push → deploy → cron → gate →
   REPLY_DESK_ENABLED → v5 copy → Netlify). Agent runs can't confirm production mutations, so the owner
-  runs it. Then build the GHL workflow "Outbound — Needs a Person" (tag `outbound-needs-human` → SMS
-  to Rhyan with company, email, `{{contact.last_reply_text}}`, admin link; re-entry ON).
+  runs it. The GHL workflow "Outbound — Needs a Person" (id `30f1e52c-4e17-4969-8a6e-2e1cf3d153ad`) is
+  already PUBLISHED: tag `outbound-needs-human` → SMS to Rhyan with company, email,
+  `{{contact.last_reply_text}}`, intent + admin link; re-entry ON.
 - **Demo page gate (shipped with this):** `demo-site` returns 404 and never builds for suppressed rows
   or `reply_sentiment in (no, remove, hostile)` — the 3 hostile wave-1 sites were built by opening
   the link in the staff-alert email.
