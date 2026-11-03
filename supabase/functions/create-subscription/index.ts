@@ -46,6 +46,8 @@ interface Body {
   /** demo_monthly only: the prospect's capability token + chosen domain. */
   prospectToken?: string
   domain?: string
+  /** 'own' = the customer keeps a domain they already have (no Porkbun; they point DNS at us). */
+  domainMode?: 'register' | 'own'
 }
 
 Deno.serve(async (req: Request) => {
@@ -72,9 +74,13 @@ Deno.serve(async (req: Request) => {
   // ── outbound demo-site checkout (prospect token, not contact) ───────────────
   if (plan === 'demo_monthly') {
     const token = (b.prospectToken ?? '').trim()
-    const domain = (b.domain ?? '').trim().toLowerCase()
+    const own = b.domainMode === 'own'
+    const domain = (b.domain ?? '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '')
     if (!/^[0-9a-f]{32}$/.test(token)) return json({ error: 'not found' }, 404)
-    if (!/^[a-z0-9-]{3,60}\.com$/.test(domain)) return json({ error: 'invalid domain' }, 400)
+    // Registered domains are .com only (what we price); an owned domain just has to be a real hostname.
+    if (own ? !/^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/.test(domain) : !/^[a-z0-9-]{3,60}\.com$/.test(domain)) {
+      return json({ error: 'invalid domain' }, 400)
+    }
 
     const supa = admin()
     const { data } = await supa
@@ -90,7 +96,7 @@ Deno.serve(async (req: Request) => {
     if (prospect.site_status !== 'deployed') return json({ error: 'demo not ready yet' }, 409)
 
     // Lock the exact domain before money moves — registrations are non-refundable.
-    if (porkbunConfigured()) {
+    if (!own && porkbunConfigured()) {
       const check = await checkDomain(domain)
       if (!check.ok) return json({ error: 'domain check failed — try again' }, 502)
       if (!check.available) return json({ error: 'domain taken — pick another', domainTaken: true }, 409)
@@ -108,11 +114,12 @@ Deno.serve(async (req: Request) => {
           kind: 'demo_site',
           prospect_id: prospect.id,
           domain,
+          domain_mode: own ? 'own' : 'register',
           plan,
           is_test: prospect.is_test ? 'true' : 'false',
         },
         subscription_data: {
-          metadata: { kind: 'demo_site', prospect_id: prospect.id, domain, plan },
+          metadata: { kind: 'demo_site', prospect_id: prospect.id, domain, domain_mode: own ? 'own' : 'register', plan },
         },
         allow_promotion_codes: true,
         success_url: b.successUrl || `${origin}/demo/${token}?purchased=1`,

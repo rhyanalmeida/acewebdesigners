@@ -7,12 +7,13 @@
 --   instantly-poll       every 15 min     → replies/bounces/unsubs → webhook (→ reply-desk classify)
 --   reply-desk-release   every 5 min      → sends queued reply-desk answers whose hold elapsed
 --   reply-desk-followups daily 13:00 UTC  → "later" re-touches + viewed-but-silent nudges
+--   domain-recheck       hourly           → own-domain purchases: SSL issued once the customer's DNS points at us → live
 --
 -- After instantly-poll runs green, DISABLE the Windows task "Instantly Poll"
 -- (schtasks /change /tn "Instantly Poll" /disable) so replies aren't forwarded twice.
 
 select cron.unschedule(jobname) from cron.job
- where jobname in ('site-edit-release', 'instantly-poll', 'reply-desk-release', 'reply-desk-followups');
+ where jobname in ('site-edit-release', 'instantly-poll', 'reply-desk-release', 'reply-desk-followups', 'domain-recheck');
 
 select cron.schedule(
   'site-edit-release',
@@ -55,5 +56,16 @@ select cron.schedule(
        headers := '{"content-type":"application/json","x-cron-key":"<KEY>"}'::jsonb,
        body    := '{"action":"followups"}'::jsonb,
        timeout_milliseconds := 150000
+     ) $$
+);
+
+select cron.schedule(
+  'domain-recheck',
+  '17 * * * *',
+  $$ select net.http_post(
+       url     := 'https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/provision-domain',
+       headers := '{"content-type":"application/json","x-cron-key":"<KEY>"}'::jsonb,
+       body    := '{"step":"recheck"}'::jsonb,
+       timeout_milliseconds := 120000
      ) $$
 );

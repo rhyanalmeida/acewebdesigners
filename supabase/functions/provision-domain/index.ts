@@ -23,6 +23,13 @@
  *
  * POST { prospectId }                          → provision (steps 1-3), 202
  * POST { prospectId, step:'ssl', attempt }     → SSL polling round (internal)
+ * POST { step:'recheck' }  (x-cron-key)        → hourly: every own-domain purchase still waiting on
+ *                                                the customer's DNS — SSL issued? → live
+ *
+ * OWN DOMAIN (domain_mode 'own', 2026-11-03): steps 1-2 are skipped (nothing to register, DNS is
+ * the customer's), the domain is attached to the Netlify site, status 'awaiting_dns', and the
+ * preview page shows the two records to add. The SSL poll + the hourly recheck flip it to 'live'
+ * the moment Let's Encrypt can see the DNS. Never parks as 'failed' for a slow customer.
  */
 
 import { handlePreflight, json } from '../_shared/cors.ts'
@@ -42,7 +49,7 @@ const MAX_ROUNDS = 24
 
 interface Body {
   prospectId?: string
-  step?: 'ssl'
+  step?: 'ssl' | 'recheck'
   attempt?: number
 }
 
@@ -52,10 +59,12 @@ interface ProspectRow {
   email: string | null
   phone: string | null
   chosen_domain: string | null
+  domain_mode: 'register' | 'own'
   netlify_site_id: string | null
   domain_status: string
   purchased_at: string | null
 }
+const PROSPECT_COLS = 'id, is_test, email, phone, chosen_domain, domain_mode, netlify_site_id, domain_status, purchased_at'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -97,6 +106,11 @@ async function pollSsl(supa: ReturnType<typeof admin>, p: ProspectRow, attempt: 
     await sleep(30_000)
   }
   if (attempt >= MAX_ROUNDS) {
+    if (p.domain_mode === 'own') {
+      // Their DNS, their pace: stay 'awaiting_dns'; the hourly recheck finishes the job.
+      await supa.from('prospects').update({ domain_status: 'awaiting_dns', domain_error: null }).eq('id', p.id)
+      return
+    }
     await supa
       .from('prospects')
       .update({
@@ -109,8 +123,50 @@ async function pollSsl(supa: ReturnType<typeof admin>, p: ProspectRow, attempt: 
   await selfInvoke(p.id, attempt + 1)
 }
 
+/** Own domain: attach + kick SSL, then wait for the customer's DNS (no Porkbun at all). */
+async function attachOwnDomain(supa: ReturnType<typeof admin>, p: ProspectRow): Promise<void> {
+  const domain = p.chosen_domain!
+  try {
+    const attach = await setCustomDomain(p.netlify_site_id!, domain)
+    if (!attach.ok) {
+      await supa.from('prospects').update({ domain_status: 'failed', domain_error: `custom_domain failed: ${attach.error ?? ''}`.slice(0, 280) }).eq('id', p.id)
+      return
+    }
+    await provisionSsl(p.netlify_site_id!) // 4xxs harmlessly until their DNS resolves
+    await supa.from('prospects').update({ domain_status: 'awaiting_dns', domain_error: null }).eq('id', p.id)
+    await selfInvoke(p.id, 1)
+  } catch (err) {
+    console.error('[provision-domain] own-domain attach error', p.id, err)
+    await supa.from('prospects').update({ domain_status: 'failed', domain_error: String(err).slice(0, 280) }).eq('id', p.id)
+  }
+}
+
+/** Hourly cron: own-domain rows still waiting → SSL issued? → live. Re-kicks provisioning otherwise. */
+async function recheckOwnDomains(supa: ReturnType<typeof admin>): Promise<{ checked: number; live: number }> {
+  const { data } = await supa
+    .from('prospects')
+    .select(PROSPECT_COLS)
+    .eq('domain_mode', 'own')
+    .in('domain_status', ['awaiting_dns', 'ssl_pending', 'attached'])
+    .not('purchased_at', 'is', null)
+    .not('netlify_site_id', 'is', null)
+    .limit(50)
+  let live = 0
+  for (const row of (data ?? []) as unknown as ProspectRow[]) {
+    try {
+      const ssl = await getSslState(row.netlify_site_id!)
+      if (ssl.ok && ssl.state === 'issued') { await markLive(supa, row); live++; continue }
+      await provisionSsl(row.netlify_site_id!)
+    } catch (err) {
+      console.error('[provision-domain] recheck error', row.id, err)
+    }
+  }
+  return { checked: data?.length ?? 0, live }
+}
+
 /** Steps 1-3 (register → DNS → attach), then hand off to SSL polling. */
 async function provision(supa: ReturnType<typeof admin>, p: ProspectRow): Promise<void> {
+  if (p.domain_mode === 'own') return attachOwnDomain(supa, p)
   const domain = p.chosen_domain!
   const fail = (msg: string) =>
     supa.from('prospects').update({ domain_status: 'failed', domain_error: msg.slice(0, 280) }).eq('id', p.id)
@@ -162,30 +218,31 @@ Deno.serve(async (req: Request) => {
   if (pre) return pre
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405)
 
-  const internal = req.headers.get('x-internal-key') === Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  if (!internal) {
-    const adminUser = await requireAdmin(req)
-    if (!adminUser) return json({ error: 'unauthorized' }, 401)
-  }
-
-  if (!porkbunConfigured()) return json({ error: 'Porkbun not configured' }, 503)
-  if (!netlifyConfigured()) return json({ error: 'NETLIFY_AUTH_TOKEN not set' }, 503)
-
   let b: Body
   try {
     b = (await req.json()) as Body
   } catch {
     return json({ error: 'invalid JSON' }, 400)
   }
+
+  const internal = req.headers.get('x-internal-key') === Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const cronKey = Deno.env.get('CAPI_INTERNAL_SECRET')
+  const cron = Boolean(cronKey) && req.headers.get('x-cron-key') === cronKey
+  if (b.step === 'recheck') {
+    if (!cron && !internal) return json({ error: 'unauthorized' }, 401)
+    if (!netlifyConfigured()) return json({ error: 'NETLIFY_AUTH_TOKEN not set' }, 503)
+    return json({ ok: true, ...(await recheckOwnDomains(admin())) })
+  }
+  if (!internal) {
+    const adminUser = await requireAdmin(req)
+    if (!adminUser) return json({ error: 'unauthorized' }, 401)
+  }
+  if (!netlifyConfigured()) return json({ error: 'NETLIFY_AUTH_TOKEN not set' }, 503)
   if (!b.prospectId) return json({ error: 'prospectId required' }, 400)
   if (b.step === 'ssl' && !internal) return json({ error: 'steps are internal' }, 403)
 
   const supa = admin()
-  const { data } = await supa
-    .from('prospects')
-    .select('id, is_test, email, phone, chosen_domain, netlify_site_id, domain_status, purchased_at')
-    .eq('id', b.prospectId)
-    .maybeSingle()
+  const { data } = await supa.from('prospects').select(PROSPECT_COLS).eq('id', b.prospectId).maybeSingle()
   if (!data) return json({ error: 'prospect not found' }, 404)
   const p = data as unknown as ProspectRow
 
@@ -193,9 +250,12 @@ Deno.serve(async (req: Request) => {
   if (!p.chosen_domain) return json({ error: 'no chosen_domain' }, 409)
   if (!p.netlify_site_id) return json({ error: 'no netlify site (demo never built?)' }, 409)
   if (p.domain_status === 'live') return json({ ok: true, skipped: 'already live' })
-  // Real-money guard: a test prospect may only provision against the sandbox.
-  if (p.is_test && !Deno.env.get('PORKBUN_API_BASE')) {
-    return json({ error: 'test prospect — set PORKBUN_API_BASE to the sandbox first' }, 409)
+  if (p.domain_mode !== 'own') {
+    if (!porkbunConfigured()) return json({ error: 'Porkbun not configured' }, 503)
+    // Real-money guard: a test prospect may only provision against the sandbox.
+    if (p.is_test && !Deno.env.get('PORKBUN_API_BASE')) {
+      return json({ error: 'test prospect — set PORKBUN_API_BASE to the sandbox first' }, 409)
+    }
   }
 
   const task = b.step === 'ssl' ? pollSsl(supa, p, b.attempt ?? 1) : provision(supa, p)

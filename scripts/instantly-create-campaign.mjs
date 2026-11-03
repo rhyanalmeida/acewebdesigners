@@ -6,6 +6,8 @@
 //   node scripts/instantly-create-campaign.mjs --update <id>  # PATCH copy/settings onto an existing campaign
 //   node scripts/instantly-create-campaign.mjs --name "..."   # override the campaign name
 //   node scripts/instantly-create-campaign.mjs --daily 40     # override campaign daily limit (default 60 = 2 inboxes × 30; campaign-wide cap)
+//   node scripts/instantly-create-campaign.mjs --doc docs/OUTBOUND_COLD_SEQUENCE_RESTAURANTS.md --name "Outbound — Restaurants v1" --schedule restaurant
+//                                                             # another niche: its own doc, name and send windows (lib SCHEDULES)
 //
 // Reads INSTANTLY_ADMIN_API_KEY (scopes campaigns:all + leads:all +
 // account_campaign_mappings:all) from supabase/.env. Refuses to create a second
@@ -26,11 +28,11 @@ import { parseSequenceDoc, buildPayload, validateSteps, isThreaded, DEFAULT_NAME
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const API = 'https://api.instantly.ai/api/v2'
-const DOC = path.join(ROOT, 'docs', 'OUTBOUND_COLD_SEQUENCE_DRAFT.md')
-
 const args = process.argv.slice(2)
 const DRY = args.includes('--dry')
 const opt = (n) => { const i = args.indexOf(`--${n}`); return i >= 0 ? args[i + 1] : undefined }
+const DOC = path.resolve(ROOT, opt('doc') ?? path.join('docs', 'OUTBOUND_COLD_SEQUENCE_DRAFT.md'))
+const SCHEDULE = opt('schedule') ?? 'default'
 const NAME = opt('name') ?? DEFAULT_NAME
 const DAILY = Number(opt('daily') ?? 60)
 const UPDATE_ID = opt('update')
@@ -72,7 +74,7 @@ async function main() {
     console.warn(`⚠ ${placeholders}/${steps.length} emails still carry the [OWNER: postal address] placeholder — ` +
       'fine while the campaign is not running, NOT for sending. Re-run with --update <id> once the address is in the doc.')
   }
-  const payload = buildPayload(steps, { name: NAME, daily: DAILY })
+  const payload = buildPayload(steps, { name: NAME, daily: DAILY, schedule: SCHEDULE })
   console.log(`Sequence: ${steps.map((s) => `E${s.n}@day${s.day}${isThreaded(s.subject) ? ' (threaded)' : ''}`).join(' → ')}`)
   if (DRY) { console.log(JSON.stringify(payload, null, 2)); return }
 

@@ -40,6 +40,7 @@
 import Anthropic from 'npm:@anthropic-ai/sdk@0.40.1'
 import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
+import { isFoodBusiness } from '../_shared/niche.ts'
 import { requireAdmin } from '../_shared/adminAuth.ts'
 import { createNetlifySite, deployFiles, netlifyConfigured } from '../_shared/netlify.ts'
 import { parseFiles, stripFences } from '../_shared/siteFiles.ts'
@@ -99,12 +100,60 @@ const PHOTO_LIBRARY = `PHOTO LIBRARY — use ONLY these images.unsplash.com phot
 - photo-1580256081112-e49377338b7f  commercial corridor + cleaning cart (janitorial/commercial)
 URL pattern: https://images.unsplash.com/photo-<id>?auto=format&fit=crop&w=1600&q=80 for hero backgrounds, w=800&q=75 for cards/sections. Pick 4-7 photos that FIT THIS TRADE; loading="lazy" on everything except the hero; meaningful alt text.`
 
+// Restaurants / cafes (verified 2026-11-03 — every id fetched and eyeballed; any other id 404s).
+const FOOD_PHOTO_LIBRARY = `PHOTO LIBRARY — use ONLY these images.unsplash.com photos (any other photo URL will 404):
+- photo-1414235077428-338989a2e8c0  plated dish on a candlelit table, wine glasses (best fine-dining HERO)
+- photo-1552566626-52f8b828add9  warm modern restaurant dining room, red booths (HERO / interior)
+- photo-1517248135467-4c7edcad34c4  sleek dark restaurant interior, round tables (upscale interior)
+- photo-1555396273-367ea4eb4db5  airy industrial cafe, wood tables, people (cafe / casual HERO)
+- photo-1559339352-11d035aa65de  waterfront terrace tables at sunset (seafood / patio)
+- photo-1551183053-bf91a1d81141  cozy diner table with flowers, warm bokeh (diner / family)
+- photo-1521017432531-fbd92d768814  cafe with chalkboard menu, espresso machine (coffee shop)
+- photo-1554118811-1e0d58224f24  bright cafe interior, plants, big windows (cafe / brunch)
+- photo-1559925393-8be0ec4767c8  European cafe terrace, chalkboard sign (cafe exterior)
+- photo-1514933651103-005eec06c04b  dark wood bar, chalkboard beer list (bar & grill / pub)
+- photo-1551632436-cbf8dd35adfa  modern restaurant, copper pendant lights, server (bistro)
+- photo-1466978913421-dad2ebd01d17  overhead table of burgers and fries, friends sharing (casual / American)
+- photo-1504674900247-0877df9cc836  three plated dishes overhead, chilies and herbs (Asian / fusion)
+- photo-1565299624946-b28f40a0ae38  bbq chicken pizza on a wood board (pizza)
+- photo-1513104890138-7c749659a591  cheese pizza slices, tomatoes, rosemary (pizza / Italian)
+- photo-1593504049359-74330189a345  cheese pull from a hot pizza, steam (pizza HERO)
+- photo-1476224203421-9ac39bcb3327  creamy fettuccine with steak in a pan (Italian / pasta)
+- photo-1529042410759-befb1204b468  meatballs on arugula (Italian)
+- photo-1600891964092-4316c288032e  steak frites on a white plate (steakhouse / American)
+- photo-1571091718767-18b5b1457add  classic cheeseburger, dark background (burgers)
+- photo-1568901346375-23c9450c58cd  double cheeseburger on a board (burgers / diner)
+- photo-1565299585323-38d6b0865b47  street tacos with lime squeeze (Mexican HERO)
+- photo-1551504734-5ee1c4a1479b  plate of tacos on a blue table (Mexican / casual)
+- photo-1559847844-5315695dadae  shrimp and rice bowl (Caribbean / Creole / Latin)
+- photo-1559737558-2f5a35f4523b  grilled shrimp platter, lemon (seafood)
+- photo-1579871494447-9811cf80d66c  salmon sushi rolls (sushi / Japanese)
+- photo-1534604973900-c43ab4c2e0ab  sushi rolls on wood boards, chopsticks (sushi)
+- photo-1525755662778-989d0524087e  steamed dumplings in bamboo baskets (Chinese / dim sum)
+- photo-1563245372-f21724e3856d  orange chicken with broccoli and rice (Chinese-American)
+- photo-1544148103-0773bf10d330  Korean table spread, bibimbap and banchan (Korean / Asian)
+- photo-1546069901-ba9599a7e63c  colorful poke/salad bowl overhead (healthy / bowls)
+- photo-1540189549336-e6e99c3679fe  fresh salad with orange juice (salads / cafe)
+- photo-1567620905732-2d1ec7ab7445  pancake stack with syrup pour (breakfast HERO)
+- photo-1484723091739-30a097e8f929  french toast with blueberries (breakfast / brunch)
+- photo-1533089860892-a7c6f0a88666  egg-in-toast breakfast plate (diner breakfast)
+- photo-1495474472287-4d71bcdd2085  three latte cups held together (coffee)
+- photo-1509440159596-0249088772ff  artisan bread loaves with wheat (bakery)
+- photo-1555507036-ab1f4038808a  croissants dusted with sugar (bakery / cafe)
+- photo-1565958011703-44f9829ba187  raspberry layer cake slice (desserts / bakery)
+- photo-1510812431401-41d2bd2722f3  friends toasting red wine outdoors (wine / celebrations)
+- photo-1498654896293-37aacf113fd9  chef chopping herbs on a board (kitchen / craft)
+- photo-1556910103-1c02745aae4d  two people cooking at a kitchen island (homestyle / catering)
+- photo-1590947132387-155cc02f3212  pizza with cherry tomatoes and arugula (pizza / Italian)
+- photo-1551218808-94e220e084d2  egg noodle bowl on painted teal backdrop (cafe / brunch)
+URL pattern: https://images.unsplash.com/photo-<id>?auto=format&fit=crop&w=1600&q=80 for hero backgrounds, w=800&q=75 for cards/sections. Pick 4-7 photos that FIT THIS CUISINE (a pizzeria gets pizza, a diner gets breakfast, a cafe gets coffee); loading="lazy" on everything except the hero; meaningful alt text.`
+
 // The system prompt is assembled per-site: constant scaffolding (output contract,
 // photo library, motion craft, truthfulness) wraps the SELECTED art direction
 // (renderArtDirection), so every generated site is visually unique. The shared
 // page ingredients (hero, marquee, stat band, service cards, splits, CTA band,
 // footer) stay required in the STAGES instructions; the art direction restyles them.
-function buildSystemPrompt(ds: DesignSystem, pb: NichePlaybook, singleFile = false): string {
+function buildSystemPrompt(ds: DesignSystem, pb: NichePlaybook, singleFile = false, businessType: string | null = null): string {
   const pagesRule = singleFile
     ? `- The site is ONE self-contained file, index.html: put ALL CSS in one <style> block in <head> and ALL JS in one <script> at the end of <body>. No external stylesheet/script. Nav links are in-page anchors (#services, #about, #contact).`
     : `- The site is multi-page: / (index.html), /services.html, /about.html, /contact.html. Every page links the shared stylesheet (<link rel="stylesheet" href="/styles.css">) and script (<script src="/main.js" defer></script>) and shares the same nav + footer with working links between pages.`
@@ -121,7 +170,7 @@ ${pagesRule}
 - DRY — single source of truth everywhere: design tokens (colors, spacing, radii, shadows, timing) defined ONCE as CSS custom properties and referenced everywhere; one .btn / .card / .section / .reveal system reused across all pages; the shared nav + footer markup identical byte-for-byte on every page; one IntersectionObserver in main.js drives all reveals. Never restate a style or script two ways.
 - REQUIRED page ingredients (style them in the art direction below): a hero with a small badge/eyebrow chip + a display headline where ONE key word is emphasized (accent color) + subline + primary CTA (call) + secondary CTA + a row of small trust chips with inline SVG ticks; a slim scrolling MARQUEE ticker of 4-6 short trade promises after the hero; an animated STAT COUNTER band (3-4 process-fact stats); photo-and-text split sections; service cards with inline SVG icons; a photo-backed CTA band near the footer; a rich multi-column footer with tel: link and a small "Website preview by Ace Web Designers" line. NAV = business-name wordmark + small inline SVG mark + links + phone + accent CTA, solid/blurred on scroll.
 
-${PHOTO_LIBRARY}
+${isFoodBusiness(businessType) ? FOOD_PHOTO_LIBRARY : PHOTO_LIBRARY}
 
 ${renderArtDirection(ds)}
 
@@ -253,6 +302,36 @@ const FAST_STAGE: StageSpec = {
     `  js: burger toggles menu.classList "open" + aria-expanded; any .menu a click closes it. The menu MUST be hidden on first paint at 360-900px wide and the header row MUST fit without overflow at 360px.`,
 }
 
+/**
+ * Fast-path spec for FOOD businesses (restaurants, cafes, diners, bakeries — `isFoodBusiness`).
+ * Same one-file contract and mobile nav as FAST_STAGE; the page is built around what a hungry
+ * person on a phone needs (menu, call, directions) instead of services. Truthfulness: the menu
+ * is labeled a sample, hours are never listed, the only rating shown is the REAL Google one
+ * from the brief.
+ */
+const FAST_STAGE_RESTAURANT: StageSpec = {
+  files: ['index.html'],
+  maxTokens: 12000,
+  instruction:
+    `For THIS request, output exactly ONE file: index.html — the complete homepage for a RESTAURANT with ALL CSS inline in one <style> block and ALL JS inline in one <script> block.
+` +
+    `Line cap (HARD — the stream is cut off if you run long, destroying the build): index.html ≤ 420 lines total. Terse CSS, no comments.
+` +
+    `This is a restaurant, not a trade: wherever the contract says "service cards" build MENU cards; the marquee carries cuisine words (dishes, "fresh", "takeout", "family dinners") stated as flavor, never as facts about this business; SKIP the stat counter band entirely (restaurants have no process stats).
+` +
+    `Sections in order: nav (wordmark + anchors Menu / About / Visit + tel: "Call" CTA) → photographic hero matched to the cuisine (badge chip = cuisine, headline with ONE accent word, subline naming the city, CTAs: "Call to order" tel: + "Get directions" linking to https://www.google.com/maps/search/?api=1&query=<URL-encoded business name, city, state>; trust chips: cuisine · city · "Call for today's hours" · the REAL Google rating ONLY if the brief provides one, formatted "4.6 ★ on Google (120 reviews)") → marquee ticker of 5-6 cuisine words → #menu "Menu highlights": 6 cards of dishes TYPICAL of this cuisine, NO prices, each one line, a small caption under the heading reading "Sample menu — your real menu, prices and photos go here", and a "Call for the full menu" tel: button → photo+text split (#about: honest generic story about a neighborhood restaurant — no invented history, no "family owned since") → #visit "Visit us": left column city/state + "Get directions" button (same maps URL) + phone tel:; right column an "Hours" card whose only line is "Call for today's hours" with the tel: link (NEVER list hours) → 2 example-labeled reviews → photo-backed CTA band ("Hungry? Call …" tel:) → footer with tel: link, city, and "Website preview by Ace Web Designers".
+` +
+    `JS: nav toggle + scrolled-nav class, one IntersectionObserver for reveals. Vanilla, defensive.
+` +
+    `MOBILE NAV — NON-NEGOTIABLE (phones are where this preview is judged). Use EXACTLY this markup/CSS/JS, styled to the art direction:
+` +
+    `  markup: <nav class="nav"><div class="nav-in"><a class="mark" href="#top">…</a><div class="links">…anchors…</div><a class="btn btn-primary nav-call" href="tel:…">Call</a><button class="burger" id="burger" aria-label="Menu" aria-expanded="false">…svg…</button></div><div class="menu" id="menu">…anchors + tel link…</div></nav>
+` +
+    `  css: .menu{display:none} .menu.open{display:flex;flex-direction:column} .burger{display:none} @media(max-width:900px){.links,.nav-call{display:none} .burger{display:block} .nav-in{display:flex;align-items:center;justify-content:space-between;gap:12px} .mark{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}}
+` +
+    `  js: burger toggles menu.classList "open" + aria-expanded; any .menu a click closes it. The menu MUST be hidden on first paint at 360-900px wide and the header row MUST fit without overflow at 360px.`,
+}
+
 interface Body {
   appointmentId?: string
   /** Outbound-funnel subject: build for a `prospects` row instead (demo-site trigger). */
@@ -278,6 +357,9 @@ interface SubjectBrief {
   city: string | null
   state: string | null
   phone: string | null
+  /** Prospects only — the REAL Google rating from the scrape (the one stat a preview may show). */
+  rating?: number | null
+  review_count?: number | null
 }
 
 /**
@@ -325,7 +407,7 @@ async function loadSubject(supa: ReturnType<typeof admin>, b: Body): Promise<Sub
   }
   const { data, error } = await supa
     .from('prospects')
-    .select('id, is_test, site_status, netlify_site_id, first_name, business_name, business_type, city, state, phone')
+    .select('id, is_test, site_status, netlify_site_id, first_name, business_name, business_type, city, state, phone, rating, review_count')
     .eq('id', b.prospectId!)
     .single()
   if (error || !data) return null
@@ -348,6 +430,8 @@ async function loadSubject(supa: ReturnType<typeof admin>, b: Body): Promise<Sub
       city: row.city,
       state: row.state,
       phone: row.phone,
+      rating: row.rating ?? null,
+      review_count: row.review_count ?? null,
     },
   }
 }
@@ -356,6 +440,9 @@ function businessBrief(subject: Subject): string {
   const c = subject.brief
   const businessName = c?.business_name?.trim() || `${c?.first_name ?? 'Local'}'s Business`
   const trade = c?.business_type?.trim() || 'general contracting'
+  const rating = c?.rating && c?.review_count && Number(c.rating) >= 4 && Number(c.review_count) >= 10
+    ? `- Google rating (REAL, from their listing — the only rating you may show): ${Number(c.rating).toFixed(1)} stars from ${c.review_count} reviews\n`
+    : ''
   const place = [c?.city, c?.state].filter(Boolean).join(', ')
   return (
     `The business:\n` +
@@ -363,7 +450,8 @@ function businessBrief(subject: Subject): string {
     `- Trade / type of business: ${trade}\n` +
     (place ? `- Location: ${place}\n` : `- Location: not provided (use "your area" phrasing)\n`) +
     (c?.phone ? `- Phone: ${c.phone}\n` : `- Phone: not provided (make CTAs link to /contact.html instead of tel:)\n`) +
-    (c?.first_name ? `- Owner first name: ${c.first_name}\n` : '')
+    (c?.first_name ? `- Owner first name: ${c.first_name}\n` : '') +
+    rating
   )
 }
 
@@ -376,7 +464,7 @@ async function generateStage(
   pb: NichePlaybook,
   fast = false,
 ): Promise<Record<string, string>> {
-  const spec = fast ? FAST_STAGE : STAGES[stage]
+  const spec = fast ? (isFoodBusiness(subject.brief.business_type) ? FAST_STAGE_RESTAURANT : FAST_STAGE) : STAGES[stage]
   let userMsg = `${businessBrief(subject)}\n${spec.instruction}`
   if (stage > 1) {
     const ctx = ['/styles.css', '/main.js', '/index.html']
@@ -392,7 +480,7 @@ async function generateStage(
     max_tokens: spec.maxTokens,
     // Haiku 5.5 thinks by default; off for speed (allowed at its default effort).
     ...(fast ? { thinking: { type: 'disabled' as const } } : {}),
-    system: buildSystemPrompt(ds, pb, fast),
+    system: buildSystemPrompt(ds, pb, fast, subject.brief.business_type),
     messages: [{ role: 'user', content: userMsg }],
   })
   const msg = await stream.finalMessage()

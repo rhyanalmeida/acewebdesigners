@@ -53,6 +53,7 @@ Deno.serve(async (req: Request) => {
     if (session.metadata?.kind === 'demo_site') {
       const prospectId = session.metadata?.prospect_id || session.client_reference_id || ''
       const domain = (session.metadata?.domain || '').toLowerCase()
+      const ownDomain = session.metadata?.domain_mode === 'own'
       const subId = typeof session.subscription === 'string' ? session.subscription : session.id
       if (prospectId && domain) {
         const supa = admin()
@@ -62,9 +63,10 @@ Deno.serve(async (req: Request) => {
             purchased_at: new Date().toISOString(),
             plan: session.metadata?.plan || 'demo_monthly',
             chosen_domain: domain,
+            domain_mode: ownDomain ? 'own' : 'register',
             stripe_subscription_id: subId,
             stripe_customer_id: typeof session.customer === 'string' ? session.customer : null,
-            domain_status: 'registering',
+            domain_status: ownDomain ? 'awaiting_dns' : 'registering',
           })
           .eq('id', prospectId)
           .is('purchased_at', null)
@@ -89,7 +91,9 @@ Deno.serve(async (req: Request) => {
               city: w.city ?? undefined,
               state: w.state ?? undefined,
               attribution: { dealValue: amount, recurringValue: amount, recurringInterval: 'month', planName: session.metadata?.plan },
-              qualifiers: { business_type: w.business_type ?? undefined, chosen_domain: domain },
+              // The welcome email prints this field; for an owned domain it has to say the site
+              // waits on THEIR DNS rather than "live within the hour".
+              qualifiers: { business_type: w.business_type ?? undefined, chosen_domain: ownDomain ? `${domain} (your own domain — add the two DNS records shown on your preview page, or email us and we'll walk you through it)` : domain },
             })
           } catch (err) {
             console.error('[stripe-webhook] ghl demo_site sync failed', err)
@@ -112,7 +116,7 @@ Deno.serve(async (req: Request) => {
           )
           if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(provision)
           else await provision
-          console.log(`[stripe-webhook] demo_site purchased prospect=${w.id} domain=${domain}`)
+          console.log(`[stripe-webhook] demo_site purchased prospect=${w.id} domain=${domain} mode=${ownDomain ? 'own' : 'register'}`)
         } else {
           console.log(`[stripe-webhook] demo_site redelivery ignored prospect=${prospectId}`)
         }

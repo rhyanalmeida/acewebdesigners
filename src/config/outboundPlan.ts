@@ -85,7 +85,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'I already own a domain. Can I use it?',
-    a: `Yes. Email ${SUPPORT_EMAIL} before you check out and we'll connect your existing domain instead of registering a new one.`,
+    a: `Yes. At checkout choose "I already have a domain" and type it in. After you pay, this page shows the two records to add where your domain is registered (GoDaddy, Google, Squarespace, Wix…). It takes a few minutes, and if you'd rather not touch it, email ${SUPPORT_EMAIL} and we'll walk you through it.`,
   },
   {
     q: 'Is there a contract or setup fee?',
@@ -143,3 +143,13 @@ export const KEEP_PAGE = {
   emailSubject: 'My website page — Ace Web Designers',
   emailBody: `Your website page (send changes from here any time):\n\n{url}\n\nUpdates are unlimited and included. Questions: ${SUPPORT_EMAIL}`,
 } as const
+
+/** Netlify's apex load balancer — the A record an owned domain points at (same as provision-domain). */
+export const NETLIFY_APEX_IP = '75.2.60.5'
+
+/** Post-purchase copy for the "I already have a domain" path (DemoPage PurchasedView). */
+export const OWN_DOMAIN_HELP = {
+  heading: 'Two records to add where your domain lives',
+  body: 'Log in where you bought the domain (GoDaddy, Google, Squarespace, Wix, Namecheap…), open its DNS settings and add these. Most registrars apply them within an hour; this page turns green on its own once we can see them.',
+  rather: `Rather not touch DNS? Email ${SUPPORT_EMAIL} and we'll walk you through it on a quick screen-share — no passwords by email, please.`,
+}

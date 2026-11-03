@@ -46,6 +46,7 @@ interface ProspectRow {
   site_error: string | null
   preview_url: string | null
   chosen_domain: string | null
+  domain_mode: 'register' | 'own'
   domain_status: string
   purchased_at: string | null
   demo_first_viewed_at: string | null
@@ -56,7 +57,11 @@ const BLOCKED_SENTIMENTS = new Set(['no', 'remove', 'hostile'])
 
 const PUBLIC_COLS =
   'id, is_test, suppressed, business_name, business_type, first_name, last_name, email, phone, city, state, ' +
-  'site_status, site_error, preview_url, chosen_domain, domain_status, purchased_at, demo_first_viewed_at, demo_view_count, reply_sentiment'
+  'site_status, site_error, preview_url, chosen_domain, domain_mode, domain_status, purchased_at, demo_first_viewed_at, demo_view_count, reply_sentiment'
+
+function safeHost(url: string): string | null {
+  try { return new URL(url).host } catch { return null }
+}
 
 /** Only what the public page needs — never ids, email, or internal errors. */
 function publicPayload(p: ProspectRow) {
@@ -71,6 +76,9 @@ function publicPayload(p: ProspectRow) {
     purchased: Boolean(p.purchased_at),
     chosenDomain: p.purchased_at ? p.chosen_domain : null,
     domainStatus: p.purchased_at ? p.domain_status : null,
+    domainMode: p.purchased_at ? p.domain_mode : null,
+    // Own-domain DNS instructions need the Netlify host (CNAME www → <site>.netlify.app).
+    siteHost: p.purchased_at && p.domain_mode === 'own' && p.preview_url ? safeHost(p.preview_url) : null,
   }
 }
 

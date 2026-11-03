@@ -167,11 +167,13 @@ export interface Prospect {
   demo_view_count?: number
   plan?: string | null
   chosen_domain?: string | null
+  domain_mode?: 'register' | 'own'
   domain_status:
     | 'none'
     | 'registering'
     | 'dns_set'
     | 'attached'
+    | 'awaiting_dns'
     | 'ssl_pending'
     | 'live'
     | 'failed'

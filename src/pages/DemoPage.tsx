@@ -57,7 +57,9 @@ import {
   GO_LIVE_STEPS,
   GOOGLE_REVIEW_URL,
   KEEP_PAGE,
+  NETLIFY_APEX_IP,
   OUTBOUND_PLAN,
+  OWN_DOMAIN_HELP,
   SUPPORT_EMAIL,
 } from '../config/outboundPlan'
 
@@ -71,6 +73,10 @@ interface DemoState {
   purchased: boolean
   chosenDomain: string | null
   domainStatus: string | null
+  /** 'own' = customer kept a domain they already had; DNS is theirs to point at us. */
+  domainMode: 'register' | 'own' | null
+  /** Netlify host of the site (own-domain DNS instructions: CNAME www → this). */
+  siteHost: string | null
 }
 
 type DomainCheck = { domain: string; available: boolean; price?: string } | null
@@ -117,6 +123,27 @@ const PROVISIONING_STEPS = [
   'Live',
 ]
 
+/** Own-domain purchases: nothing to register — the wait is for the customer's DNS. */
+const OWN_DOMAIN_STEPS = ['Payment received', 'Site connected to your domain', 'Waiting for your DNS records', 'Securing it (SSL)', 'Live']
+function ownDomainStep(status: string | null): number {
+  switch (status) {
+    case 'awaiting_dns':
+    case 'attached':
+      return 2
+    case 'ssl_pending':
+      return 3
+    case 'live':
+      return 4
+    default:
+      return 1
+  }
+}
+
+/** Loose hostname check for a domain the customer already owns (any TLD, no scheme, no path). */
+const OWN_DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/
+const cleanOwnDomain = (v: string) =>
+  v.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '').replace(/[^a-z0-9.-]/g, '')
+
 export default function DemoPage() {
   const token = useRef(tokenFromPath()).current
   const [state, setState] = useState<DemoState | null>(null)
@@ -132,6 +159,10 @@ export default function DemoPage() {
   const [checking, setChecking] = useState(false)
   const [domainResult, setDomainResult] = useState<DomainCheck>(null)
   const [checkingOut, setCheckingOut] = useState(false)
+  // "I already have a domain" — skips the .com picker; DNS instructions come after payment.
+  const [ownDomain, setOwnDomain] = useState(false)
+  const [ownDomainValue, setOwnDomainValue] = useState('')
+  const ownDomainValid = OWN_DOMAIN_RE.test(ownDomainValue)
   const autoChecked = useRef(false)
 
   const fetchState = useCallback(
@@ -236,16 +267,19 @@ export default function DemoPage() {
   }, [state?.siteStatus, showPurchased])
 
   const checkout = useCallback(async () => {
-    if (checkingOut || !domainResult?.available) return
+    if (checkingOut) return
+    if (ownDomain ? !ownDomainValid : !domainResult?.available) return
     setCheckingOut(true)
     setError('')
     try {
       const { data, error: invErr } = await supabase.functions.invoke('create-subscription', {
-        body: { plan: OUTBOUND_PLAN.key, prospectToken: token, domain: domainResult.domain },
+        body: ownDomain
+          ? { plan: OUTBOUND_PLAN.key, prospectToken: token, domain: ownDomainValue, domainMode: 'own' }
+          : { plan: OUTBOUND_PLAN.key, prospectToken: token, domain: domainResult!.domain, domainMode: 'register' },
       })
       const d = data as { url?: string; error?: string; domainTaken?: boolean } | null
       if (invErr || !d?.url) {
-        if (d?.domainTaken) {
+        if (d?.domainTaken && domainResult) {
           setDomainResult({ ...domainResult, available: false })
           setEditingDomain(true)
           setError('That domain was just taken — please pick another.')
@@ -260,7 +294,7 @@ export default function DemoPage() {
     } finally {
       setCheckingOut(false)
     }
-  }, [checkingOut, domainResult, token])
+  }, [checkingOut, domainResult, token, ownDomain, ownDomainValid, ownDomainValue])
 
   const scrollToGoLive = () =>
     document.getElementById('go-live')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -443,17 +477,45 @@ export default function DemoPage() {
                         <h3 className="font-semibold flex items-center gap-2 mb-1">
                           <Globe className="w-4 h-4 text-signal-300" /> 1. Your domain
                         </h3>
-                        <p className="text-white/60 text-sm mb-4">
-                          Registered for you the moment you subscribe — included.
-                        </p>
+                        {ownDomain ? (
+                          <div className="mb-4">
+                            <p className="text-white/60 text-sm mb-3">
+                              Type the domain you already own. You keep it — after checkout this page shows the two
+                              records to add where it's registered, and we'll help if you'd rather not touch it.
+                            </p>
+                            <input
+                              value={ownDomainValue}
+                              onChange={(e) => setOwnDomainValue(cleanOwnDomain(e.target.value))}
+                              placeholder="yourrestaurant.com"
+                              aria-label="Your existing domain"
+                              className="w-full rounded-xl border border-white/15 bg-ink-900 focus:border-signal-500 px-4 py-3 text-white outline-none"
+                            />
+                            {ownDomainValue.length > 0 && !ownDomainValid && (
+                              <p className="text-amber-300 text-sm mt-2">That doesn't look like a domain — just the name, like yourrestaurant.com.</p>
+                            )}
+                            <button
+                              onClick={() => setOwnDomain(false)}
+                              className="mt-3 text-xs text-white/60 hover:text-white underline"
+                            >
+                              I'd rather get a new .com instead
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-white/60 text-sm mb-4">
+                            Registered for you the moment you subscribe — included.{' '}
+                            <button onClick={() => setOwnDomain(true)} className="underline text-white/80 hover:text-white">
+                              Already have a domain? Keep it.
+                            </button>
+                          </p>
+                        )}
 
-                        {checking && !domainResult && (
+                        {!ownDomain && checking && !domainResult && (
                           <div className="flex items-center gap-2 text-white/70 text-sm rounded-xl border border-white/10 px-4 py-3 mb-4">
                             <Loader2 className="w-4 h-4 animate-spin" /> Checking {domainQuery || 'your domain'}.com…
                           </div>
                         )}
 
-                        {domainResult?.available && !editingDomain && (
+                        {!ownDomain && domainResult?.available && !editingDomain && (
                           <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/25 px-4 py-3 mb-4 flex items-center justify-between gap-3">
                             <div className="text-sm text-emerald-200">
                               <Check className="w-4 h-4 inline mr-1.5 -mt-0.5" />
@@ -468,7 +530,7 @@ export default function DemoPage() {
                           </div>
                         )}
 
-                        {(editingDomain || (!checking && !domainResult)) && (
+                        {!ownDomain && (editingDomain || (!checking && !domainResult)) && (
                           <div className="mb-4">
                             <div className="flex gap-2">
                               <div className="flex-1 flex items-center rounded-xl border border-white/15 bg-ink-900 focus-within:border-signal-500 min-w-0">
@@ -524,16 +586,25 @@ export default function DemoPage() {
                         <p className="text-white/60 text-sm mb-4">{price} on Stripe. Card on file, cancel anytime by email.</p>
                         <button
                           onClick={() => void checkout()}
-                          disabled={!domainResult?.available || checkingOut}
+                          disabled={(ownDomain ? !ownDomainValid : !domainResult?.available) || checkingOut}
                           className="w-full inline-flex items-center justify-center gap-2 bg-signal-500 hover:bg-signal-400 disabled:opacity-50 text-white font-semibold px-6 py-4 rounded-xl transition-colors text-lg"
                         >
                           {checkingOut ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
                           Take my site live — {price}
                         </button>
                         <p className="text-white/40 text-xs mt-3">
-                          Secure checkout via Stripe. Domain registrations are non-refundable, so please double-check
-                          the spelling of <span className="text-white/70">{domainResult?.domain ?? 'your domain'}</span>{' '}
-                          above.
+                          {ownDomain ? (
+                            <>
+                              Secure checkout via Stripe. Your site goes on{' '}
+                              <span className="text-white/70">{ownDomainValid ? ownDomainValue : 'your domain'}</span>; nothing
+                              is registered or moved, and nothing changes until you add the records.
+                            </>
+                          ) : (
+                            <>
+                              Secure checkout via Stripe. Domain registrations are non-refundable, so please double-check the
+                              spelling of <span className="text-white/70">{domainResult?.domain ?? 'your domain'}</span> above.
+                            </>
+                          )}
                         </p>
                         {error && <p className="text-amber-400 text-sm mt-3">{error}</p>}
                       </div>
@@ -662,9 +733,11 @@ export default function DemoPage() {
 
 function PurchasedView({ state, token }: { state: DemoState; token: string }) {
   const status = state.domainStatus
+  const own = state.domainMode === 'own'
   const failed = status === 'failed' || status === 'cancelled'
   const live = status === 'live'
-  const active = provisioningStep(status)
+  const active = own ? ownDomainStep(status) : provisioningStep(status)
+  const steps = own ? OWN_DOMAIN_STEPS : PROVISIONING_STEPS
   const liveUrl = state.chosenDomain ? `https://${state.chosenDomain}` : null
 
   return (
@@ -685,6 +758,12 @@ function PurchasedView({ state, token }: { state: DemoState; token: string }) {
               </a>
               .
             </>
+          ) : own && state.chosenDomain ? (
+            <>
+              Payment received. Your site is connected to{' '}
+              <span className="font-semibold text-white">{state.chosenDomain}</span>. One last step is yours: point
+              the domain at it with the two records below, and it goes live on its own.
+            </>
           ) : state.chosenDomain ? (
             <>
               Payment received. <span className="font-semibold text-white">{state.chosenDomain}</span> is being
@@ -703,7 +782,7 @@ function PurchasedView({ state, token }: { state: DemoState; token: string }) {
 
       {/* progress stepper */}
       <ol className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3">
-        {PROVISIONING_STEPS.map((label, i) => {
+        {steps.map((label, i) => {
           const done = live || i < active
           const current = !live && i === active
           return (
@@ -730,6 +809,36 @@ function PurchasedView({ state, token }: { state: DemoState; token: string }) {
           )
         })}
       </ol>
+      {own && !live && !failed && state.chosenDomain && (
+        <div className="mt-6 rounded-2xl border border-signal-500/30 bg-signal-500/10 p-5">
+          <h2 className="text-lg font-semibold mb-1">{OWN_DOMAIN_HELP.heading}</h2>
+          <p className="text-white/70 text-sm mb-4">{OWN_DOMAIN_HELP.body}</p>
+          <table className="w-full text-sm font-mono">
+            <thead className="text-white/50 text-xs font-sans">
+              <tr>
+                <th className="text-left pb-1 font-medium">Type</th>
+                <th className="text-left pb-1 font-medium">Host / name</th>
+                <th className="text-left pb-1 font-medium">Value / points to</th>
+              </tr>
+            </thead>
+            <tbody className="text-white">
+              <tr className="border-t border-white/10">
+                <td className="py-2 pr-3">A</td>
+                <td className="py-2 pr-3">@</td>
+                <td className="py-2 break-all">{NETLIFY_APEX_IP}</td>
+              </tr>
+              <tr className="border-t border-white/10">
+                <td className="py-2 pr-3">CNAME</td>
+                <td className="py-2 pr-3">www</td>
+                <td className="py-2 break-all">{state.siteHost ?? 'shown here once ready'}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="text-white/50 text-xs mt-4">
+            If your registrar already has an A record for @ or a CNAME for www, replace them. {OWN_DOMAIN_HELP.rather}
+          </p>
+        </div>
+      )}
       {failed && (
         <p className="mt-3 text-amber-300 text-sm text-center">
           This step is taking longer than usual and our team has been notified — we'll finish it by hand and email
@@ -755,8 +864,8 @@ function PurchasedView({ state, token }: { state: DemoState; token: string }) {
       <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-5">
         <h2 className="text-lg font-semibold mb-2">Once it's live — one small favor</h2>
         <p className="text-white/70 text-sm mb-3">
-          If we did right by you, a quick Google review helps other contractors find us. No rush — take a look at
-          the finished site first.
+          If we did right by you, a quick Google review helps other local businesses find us. No rush — take a look
+          at the finished site first.
         </p>
         <a
           href={GOOGLE_REVIEW_URL}

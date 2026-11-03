@@ -258,11 +258,19 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   niche at booking time still runs through the Edge path and will fail the same way → the brief
   falls back to `FALLBACK_PLAYBOOK`; seed new trades locally.
 
-## Outbound cold-email demo funnel — LIVE (campaign active since 2026-11-02)
+## Outbound cold-email demo funnel — LIVE (restaurants since 2026-11-03; contractors paused)
 **Full runbook = `docs/OUTBOUND_FLOW.md` — read it before touching anything outbound.** It holds the
 end-to-end diagram, every script/flag, Instantly + GHL + Porkbun specifics, the verification log and the
 current status. Only the invariants live here:
-- Scraped contractor lists → cold email via **Instantly.ai only** (never GHL/LC Email, never from
+- **Niche = local restaurants (owner decision 2026-11-03; plan + research `docs/RESTAURANT_OUTBOUND_PLAN_2026-11-03.md`).**
+  Contractor campaign `46657029-…` PAUSED (not deleted). Restaurant campaign `94ab9d2a-faac-46da-8470-7ade9c9fd55c`,
+  copy `docs/OUTBOUND_COLD_SEQUENCE_RESTAURANTS.md`, sends Mon–Fri 09:30–11 + 14–16 ET. `_shared/niche.ts`
+  `isFoodBusiness(business_type)` switches the fast demo spec (menu/call/directions, 44-photo food library,
+  real Google rating only) and the reply-desk summary; contractors keep the old spec. **Go-live pending:**
+  `node scripts/go-live-restaurants.mjs` (migration 0016 → functions → cron → Netlify → activate campaign).
+- **Own domain at checkout (2026-11-03):** `domain_mode` register|own. Own = no Porkbun; `provision-domain`
+  attaches to Netlify → `awaiting_dns`; /demo shows the 2 DNS records; hourly `domain-recheck` cron → live.
+- Scraped business lists → cold email via **Instantly.ai only** (never GHL/LC Email, never from
   acewebdesigners.com) → reply-gated: a "yes" auto-builds the demo (`generate-site` `{prospectId}`,
   one Opus build EVER per prospect) and the poller replies in-thread with `/demo/<token>` →
   $49/mo Stripe → `provision-domain` (Porkbun, NON-refundable) → GHL `outbound-*` tags drive staff
@@ -271,8 +279,9 @@ current status. Only the invariants live here:
   both enforce it. Footer postal address is required (16 CFR 316.2 — no B2B exemption).
 - Lead sourcing: Apify Google Maps (`scripts/apify-scrape-contractors.mjs`, Starter plan, always
   `--budget`) + our own `scripts/enrich-emails.mjs` for emails ($0, same yield as the paid add-on).
-  Google Maps publishes no emails, so "no-website" contractors are NOT emailable — the list is
-  real-website contractors and the live v4 copy is the **redesign** angle.
+  Google Maps publishes no emails, so "no-website" businesses are emailable ONLY when their listing points
+  at a Facebook page: scrape `allPlaces`, take `websiteKind=social` rows, run Apify `facebook-pages-scraper`
+  (23% yield, 2026-11-03). Everyone else on the list has a real website; copy is the **better site** angle.
 - Pipeline: scrape → enrich → `import-prospects` (batch) → `export-instantly --limit N` (stamps
   `emailed_at`) → `instantly-upload-leads` → re-activate the campaign if it reads COMPLETED (3).
   Throughput is 2 inboxes × 30/day (3-step sequence, 06–16 ET; raised 2026-11-02); more inboxes,

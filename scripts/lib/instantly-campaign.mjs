@@ -3,6 +3,19 @@
 export const DEFAULT_NAME = 'Outbound — Contractors v2'
 export const SENDING_ACCOUNTS = ['rhyan@getacewebdesigners.com', 'rhyan@acewebdesignershq.com']
 
+// Instantly's timezone enum has no America/New_York; America/Detroit is the same US Eastern zone.
+const WEEKDAYS = { 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: false }
+export const SCHEDULES = {
+  // 06–16 ET (owner, 2026-11-02): wide enough for two inboxes to clear 60/day; Instantly fills from the start.
+  default: [{ name: 'Weekdays 6am–4pm ET', timing: { from: '06:00', to: '16:00' }, days: WEEKDAYS, timezone: 'America/Detroit' }],
+  // Restaurants (2026-11-03): between breakfast and lunch, and between lunch and dinner — operators
+  // don't read email during service (hospitality cold-email benchmarks, see RESTAURANT_OUTBOUND_PLAN).
+  restaurant: [
+    { name: 'Weekdays 9:30–11am ET', timing: { from: '09:30', to: '11:00' }, days: WEEKDAYS, timezone: 'America/Detroit' },
+    { name: 'Weekdays 2–4pm ET', timing: { from: '14:00', to: '16:00' }, days: WEEKDAYS, timezone: 'America/Detroit' },
+  ],
+}
+
 /**
  * Parse docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md: every "## Email N — Day D …" section
  * yields { n, day, subject, body } where body is the plain text between the
@@ -51,7 +64,8 @@ export function textToHtml(text) {
 /** A follow-up whose subject starts with "Re:" is sent with an empty subject → Instantly threads it. */
 export const isThreaded = (subject) => /^re:\s*/i.test(subject)
 
-export function buildPayload(steps, { name = DEFAULT_NAME, daily = 60, accounts = SENDING_ACCOUNTS } = {}) {
+export function buildPayload(steps, { name = DEFAULT_NAME, daily = 60, accounts = SENDING_ACCOUNTS, schedule = 'default' } = {}) {
+  if (!SCHEDULES[schedule]) throw new Error(`unknown schedule "${schedule}" (${Object.keys(SCHEDULES).join(', ')})`)
   let prevDay = 0
   const apiSteps = steps.map((s, i) => {
     const delay = i === 0 ? 0 : s.day - prevDay
@@ -66,19 +80,7 @@ export function buildPayload(steps, { name = DEFAULT_NAME, daily = 60, accounts 
   })
   return {
     name,
-    campaign_schedule: {
-      schedules: [
-        {
-          // 06–16 ET (owner, 2026-11-02): widened from 06–11 so two inboxes can clear 60/day; Instantly
-          // fills the window from the start, so early-morning sends still go first.
-          name: 'Weekdays 6am–4pm ET',
-          timing: { from: '06:00', to: '16:00' },
-          days: { 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: false },
-          // Instantly's enum has no America/New_York; America/Detroit is the same US Eastern zone.
-          timezone: 'America/Detroit',
-        },
-      ],
-    },
+    campaign_schedule: { schedules: SCHEDULES[schedule] },
     sequences: [{ steps: apiSteps }],
     email_list: accounts,
     daily_limit: daily,

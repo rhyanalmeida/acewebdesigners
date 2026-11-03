@@ -272,7 +272,7 @@ Deno.serve(async (req: Request) => {
     .select(
       'id, business_name, business_type, first_name, last_name, email, phone, city, state, batch, is_test, ' +
         'suppressed, suppressed_reason, site_status, site_error, preview_url, demo_first_viewed_at, demo_view_count, ' +
-        'plan, chosen_domain, domain_status, domain_error, purchased_at, cancelled_at, emailed_at, replied_at, created_at, ' +
+        'plan, chosen_domain, domain_mode, domain_status, domain_error, purchased_at, cancelled_at, emailed_at, replied_at, created_at, ' +
         'last_reply, reply_sentiment, auto_send, demo_link_sent_at, ai_turns, handoff_at, followup_at, nudge_count',
     )
     .order('created_at', { ascending: false })

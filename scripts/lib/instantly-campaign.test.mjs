@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import path from 'node:path'
-import { parseSequenceDoc, textToHtml, buildPayload, validateSteps, isThreaded } from './instantly-campaign.mjs'
+import { parseSequenceDoc, textToHtml, buildPayload, validateSteps, isThreaded, SCHEDULES } from './instantly-campaign.mjs'
 
 const SAMPLE = `# heading
 
@@ -93,6 +93,12 @@ describe('buildPayload', () => {
       insert_unsubscribe_header: true,
     })
     expect(p.campaign_schedule.schedules[0].days).toEqual({ 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: false })
+  })
+  it('restaurant schedule = two weekday windows outside service hours', () => {
+    const r = buildPayload(steps, { schedule: 'restaurant' })
+    expect(r.campaign_schedule.schedules).toEqual(SCHEDULES.restaurant)
+    expect(r.campaign_schedule.schedules.map((x) => x.timing)).toEqual([{ from: '09:30', to: '11:00' }, { from: '14:00', to: '16:00' }])
+    expect(() => buildPayload(steps, { schedule: 'nope' })).toThrow()
   })
   it('rejects a non-increasing day schedule', () => {
     expect(() => buildPayload([{ n: 1, day: 0, subject: 'a', body: '' }, { n: 2, day: 0, subject: 'b', body: '' }])).toThrow()

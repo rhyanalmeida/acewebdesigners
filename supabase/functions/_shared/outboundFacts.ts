@@ -13,9 +13,9 @@ export const SUPPORT_EMAIL = 'hello@acewebdesigners.com'
 export const OUTBOUND_FACTS: readonly string[] = [
   `The preview is free; nothing is owed unless they decide to take it live.`,
   `Taking it live is $${OUTBOUND_PRICE} a month, on a card, cancel anytime, no contract and no setup fee.`,
-  `That price includes their own .com domain (registered for them), hosting, the SSL certificate, and unlimited updates.`,
-  `Updates: they email what to change and it gets done — no limit, no extra charge. ${SUPPORT_EMAIL} is the support line.`,
-  `If they already own a domain, it can be connected instead of registering a new one — they just say so before checking out.`,
+  `That price includes the domain (a new .com registered for them, or the one they already own), hosting, the SSL certificate, and unlimited updates.`,
+  `Updates: they email what to change (menu, hours, photos, a new service, a phone number) and it gets done — no limit, no extra charge. ${SUPPORT_EMAIL} is the support line.`,
+  `If they already own a domain they keep it: at checkout they choose "I already have a domain" and type it in; after paying, the preview page shows the two DNS records to add at their registrar, and ${SUPPORT_EMAIL} will walk them through it if they want.`,
   `After checkout the site is usually live within the hour; they can watch it happen on the same preview page.`,
   `Before paying, they can ask for changes to the preview by replying — they only pay when they're happy with it.`,
   `There is a button on the preview page that takes it live; checkout is on Stripe.`,

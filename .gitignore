@@ -57,3 +57,4 @@ coverage/
 
 # Instantly exports contain prospect emails (PII) — never commit
 instantly-*.csv
+leads/

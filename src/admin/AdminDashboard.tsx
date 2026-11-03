@@ -898,6 +898,7 @@ const DOMAIN_CHIP: Record<string, string> = {
   registering: 'bg-sky-50 text-sky-700',
   dns_set: 'bg-sky-50 text-sky-700',
   attached: 'bg-violet-50 text-violet-700',
+  awaiting_dns: 'bg-amber-50 text-amber-700',
   ssl_pending: 'bg-amber-50 text-amber-700',
   live: 'bg-emerald-50 text-emerald-700',
   failed: 'bg-rose-50 text-rose-700',
@@ -1100,7 +1101,7 @@ const OutboundTab: React.FC<{ prospects: Prospect[]; replies: OutboundReply[]; o
                       {p.chosen_domain ? (
                         <>
                           <div className="text-xs font-medium text-slate-700">{p.chosen_domain}</div>
-                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${DOMAIN_CHIP[p.domain_status] ?? DOMAIN_CHIP.none}`}>{p.domain_status}</span>
+                          <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${DOMAIN_CHIP[p.domain_status] ?? DOMAIN_CHIP.none}`} title={p.domain_mode === 'own' ? 'customer keeps their own domain' : undefined}>{p.domain_mode === 'own' ? 'own · ' : ''}{p.domain_status}</span>
                           {p.domain_error && <div className="mt-1 max-w-[220px] truncate text-[11px] text-rose-500" title={p.domain_error}>{p.domain_error}</div>}
                         </>
                       ) : (
@@ -1117,7 +1118,7 @@ const OutboundTab: React.FC<{ prospects: Prospect[]; replies: OutboundReply[]; o
                         {p.purchased_at && p.domain_status === 'failed' && (
                           <button onClick={() => fixDomain(p)} disabled={busy === p.id} className="text-xs font-medium text-rose-600 hover:underline disabled:opacity-50">Fix domain…</button>
                         )}
-                        {p.purchased_at && ['registering', 'dns_set', 'attached', 'ssl_pending'].includes(p.domain_status) && (
+                        {p.purchased_at && ['registering', 'dns_set', 'attached', 'awaiting_dns', 'ssl_pending'].includes(p.domain_status) && (
                           <button onClick={() => void act(p.id, () => retryProvisioning(p.id))} disabled={busy === p.id} className="text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50">
                             {busy === p.id ? 'Working…' : 'Retry provisioning'}
                           </button>

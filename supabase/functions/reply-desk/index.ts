@@ -26,6 +26,7 @@
  */
 
 import Anthropic from 'npm:@anthropic-ai/sdk@0.40.1'
+import { isFoodBusiness } from '../_shared/niche.ts'
 import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { classifyReply, type RuleSentiment } from '../_shared/replyClassifier.ts'
@@ -55,9 +56,13 @@ const NEEDS_HUMAN_TAG = 'outbound-needs-human'
 const NUDGE_1_AFTER_MS = 2 * 24 * 3600e3
 const NUDGE_2_AFTER_MS = 5 * 24 * 3600e3
 
-/** What E1 said — context for the model (keep in step with docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md). */
-const ORIGINAL_EMAIL_SUMMARY = `Subject: {company} homepage?
+/** What E1 said — context for the model (keep in step with the two sequence docs in docs/). */
+const CONTRACTOR_EMAIL_SUMMARY = `Subject: {company} homepage?
 Rhyan came across their business while looking at contractors in their area, said he designs websites for contractors and put together a homepage preview for them built around their work (not a template). The preview link was in the email. It's free, there's no call; if they like it, taking it live is $49/month with domain, hosting and updates included, cancel anytime. He asked them to have a look and tell him what to change.`
+const RESTAURANT_EMAIL_SUMMARY = `Subject: {company} website?
+Rhyan came across their restaurant while looking at restaurants in their city, said he designs websites for local restaurants and mocked up a new homepage for them with the menu, hours and directions up top, built to load fast on a phone. The preview link was in the email. It's free, there's no call; if they like it, taking it live is $49/month — the domain they already have or a new one, hosting, and menu/hours changes whenever they need them, cancel anytime. He asked them to have a look and tell him what to change.`
+const originalEmailSummary = (p: { business_name: string; business_type: string | null }) =>
+  (isFoodBusiness(p.business_type) ? RESTAURANT_EMAIL_SUMMARY : CONTRACTOR_EMAIL_SUMMARY).replace('{company}', p.business_name)
 
 const env = (k: string) => Deno.env.get(k) ?? ''
 
@@ -138,7 +143,7 @@ async function runModel(p: ProspectRow, thread: ReplyRow[], newest: string): Pro
             state: p.state,
             demo_url: demoUrl(p),
             site_status: p.site_status,
-            original_email: ORIGINAL_EMAIL_SUMMARY.replace('{company}', p.business_name),
+            original_email: originalEmailSummary(p),
             thread: msgs,
             ai_turns: p.ai_turns,
           }),
