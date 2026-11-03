@@ -127,7 +127,6 @@ async function runModel(p: ProspectRow, thread: ReplyRow[], newest: string): Pro
     const msg = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 800,
-      temperature: 0,
       system: buildSystemPrompt(),
       messages: [
         {
@@ -147,7 +146,8 @@ async function runModel(p: ProspectRow, thread: ReplyRow[], newest: string): Pro
       ],
       // deno-lint-ignore no-explicit-any
       tools: [CLASSIFY_TOOL as any],
-      tool_choice: { type: 'tool', name: CLASSIFY_TOOL.name },
+      // Sonnet 5.5 rejects forced tool_choice ('tool'/'any') and 'temperature'; the prompt mandates the tool
+      tool_choice: { type: 'auto' },
     })
     const tu = msg.content.find((b) => b.type === 'tool_use') as { input?: unknown } | undefined
     return parseClassifier(tu?.input)
