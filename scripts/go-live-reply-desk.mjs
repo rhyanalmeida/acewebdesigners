@@ -50,7 +50,8 @@ function run(label, cmd, cmdArgs, extraEnv = {}) {
   const r = spawnSync(cmd, cmdArgs, { cwd: ROOT, stdio: 'inherit', shell: process.platform === 'win32', env: { ...process.env, ...extraEnv } })
   if (r.status !== 0) { console.error(`\n✗ ${label} failed (exit ${r.status}). Fix and re-run with --from <step>.`); process.exit(r.status ?? 1) }
 }
-const supa = (...a) => run(a.join(' '), 'npx', ['supabase', ...a])
+const redact = (a) => a.map((x) => (/^[A-Z0-9_]+=/.test(x) ? x.replace(/=.*/, '=<redacted>') : x))
+const supa = (...a) => run(redact(a).join(' '), 'npx', ['supabase', ...a])
 const step = (n) => n >= FROM
 
 // GHL custom field ids (not secret — ids of fields in our own GHL location). Must include the
