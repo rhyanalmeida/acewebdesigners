@@ -67,9 +67,9 @@ const GHL_FIELD_IDS = {
 }
 
 if (step(1)) {
-  supa('secrets', 'set', `INSTANTLY_API_KEY=${need('INSTANTLY_API_KEY')}`)
-  supa('secrets', 'set', `INSTANTLY_SENDER_API_KEY=${need('INSTANTLY_SENDER_API_KEY')}`)
-  supa('secrets', 'set', `GHL_CUSTOM_FIELD_IDS=${JSON.stringify(GHL_FIELD_IDS)}`)
+  supa('secrets', 'set', '--yes', `INSTANTLY_API_KEY=${need('INSTANTLY_API_KEY')}`)
+  supa('secrets', 'set', '--yes', `INSTANTLY_SENDER_API_KEY=${need('INSTANTLY_SENDER_API_KEY')}`)
+  supa('secrets', 'set', '--yes', `GHL_CUSTOM_FIELD_IDS=${JSON.stringify(GHL_FIELD_IDS)}`)
 }
 if (step(2)) supa('db', 'push', '--remote', '--yes')
 if (step(3)) {
@@ -78,7 +78,7 @@ if (step(3)) {
 }
 if (step(4)) run('cron jobs', 'node', ['scripts/run-cron-jobs.mjs'])
 if (step(5)) run('dry-run gate (Sonnet classifies the samples; nothing is written)', 'node', ['scripts/reply-desk-dryrun.mjs'])
-if (step(6)) supa('secrets', 'set', 'REPLY_DESK_ENABLED=true')
+if (step(6)) supa('secrets', 'set', '--yes', 'REPLY_DESK_ENABLED=true')
 if (step(7) && !SKIP_COPY) run('v5 copy → live campaign', 'node', ['scripts/instantly-create-campaign.mjs', '--update', CAMPAIGN])
 if (step(8)) {
   run('build', 'npm', ['run', 'build'])
