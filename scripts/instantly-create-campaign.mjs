@@ -5,7 +5,7 @@
 //   node scripts/instantly-create-campaign.mjs                # create it (not running — never activates)
 //   node scripts/instantly-create-campaign.mjs --update <id>  # PATCH copy/settings onto an existing campaign
 //   node scripts/instantly-create-campaign.mjs --name "..."   # override the campaign name
-//   node scripts/instantly-create-campaign.mjs --daily 40     # override campaign daily limit (default 20)
+//   node scripts/instantly-create-campaign.mjs --daily 40     # override campaign daily limit (default 60 = 2 inboxes × 30; campaign-wide cap)
 //
 // Reads INSTANTLY_ADMIN_API_KEY (scopes campaigns:all + leads:all +
 // account_campaign_mappings:all) from supabase/.env. Refuses to create a second
@@ -32,7 +32,7 @@ const args = process.argv.slice(2)
 const DRY = args.includes('--dry')
 const opt = (n) => { const i = args.indexOf(`--${n}`); return i >= 0 ? args[i + 1] : undefined }
 const NAME = opt('name') ?? DEFAULT_NAME
-const DAILY = Number(opt('daily') ?? 20)
+const DAILY = Number(opt('daily') ?? 60)
 const UPDATE_ID = opt('update')
 
 function loadDotEnv(file) {

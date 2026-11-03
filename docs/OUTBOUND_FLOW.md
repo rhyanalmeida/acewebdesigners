@@ -142,6 +142,57 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   `demo_link_sent_at`. Sent exactly once; a failed send retries next tick. A reply with no
   `reply_email_id` (e.g. a synthetic test event) can never trigger a send.
 
+## 5b. Reply desk — the automated sales desk (built 2026-11-02, GO-LIVE PENDING)
+
+Owner rule: "if they are interested or need a reply an AI should email back; if it needs me,
+message me." Nothing a prospect sees may look automated.
+
+```
+reply → instantly-poll → instantly-webhook
+   hard rules (_shared/replyClassifier.ts): remove / hostile / no → suppressions + prospects.suppressed,
+                                             NO build, NO GHL alert (this is what wave 1 lacked)
+   REPLY_DESK_ENABLED=true → outbound_replies row (direction 'in', status queued) → reply-desk {classify}
+reply-desk classify   ONE Sonnet 5.5 call (tool-forced JSON: intent, confidence, needs_human, draft)
+                      constrained to _shared/outboundFacts.ts → _shared/replyPolicy.ts decide():
+   yes                    → build if none; queue the demo-link reply (kind demo_link); GHL outbound-lead
+   question / price       → queue the draft (lintDraft: no $≠49, no %, no AI/automat/minute words,
+                            no foreign links, no lists, no "!"); max 2 drafted answers per thread
+   later / timing         → queue a short ack; followup_at = +7..60 d (default 21)
+   no / remove / hostile  → suppress, silent
+   ooo_auto               → ignored, no turn consumed
+   unknown / needs_human / lint fail / turn cap / model down → HAND-OFF:
+                            prospects.handoff_at + GHL fields last_reply_text/_intent +
+                            tag outbound-needs-human (removed then re-added so the SMS fires every time);
+                            the desk stays silent on that thread until /admin "Resolved"
+reply-desk release    pg_cron */5 — sends rows whose release_after passed: humanReleaseTime() =
+                      +20–90 min, clamped to 07:00–19:00 in the lead's STATE tz, never Sunday.
+                      Instantly POST /emails/reply {reply_to_uuid, eaccount} → same inbox, same thread.
+                      demo_link rows also wait for site_status=deployed; stuck/failed sends → hand-off.
+reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (followupText) and up to 2
+                      nudges (+2 d, +5 d more) for prospects who opened the preview and never replied
+                      (nudgeText; replies to our last SENT email so it threads). A new reply cancels
+                      queued nudges/follow-ups.
+```
+- **Where replies come from:** always Instantly, from the inbox that received the message, in-thread.
+  Never acewebdesigners.com, never GHL.
+- **Facts** the desk may state live ONLY in `_shared/outboundFacts.ts` (vitest asserts price + support
+  email match `src/config/outboundPlan.ts`). Add a fact there, never in the prompt.
+- **/admin → Outbound → Reply desk:** queued answers (Send now / Edit / Cancel), hand-offs
+  (Resolved), recent sends. Prospect rows show `NEEDS YOU` while `handoff_at` is set.
+- **Dry-run gate:** `node scripts/reply-desk-dryrun.mjs` runs `scripts/data/reply-samples.json`
+  (the 3 real hostile texts + yes/question/price/later/needs-human/ooo) through the deployed fn with
+  `{action:'dryrun'}` — writes nothing, prints rule / model / decision / draft, exits 1 on a mismatch.
+- **Go-live:** `node scripts/go-live-reply-desk.mjs` (secrets → db push → deploy → cron → gate →
+  REPLY_DESK_ENABLED → v5 copy → Netlify). Agent runs can't confirm production mutations, so the owner
+  runs it. Then build the GHL workflow "Outbound — Needs a Person" (tag `outbound-needs-human` → SMS
+  to Rhyan with company, email, `{{contact.last_reply_text}}`, admin link; re-entry ON).
+- **Demo page gate (shipped with this):** `demo-site` returns 404 and never builds for suppressed rows
+  or `reply_sentiment in (no, remove, hostile)` — the 3 hostile wave-1 sites were built by opening
+  the link in the staff-alert email.
+- **Copy v5 (docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md):** every email carries `{{demo_url}}`; the page
+  builds on open. Day 0 / 3 / 7, price once in E3. `buildPayload` defaults = live settings
+  (06–16 ET, daily_limit 60 campaign-wide) because `--update` PATCHes schedule + cap too.
+
 ## 6. Demo build, demo page, purchase, provisioning
 
 - `generate-site` **subject adapter** `{prospectId}`: prospects take the **FAST path** (2026-11-02):
@@ -214,6 +265,8 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 
 ## 9. Current status (update in place)
 
+- **2026-11-02 late:** reply desk built (§5b) — go-live pending `node scripts/go-live-reply-desk.mjs`
+  + the GHL "Needs a Person" workflow. Instantly `daily_limit` PATCHed 30→60 (campaign-wide cap).
 - **2026-11-02 evening read:** day 1 of wave 2 sent only **30** (16 new leads + 14 follow-ups), 0 replies,
   0 bounces — because `daily_limit` is a CAMPAIGN-level cap, not per-inbox. PATCHed to **60**
   (= 2 inboxes × 30) so Tuesday sends the full 60. ⚠️ The pg_cron `instantly-poll` has returned

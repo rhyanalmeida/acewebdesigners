@@ -108,6 +108,8 @@ async function postWebhook(body: unknown): Promise<string> {
 
 async function sendDemoLinks(dry: boolean): Promise<{ sent: number; pending: number; skipped?: string }> {
   const senderKey = env('INSTANTLY_SENDER_API_KEY')
+  // With the reply desk on, demo links are queued rows released by `reply-desk` (human-looking hold).
+  if (env('REPLY_DESK_ENABLED') === 'true') return { sent: 0, pending: 0, skipped: 'reply-desk owns sends' }
   if (dry || !senderKey) return { sent: 0, pending: 0, skipped: !senderKey ? 'no INSTANTLY_SENDER_API_KEY' : 'dry' }
   const { items = [] } = JSON.parse(await postWebhook({ event_type: 'auto_send_pending' })) as {
     items?: { email: string; first_name?: string | null; business_name?: string | null; demo_url: string; reply_email_id: string; reply_eaccount: string; reply_subject?: string | null }[]

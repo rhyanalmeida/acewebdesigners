@@ -67,14 +67,15 @@ Supabase Edge Functions (supabase/functions, Deno)
   domain-search  outbound: Porkbun .com availability for the checkout domain picker (token-gated)
   provision-domain outbound: post-purchase Porkbun register + DNS → Netlify custom_domain → SSL poll
   instantly-poll outbound: pg_cron-driven Instantly poll (replies/bounces/unsubs → instantly-webhook; demo-link sends)
-  instantly-webhook outbound: Instantly reply/bounce/unsub → prospects + suppressions + GHL tag
+  instantly-webhook outbound: Instantly reply/bounce/unsub → prospects + suppressions; hard rules suppress remove/hostile/no
+  reply-desk     outbound: AI sales desk — Sonnet classifies + drafts (facts-only), human-hold send via Instantly, hand-off tag
   create-subscription / create-checkout / stripe-webhook   Stripe → Purchase CAPI
   ghl-webhook    logs GHL messaging sends (visibility)
   _shared/*      meta.ts (CAPI engine), contacts.ts, attribution.ts, availability.ts, google.ts,
                  ghl.ts (ghlSyncStage/createGhlAppointment/pushLegacyBooking), netlify.ts,
                  designSystems.ts, nichePlaybooks.ts, identity.ts, adminAuth.ts
         ▼
-Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks · prospects · suppressions · site_edits · poll_state
+Supabase Postgres: contacts · appointments · availability · capi_events (dedup/audit) · ghl_messages · design_systems · niche_playbooks · prospects · suppressions · site_edits · poll_state · outbound_replies
         ▼ external sinks
 Meta CAPI · Google Calendar · Stripe · GHL (messaging only) · Netlify (preview sites) · Anthropic API · Porkbun (domains) · Instantly (cold email)
 ```
@@ -276,10 +277,17 @@ current status. Only the invariants live here:
   `emailed_at`) → `instantly-upload-leads` → re-activate the campaign if it reads COMPLETED (3).
   Throughput is 2 inboxes × 30/day (3-step sequence, 06–16 ET; raised 2026-11-02); more inboxes,
   not a bigger list, is the volume lever.
+- **Reply desk (2026-11-02, go-live pending — `node scripts/go-live-reply-desk.mjs`):** replies are answered by
+  `reply-desk` (Sonnet, facts ONLY from `_shared/outboundFacts.ts`, `_shared/replyPolicy.ts` decides, 20–90 min
+  business-hours hold, sent via Instantly from the SAME inbox in-thread); remove/hostile/no auto-suppress with no
+  build and no alert; anything else → GHL tag `outbound-needs-human` → SMS to Rhyan. `REPLY_DESK_ENABLED=true`
+  routes the webhook to the desk; off = legacy yes-only auto-build. Runbook §5b.
 - Replies: `instantly-poll` Edge fn (pg_cron every 15 min, state in `poll_state`) → `instantly-webhook` fn; the Windows task "Instantly Poll" is only the fallback. Every reply tags
   `outbound-lead` in GHL; the GHL token in local `supabase/.env` is stale — the deployed secret works.
-- Keys for the local scripts (`APIFY_TOKEN`, `INSTANTLY_*_API_KEY`) live in `supabase/.env` and are
-  NEVER Edge secrets — never run `secrets set --env-file`.
+- Keys for the local scripts (`APIFY_TOKEN`, `INSTANTLY_ADMIN_API_KEY`) live in `supabase/.env` and are
+  NEVER Edge secrets — never run `secrets set --env-file`. `INSTANTLY_API_KEY` (read) and
+  `INSTANTLY_SENDER_API_KEY` (emails:all) ARE Edge secrets — `instantly-poll` + `reply-desk` need them
+  (set one at a time; the poller 503s "not configured" without them — it did until 2026-11-02).
 
 ## Restaurant self-serve funnel — BUILT, DEPLOY PENDING
 A third, fully isolated ad funnel (own pixel + dataset + tags + page) — nothing crosses into
@@ -448,7 +456,7 @@ stay in the Ace Web Designers portfolio.)
   `PORKBUN_API_KEY` / `PORKBUN_SECRET_API_KEY` (prod `pk1_/sk1_`; sandbox `pk1_sb_/sk1_sb_`
   kept as `PORKBUN_SB_*` in `supabase/.env`) / `PORKBUN_API_BASE` (unset = prod; setting it —
   to the SAME main URL — is what marks sandbox mode, see outbound funnel section),
-  `INSTANTLY_WEBHOOK_SECRET` (outbound funnel). Porkbun account: username `acewebdesigners`,
+  `INSTANTLY_WEBHOOK_SECRET`, `INSTANTLY_API_KEY`, `INSTANTLY_SENDER_API_KEY`, `REPLY_DESK_ENABLED` (outbound funnel). Porkbun account: username `acewebdesigners`,
   hello@, password in `~/.secrets/porkbun-credentials.txt`; ⚠️ no card/balance yet (owner).
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_ANON_KEY` are auto-injected — don't set.
 - Everything degrades gracefully: Google/GHL/Stripe/Netlify/Anthropic each **no-op when unset**.

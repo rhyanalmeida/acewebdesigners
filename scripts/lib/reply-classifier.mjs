@@ -1,11 +1,10 @@
-// Classify a cold-email reply as 'yes' | 'no' | 'unknown'. Pure, unit-tested.
+// Hard-rule pre-pass for cold-email replies. Pure, unit-tested.
 // Mirrored in supabase/functions/_shared/replyClassifier.ts — keep both in sync.
 //
-// Only a clear 'yes' triggers the automatic build + link send; 'no' and 'unknown'
-// leave the row for a human (the GHL staff alert fires on every reply regardless).
-// Conservative on purpose: "yes, but how much?" is still a yes (price is on the
-// demo page); "not interested" / "remove me" / "already have someone" is a no; a
-// question with no yes/no signal is unknown.
+// The reply desk (reply-desk Edge fn) runs a model classifier for the nuanced intents;
+// these regexes are the safety rails that OVERRIDE it: 'remove' / 'hostile' are final
+// (suppress, never answer), a 'no' never becomes a 'yes', 'ooo_auto' is an auto-responder,
+// and a 'yes' is only trusted when no NO-terms are present.
 
 /** Strip quoted history, signatures and the unsubscribe footer so we only read what THEY typed. */
 export function stripQuoted(text) {
@@ -24,22 +23,37 @@ export function stripQuoted(text) {
   return out.join('\n').trim()
 }
 
-const NO = /\b(not interested|no thanks?|no thank you|unsubscribe|remove me|take me off|stop emailing|don'?t (email|contact)|already have (a|someone|a guy|a website|one)|we'?re (all )?set|not (right )?now|no need|pass\b|not looking|do not (email|contact)|wrong (person|number|email)|spam)\b/i
-const YES = /\b(yes|yeah|yep|yup|sure|ok(ay)?|sounds good|go ahead|go for it|do it|build it|send it|let'?s see it|let'?s do it|i'?m interested|interested|please do|absolutely|why not|i'?d like to see|show me|make it|put it together|start|let'?s go)\b/i
-const LATER = /\b(later|next (month|year|season|spring|summer|fall|winter)|busy season|check back|circle back|reach out (in|after)|not a good time)\b/i
+const REMOVE =
+  /\b(unsubscribe|remove (me|us|our (name|company|business|email))|take (me|us) off|stop (emailing|contacting|sending)|do not (email|contact)|don'?t (email|contact)|(no|not) (more )?(emails?|contact)|spam|opt ?out|cease)\b/i
+const HOSTILE =
+  /\b(bug someone else|get a life|f+u+c+k|screw (you|off)|piss off|go away|scam(mer)?|harass|lawyer|attorney|report(ing)? (you|this)|ftc|leave (me|us) alone)\b/i
+const NO =
+  /\b(not interested|no thanks?|no thank you|already have (a|someone|a guy|a website|one)|we'?re (all )?set|not (right )?now|no need|pass\b|not looking|wrong (person|number|email))\b/i
+const YES =
+  /\b(yes|yeah|yep|yup|sure|ok(ay)?|sounds good|go ahead|go for it|do it|build it|send it|let'?s see it|let'?s do it|i'?m interested|interested|please do|absolutely|why not|i'?d like to see|show me|make it|put it together|start|let'?s go)\b/i
+const LATER =
+  /\b(later|next (month|year|season|spring|summer|fall|winter)|busy season|check back|circle back|reach out (in|after)|not a good time)\b/i
+const OOO =
+  /\b(out of (the )?office|automatic reply|auto-?reply|autoreply|on vacation|away from (my )?(email|the office)|limited access to email|will (be )?(respond|reply|return) (on|after|when))\b/i
 
-/** @returns {'yes'|'no'|'unknown'} */
+/** 'yes' | 'no' | 'remove' | 'hostile' | 'ooo_auto' | 'unknown' */
 export function classifyReply(text) {
   const body = stripQuoted(text)
   if (!body) return 'unknown'
   const head = body.slice(0, 400)
+  if (HOSTILE.test(head)) return 'hostile'
+  if (REMOVE.test(head)) return 'remove'
+  if (OOO.test(head)) return 'ooo_auto'
   const no = NO.test(head)
   const later = LATER.test(head)
-  // Test "yes" on the text with the no-phrases removed, so "not interested" can't read as interest.
   const yes = YES.test(head.replace(new RegExp(NO.source, 'gi'), ' '))
   if (no && !yes) return 'no'
-  if (no && yes) return 'unknown' // "yes, take me off" / "no, I'm interested" — a human reads it
+  if (no && yes) return 'unknown'
   if (later && !yes) return 'unknown'
   if (yes) return 'yes'
   return 'unknown'
+}
+
+export function isTerminal(s) {
+  return s === 'remove' || s === 'hostile' || s === 'no'
 }

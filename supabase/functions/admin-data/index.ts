@@ -123,7 +123,7 @@ Deno.serve(async (req: Request) => {
   const supa = admin()
 
   // ── maintenance action: purge all test data (capi rows first — FK on appointments)
-  let body: { action?: string; appointmentId?: string; prospectId?: string; chosenDomain?: string } = {}
+  let body: { action?: string; appointmentId?: string; prospectId?: string; chosenDomain?: string; replyId?: string; status?: string; body?: string; releaseAfter?: string } = {}
   try {
     body = await req.json()
   } catch {
@@ -211,6 +211,29 @@ Deno.serve(async (req: Request) => {
     }
     return json({ ok: true })
   }
+  // ── reply desk (outbound_replies) ──────────────────────────────────────────
+  // Edit / send now / cancel a queued answer, or re-arm a failed one.
+  if (body.action === 'replyDeskUpdate') {
+    if (!body.replyId) return json({ error: 'replyId required' }, 400)
+    const patch: Record<string, unknown> = {}
+    if (typeof body.body === 'string' && body.body.trim()) patch.body = body.body.trim().slice(0, 4000)
+    if (body.status === 'cancelled') patch.status = 'cancelled'
+    if (body.status === 'ready') { patch.status = 'ready'; patch.error = null }
+    if (body.releaseAfter === 'now') patch.release_after = new Date().toISOString()
+    else if (typeof body.releaseAfter === 'string' && !Number.isNaN(Date.parse(body.releaseAfter))) patch.release_after = new Date(body.releaseAfter).toISOString()
+    if (!Object.keys(patch).length) return json({ error: 'nothing to change' }, 400)
+    const { error } = await supa.from('outbound_replies').update(patch).eq('id', body.replyId).eq('direction', 'out').in('status', ['ready', 'failed', 'queued'])
+    if (error) return json({ error: error.message }, 500)
+    return json({ ok: true })
+  }
+  // A person handled the thread: clear the hand-off so the desk can answer again.
+  if (body.action === 'resolveHandoff') {
+    if (!body.prospectId) return json({ error: 'prospectId required' }, 400)
+    const { error } = await supa.from('prospects').update({ handoff_at: null }).eq('id', body.prospectId)
+    if (error) return json({ error: error.message }, 500)
+    await supa.from('outbound_replies').update({ status: 'ignored', reason: 'resolved by a person' }).eq('prospect_id', body.prospectId).eq('direction', 'in').eq('status', 'needs_human')
+    return json({ ok: true })
+  }
   if (body.action === 'discardTests') {
     const capiDel = await supa.from('capi_events').delete({ count: 'exact' }).eq('is_test', true)
     if (capiDel.error) return json({ error: capiDel.error.message }, 500)
@@ -250,10 +273,16 @@ Deno.serve(async (req: Request) => {
       'id, business_name, business_type, first_name, last_name, email, phone, city, state, batch, is_test, ' +
         'suppressed, suppressed_reason, site_status, site_error, preview_url, demo_first_viewed_at, demo_view_count, ' +
         'plan, chosen_domain, domain_status, domain_error, purchased_at, cancelled_at, emailed_at, replied_at, created_at, ' +
-        'last_reply, reply_sentiment, auto_send, demo_link_sent_at',
+        'last_reply, reply_sentiment, auto_send, demo_link_sent_at, ai_turns, handoff_at, followup_at, nudge_count',
     )
     .order('created_at', { ascending: false })
     .limit(500)
+  // Reply desk: what is waiting to go out / needs a person, plus what went out recently.
+  const repliesRes = await supa
+    .from('outbound_replies')
+    .select('id, prospect_id, direction, kind, intent, confidence, needs_human, reason, status, body, subject, release_after, sent_at, error, created_at')
+    .order('created_at', { ascending: false })
+    .limit(200)
 
   const leads = leadsRes.count ?? 0
   const availabilityRows = availRes.count ?? 0
@@ -325,5 +354,6 @@ Deno.serve(async (req: Request) => {
     ghlMessages: ghlMessagesRes.data ?? [],
     contactsList: contactsRes.data ?? [],
     prospects: prospectsRes.data ?? [],
+    outboundReplies: repliesRes.data ?? [],
   })
 })

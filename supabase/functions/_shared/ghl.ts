@@ -279,6 +279,53 @@ export async function ghlUpdateContactFields(input: {
   }
 }
 
+/** Resolve a contact id by email/phone (upsert is GHL's idempotent lookup). Null when unconfigured/failed. */
+export async function ghlFindContactId(input: { email?: string; phone?: string }): Promise<string | null> {
+  if (!ghlConfigured()) return null
+  if (!input.email && !input.phone) return null
+  try {
+    const body: Record<string, unknown> = { locationId: locationId() }
+    if (input.email) body.email = input.email
+    if (input.phone) body.phone = input.phone
+    const up = await fetch(`${GHL_API}/contacts/upsert`, { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) })
+    if (!up.ok) return null
+    const data = (await up.json().catch(() => null)) as { contact?: { id?: string } } | null
+    return data?.contact?.id ?? null
+  } catch (err) {
+    console.error('[ghl] ghlFindContactId error', err)
+    return null
+  }
+}
+
+/**
+ * ADD tags to a contact (additive; never touches existing tags). Used for non-stage
+ * signals such as `outbound-needs-human`. Never throws.
+ */
+export async function ghlAddTags(contactId: string, tags: string[]): Promise<boolean> {
+  if (!ghlConfigured() || !contactId || !tags.length) return false
+  try {
+    const r = await fetch(`${GHL_API}/contacts/${contactId}/tags`, { method: 'POST', headers: apiHeaders(), body: JSON.stringify({ tags }) })
+    if (!r.ok) console.error('[ghl] add tags failed', r.status, (await r.text()).slice(0, 200))
+    return r.ok
+  } catch (err) {
+    console.error('[ghl] ghlAddTags error', err)
+    return false
+  }
+}
+
+/** REMOVE tags from a contact. Remove-then-add makes GHL's "tag added" trigger fire again. */
+export async function ghlRemoveTags(contactId: string, tags: string[]): Promise<boolean> {
+  if (!ghlConfigured() || !contactId || !tags.length) return false
+  try {
+    const r = await fetch(`${GHL_API}/contacts/${contactId}/tags`, { method: 'DELETE', headers: apiHeaders(), body: JSON.stringify({ tags }) })
+    if (!r.ok) console.error('[ghl] remove tags failed', r.status, (await r.text()).slice(0, 200))
+    return r.ok
+  } catch (err) {
+    console.error('[ghl] ghlRemoveTags error', err)
+    return false
+  }
+}
+
 export interface GhlSmsInput {
   email?: string
   phone?: string

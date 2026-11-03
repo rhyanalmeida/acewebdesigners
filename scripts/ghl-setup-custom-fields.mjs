@@ -45,6 +45,9 @@ const FIELDS = [
   // outbound demo-site funnel (cold email → /demo/<token> → purchase)
   { key: 'preview_url', name: 'Demo Preview URL', dataType: 'LARGE_TEXT' },
   { key: 'chosen_domain', name: 'Purchased Domain', dataType: 'TEXT' },
+  // reply desk hand-off (reply-desk fn → tag outbound-needs-human → staff SMS reads these)
+  { key: 'last_reply_text', name: 'Last Reply Text', dataType: 'LARGE_TEXT' },
+  { key: 'last_reply_intent', name: 'Last Reply Intent', dataType: 'TEXT' },
 ]
 
 function readEnv(file) {

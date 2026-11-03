@@ -1,0 +1,17 @@
+[
+  { "label": "hostile-1 (real, wave 1)", "expect": "suppress", "text": "Bug someone else. Geez. Get a life\n\nSeth\nPlumbline Carpentry LLC\n207-943-3884\n\nOn Thu, Oct 8, 2026, 6:56 AM Rhyan Almeida wrote:\n> Hi ,\n> Adding to my last note." },
+  { "label": "remove-1 (real, wave 1)", "expect": "suppress", "text": "PLEASE REMOVE OUR NAME FROM YOUR LIST\n\n\nRay Fraser\nInside Sales/Procurement\nDavis Brothers Inc.\n86 Access Rd.\nChester, ME 04457" },
+  { "label": "remove-2 (real, wave 1)", "expect": "suppress", "text": "spam elsewhere please\n\nOn Wed, Sep 30, 2026 at 8:00 AM Rhyan Almeida <rhyan@getacewebdesigners.com>\nwrote:\n\n> Hi ,\n> Adding to my last note. The preview I'd bui" },
+  { "label": "yes-plain", "expect": "reply:demo_link", "text": "Yes please, send it over." },
+  { "label": "yes-with-question", "expect": "reply:demo_link", "text": "Sure, let's see it. How much does it run per month?" },
+  { "label": "question-price", "expect": "reply:reply", "text": "What does it cost? And is there a contract?" },
+  { "label": "question-domain", "expect": "reply:reply", "text": "We already own hardyroofing.com. Can you use that or do we have to get a new one?" },
+  { "label": "objection-price", "expect": "reply:reply", "text": "49 a month forever seems like a lot for a website. I paid a guy 500 bucks once and that was it." },
+  { "label": "later-season", "expect": "reply:reply", "text": "Slammed until the snow comes. Hit me up in December." },
+  { "label": "no-polite", "expect": "suppress", "text": "Thanks but we're all set with our current site." },
+  { "label": "needs-human-call", "expect": "escalate", "text": "Call me Tuesday at 3, 207-555-0100. Want to talk about doing the whole site plus online booking." },
+  { "label": "needs-human-privacy", "expect": "escalate", "text": "Where did you get my email address?" },
+  { "label": "needs-human-ecommerce", "expect": "escalate", "text": "Can it sell products with inventory and shipping?" },
+  { "label": "ooo", "expect": "ignore", "text": "Thank you for your email. I am out of the office until Monday November 9 with limited access to email." },
+  { "label": "unclear", "expect": "escalate", "text": "?" }
+]

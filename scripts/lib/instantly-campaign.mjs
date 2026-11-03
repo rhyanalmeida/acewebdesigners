@@ -51,7 +51,7 @@ export function textToHtml(text) {
 /** A follow-up whose subject starts with "Re:" is sent with an empty subject → Instantly threads it. */
 export const isThreaded = (subject) => /^re:\s*/i.test(subject)
 
-export function buildPayload(steps, { name = DEFAULT_NAME, daily = 20, accounts = SENDING_ACCOUNTS } = {}) {
+export function buildPayload(steps, { name = DEFAULT_NAME, daily = 60, accounts = SENDING_ACCOUNTS } = {}) {
   let prevDay = 0
   const apiSteps = steps.map((s, i) => {
     const delay = i === 0 ? 0 : s.day - prevDay
@@ -69,10 +69,10 @@ export function buildPayload(steps, { name = DEFAULT_NAME, daily = 20, accounts 
     campaign_schedule: {
       schedules: [
         {
-          // 06–11 ET: Belkins (7.5M emails, 2025) — 5–8am + 8am–12pm carry the best reply rate and ~4x
-          // the meeting rate of afternoon/evening sends; contractors read email before the first job.
-          name: 'Weekdays 6am–11am ET',
-          timing: { from: '06:00', to: '11:00' },
+          // 06–16 ET (owner, 2026-11-02): widened from 06–11 so two inboxes can clear 60/day; Instantly
+          // fills the window from the start, so early-morning sends still go first.
+          name: 'Weekdays 6am–4pm ET',
+          timing: { from: '06:00', to: '16:00' },
           days: { 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: false },
           // Instantly's enum has no America/New_York; America/Detroit is the same US Eastern zone.
           timezone: 'America/Detroit',

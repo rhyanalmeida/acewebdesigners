@@ -18,8 +18,8 @@ import {
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
   fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration, regenerateBrief,
-  retryProspectSite, retryProvisioning,
-  type AdminData, type AdminContact, type Appt, type CapiOutcome, type Prospect, type ResultKind, type ResultResponse, type ServerEventStat,
+  retryProspectSite, retryProvisioning, replyDeskUpdate, resolveHandoff,
+  type AdminData, type AdminContact, type Appt, type CapiOutcome, type Prospect, type OutboundReply, type ResultKind, type ResultResponse, type ServerEventStat,
 } from './adminApi'
 
 // ── formatting helpers ────────────────────────────────────────────────────────
@@ -904,7 +904,102 @@ const DOMAIN_CHIP: Record<string, string> = {
   cancelled: 'bg-slate-100 text-slate-500',
 }
 
-const OutboundTab: React.FC<{ prospects: Prospect[]; onChanged: () => void }> = ({ prospects, onChanged }) => {
+const REPLY_STATUS_CHIP: Record<string, string> = {
+  ready: 'bg-sky-50 text-sky-700',
+  sending: 'bg-amber-50 text-amber-700',
+  sent: 'bg-emerald-50 text-emerald-700',
+  needs_human: 'bg-rose-50 text-rose-700',
+  failed: 'bg-rose-100 text-rose-800',
+  cancelled: 'bg-slate-100 text-slate-500',
+  suppressed: 'bg-slate-100 text-slate-500',
+  answered: 'bg-slate-50 text-slate-500',
+  ignored: 'bg-slate-50 text-slate-400',
+  queued: 'bg-amber-50 text-amber-700',
+}
+
+/** Reply desk: what the machine is about to send, what it handed to a person, what went out. */
+const ReplyDeskPanel: React.FC<{ replies: OutboundReply[]; prospects: Prospect[]; onChanged: () => void }> = ({ replies, prospects, onChanged }) => {
+  const [busy, setBusy] = useState<string | null>(null)
+  const [err, setErr] = useState<string>('')
+  const byId = useMemo(() => new Map(prospects.map((p) => [p.id, p])), [prospects])
+  const act = async (id: string, fn: () => Promise<unknown>) => {
+    setBusy(id); setErr('')
+    try { await fn(); onChanged() }
+    catch (e) { setErr(e instanceof Error ? e.message : 'Action failed') }
+    finally { setBusy(null) }
+  }
+  const edit = (r: OutboundReply) => {
+    const body = window.prompt('Edit the reply text (it goes out from the same inbox, in-thread):', r.body)
+    if (body == null || !body.trim() || body === r.body) return
+    void act(r.id, () => replyDeskUpdate(r.id, { body }))
+  }
+  const open = replies.filter((r) => ['ready', 'sending', 'needs_human', 'failed', 'queued'].includes(r.status))
+  const recent = replies.filter((r) => r.status === 'sent').slice(0, 30)
+  const label = (r: OutboundReply) => {
+    const p = byId.get(r.prospect_id)
+    return p ? `${p.business_name}${p.email ? ` · ${p.email}` : ''}` : r.prospect_id.slice(0, 8)
+  }
+  const when = (iso?: string | null) => (iso ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—')
+  return (
+    <section>
+      <h2 className={`${sectionTitle} mb-2`}>Reply desk</h2>
+      <div className={`${card} p-3`}>
+        {err && <p className="mb-2 text-xs text-rose-600">{err}</p>}
+        {open.length === 0 ? (
+          <p className="text-sm text-slate-400">Nothing waiting. Replies are answered from the inbox they arrived in; anything the desk cannot answer shows up here and texts you.</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {open.map((r) => {
+              const p = byId.get(r.prospect_id)
+              return (
+                <li key={r.id} className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className={`rounded-full px-2 py-0.5 font-semibold ${REPLY_STATUS_CHIP[r.status] ?? ''}`}>{r.status.replace('_', ' ')}</span>
+                      <span className="font-medium text-slate-700">{label(r)}</span>
+                      {r.intent && <span className="text-slate-400">· {r.intent}{typeof r.confidence === 'number' ? ` ${Math.round(r.confidence * 100)}%` : ''}</span>}
+                      <span className="text-slate-400">· {r.direction === 'in' ? 'received' : r.kind} {timeAgo(r.created_at)}</span>
+                      {r.release_after && r.status === 'ready' && <span className="text-sky-600">· goes out {when(r.release_after)}</span>}
+                    </div>
+                    {r.reason && <div className="mt-0.5 text-xs text-rose-600">{r.reason}</div>}
+                    {r.error && <div className="mt-0.5 text-xs text-rose-600">{r.error}</div>}
+                    <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2 text-xs text-slate-600">{r.body}</pre>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap gap-2 text-xs sm:flex-col sm:items-end">
+                    {r.direction === 'out' && (r.status === 'ready' || r.status === 'failed') && (
+                      <>
+                        <button onClick={() => void act(r.id, () => replyDeskUpdate(r.id, { status: 'ready', releaseAfter: 'now' }))} disabled={busy === r.id} className="font-medium text-indigo-600 hover:underline disabled:opacity-50">Send now</button>
+                        <button onClick={() => edit(r)} disabled={busy === r.id} className="font-medium text-slate-600 hover:underline disabled:opacity-50">Edit</button>
+                        <button onClick={() => void act(r.id, () => replyDeskUpdate(r.id, { status: 'cancelled' }))} disabled={busy === r.id} className="font-medium text-rose-600 hover:underline disabled:opacity-50">Cancel</button>
+                      </>
+                    )}
+                    {r.status === 'needs_human' && p && (
+                      <button onClick={() => void act(r.id, () => resolveHandoff(p.id))} disabled={busy === r.id} className="font-medium text-emerald-600 hover:underline disabled:opacity-50">Resolved — let the desk answer again</button>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+        {recent.length > 0 && (
+          <details className="mt-3">
+            <summary className="cursor-pointer text-xs font-medium text-slate-500">Sent recently ({recent.length})</summary>
+            <ul className="mt-2 divide-y divide-slate-100">
+              {recent.map((r) => (
+                <li key={r.id} className="py-2 text-xs">
+                  <div className="flex flex-wrap items-center gap-1.5"><span className="font-medium text-slate-700">{label(r)}</span><span className="text-slate-400">· {r.kind} · sent {timeAgo(r.sent_at ?? r.created_at)}</span></div>
+                  <pre className="mt-1 max-h-24 overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2 text-slate-500">{r.body}</pre>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </div>
+    </section>
+  )
+}
+const OutboundTab: React.FC<{ prospects: Prospect[]; replies: OutboundReply[]; onChanged: () => void }> = ({ prospects, replies, onChanged }) => {
   const [busy, setBusy] = useState<string | null>(null)
   const [rowErr, setRowErr] = useState<Record<string, string>>({})
   const real = prospects.filter((p) => !p.is_test)
@@ -943,6 +1038,7 @@ const OutboundTab: React.FC<{ prospects: Prospect[]; onChanged: () => void }> = 
         <Kpi icon={Target} label="Purchased" value={stats.purchased} accent="emerald" />
         <Kpi icon={CheckCircle2} label="Sites live" value={stats.live} accent="emerald" />
       </section>
+      <ReplyDeskPanel replies={replies} prospects={prospects} onChanged={onChanged} />
       <section>
         <h2 className={`${sectionTitle} mb-2`}>Prospects</h2>
         <div className={`${card} overflow-x-auto p-1.5`}>
@@ -983,9 +1079,9 @@ const OutboundTab: React.FC<{ prospects: Prospect[]; onChanged: () => void }> = 
                       {p.replied_at && !p.purchased_at && (
                         <div className="mt-0.5" title={p.last_reply ?? undefined}>
                           <span className={
-                            p.reply_sentiment === 'yes' ? 'text-emerald-600' : p.reply_sentiment === 'no' ? 'text-rose-500' : 'text-amber-600'
+                            p.handoff_at ? 'font-semibold text-rose-600' : p.reply_sentiment === 'yes' ? 'text-emerald-600' : ['no', 'remove', 'hostile'].includes(p.reply_sentiment ?? '') ? 'text-rose-500' : 'text-amber-600'
                           }>
-                            {p.reply_sentiment === 'yes' ? 'YES' : p.reply_sentiment === 'no' ? 'no' : 'read it'}
+                            {p.handoff_at ? 'NEEDS YOU' : p.reply_sentiment === 'yes' ? 'YES' : (p.reply_sentiment ?? 'read it')}
                           </span>
                           {p.demo_link_sent_at ? ` · link sent ${timeAgo(p.demo_link_sent_at)}`
                             : p.auto_send ? ' · auto-sending' : ''}
@@ -1189,7 +1285,7 @@ const AdminDashboard: React.FC = () => {
         ) : tab === 'customers' ? (
           <CustomerOverview data={data} onResult={setResulting} onPaymentLink={setPayLinking} />
         ) : tab === 'outbound' ? (
-          <OutboundTab prospects={data.prospects ?? []} onChanged={load} />
+          <OutboundTab prospects={data.prospects ?? []} replies={data.outboundReplies ?? []} onChanged={load} />
         ) : tab === 'conversions' ? (
           <>
             {data.serverEvents && <ConversionFlow se={data.serverEvents} />}

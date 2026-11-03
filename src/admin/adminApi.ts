@@ -182,9 +182,34 @@ export interface Prospect {
   emailed_at?: string | null
   replied_at?: string | null
   last_reply?: string | null
-  reply_sentiment?: 'yes' | 'no' | 'unknown' | null
+  reply_sentiment?: ReplyIntent | null
   auto_send?: boolean | null
   demo_link_sent_at?: string | null
+  ai_turns?: number
+  handoff_at?: string | null
+  followup_at?: string | null
+  nudge_count?: number
+  created_at: string
+}
+
+export type ReplyIntent = 'yes' | 'question' | 'objection_price' | 'objection_timing' | 'later' | 'no' | 'remove' | 'hostile' | 'ooo_auto' | 'unknown'
+
+/** One inbound reply or one outbound answer handled by the reply desk (migration 0015). */
+export interface OutboundReply {
+  id: string
+  prospect_id: string
+  direction: 'in' | 'out'
+  kind: 'reply' | 'demo_link' | 'followup' | 'nudge'
+  intent?: ReplyIntent | null
+  confidence?: number | null
+  needs_human?: boolean
+  reason?: string | null
+  status: 'queued' | 'ready' | 'sending' | 'sent' | 'needs_human' | 'suppressed' | 'cancelled' | 'failed' | 'answered' | 'ignored'
+  body: string
+  subject?: string | null
+  release_after?: string | null
+  sent_at?: string | null
+  error?: string | null
   created_at: string
 }
 
@@ -200,6 +225,7 @@ export interface AdminData {
   ghlMessages: GhlMessage[]
   contactsList?: AdminContact[] // optional: old function payloads omit it
   prospects?: Prospect[] // optional: old function payloads omit it
+  outboundReplies?: OutboundReply[] // reply desk log (optional: pre-0015 payloads omit it)
 }
 
 async function errorMessage(error: unknown, fallback: string): Promise<{ status: number; message: string }> {
@@ -340,6 +366,33 @@ export async function retryProvisioning(
   })
   if (error) {
     const { message } = await errorMessage(error, 'Could not restart provisioning')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}
+
+/** Reply desk: edit the text, send now, re-arm a failed answer, or cancel a queued one. */
+export async function replyDeskUpdate(
+  replyId: string,
+  patch: { body?: string; status?: 'cancelled' | 'ready'; releaseAfter?: 'now' | string },
+): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', {
+    body: { action: 'replyDeskUpdate', replyId, ...patch },
+  })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not update the reply')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}
+
+/** Reply desk: a person handled the thread — let the desk answer again. */
+export async function resolveHandoff(prospectId: string): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', {
+    body: { action: 'resolveHandoff', prospectId },
+  })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not resolve the hand-off')
     throw new Error(message)
   }
   return data as { ok: boolean }

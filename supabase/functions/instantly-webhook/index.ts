@@ -10,7 +10,10 @@
  * x-instantly-secret header also works.)
  *
  * Handled event types (Instantly names vary by version — matched loosely):
- *   reply / interested   → prospects.replied_at + last_reply (+ classification) + GHL
+ *   reply / interested   → prospects.replied_at + last_reply; hard rules (remove/hostile/no →
+ *                          suppress, no alert). With REPLY_DESK_ENABLED=true the reply is logged to
+ *                          outbound_replies and `reply-desk classify` decides (AI answer / hand-off).
+ *                          Desk off: legacy — prospects.replied_at + last_reply (+ classification) + GHL
  *                          outbound-lead tag. A clear "yes" (replyClassifier.ts) also
  *                          fires the ONE demo build (same atomic none→generating gate
  *                          as demo-site) and marks the row auto_send — fully automated
@@ -26,7 +29,7 @@
 import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { ghlSyncStage } from '../_shared/ghl.ts'
-import { classifyReply } from '../_shared/replyClassifier.ts'
+import { classifyReply, isTerminal } from '../_shared/replyClassifier.ts'
 
 interface InstantlyEvent {
   event_type?: string
@@ -165,28 +168,59 @@ Deno.serve(async (req: Request) => {
   } else if (type.includes('reply') || type.includes('interest')) {
     if (p) {
       const text = typeof ev.reply_text === 'string' ? ev.reply_text : ''
-      const sentiment = text ? classifyReply(text) : 'unknown'
+      const rule = text ? classifyReply(text) : 'unknown'
       const now = new Date().toISOString()
-      // A "yes" auto-sends the link: on a fresh row the build starts here; on an already
-      // deployed row (manual build) the poller just sends. Never for test/suppressed rows.
-      const autoSend = sentiment === 'yes' && !p.is_test && !p.suppressed
+      const emailId = typeof ev.email_id === 'string' ? ev.email_id : null
+      const eaccount = typeof ev.eaccount === 'string' ? ev.eaccount : null
+      const subject = typeof ev.subject === 'string' ? ev.subject.slice(0, 200) : null
       await supa
         .from('prospects')
         .update({
           ...(p.replied_at ? {} : { replied_at: now }),
-          ...(text
-            ? {
-                last_reply: text.slice(0, 2000),
-                last_reply_at: now,
-                reply_sentiment: sentiment,
-                reply_email_id: typeof ev.email_id === 'string' ? ev.email_id : null,
-                reply_eaccount: typeof ev.eaccount === 'string' ? ev.eaccount : null,
-                reply_subject: typeof ev.subject === 'string' ? ev.subject.slice(0, 200) : null,
-              }
-            : {}),
-          ...(autoSend ? { auto_send: true } : {}),
+          ...(text ? { last_reply: text.slice(0, 2000), last_reply_at: now, reply_sentiment: rule, reply_email_id: emailId, reply_eaccount: eaccount, reply_subject: subject } : {}),
         })
         .eq('id', p.id)
+
+      // Hard rules apply with or without the desk: remove/hostile/no = suppress, no build, no alert.
+      if (isTerminal(rule)) {
+        const reason = rule === 'hostile' ? 'hostile' : rule === 'remove' ? 'unsubscribe' : 'declined'
+        await supa.from('suppressions').upsert({ email, reason }, { onConflict: 'email' })
+        await supa.from('prospects').update({ suppressed: true, suppressed_reason: reason }).eq('id', p.id)
+        if (emailId) await supa.from('outbound_replies').upsert({ prospect_id: p.id, direction: 'in', instantly_email_id: emailId, eaccount, subject, body: text.slice(0, 4000), intent: rule, status: 'suppressed', reason }, { onConflict: 'instantly_email_id', ignoreDuplicates: true })
+        console.log(`[instantly-webhook] reply ${email} ${rule} → suppressed, no alert`)
+        return json({ received: true, sentiment: rule, suppressed: true })
+      }
+      if (rule === 'ooo_auto') return json({ received: true, sentiment: rule, ignored: true })
+
+      // ── Reply desk on: log the inbound row and let `reply-desk classify` decide ──
+      if (Deno.env.get('REPLY_DESK_ENABLED') === 'true' && text) {
+        const { data: row } = await supa
+          .from('outbound_replies')
+          .upsert({ prospect_id: p.id, direction: 'in', instantly_email_id: emailId ?? `${email}:${now}`, eaccount, subject, body: text.slice(0, 4000), status: 'queued' }, { onConflict: 'instantly_email_id', ignoreDuplicates: true })
+          .select('id')
+          .maybeSingle()
+        if (row) {
+          const task = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/reply-desk`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'x-internal-key': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')! },
+            body: JSON.stringify({ action: 'classify', replyId: (row as { id: string }).id }),
+          })
+            .then(async (r) => {
+              if (!r.ok) console.error('[instantly-webhook] reply-desk classify', r.status, (await r.text()).slice(0, 150))
+              else await r.body?.cancel()
+            })
+            .catch((e) => console.error('[instantly-webhook] reply-desk unreachable', e))
+          if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(task)
+          else await task
+        }
+        console.log(`[instantly-webhook] reply ${email} rule=${rule} → reply-desk ${row ? 'queued' : 'duplicate'}`)
+        return json({ received: true, sentiment: rule, desk: Boolean(row) })
+      }
+
+      // ── Legacy path (desk off): a clear "yes" builds + the poller sends the link ──
+      const sentiment = rule
+      const autoSend = sentiment === 'yes' && !p.is_test && !p.suppressed
+      if (autoSend) await supa.from('prospects').update({ auto_send: true }).eq('id', p.id)
       let started = false
       if (autoSend && p.site_status === 'none') started = await startBuild(p.id)
       console.log(`[instantly-webhook] reply ${email} sentiment=${sentiment} auto_send=${autoSend} build_started=${started}`)

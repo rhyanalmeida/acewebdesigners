@@ -33,6 +33,7 @@ interface ProspectRow {
   id: string
   is_test: boolean
   suppressed: boolean
+  reply_sentiment: string | null
   business_name: string
   business_type: string | null
   first_name: string | null
@@ -51,9 +52,11 @@ interface ProspectRow {
   demo_view_count: number
 }
 
+const BLOCKED_SENTIMENTS = new Set(['no', 'remove', 'hostile'])
+
 const PUBLIC_COLS =
   'id, is_test, suppressed, business_name, business_type, first_name, last_name, email, phone, city, state, ' +
-  'site_status, site_error, preview_url, chosen_domain, domain_status, purchased_at, demo_first_viewed_at, demo_view_count'
+  'site_status, site_error, preview_url, chosen_domain, domain_status, purchased_at, demo_first_viewed_at, demo_view_count, reply_sentiment'
 
 /** Only what the public page needs — never ids, email, or internal errors. */
 function publicPayload(p: ProspectRow) {
@@ -89,6 +92,9 @@ Deno.serve(async (req: Request) => {
   const { data, error } = await supa.from('prospects').select(PUBLIC_COLS).eq('token', token).maybeSingle()
   if (error || !data) return json({ error: 'not found' }, 404)
   const p = data as unknown as ProspectRow
+  // Reply-desk rule (2026-11-02): a suppressed or declining prospect never gets a build — the
+  // staff-alert email carries this link, and opening it used to build sites for hostile repliers.
+  if (p.suppressed || BLOCKED_SENTIMENTS.has(p.reply_sentiment ?? '')) return json({ error: 'not found' }, 404)
 
   if (b.action === 'build') {
     // Atomic one-build gate: only the request that flips none → generating wins.

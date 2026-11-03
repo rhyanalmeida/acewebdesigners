@@ -45,10 +45,10 @@ describe('parseSequenceDoc', () => {
     expect(steps[1]).toMatchObject({ n: 2, day: 3, subject: 'Re: quick question about {{company_name}}' })
     expect(steps[1].body).toBe('Still here: {{demo_url}}\n\n{{unsubscribe}}')
   })
-  it('parses the real approved draft: 4 emails on day 0/3/7/14, all with CTA + unsubscribe', () => {
+  it('parses the real approved draft: 3 emails on day 0/3/7, all with CTA + unsubscribe', () => {
     const md = fs.readFileSync(path.resolve(__dirname, '../../docs/OUTBOUND_COLD_SEQUENCE_DRAFT.md'), 'utf8')
     const steps = parseSequenceDoc(md)
-    expect(steps.map((s) => s.day)).toEqual([0, 3, 7, 14])
+    expect(steps.map((s) => s.day)).toEqual([0, 3, 7])
     expect(validateSteps(steps).problems).toEqual([])
     expect(steps.filter((s) => s.body.includes('$49')).map((s) => s.n)).toEqual([3])
   })

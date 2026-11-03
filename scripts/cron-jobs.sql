@@ -1,15 +1,18 @@
 -- pg_cron jobs for the outbound funnel (needs pg_cron + pg_net — migration 0013).
 -- Run via the Management API SQL endpoint with <KEY> replaced by the deployed
--- CAPI_INTERNAL_SECRET (both functions check it; the cron command embeds it, so this
+-- CAPI_INTERNAL_SECRET (every function checks it; the cron command embeds it, so this
 -- file is NOT a migration). Idempotent: each job is unscheduled first.
 --
---   site-edit-release  every 5 min  → deploys change requests whose 30-45 min hold elapsed
---   instantly-poll     every 15 min → replies/bounces/unsubs → webhook; demo-link sends
+--   site-edit-release    every 5 min      → deploys change requests whose 30-45 min hold elapsed
+--   instantly-poll       every 15 min     → replies/bounces/unsubs → webhook (→ reply-desk classify)
+--   reply-desk-release   every 5 min      → sends queued reply-desk answers whose hold elapsed
+--   reply-desk-followups daily 13:00 UTC  → "later" re-touches + viewed-but-silent nudges
 --
 -- After instantly-poll runs green, DISABLE the Windows task "Instantly Poll"
 -- (schtasks /change /tn "Instantly Poll" /disable) so replies aren't forwarded twice.
 
-select cron.unschedule(jobname) from cron.job where jobname in ('site-edit-release', 'instantly-poll');
+select cron.unschedule(jobname) from cron.job
+ where jobname in ('site-edit-release', 'instantly-poll', 'reply-desk-release', 'reply-desk-followups');
 
 select cron.schedule(
   'site-edit-release',
@@ -29,6 +32,28 @@ select cron.schedule(
        url     := 'https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/instantly-poll',
        headers := '{"content-type":"application/json","x-cron-key":"<KEY>"}'::jsonb,
        body    := '{}'::jsonb,
+       timeout_milliseconds := 150000
+     ) $$
+);
+
+select cron.schedule(
+  'reply-desk-release',
+  '*/5 * * * *',
+  $$ select net.http_post(
+       url     := 'https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/reply-desk',
+       headers := '{"content-type":"application/json","x-cron-key":"<KEY>"}'::jsonb,
+       body    := '{"action":"release"}'::jsonb,
+       timeout_milliseconds := 150000
+     ) $$
+);
+
+select cron.schedule(
+  'reply-desk-followups',
+  '0 13 * * *',
+  $$ select net.http_post(
+       url     := 'https://dwsmrruzufqpopdzlszw.supabase.co/functions/v1/reply-desk',
+       headers := '{"content-type":"application/json","x-cron-key":"<KEY>"}'::jsonb,
+       body    := '{"action":"followups"}'::jsonb,
        timeout_milliseconds := 150000
      ) $$
 );
