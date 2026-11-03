@@ -277,7 +277,7 @@ current status. Only the invariants live here:
   `emailed_at`) → `instantly-upload-leads` → re-activate the campaign if it reads COMPLETED (3).
   Throughput is 2 inboxes × 30/day (3-step sequence, 06–16 ET; raised 2026-11-02); more inboxes,
   not a bigger list, is the volume lever.
-- **Reply desk (deployed 2026-11-03; migration + cron + secrets live, gate 15/15; STILL OFF until `node scripts/go-live-reply-desk.mjs --from 6` sets `REPLY_DESK_ENABLED`, pushes v5 copy, redeploys /admin):** replies are answered by
+- **Reply desk — LIVE 2026-11-03 (`REPLY_DESK_ENABLED=true`, v5 copy on the campaign, /admin panel deployed, dry-run gate 15/15):** replies are answered by
   `reply-desk` (Sonnet, facts ONLY from `_shared/outboundFacts.ts`, `_shared/replyPolicy.ts` decides, 20–90 min
   business-hours hold, sent via Instantly from the SAME inbox in-thread); remove/hostile/no auto-suppress with no
   build and no alert; anything else → GHL tag `outbound-needs-human` → SMS to Rhyan. `REPLY_DESK_ENABLED=true`

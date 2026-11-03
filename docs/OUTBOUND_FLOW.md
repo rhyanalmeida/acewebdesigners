@@ -142,7 +142,7 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   `demo_link_sent_at`. Sent exactly once; a failed send retries next tick. A reply with no
   `reply_email_id` (e.g. a synthetic test event) can never trigger a send.
 
-## 5b. Reply desk — the automated sales desk (built 2026-11-02, GO-LIVE PENDING)
+## 5b. Reply desk — the automated sales desk (LIVE since 2026-11-03)
 
 Owner rule: "if they are interested or need a reply an AI should email back; if it needs me,
 message me." Nothing a prospect sees may look automated.
@@ -268,8 +268,9 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
 
 - **2026-11-03 02:56 UTC:** go-live steps 1–5 landed (Instantly secrets → poller 200 at 03:00, migration 0015,
   reply-desk + 4 fns deployed, cron reply-desk-release/followups). Classifier was dead on arrival — Sonnet 5.5
-  400s on forced `tool_choice` and `temperature` (fixed, redeployed, dry-run 15/15). Steps 6–8 (flag, v5 copy,
-  /admin bundle) still pending: `node scripts/go-live-reply-desk.mjs --from 6`.
+  400s on forced `tool_choice` and `temperature` (fixed, redeployed, dry-run 15/15). Steps 6–8 landed 03:22 UTC:
+  REPLY_DESK_ENABLED=true, v5 copy on the live campaign, /admin Reply desk panel deployed. Windows task
+  "Instantly Poll" disabled — the Edge poller owns replies. **Reply desk is LIVE.**
 - **2026-11-02 late:** reply desk built (§5b) — go-live pending `node scripts/go-live-reply-desk.mjs`
   + the GHL "Needs a Person" workflow. Instantly `daily_limit` PATCHed 30→60 (campaign-wide cap).
 - **2026-11-02 evening read:** day 1 of wave 2 sent only **30** (16 new leads + 14 follow-ups), 0 replies,

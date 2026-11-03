@@ -100,4 +100,4 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 ## Launch record
 - [x] v4 copy approved by owner ("let's start") 2026-09-22; launched 2026-09-22.
 - [x] Email 4 removed from the live campaign 2026-11-02 (3-step sequence).
-- [ ] v5 pushed with `--update` (record date here when done).
+- [x] v5 pushed with `--update` 2026-11-03 03:22 UTC (every step carries {{demo_url}}; price once in E3).
