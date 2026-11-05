@@ -2,6 +2,8 @@
  * Admin dashboard (/admin) — Supabase email+password (magic-link fallback),
  * ADMIN_EMAILS allow-list. The operations cockpit for the funnel.
  *
+ * Default view: Email Outreach (cold-email prospects: who opened their demo, views, replies).
+ * The funnel tabs below are hidden behind SHOW_FUNNEL_TABS.
  * Tabs: Overview (health + KPIs + funnel + conversion flow + meetings to result),
  * Website (booking funnel + appointments + Result actions + CAPI log + GHL messages),
  * Social Media (paid FB/IG-attributed funnel + per-campaign breakdown).
@@ -12,12 +14,12 @@ import type { Session } from '@supabase/supabase-js'
 import {
   CheckCircle2, XCircle, AlertTriangle, Info, RefreshCw, LogOut, Globe, Share2, LayoutDashboard,
   Users, CalendarCheck, CircleDollarSign, Target, Zap, Clock, ArrowRight, Activity, Sparkles,
-  Repeat, ChevronRight, TrendingUp, Wifi, Link2, Copy, ExternalLink,
+  Repeat, ChevronRight, TrendingUp, Wifi, Link2, Copy, ExternalLink, Send, MousePointerClick, MessageSquare,
 } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
-  fetchAdminData, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration,
-  type AdminData, type AdminContact, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat,
+  fetchAdminData, fetchOutreach, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration,
+  type AdminData, type OutreachData, type AdminContact, type Appt, type CapiOutcome, type ResultKind, type ResultResponse, type ServerEventStat,
 } from './adminApi'
 
 // ── formatting helpers ────────────────────────────────────────────────────────
@@ -795,7 +797,149 @@ const ResultModal: React.FC<{ appt: Appt; onClose: () => void; onSaved: () => vo
   )
 }
 
-type Tab = 'overview' | 'customers' | 'website' | 'conversions' | 'social'
+// ── cold-email outreach ─────────────────────────────────────────────────────────
+type OutreachFilter = 'today' | 'opened' | 'replied'
+
+const SENTIMENT_PILL: Record<string, string> = {
+  positive: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+  interested: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+  neutral: 'bg-slate-100 text-slate-600 ring-slate-200',
+  negative: 'bg-rose-50 text-rose-700 ring-rose-200',
+}
+
+const OutreachView: React.FC<{ o: OutreachData }> = ({ o }) => {
+  const [filter, setFilter] = useState<OutreachFilter>(o.totals.openedToday > 0 ? 'today' : 'opened')
+  const rows = useMemo(
+    () =>
+      filter === 'today' ? o.engaged.filter((p) => p.openedToday)
+      : filter === 'replied' ? o.engaged.filter((p) => p.replied_at)
+      : o.engaged.filter((p) => p.demo_first_viewed_at),
+    [o, filter],
+  )
+  const t = o.totals
+  const chips: { id: OutreachFilter; label: string; n: number }[] = [
+    { id: 'today', label: 'Opened today', n: t.openedToday },
+    { id: 'opened', label: 'All who opened', n: t.opened },
+    { id: 'replied', label: 'Replied', n: t.replied },
+  ]
+  return (
+    <>
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <Kpi icon={Send} label="Emailed" value={t.emailed.toLocaleString()} sub={`${t.prospects.toLocaleString()} prospects`} accent="slate" />
+        <Kpi icon={MousePointerClick} label="Opened demo" value={t.opened} sub={`${t.openRate}% of emailed`} accent="indigo" />
+        <Kpi icon={Zap} label="Opened today" value={t.openedToday} sub="clicked the link today" accent="amber" />
+        <Kpi icon={MessageSquare} label="Replied" value={t.replied} sub={`${t.replyRate}% reply rate${t.repliedToday ? ` · ${t.repliedToday} today` : ''}`} accent="violet" />
+        <Kpi icon={Target} label="Purchased" value={t.purchased} accent="emerald" />
+      </section>
+
+      <section>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h2 className={sectionTitle}>Prospects who engaged</h2>
+          <div className="flex gap-1.5">
+            {chips.map((c) => (
+              <button key={c.id} onClick={() => setFilter(c.id)} className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition ${filter === c.id ? 'bg-indigo-600 text-white ring-indigo-600' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'}`}>
+                {c.label} <span className={filter === c.id ? 'text-indigo-100' : 'text-slate-400'}>{c.n}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={`overflow-hidden ${card}`}>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <tr>
+                  <th className="px-4 py-2.5">Business</th><th className="px-4 py-2.5">Contact</th>
+                  <th className="px-4 py-2.5">Opened demo</th><th className="px-4 py-2.5">Views</th>
+                  <th className="px-4 py-2.5">Reply</th><th className="px-4 py-2.5">Demo</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rows.map((p) => (
+                  <tr key={p.id} className={p.openedToday ? 'bg-amber-50/40 hover:bg-amber-50' : 'hover:bg-slate-50/60'}>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-slate-900">{p.business_name || p.email}</div>
+                      <div className="text-xs text-slate-400">
+                        {[p.city, p.state].filter(Boolean).join(', ') || '—'}
+                        {p.batch ? <span> · {p.batch}</span> : ''}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {p.first_name && <div className="font-medium text-slate-700">{p.first_name}</div>}
+                      {p.email && <a href={`mailto:${p.email}`} className="block text-indigo-600 hover:underline">{p.email}</a>}
+                      {p.phone && <a href={`tel:${p.phone.replace(/[^\d+]/g, '')}`} className="block text-slate-600 hover:underline">{p.phone}</a>}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {p.demo_first_viewed_at ? (
+                        <>
+                          <div className="text-slate-700">{dateTime(p.demo_first_viewed_at)}</div>
+                          <div className="text-xs text-slate-400">{timeAgo(p.demo_first_viewed_at)}{p.openedToday && <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-700">today</span>}</div>
+                        </>
+                      ) : <span className="text-xs text-slate-400">Not opened</span>}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-slate-800">{p.demo_view_count ?? 0}</td>
+                    <td className="max-w-xs px-4 py-3 text-xs">
+                      {p.replied_at ? (
+                        <>
+                          <div className="flex items-center gap-1.5">
+                            {p.reply_sentiment && <span className={`rounded-full px-2 py-0.5 font-semibold capitalize ring-1 ${SENTIMENT_PILL[p.reply_sentiment.toLowerCase()] ?? SENTIMENT_PILL.neutral}`}>{p.reply_sentiment}</span>}
+                            <span className="text-slate-400">{timeAgo(p.replied_at)}</span>
+                          </div>
+                          {p.last_reply && <p className="mt-1 line-clamp-2 text-slate-600">{p.last_reply}</p>}
+                        </>
+                      ) : <span className="text-slate-400">No reply yet</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      {p.preview_url
+                        ? <a href={p.preview_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline">View <ExternalLink size={12} /></a>
+                        : <span className="text-xs text-slate-400">—</span>}
+                    </td>
+                  </tr>
+                ))}
+                {rows.length === 0 && (
+                  <tr><td colSpan={6} className="px-4 py-12 text-center text-slate-400">
+                    {filter === 'today' ? 'Nobody has opened their demo today yet.' : filter === 'replied' ? 'No replies yet.' : 'Nobody has opened a demo yet.'}
+                  </td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-slate-400">Your own visits to a demo link also count as views. Email security scanners can sometimes add a view too.</p>
+      </section>
+
+      <section>
+        <h2 className={`${sectionTitle} mb-2`}>By campaign batch</h2>
+        <div className={`overflow-hidden ${card}`}>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <tr><th className="px-4 py-2.5">Batch</th><th className="px-4 py-2.5">Emailed</th><th className="px-4 py-2.5">Opened</th><th className="px-4 py-2.5">Open rate</th><th className="px-4 py-2.5">Replied</th><th className="px-4 py-2.5">Purchased</th></tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {o.batches.map((b) => (
+                  <tr key={b.batch} className="hover:bg-slate-50/60">
+                    <td className="px-4 py-2.5 font-medium text-slate-800">{b.batch}</td>
+                    <td className="px-4 py-2.5">{b.emailed}</td>
+                    <td className="px-4 py-2.5">{b.opened}</td>
+                    <td className="px-4 py-2.5">{b.openRate}%</td>
+                    <td className="px-4 py-2.5">{b.replied}</td>
+                    <td className="px-4 py-2.5">{b.purchased}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
+/** The funnel tabs (Overview, Website, Social…) are hidden for now: the dashboard
+ *  shows cold-email outreach only. Flip to true to bring them back. */
+const SHOW_FUNNEL_TABS = false
+
+type Tab = 'outreach' | 'overview' | 'customers' | 'website' | 'conversions' | 'social'
 
 // ── dashboard ───────────────────────────────────────────────────────────────────
 const AdminDashboard: React.FC = () => {
@@ -805,7 +949,8 @@ const AdminDashboard: React.FC = () => {
   const [loadErr, setLoadErr] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadedAt, setLoadedAt] = useState<number | null>(null)
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useState<Tab>('outreach')
+  const [outreach, setOutreach] = useState<OutreachData | null>(null)
   const [resulting, setResulting] = useState<Appt | null>(null)
   const [payLinking, setPayLinking] = useState<Appt | null>(null)
   const [showResolved, setShowResolved] = useState(true)
@@ -819,7 +964,10 @@ const AdminDashboard: React.FC = () => {
 
   const load = useCallback(async () => {
     setLoading(true); setLoadErr('')
-    try { setData(await fetchAdminData()); setLoadedAt(Date.now()) }
+    try {
+      const [o, d] = await Promise.all([fetchOutreach(), SHOW_FUNNEL_TABS ? fetchAdminData() : Promise.resolve(null)])
+      setOutreach(o); if (d) setData(d); setLoadedAt(Date.now())
+    }
     catch (e) { setLoadErr(e instanceof Error ? e.message : 'Failed to load') } finally { setLoading(false) }
   }, [])
 
@@ -863,13 +1011,15 @@ const AdminDashboard: React.FC = () => {
   if (!isSupabaseConfigured) return <div className="flex min-h-screen items-center justify-center text-rose-600">Supabase is not configured.</div>
   if (!session) return <LoginCard />
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  const allTabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: 'outreach', label: 'Email Outreach', icon: <Send size={16} /> },
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
     { id: 'customers', label: 'Customer Overview', icon: <Users size={16} /> },
     { id: 'website', label: 'Website', icon: <Globe size={16} /> },
     { id: 'conversions', label: 'Conversion Log', icon: <Activity size={16} /> },
     { id: 'social', label: 'Social', icon: <Share2 size={16} /> },
   ]
+  const tabs = allTabs.filter((t) => SHOW_FUNNEL_TABS || t.id === 'outreach')
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -900,6 +1050,8 @@ const AdminDashboard: React.FC = () => {
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">This account isn't authorized. Sign out and use an approved email, or add it to <code className="rounded bg-amber-100 px-1">ADMIN_EMAILS</code>.</div>
         ) : loadErr ? (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-700">{loadErr}</div>
+        ) : tab === 'outreach' ? (
+          outreach ? <OutreachView o={outreach} /> : <div className="grid gap-3 sm:grid-cols-3">{[...Array(6)].map((_, i) => <div key={i} className={`${card} h-24 animate-pulse`} />)}</div>
         ) : !data ? (
           <div className="grid gap-3 sm:grid-cols-3">{[...Array(6)].map((_, i) => <div key={i} className={`${card} h-24 animate-pulse`} />)}</div>
         ) : tab === 'overview' ? (
