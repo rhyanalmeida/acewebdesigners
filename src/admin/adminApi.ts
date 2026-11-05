@@ -230,6 +230,43 @@ export interface AdminData {
   outboundReplies?: OutboundReply[] // reply desk log (optional: pre-0015 payloads omit it)
 }
 
+// ── cold-email outreach ──────────────────────────────────────────────────────
+export interface OutreachTally {
+  emailed: number
+  opened: number
+  replied: number
+  purchased: number
+  openRate: number
+  replyRate: number
+}
+export interface OutreachProspect {
+  id: string
+  business_name: string | null
+  business_type: string | null
+  first_name: string | null
+  email: string | null
+  phone: string | null
+  city: string | null
+  state: string | null
+  batch: string | null
+  preview_url: string | null
+  emailed_at: string | null
+  demo_first_viewed_at: string | null
+  demo_view_count: number | null
+  replied_at: string | null
+  reply_sentiment: string | null
+  last_reply: string | null
+  purchased_at: string | null
+  plan: string | null
+  suppressed: boolean | null
+  openedToday: boolean
+}
+export interface OutreachData {
+  totals: OutreachTally & { prospects: number; openedToday: number; repliedToday: number; suppressed: number }
+  batches: (OutreachTally & { batch: string; prospects: number })[]
+  engaged: OutreachProspect[]
+}
+
 async function errorMessage(error: unknown, fallback: string): Promise<{ status: number; message: string }> {
   const ctx = (error as { context?: Response })?.context
   let status = 0
@@ -253,6 +290,16 @@ export async function fetchAdminData(): Promise<AdminData> {
     throw new Error(status === 401 ? 'not-admin' : message)
   }
   return data as AdminData
+}
+
+/** Cold-email outreach stats: who opened their demo link, views, replies. */
+export async function fetchOutreach(): Promise<OutreachData> {
+  const { data, error } = await supabase.functions.invoke('admin-data', { body: { action: 'outreach' } })
+  if (error) {
+    const { status, message } = await errorMessage(error, 'Failed to load outreach')
+    throw new Error(status === 401 ? 'not-admin' : message)
+  }
+  return data as OutreachData
 }
 
 export type ResultKind = 'showed' | 'no_show' | 'purchase'

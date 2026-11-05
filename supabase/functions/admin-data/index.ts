@@ -114,6 +114,101 @@ function segment(rows: ApptRow[]) {
   }
 }
 
+// ── cold-email outreach (prospects) ─────────────────────────────────────────
+interface ProspectRow {
+  id: string
+  business_name: string | null
+  business_type: string | null
+  first_name: string | null
+  email: string | null
+  phone: string | null
+  city: string | null
+  state: string | null
+  batch: string | null
+  source: string | null
+  preview_url: string | null
+  emailed_at: string | null
+  demo_first_viewed_at: string | null
+  demo_view_count: number | null
+  replied_at: string | null
+  reply_sentiment: string | null
+  last_reply: string | null
+  purchased_at: string | null
+  plan: string | null
+  suppressed: boolean | null
+}
+const PROSPECT_COLS =
+  'id, business_name, business_type, first_name, email, phone, city, state, batch, source, preview_url, ' +
+  'emailed_at, demo_first_viewed_at, demo_view_count, replied_at, reply_sentiment, last_reply, purchased_at, plan, suppressed'
+
+/** Calendar date (YYYY-MM-DD) in the business's timezone, so "today" matches the owner's day. */
+const etDate = (iso: string | Date) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date(iso))
+
+async function loadOutreach(supa: ReturnType<typeof admin>) {
+  // PostgREST caps responses at 1000 rows — page through.
+  const rows: ProspectRow[] = []
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supa
+      .from('prospects')
+      .select(PROSPECT_COLS)
+      .eq('is_test', false)
+      .order('created_at', { ascending: true })
+      .range(from, from + 999)
+    if (error) return { data: null, error: error.message }
+    rows.push(...((data ?? []) as unknown as ProspectRow[]))
+    if (!data || data.length < 1000) break
+  }
+  const real = rows.filter((p) => p.source !== 'seed')
+  const today = etDate(new Date())
+
+  const tally = (list: ProspectRow[]) => {
+    const emailed = list.filter((p) => p.emailed_at).length
+    const opened = list.filter((p) => p.demo_first_viewed_at).length
+    const replied = list.filter((p) => p.replied_at).length
+    return {
+      emailed,
+      opened,
+      replied,
+      purchased: list.filter((p) => p.purchased_at).length,
+      openRate: emailed ? Math.round((opened / emailed) * 1000) / 10 : 0,
+      replyRate: emailed ? Math.round((replied / emailed) * 1000) / 10 : 0,
+    }
+  }
+
+  const byBatch = new Map<string, ProspectRow[]>()
+  for (const p of real) {
+    const k = p.batch || 'unbatched'
+    byBatch.set(k, [...(byBatch.get(k) ?? []), p])
+  }
+
+  const engaged = real
+    .filter((p) => p.demo_first_viewed_at || p.replied_at)
+    .map((p) => ({ ...p, openedToday: Boolean(p.demo_first_viewed_at && etDate(p.demo_first_viewed_at) === today) }))
+    .sort((a, b) => {
+      const ta = Math.max(Date.parse(a.demo_first_viewed_at ?? '') || 0, Date.parse(a.replied_at ?? '') || 0)
+      const tb = Math.max(Date.parse(b.demo_first_viewed_at ?? '') || 0, Date.parse(b.replied_at ?? '') || 0)
+      return tb - ta
+    })
+
+  return {
+    data: {
+      totals: {
+        ...tally(real),
+        prospects: real.length,
+        openedToday: engaged.filter((p) => p.openedToday).length,
+        repliedToday: real.filter((p) => p.replied_at && etDate(p.replied_at) === today).length,
+        suppressed: real.filter((p) => p.suppressed).length,
+      },
+      batches: [...byBatch.entries()]
+        .map(([batch, list]) => ({ batch, prospects: list.length, ...tally(list) }))
+        .sort((a, b) => b.batch.localeCompare(a.batch)),
+      engaged,
+    },
+    error: null,
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const pre = handlePreflight(req)
   if (pre) return pre
@@ -240,6 +335,10 @@ Deno.serve(async (req: Request) => {
     const apptDel = await supa.from('appointments').delete({ count: 'exact' }).eq('is_test', true)
     if (apptDel.error) return json({ error: apptDel.error.message }, 500)
     return json({ ok: true, deletedCapiEvents: capiDel.count ?? 0, deletedAppointments: apptDel.count ?? 0 })
+  }
+  if (body.action === 'outreach') {
+    const { data, error } = await loadOutreach(supa)
+    return error ? json({ error }, 500) : json(data)
   }
   // NOTE: test bookings still upsert a contacts row (FK), so the Leads count can
   // drift slightly until cleaned (scripts/clean-booking.mjs).
