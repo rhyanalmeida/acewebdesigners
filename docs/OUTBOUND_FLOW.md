@@ -24,10 +24,10 @@ instantly-poll fn (pg_cron, 15 min) ──► instantly-webhook fn ──► cla
                                                  │                            → generate-site (3-stage Opus chain → Netlify preview)
                                                  ▼
           poller tick: auto_send_pending → POST /emails/reply IN-THREAD from the receiving inbox
-          (demo link + $49/mo + what's included) → demo_link_sent stamps demo_link_sent_at (once)
+          (demo link + $37/mo + what's included) → demo_link_sent stamps demo_link_sent_at (once)
                                                                      │ prospect clicks
                                                                      ▼
-/demo/<token> page (DemoPage.tsx) ──► Stripe $49/mo (create-subscription, plan demo_monthly)
+/demo/<token> page (DemoPage.tsx) ──► Stripe $37/mo (create-subscription, plan demo_monthly; $49 until 2026-11-04)
       ──► stripe-webhook kind:'demo_site' ──► provision-domain (Porkbun register → DNS → Netlify custom_domain → SSL)
       ──► GHL `outbound-purchased` tag → workflow "Outbound — Purchased (Onboarding)" (staff SMS, welcome email, 5-day review ask)
 ```
@@ -58,7 +58,8 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
   ```
   node scripts/apify-scrape-contractors.mjs --state Maine --search "general contractor" --max 250 --website withWebsite --budget 1.6 --out x.csv
   node scripts/enrich-emails.mjs --in x.csv --out x.enriched.csv --concurrency 8
-  node scripts/import-prospects.mjs --file x.enriched.csv --batch 2026-11-ne-gc --trade general-contractor
+  node scripts/verify-emails.mjs --in x.enriched.csv            # MillionVerifier → x.enriched.verified.csv (verify_result/quality)
+  node scripts/import-prospects.mjs --file x.enriched.verified.csv --batch 2026-11-ne-gc --trade general-contractor --verify
   node scripts/apify-scrape-contractors.mjs --run <runId> --out x.csv        # re-fetch a finished run for $0
   ```
   Searches used so far: "general contractor" (MA, CT, RI, NH, ME; VT came in the owner's first
@@ -73,10 +74,28 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 
 ## 3. Import → export → upload (waves)
 
+- **Email quality (2026-11-04, after a 15% bounce day):** `scripts/lib/email-quality.mjs` (vitest, 155 tests) is the
+  ONE junk filter — `extractEmailsFromHtml` takes addresses only from `<a href=mailto:>` and visible text (never
+  `<script>`/`<style>`/comments/attributes, so font-licence and placeholder emails can't leak), `cleanEmail` strips
+  the ``/`
+` tails, `isJunkEmail` drops placeholders, site-builder/hosting/font/agency domains and national chains,
+  `findSharedEmails` drops an address that sits on 2+ different businesses (= the web agency), `pickBestEmail`
+  ranks own-domain → business-like free-mail → info@. `enrich-emails` and `import-prospects` both use it.
+  **Verify before every upload:** `verify-emails.mjs` (MillionVerifier single-email API, key
+  `MILLIONVERIFIER_API_KEY` in `supabase/.env`, cache `leads/.verify-cache.json`, `--dry`/`--limit`/`--force`,
+  prints credits left) → `import-prospects --verify` imports **ok only**, writes `catch_all` rows to
+  `<file>.catchall.csv` for a later low-volume wave (`--verify-accept ok,catch_all`), skips invalid/unknown/
+  disposable/error. `import-prospects --dry` = no Supabase call (so no suppression check).
+  `instantly-remove-leads.mjs --campaign <id> --emails-file <txt|csv> [--mark-junk] [--live]` pulls listed
+  leads out of a campaign (dry by default; `--mark-junk` sets `prospects.suppressed=true, reason junk-email`).
 - `import-prospects.mjs` drops rows with no/placeholder email, suppressed emails, non-US; upserts
   on `gmaps_place_id` (a re-import never resets token / site_status / emailed_at). Column
   contract the scraper must keep: `title, emails/0, phone, city, state, website, placeId,
-  categoryName, totalScore, reviewsCount`.
+  categoryName, totalScore, reviewsCount`. ⚠️ **2026-11-04 bug fixed:** the header matcher never
+  lowercased camelCase names, so `categoryName/totalScore/reviewsCount` silently missed and every
+  restaurant imported with `business_type`/`rating` NULL → generate-site built them as "General
+  Contracting". Backfilled (299 rows) with `scripts/backfill-prospect-fields.mjs`; after any import,
+  check `select count(*) filter (where business_type is null) from prospects where batch='…'` = 0.
 - `export-instantly.mjs --batch <b> --limit N` writes the Instantly CSV for the next N
   un-emailed, non-test, non-suppressed rows and **stamps `emailed_at`** (`--no-stamp` = dry run).
   Merge fallbacks (`first_name`→"there", `city`→"your area") are baked in here.
@@ -85,8 +104,8 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 - **Throughput reality (raised 2026-11-02, owner ask):** 2 inboxes × 30/day = **60 sends/day**; the
   daily limit counts follow-ups, so with 3 steps that is ~20 fresh leads/day (~100/week) at steady
   state. The 496-lead wave 2 clears in ~5 weeks. Step-up plan: 40/day after a week if bounces stay
-  <2% and Instantly warm-up health is green (neither API key can read `/accounts` — check the
-  dashboard); never jump straight to 50. Before 2026-11-02 it was 20/day, 06–11 ET, 4 steps. The lever for "a sale this week" is more inboxes (Workspace user +
+  <2% and Instantly warm-up health is green (`GET /api/v2/accounts` with the READ key returns
+  `warmup_status` + `stat_warmup_score` per inbox — both read 100 on 2026-11-04); never jump straight to 50. Before 2026-11-02 it was 20/day, 06–11 ET, 4 steps. The lever for "a sale this week" is more inboxes (Workspace user +
   connect + 2–3 wk warm-up), not a bigger list. Instantly Growth caps at 1,000 active contacts /
   5,000 emails per month — upload in waves that fit, don't dump the whole table.
 - **Campaign status codes:** 0 draft · 1 active · 2 paused · 3 completed. After every lead
@@ -97,9 +116,18 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 
 - Login `rhyan@getacewebdesigners.com`; workspace `b8362bc8-3628-4609-b0c4-457a054aaff9`;
   **Growth $47/mo** (renews the 14th). Webhooks are Hyper-Growth-only → we poll instead.
-- Sending inboxes (Google Workspace "Ace Web Designers", Business Starter $8.40/user):
-  `rhyan@getacewebdesigners.com`, `rhyan@acewebdesignershq.com`. Domains at Porkbun with
-  SPF/DKIM/DMARC(p=none) + wildcard 301 → acewebdesigners.com. Warm-up ON since 2026-08-31.
+- Sending inboxes (Google Workspace "Ace Web Designers", Business Starter $8.40/user; admin =
+  rhyan@getacewebdesigners.com, creds `~/.secrets/google-workspace-credentials.txt`):
+  `rhyan@getacewebdesigners.com`, `rhyan@acewebdesignershq.com` (warm-up ON since 2026-08-31, score 100) **+
+  `rhyan.a@getacewebdesigners.com`, `rhyan.a@acewebdesignershq.com`** (created 2026-11-04 as rhyan.almeida@, renamed
+  on owner ask — old address = alias; name "Rhyan A."; 2 per domain, ≤3 is the ceiling). New inboxes: ≥14 days
+  warm-up + score ≥90 before joining a campaign, then 5–10 → 15–20 → 30/day over weeks 3–5 (playbook §3); raise the
+  campaign-level `daily_limit` in step (60 → 120). Domains at Porkbun with SPF/DKIM/DMARC(p=none) + wildcard 301 →
+  acewebdesigners.com.
+- **Restaurant campaign `94ab9d2a-…` live settings (2026-11-04):** windows Mon–Fri 07:00–11:30 + 13:30–16:30 ET,
+  gap 6 + 8 random min, `daily_limit` 60 (= 2 × 30), 3 steps (day 0/3/7), text only, tracking off. Capacity rule:
+  window-hours × (60 ÷ avg gap) must exceed each inbox's 30 — the old 3.5 h windows capped sends at ~12/inbox/day.
+  `SCHEDULES.restaurant` + `EMAIL_GAP_MINUTES` in `scripts/lib/instantly-campaign.mjs` match the live values.
 - **Campaign "Outbound — Contractors v2" `46657029-fdd6-4567-b5fe-2165bb298367`.** Created and
   updated by `scripts/instantly-create-campaign.mjs` (parses the v4 sequence doc; `--dry`,
   `--update <id>`). Settings: both inboxes, **30/day**, **weekdays 06:00–16:00 ET** (tz enum
@@ -138,7 +166,7 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 - **Auto-send:** each poller tick asks the webhook for `auto_send_pending` (auto_send, deployed,
   not suppressed, `demo_link_sent_at` null, `reply_email_id` not null) and replies in-thread via
   `POST /emails/reply` from the inbox that received the reply (`demoLinkReply`: greeting, the
-  `/demo/<token>` link once, the $49/mo button, what's included, cancel anytime), then stamps
+  `/demo/<token>` link once, the $37/mo button, what's included, cancel anytime), then stamps
   `demo_link_sent_at`. Sent exactly once; a failed send retries next tick. A reply with no
   `reply_email_id` (e.g. a synthetic test event) can never trigger a send.
 
@@ -169,7 +197,8 @@ reply-desk release    pg_cron */5 — sends rows whose release_after passed: hum
                       Instantly POST /emails/reply {reply_to_uuid, eaccount} → same inbox, same thread.
                       demo_link rows also wait for site_status=deployed; stuck/failed sends → hand-off.
 reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (followupText) and up to 2
-                      nudges (+2 d, +5 d more) for prospects who opened the preview and never replied
+                      nudges (+2 d, +5 d more) for prospects who opened the preview and never replied —
+                      only once the lead is ≥ 8 days past `emailed_at` (the 3-step sequence has finished)
                       (nudgeText; replies to our last SENT email so it threads). A new reply cancels
                       queued nudges/follow-ups.
 ```
@@ -197,8 +226,13 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
 ## 6. Demo build, demo page, purchase, provisioning
 
 - `generate-site` **subject adapter** `{prospectId}`: prospects take the **FAST path** (2026-11-02):
-  one Haiku 5.5 call → a single self-contained index.html → Netlify, **~50s and ~$0.005 per site**
-  (measured twice). The prompt carries a fixed mobile-nav pattern (the first Haiku build shipped
+  one call → a single self-contained index.html → Netlify. **2026-11-04: Haiku 5.5 → Sonnet 5.5**
+  (owner: the demo must look enterprise-grade; ~$0.05 and ~2 min per site — the /demo building
+  state already says "a minute or two"). Food businesses (`isFoodBusiness`) get the RESTAURANT
+  spec (appetite hero, menu highlights, ambiance strip, visit card, no stats/forms/trade words),
+  a food-only design pool (5 food art directions added in migration 0017; `selectDesignSystem`
+  never gives a food business a universal/corporate style) and the restaurant playbook fallback.
+  The prompt carries a fixed mobile-nav pattern (the first Haiku build shipped
   an always-open mobile menu). `{full:true}` forces the 3-stage Opus chain (~$1, 4–20 min) if a
   prospect ever needs the multi-page build. Saves `preview_url` / `netlify_site_id` /
   `site_status` on `prospects`. Needs `ANTHROPIC_API_KEY` credits (org "Ace Web Designers's Individual Org" on
@@ -266,6 +300,86 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
 
 ## 9. Current status (update in place)
 
+- **2026-11-06 audit — PROD BROKEN, fix pending `node scripts/go-live-outbound-fix.mjs` (owner-run):** (1) Netlify
+  auto-built production from `master` (commit `132d313` pushed 2026-11-05) = July code with no `/demo` route, so every
+  demo link opens the homepage since 19:46 UTC that day; cherry-picked to `redesign/marketing-site`, script redeploys
+  + moves the production branch. (2) `STRIPE_PRICE_DEMO_MONTHLY` still = $49 price and Email 3 still says $49
+  (`go-live-restaurant-sites.mjs` steps 4-8 never ran; the fix script runs them). (3) `reply-desk` nudges now wait
+  8 d past `emailed_at` (sequence done). (4) `first_line` NULL everywhere — enrich-haiku only the next wave.
+  Healthy: all 5 crons 200 every tick, 11-05 sent the full 60, the one real reply since the desk went live
+  ("not interested") suppressed correctly, 4 restaurant demo views all carry GHL ids.
+- **2026-11-05 late — DEPLOYED (`scripts/go-live-alerts.mjs`: secret set, migration 0018 applied, demo-site +
+  reply-desk + create-subscription live; verified 404/400 boots + columns present). Only the 3 GHL workflows
+  remain (UI). Original note:** (1) **Lead sourcing without Apify** — `scrape-places.mjs`
+  (our Playwright on Google Maps, $0, proven 47 results/12s) → `enrich-emails` → **`enrich-haiku.mjs`** (Haiku
+  5.5 reads each site: owner first name only with a quote, cuisine, dishes, `first_line` = the email opener,
+  ≈$0.0004/site) → verify → import. (2) **Personalized Email 1** — migration `0018` adds
+  `prospects.first_line/hook/cuisine/dishes/owner_evidence`; export sends `{{first_line}}` with the v2 opener as
+  fallback; v3 copy in the sequence doc, push for NEW waves only. (3) **Specific staff texts** —
+  `outbound-replied` / `outbound-viewed` / `outbound-checkout` tags with details in custom fields
+  (`docs/GHL_OUTBOUND_ALERTS_2026-11-05.md`: run the custom-fields script, set the secret, deploy demo-site +
+  reply-desk + create-subscription, build 3 GHL workflows, then disable "Interested Lead"). (4) **`ace-site`
+  skill** for hand-built multi-page sites on Netlify (`docs/ZOKAGO_COMPARISON_2026-11-05.md`).
+
+- **2026-11-04 list-quality read (day 2 of restaurants):** 27 contacted / 50 sent → **4 bounces (15% of
+  contacted)**, 1 reply (declined). Contractors ran 321 contacted / 1 bounce, so this is the restaurant LIST,
+  not the inboxes. Every bounce was a scraped placeholder or third-party address (`mail@gmail.com`,
+  `mymail@mailservice.com`, `impallari@gmail.com` = a font designer's licence email in the site CSS, one dead
+  mailbox). The same pattern sits in what is still queued: ~15 junk/agency addresses among the 256 un-contacted
+  restaurant leads (`example@mysite.com`, `hi@mystore.com`, `team@latofonts.com`, `astigma@astigmatic.com`,
+  `pressable@alias-solutions.com`, `hello@rfuenzalida.com`, Barnes & Noble / Chili's corporate, two with a
+  trailing backslash from the enricher's regex) and 25 junk + ~100 non-matching-domain rows in the 691 un-emailed
+  `2026-11-ne-gc`. Instantly's auto-pause is 5% and only arms after 200 sends, so it will NOT catch this.
+  Root cause: `enrich-emails.mjs` has no verification step and a 10-pattern junk filter. Decision pending
+  (owner): pull the queued junk from the campaign, add MillionVerifier (or Instantly 0.25-credit verify) before
+  every upload, widen the junk/agency filters, and only then add inboxes. Both inboxes: warm-up score 100.
+  **Same day, later:** (1) **Why only ~25/day went out:** the restaurant windows (09:30–11 + 14–16 ET = 3.5 h) at a
+  10–25 min gap cap each inbox at ~12 sends, so the 60 `daily_limit` was unreachable. PATCHed via API to
+  **07:00–11:30 + 13:30–16:30 ET, gap 6 + 8 random** (7.5 h × ~6/h > 30/inbox) — full 60/day from 2026-11-05.
+  (2) **MillionVerifier account** created under hello@ (creds `~/.secrets/millionverifier-credentials.txt`, 500 free
+  credits, then $39/10k; key = `MILLIONVERIFIER_API_KEY` in `supabase/.env`, local scripts only). (3) Research-backed
+  operating playbook written: **`docs/COLD_EMAIL_SALES_PLAYBOOK_2026-11-04.md`** (weekly sequence, v3 A/B copy,
+  bounce ladder, new-inbox ramp, benchmarks → ~1 sale per 1,000 verified contacts, decision thresholds). (4) Two more
+  inboxes (one per existing domain, 2 ≤ 3 per domain) are the agreed next step — blocked only on the Workspace admin
+  password, which the auto-mode classifier will not let an agent read; the owner types it into the automation browser.
+  **Later the same night:** inboxes 3+4 created in Admin console (owner typed the password), first sign-in done,
+  passwords set (creds file), renamed to `rhyan.a@` per owner; **both CONNECTED to Instantly via Google OAuth and
+  WARM-UP ON 2026-11-05 ~03:50 UTC (owner typed the Instantly Google login; 4 accounts now, `warmup_status 1` on
+  all). Earliest campaign join ≈ 2026-11-19 (≥14 days + score ≥90), then 5–10 → 15–20 → 30/day.** Instantly's
+  bounce auto-pause threshold is plan-gated (customising it is a Hypergrowth upsell) — stays at the 5%/200-send
+  default, so the playbook's bounce ladder is applied by hand. **Queue verified:** the 256 un-contacted restaurant leads went through MillionVerifier →
+  **ok 159 · catch_all 36 · junk 27 · invalid 23 · unknown 11** (`leads/restaurants-queued-2026-11-04.verified.csv`).
+  Removal lists: `.remove-dead.txt` (50 = junk+invalid, delete + `--mark-junk`) and `.remove-held.txt` (47 =
+  catch_all+unknown, delete only; rows kept in `.held.csv` for a later wave). The `--live` runs were denied by the
+  auto-mode classifier ("Unverifiable Deletion Scope"); **run on the owner's say-so 2026-11-05 ~04:00 UTC: 50 + 47
+  deleted, 55 prospect rows marked `junk-email`** (first attempt failed — Instantly's API 400s a DELETE that carries
+  a JSON content-type with no body; the script now sends no content-type on body-less calls). Campaign analytics
+  `leads_count` lags the leads list after deletes. After removal + the new wave the campaign holds 307 leads, 280 queued, every one verified-ok (≈ 14 send-days) → the next
+  wave (new scrape → verify → import --verify) must be ready by ~2026-11-14, when the Instantly contact cap resets.
+  **Next wave DONE the same night (first run of the new pipeline):** Apify "restaurant <city>" × Worcester, Lowell,
+  Framingham, Cambridge, Somerville, Quincy, Brockton (`--max 80 --website withWebsite`) → 560 places, $2.24 → crawler
+  210 emails (0 junk — the mailto/visible-text extractor) → MillionVerifier **ok 147 · catch_all 45 · invalid 10 ·
+  unknown 8** → batch **`2026-11-ma-restaurants-central`** = 144 prospects (5 were already-emailed overlaps) →
+  **121 uploaded** to the restaurant campaign (campaign now 404 leads; `POST /leads/add` answered
+  "Remaining uploads: 121" — Growth's monthly contact cap is now 0 until the 14th). Left for after the reset: 18
+  verified-ok rows (`export-instantly --batch 2026-11-ma-restaurants-central`) + 45 catch-alls
+  (`leads/restaurants-ma-central-2026-11-04.enriched.verified.catchall.csv`). Apify cycle: $18.4 of $19 used (ends
+  2026-12-01) — the next scrape needs the owner to raise the Apify spend limit or a Google Places API source.
+  MillionVerifier: 316 credits left.
+- **2026-11-04 (incident + fixes):** every restaurant prospect had `business_type`/`rating` NULL — the
+  import header matcher never lowercased camelCase Apify columns — so the two restaurant demos opened so far
+  (Point Breeze, Steaming Tender) were built as "General Contracting" with construction photos. Fixed the
+  matcher, backfilled 299 rows (`scripts/backfill-prospect-fields.mjs`), rebuilt both at the SAME preview
+  URLs (verified by eye, desktop + phone: appetite hero, real Google rating chip, grouped menu, ambiance strip,
+  visit card). generate-site fast path: Haiku 5.5 → **Sonnet 5.5** (adaptive thinking, effort medium — Sonnet
+  5.5 400s on `thinking:disabled`; first redeploy died on it), restaurant ingredient list + playbook fallback,
+  5 food-only design directions (migration 0017) with the on-trade pool rule. Builds now ~55-60s, ~$0.05.
+  Email copy → **v2** (~40 words each) on the live campaign. **Price cut $49 → $37/mo (owner):** Stripe price
+  `price_1UYF6ZJHIJK0EFOz2tJCdGJZ` created (live); code/copy/docs say $37; **pending owner-run**
+  `node scripts/go-live-restaurant-sites.mjs` (plain, from step 1) = redeploy generate-site with the nav-legibility
+  rule (Point Breeze's nav links were dark-on-dark over its hero photo) → rebuild Point Breeze → set
+  `STRIPE_PRICE_DEMO_MONTHLY` → deploy reply-desk + instantly-poll → Netlify → email 3 → archive the $49 price. Until step 4 runs, checkout still
+  charges $49 (the deployed /demo page still shows $49 too, so nothing is inconsistent yet).
 - **2026-11-03 late:** owner switched the funnel to RESTAURANTS (`docs/RESTAURANT_OUTBOUND_PLAN_2026-11-03.md`).
   Contractor campaign paused. Restaurant campaign `94ab9d2a-faac-46da-8470-7ade9c9fd55c` created (not running), 283
   leads uploaded (273 site-email + 10 Facebook-email). Restaurant demo spec + food photo library in generate-site

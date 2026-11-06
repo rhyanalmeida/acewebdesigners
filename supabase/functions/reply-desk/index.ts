@@ -31,7 +31,7 @@ import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { classifyReply, type RuleSentiment } from '../_shared/replyClassifier.ts'
 import { demoLinkReply } from '../_shared/instantlyEvents.ts'
-import { ghlAddTags, ghlFindContactId, ghlRemoveTags, ghlSyncStage, ghlUpdateContactFields } from '../_shared/ghl.ts'
+import { ghlAddTags, ghlFindContactId, ghlOutboundEvent, ghlRemoveTags, ghlSyncStage, ghlUpdateContactFields } from '../_shared/ghl.ts'
 import {
   CLASSIFY_TOOL,
   buildSystemPrompt,
@@ -55,12 +55,15 @@ const STALE_SENDING_MS = 10 * 60_000
 const NEEDS_HUMAN_TAG = 'outbound-needs-human'
 const NUDGE_1_AFTER_MS = 2 * 24 * 3600e3
 const NUDGE_2_AFTER_MS = 5 * 24 * 3600e3
+// Nudges wait until the Instantly sequence (3 steps, day 0/3/7) has finished for that lead — otherwise a
+// viewer could get E2, nudge 1, E3 and nudge 2 inside one week (audit 2026-11-06).
+const SEQUENCE_DONE_AFTER_MS = 8 * 24 * 3600e3
 
 /** What E1 said — context for the model (keep in step with the two sequence docs in docs/). */
 const CONTRACTOR_EMAIL_SUMMARY = `Subject: {company} homepage?
-Rhyan came across their business while looking at contractors in their area, said he designs websites for contractors and put together a homepage preview for them built around their work (not a template). The preview link was in the email. It's free, there's no call; if they like it, taking it live is $49/month with domain, hosting and updates included, cancel anytime. He asked them to have a look and tell him what to change.`
+Rhyan came across their business while looking at contractors in their area, said he designs websites for contractors and put together a homepage preview for them built around their work (not a template). The preview link was in the email. It's free, there's no call; if they like it, taking it live is $37/month with domain, hosting and updates included, cancel anytime. He asked them to have a look and tell him what to change.`
 const RESTAURANT_EMAIL_SUMMARY = `Subject: {company} website?
-Rhyan came across their restaurant while looking at restaurants in their city, said he designs websites for local restaurants and mocked up a new homepage for them with the menu, hours and directions up top, built to load fast on a phone. The preview link was in the email. It's free, there's no call; if they like it, taking it live is $49/month — the domain they already have or a new one, hosting, and menu/hours changes whenever they need them, cancel anytime. He asked them to have a look and tell him what to change.`
+Rhyan said he designs websites for restaurants around their city and put together a new homepage for them — the menu, a tap-to-call button and directions right at the top, built for phones. The preview link was in the email. It's free to look, there's no call; if they like it, taking it live is $37/month, all in — the domain they already have or a new one, hosting, and any menu or hours change whenever they need it, cancel anytime. He asked them to reply with anything that's off and he'd change it. (v2 copy, 2026-11-04 — docs/OUTBOUND_COLD_SEQUENCE_RESTAURANTS.md)`
 const originalEmailSummary = (p: { business_name: string; business_type: string | null }) =>
   (isFoodBusiness(p.business_type) ? RESTAURANT_EMAIL_SUMMARY : CONTRACTOR_EMAIL_SUMMARY).replace('{company}', p.business_name)
 
@@ -211,7 +214,7 @@ async function escalate(supa: ReturnType<typeof admin>, p: ProspectRow, intent: 
   await supa.from('prospects').update({ handoff_at: new Date().toISOString(), reply_sentiment: intent }).eq('id', p.id)
   if (p.is_test) return
   const id = (await tagLead(p)) ?? (await ghlFindContactId({ email: p.email ?? undefined, phone: p.phone ?? undefined }))
-  await ghlUpdateContactFields({ email: p.email ?? undefined, phone: p.phone ?? undefined, qualifiers: { last_reply_text: text.slice(0, 1500), last_reply_intent: `${intent} — ${reason}`.slice(0, 200) } })
+  await ghlUpdateContactFields({ email: p.email ?? undefined, phone: p.phone ?? undefined, qualifiers: { last_reply_text: text.slice(0, 1500), last_reply_intent: `${intent} — ${reason}`.slice(0, 200), reply_sentiment: intent, last_event: `${new Date().toISOString().slice(0, 16).replace('T', ' ')} — Replied (${intent}), needs a person: ${text.slice(0, 120)}`.slice(0, 250) } })
   if (id) {
     await ghlRemoveTags(id, [NEEDS_HUMAN_TAG])
     await ghlAddTags(id, [NEEDS_HUMAN_TAG])
@@ -283,7 +286,15 @@ async function classify(supa: ReturnType<typeof admin>, replyId: string) {
       .eq('id', p.id)
     let built = false
     if (decision.startBuild) built = await startBuild(supa, p.id)
-    if (!p.is_test && decision.intent !== 'later' && decision.intent !== 'objection_timing') await tagLead(p)
+    // Staff text "they replied" with the words + sentiment (tag outbound-replied; re-added every reply).
+    // Escalations already text via outbound-needs-human, so only auto-answered replies fire this one.
+    if (!p.is_test) {
+      await ghlOutboundEvent('replied', {
+        email: p.email ?? undefined, phone: p.phone ?? undefined, firstName: p.first_name ?? undefined, lastName: p.last_name ?? undefined,
+        businessName: p.business_name, city: p.city ?? undefined, state: p.state ?? undefined,
+        qualifiers: { business_type: p.business_type ?? undefined, preview_url: demoUrl(p) },
+      }, { reply_sentiment: decision.intent, last_reply_text: inbound.body.slice(0, 1500), last_reply_intent: `${decision.intent} — auto-answered (${decision.kind})`.slice(0, 200) })
+    }
     console.log(`[reply-desk] ${p.email} ${decision.intent} → ${decision.kind} at ${releaseAfter.toISOString()} build=${built}`)
   }
   return json({ ok: true, ...audit })
@@ -387,8 +398,8 @@ async function followups(supa: ReturnType<typeof admin>) {
     if (!error) queued++
   }
 
-  // viewed the preview, never replied, never bought → 2 nudges
-  const { data: viewers } = await supa.from('prospects').select(PROSPECT_COLS).eq('suppressed', false).eq('is_test', false).is('purchased_at', null).is('handoff_at', null).is('replied_at', null).not('demo_first_viewed_at', 'is', null).not('emailed_at', 'is', null).lt('nudge_count', 2).limit(25)
+  // viewed the preview, never replied, never bought, sequence finished → 2 nudges
+  const { data: viewers } = await supa.from('prospects').select(PROSPECT_COLS).eq('suppressed', false).eq('is_test', false).is('purchased_at', null).is('handoff_at', null).is('replied_at', null).not('demo_first_viewed_at', 'is', null).lt('emailed_at', new Date(now - SEQUENCE_DONE_AFTER_MS).toISOString()).lt('nudge_count', 2).limit(25)
   for (const p of (viewers ?? []) as unknown as ProspectRow[]) {
     if (!p.email) continue
     const { data: prior } = await supa.from('outbound_replies').select('status, sent_at').eq('prospect_id', p.id).eq('kind', 'nudge').order('created_at', { ascending: false }).limit(1)

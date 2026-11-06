@@ -24,12 +24,17 @@ module (`_shared/ghl.ts`) so they can be cut later.
 | Push DB migrations | `npx supabase db push` |
 | Set Edge secrets | `npx supabase secrets set --env-file supabase/.env` |
 | Meta campaign status | `npm run meta-ads:status` |
+| Scrape leads (no Apify) | `node scripts/scrape-places.mjs --search restaurant --city "Worcester, MA" --max 80 --out leads/x.csv` |
+| Enrich names/hooks (Haiku) | `node scripts/enrich-haiku.mjs --in leads/x.enriched.csv` |
+| Hand-build + deploy a site | `ace-site` skill → `node ~/.claude/skills/ace-site/deploy.mjs <slug> [--prospect <id>]` |
 | Redeploy frontend (no git) | `npm run build && npx netlify deploy --prod --dir=dist --site=4ea5b9c0-5a70-406f-a928-7f009290f519` |
 
 > First-time Supabase: `npx supabase link --project-ref dwsmrruzufqpopdzlszw` (needs `SUPABASE_ACCESS_TOKEN`).
 > Netlify deploy token = `NETLIFY_AUTH_TOKEN` from `supabase/.env` (`export` it first).
-> ⚠️ **Netlify's production branch is `master`, but work happens on `redesign/marketing-site`** — so
-> `git push` does NOT ship the frontend. Any `src/` change needs the direct deploy command above.
+> ⚠️ **Netlify auto-builds production from its git branch. Work happens on `redesign/marketing-site`; `master` is
+> July code with NO demo route — a push to `master` on 2026-11-05 shipped it and killed every /demo link.**
+> `go-live-outbound-fix.mjs` moves the production branch to `redesign/marketing-site`; never push to `master`.
+> Until then (and for any unpushed `src/` change) ship with the direct deploy command above.
 > Verify after: fetch `https://acewebdesigners.com/` → the `assets/js/index-*.js` it references →
 > grep for a string you just added.
 
@@ -60,9 +65,9 @@ Supabase Edge Functions (supabase/functions, Deno)
   result         admin: No-Show / Showed / Purchase → CAPI CompleteRegistration / Purchase; No-Show also tags funnel-noshow in GHL
   admin-data     admin: dashboard payload (health + stats + lists)
   capi           guarded manual/test CAPI endpoint (verification) + admin retry of failed events
-  generate-site  bookings: 3-stage Opus 4.8 chain; prospects: FAST single-page Haiku 5.5 (~50s, ~$0.005)
+  generate-site  bookings: 3-stage Opus 4.8 chain; prospects: FAST single-page Sonnet 5.5 (~2 min, ~$0.05); food vs trade spec via _shared/niche.ts
   generate-copy  restaurant wizard AI copy (claude-haiku-4-5)
-  demo-site      outbound: /demo/<token> status + the one-EVER demo build gate (fast Haiku path, on open)
+  demo-site      outbound: /demo/<token> status + the one-EVER demo build gate (fast path, on open)
   site-edit      outbound: post-purchase change requests (photos → storage) → Sonnet edit → held 30-45 min → pg_cron release
   domain-search  outbound: Porkbun .com availability for the checkout domain picker (token-gated)
   provision-domain outbound: post-purchase Porkbun register + DNS → Netlify custom_domain → SSL poll
@@ -210,8 +215,12 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   against itself). External callers must use an **admin JWT** (mint like `funnel-admin.mjs`) — the
   Management-API service_role key does NOT equal the runtime-injected one, so `x-internal-key` from
   outside 401s. Deployed `--no-verify-jwt`.
-- **Design systems (art direction):** 18 directions (palette + Google fonts + layout + motion + photo
-  treatment; 3 universal: nocturne-luxe, editorial-serif, clean-corporate-trust). **Source of truth =
+- **Design systems (art direction):** 23 directions (palette + Google fonts + layout + motion + photo
+  treatment; 3 universal: nocturne-luxe, editorial-serif, clean-corporate-trust; 5 food-only added
+  2026-11-04 in migration `0017`: candlelit-bistro, trattoria-rustic, fiesta-color, harbor-seafood,
+  morning-light-cafe). **Pool rule** (`selectDesignSystem`, vitest-covered): 2+ trade-fit styles →
+  trade-fit only; a food business (`isFoodBusiness`) stays on food styles with even one match — a
+  restaurant must never render in a corporate/contractor look; 1 match → + universals; 0 → all. **Source of truth =
   the `design_systems` Postgres table** (migration `0007`; edit/add rows via SQL, next build picks them
   up, no deploy). `DEFAULT_DESIGN_SYSTEMS` in `_shared/designSystems.ts` is the SEED **and** runtime
   FALLBACK if the DB read is empty/fails. Selection is **deterministic + trade-aware**
@@ -259,44 +268,50 @@ stored attribution: `capi` fn `{retryEventId}`, admin JWT). Stats exclude `is_te
   falls back to `FALLBACK_PLAYBOOK`; seed new trades locally.
 
 ## Outbound cold-email demo funnel — LIVE (restaurants since 2026-11-03; contractors paused)
-**Full runbook = `docs/OUTBOUND_FLOW.md` — read it before touching anything outbound.** It holds the
-end-to-end diagram, every script/flag, Instantly + GHL + Porkbun specifics, the verification log and the
-current status. Only the invariants live here:
-- **Niche = local restaurants (owner decision 2026-11-03; plan + research `docs/RESTAURANT_OUTBOUND_PLAN_2026-11-03.md`).**
-  Contractor campaign `46657029-…` PAUSED (not deleted). Restaurant campaign `94ab9d2a-faac-46da-8470-7ade9c9fd55c`,
-  copy `docs/OUTBOUND_COLD_SEQUENCE_RESTAURANTS.md`, sends Mon–Fri 09:30–11 + 14–16 ET. `_shared/niche.ts`
-  `isFoodBusiness(business_type)` switches the fast demo spec (menu/call/directions, 44-photo food library,
-  real Google rating only) and the reply-desk summary; contractors keep the old spec. **LIVE 2026-11-03** (campaign
-  active, 283 leads, first sends Mon 2026-11-03 09:30 ET). Re-run `node scripts/go-live-restaurants.mjs` after changes.
-- **Own domain at checkout (2026-11-03):** `domain_mode` register|own. Own = no Porkbun; `provision-domain`
-  attaches to Netlify → `awaiting_dns`; /demo shows the 2 DNS records; hourly `domain-recheck` cron → live. DEPLOYED.
-- Scraped business lists → cold email via **Instantly.ai only** (never GHL/LC Email, never from
-  acewebdesigners.com) → reply-gated: a "yes" auto-builds the demo (`generate-site` `{prospectId}`,
-  one Opus build EVER per prospect) and the poller replies in-thread with `/demo/<token>` →
-  $49/mo Stripe → `provision-domain` (Porkbun, NON-refundable) → GHL `outbound-*` tags drive staff
-  alerts + onboarding. **No Meta pixel/CAPI** anywhere in this funnel.
-- `suppressions` is the CAN-SPAM source of truth; `import-prospects.mjs` + `export-instantly.mjs`
-  both enforce it. Footer postal address is required (16 CFR 316.2 — no B2B exemption).
-- Lead sourcing: Apify Google Maps (`scripts/apify-scrape-contractors.mjs`, Starter plan, always
-  `--budget`) + our own `scripts/enrich-emails.mjs` for emails ($0, same yield as the paid add-on).
-  Google Maps publishes no emails, so "no-website" businesses are emailable ONLY when their listing points
-  at a Facebook page: scrape `allPlaces`, take `websiteKind=social` rows, run Apify `facebook-pages-scraper`
-  (23% yield, 2026-11-03). Everyone else on the list has a real website; copy is the **better site** angle.
-- Pipeline: scrape → enrich → `import-prospects` (batch) → `export-instantly --limit N` (stamps
-  `emailed_at`) → `instantly-upload-leads` → re-activate the campaign if it reads COMPLETED (3).
-  Throughput is 2 inboxes × 30/day (3-step sequence, 06–16 ET; raised 2026-11-02); more inboxes,
-  not a bigger list, is the volume lever.
-- **Reply desk — LIVE 2026-11-03 (`REPLY_DESK_ENABLED=true`, v5 copy on the campaign, /admin panel deployed, dry-run gate 15/15):** replies are answered by
-  `reply-desk` (Sonnet, facts ONLY from `_shared/outboundFacts.ts`, `_shared/replyPolicy.ts` decides, 20–90 min
-  business-hours hold, sent via Instantly from the SAME inbox in-thread); remove/hostile/no auto-suppress with no
-  build and no alert; anything else → GHL tag `outbound-needs-human` → SMS to Rhyan. `REPLY_DESK_ENABLED=true`
-  routes the webhook to the desk; off = legacy yes-only auto-build. Runbook §5b.
-- Replies: `instantly-poll` Edge fn (pg_cron every 15 min, state in `poll_state`) → `instantly-webhook` fn; the Windows task "Instantly Poll" is only the fallback. Every reply tags
-  `outbound-lead` in GHL; the GHL token in local `supabase/.env` is stale — the deployed secret works.
-- Keys for the local scripts (`APIFY_TOKEN`, `INSTANTLY_ADMIN_API_KEY`) live in `supabase/.env` and are
-  NEVER Edge secrets — never run `secrets set --env-file`. `INSTANTLY_API_KEY` (read) and
-  `INSTANTLY_SENDER_API_KEY` (emails:all) ARE Edge secrets — `instantly-poll` + `reply-desk` need them
-  (set one at a time; the poller 503s "not configured" without them — it did until 2026-11-02).
+**This is how we get customers. Runbook = `docs/OUTBOUND_FLOW.md` (every flag, id, verification log) — read it
+before touching anything outbound.** The flow, step by step:
+
+| # | Step | Where | What happens |
+|---|---|---|---|
+| 1 | Find businesses | `scripts/scrape-places.mjs` (our Playwright on Google Maps, $0; Apify = fallback) | CSV of name/category/rating/website/phone/`ChIJ…` place id |
+| 2 | Find emails | `enrich-emails.mjs` → `enrich-haiku.mjs` | crawl each site (mailto + visible text only); Haiku adds owner first name, cuisine, dishes, `first_line` opener |
+| 3 | Verify | `verify-emails.mjs` (MillionVerifier) | **never upload unverified** — `ok` only; catch-alls parked |
+| 4 | Import | `import-prospects.mjs --verify --batch <b> --trade <t>` | upsert `prospects` (dedup on place id, drops suppressed/non-US); **check `business_type` is never NULL** (NULL = contractor demo) |
+| 5 | Export + upload | `export-instantly.mjs --batch <b> --limit N` → `instantly-upload-leads.mjs` | stamps `emailed_at`; CSV vars `first_name,company_name,city,demo_url,first_line,hook,cuisine` |
+| 6 | Send | Instantly campaign `94ab9d2a-…` (restaurants) | 3 steps day 0/3/7, every email links `{{demo_url}}`, Mon–Fri 07–11:30 + 13:30–16:30 ET, `daily_limit` 60 = 2 inboxes × 30; re-activate when status = 3 (COMPLETED) |
+| 7 | Click → demo builds | `/demo/<token>` (`DemoPage.tsx`) → `demo-site` fn | first open flips `site_status none→generating` (one build EVER) → `generate-site {prospectId}` fast Sonnet 5.5 single page (~1 min, ~$0.05) → Netlify preview; GHL tag `outbound-viewed` (staff SMS) |
+| 8 | Reply → desk | pg_cron `instantly-poll` (15 min) → `instantly-webhook` → `reply-desk` | rules (`replyClassifier.ts`): remove/hostile/no → suppress silently. Else Sonnet classifies + drafts (facts only from `outboundFacts.ts`), `replyPolicy.ts` decides: yes → demo-link reply; question/price → drafted answer (≤2 per thread); later → ack + follow-up date; unclear → GHL `outbound-needs-human` SMS. Sends go out 20–90 min later, business hours, in-thread from the SAME Instantly inbox (cron `reply-desk-release` */5) |
+| 9 | Nudges | cron `reply-desk-followups` daily 13:00 UTC | viewed-but-silent: nudge +2 d and +5 d (replies to our last sent email); "later": one re-touch |
+| 10 | Buy | demo page → `create-subscription` → Stripe **$37/mo** → `stripe-webhook kind:'demo_site'` | GHL `outbound-checkout` then `outbound-purchased` (welcome email + 5-day review ask) |
+| 11 | Go live | `provision-domain` | register at Porkbun (NON-refundable, prepaid balance) or `domain_mode=own` → DNS → Netlify custom domain → SSL; hourly `domain-recheck` cron |
+| 12 | Updates | `/demo` purchased state → `site-edit` fn | Sonnet edits the live files, held 30–45 min (never look instant), cron `site-edit-release` deploys |
+
+**Invariants:** send ONLY through Instantly (never GHL/LC Email, never from acewebdesigners.com). `suppressions`
+is the CAN-SPAM source of truth (import + export enforce it; footer postal address required). No Meta pixel/CAPI
+here. Nothing a prospect sees may look automated (`lintDraft` bans AI/minute words, "!", lists, foreign links).
+Never invent stats. `_shared/niche.ts isFoodBusiness(business_type)` switches demo spec, design pool, playbook
+and desk copy — contractors keep the old spec. Price **$37** lives in four places — `STRIPE_PRICE_DEMO_MONTHLY`
+secret, `outboundPlan.ts`, `outboundFacts.ts`, Email 3 in the campaign — change all four together.
+Keys: `INSTANTLY_ADMIN_API_KEY`, `APIFY_TOKEN`, `MILLIONVERIFIER_API_KEY` = local `supabase/.env` only (never
+`secrets set --env-file`); `INSTANTLY_API_KEY` + `INSTANTLY_SENDER_API_KEY` + `REPLY_DESK_ENABLED` ARE Edge
+secrets. Local `GHL_API_TOKEN` is stale; the deployed one works. Volume lever = more warmed inboxes (≥14 d
+warm-up, score ≥90, ramp 5→30/day), not a bigger list; Growth plan caps 1,000 active contacts/month.
+Health check: `net._http_response` rows for `instantly-poll` / `reply-desk` 200 every tick; `/admin` →
+Email Outreach. Playbook: `docs/COLD_EMAIL_SALES_PLAYBOOK_2026-11-04.md`. Hand-built upgrade sites: `ace-site` skill.
+
+**Audit 2026-11-06 — fixes CODED, deploy PENDING: run `node scripts/go-live-outbound-fix.mjs` (owner; agent runs
+can't deploy prod).** It builds + deploys the frontend, moves Netlify's production branch to `redesign/marketing-site`,
+deploys `admin-data` + `reply-desk`, runs the $37 steps (`go-live-restaurant-sites.mjs --from 4`) and verifies.
+Until it runs, PROD IS BROKEN:
+1. **Every `/demo/<token>` link opens the HOME page** (since 2026-11-05 19:46 UTC). A commit pushed to `master`
+   (`132d313`, admin outreach tab) made Netlify auto-build production from the July code, which has no demo route.
+   Cherry-picked onto this branch (`e0334cb`, outreach tab + funnel tabs kept); local build has the DemoPage chunk.
+2. **Checkout charges $49, not $37** — deployed `STRIPE_PRICE_DEMO_MONTHLY` digest = the $49 price
+   (`price_1UAK4B…`); live Email 3 says $49; code/desk say $37.
+3. Nudges stacked on the Instantly sequence → `reply-desk` now waits 8 days past `emailed_at` before nudge 1.
+4. `first_line` is NULL on every prospect (all batches predate `enrich-haiku`) — run it on the 18 un-emailed
+   `2026-11-ma-restaurants-central` rows + every new scrape; push the v3 sequence only with those uploads.
+5. Instantly admin key lacks `accounts:read` — warm-up scores need the UI until the key is regenerated.
 
 ## Restaurant self-serve funnel — BUILT, DEPLOY PENDING
 A third, fully isolated ad funnel (own pixel + dataset + tags + page) — nothing crosses into
