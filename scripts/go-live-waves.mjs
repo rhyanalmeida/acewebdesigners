@@ -31,7 +31,7 @@ const run = (label, cmd, args, opts = {}) => {
 const env = loadDotEnv()
 const NETLIFY_SITE = '4ea5b9c0-5a70-406f-a928-7f009290f519'
 
-if (from <= 1) run('1/6 db push (migration 0019)', 'npx', ['supabase', 'db', 'push', '--yes'])
+if (from <= 1) run('1/6 db push (migration 0019)', 'npx', ['supabase', 'db', 'push', '--remote', '--yes'])
 
 if (from <= 2) {
   const [{ n }] = await sql(`select (select count(*) from prospects where site_status='generating') + (select count(*) from appointments where site_status='generating' and created_at > now() - interval '2 hours') as n`)
