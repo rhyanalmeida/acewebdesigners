@@ -31,10 +31,9 @@ module (`_shared/ghl.ts`) so they can be cut later.
 
 > First-time Supabase: `npx supabase link --project-ref dwsmrruzufqpopdzlszw` (needs `SUPABASE_ACCESS_TOKEN`).
 > Netlify deploy token = `NETLIFY_AUTH_TOKEN` from `supabase/.env` (`export` it first).
-> ⚠️ **Netlify auto-builds production from its git branch. Work happens on `redesign/marketing-site`; `master` is
-> July code with NO demo route — a push to `master` on 2026-11-05 shipped it and killed every /demo link.**
-> `go-live-outbound-fix.mjs` moves the production branch to `redesign/marketing-site`; never push to `master`.
-> Until then (and for any unpushed `src/` change) ship with the direct deploy command above.
+> ⚠️ **Netlify git builds are STOPPED (2026-11-06) and its production branch is `master` (July code, no demo route).**
+> Work happens on `redesign/marketing-site`; `git push` never ships the frontend — use the direct deploy command above.
+> Never re-enable git builds while the branch reads `master` (a 2026-11-05 push to master killed every /demo link).
 > Verify after: fetch `https://acewebdesigners.com/` → the `assets/js/index-*.js` it references →
 > grep for a string you just added.
 
@@ -299,19 +298,13 @@ warm-up, score ≥90, ramp 5→30/day), not a bigger list; Growth plan caps 1,00
 Health check: `net._http_response` rows for `instantly-poll` / `reply-desk` 200 every tick; `/admin` →
 Email Outreach. Playbook: `docs/COLD_EMAIL_SALES_PLAYBOOK_2026-11-04.md`. Hand-built upgrade sites: `ace-site` skill.
 
-**Audit 2026-11-06 — fixes CODED, deploy PENDING: run `node scripts/go-live-outbound-fix.mjs` (owner; agent runs
-can't deploy prod).** It builds + deploys the frontend, moves Netlify's production branch to `redesign/marketing-site`,
-deploys `admin-data` + `reply-desk`, runs the $37 steps (`go-live-restaurant-sites.mjs --from 4`) and verifies.
-Until it runs, PROD IS BROKEN:
-1. **Every `/demo/<token>` link opens the HOME page** (since 2026-11-05 19:46 UTC). A commit pushed to `master`
-   (`132d313`, admin outreach tab) made Netlify auto-build production from the July code, which has no demo route.
-   Cherry-picked onto this branch (`e0334cb`, outreach tab + funnel tabs kept); local build has the DemoPage chunk.
-2. **Checkout charges $49, not $37** — deployed `STRIPE_PRICE_DEMO_MONTHLY` digest = the $49 price
-   (`price_1UAK4B…`); live Email 3 says $49; code/desk say $37.
-3. Nudges stacked on the Instantly sequence → `reply-desk` now waits 8 days past `emailed_at` before nudge 1.
-4. `first_line` is NULL on every prospect (all batches predate `enrich-haiku`) — run it on the 18 un-emailed
-   `2026-11-ma-restaurants-central` rows + every new scrape; push the v3 sequence only with those uploads.
-5. Instantly admin key lacks `accounts:read` — warm-up scores need the UI until the key is regenerated.
+**Audit 2026-11-06 — FIXED + verified same day** (`scripts/go-live-outbound-fix.mjs`): /demo route restored on prod
+(a push to `master` had auto-built July code with no demo page from 11-05 19:46 UTC until 11-06 ~05:00 UTC — every demo link
+opened the homepage; cherry-pick `e0334cb` kept the outreach admin tab), checkout charges **$37** (secret set, $49 price
+archived, Email 3 says $37), nudges wait 8 d past `emailed_at`. **Netlify git builds are now STOPPED** (`stop_builds=true`
+via API — the production branch is still `master` and the API refuses to change it; the direct `netlify deploy` command is
+the only way the frontend ships, which is what we want). Open: `first_line` NULL everywhere (run `enrich-haiku` on the next
+wave), Instantly admin key lacks `accounts:read`.
 
 ## Restaurant self-serve funnel — BUILT, DEPLOY PENDING
 A third, fully isolated ad funnel (own pixel + dataset + tags + page) — nothing crosses into

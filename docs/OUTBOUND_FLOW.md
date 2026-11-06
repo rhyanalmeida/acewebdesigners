@@ -300,7 +300,7 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
 
 ## 9. Current status (update in place)
 
-- **2026-11-06 audit — PROD BROKEN, fix pending `node scripts/go-live-outbound-fix.mjs` (owner-run):** (1) Netlify
+- **2026-11-06 audit — FIXED ~05:00 UTC via `node scripts/go-live-outbound-fix.mjs` (verify: DemoPage chunk ✓, /demo route ✓, $37 secret ✓, Email 3 $37 ✓, $49 price archived, Netlify git builds stopped). Original note:** (1) Netlify
   auto-built production from `master` (commit `132d313` pushed 2026-11-05) = July code with no `/demo` route, so every
   demo link opens the homepage since 19:46 UTC that day; cherry-picked to `redesign/marketing-site`, script redeploys
   + moves the production branch. (2) `STRIPE_PRICE_DEMO_MONTHLY` still = $49 price and Email 3 still says $49
