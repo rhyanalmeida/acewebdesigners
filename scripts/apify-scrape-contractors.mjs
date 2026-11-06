@@ -67,14 +67,9 @@ if (searches.length === 0) searches.push('general contractor')
 const ACTOR = 'compass~crawler-google-places'
 const API = 'https://api.apify.com/v2'
 
-const SOCIAL_RE = /(facebook\.com|fb\.com|instagram\.com|yelp\.com|angi\.com|angieslist\.com|homeadvisor\.com|nextdoor\.com|houzz\.com|thumbtack\.com|linktr\.ee|google\.com\/maps|business\.site)/i
-
-export function classifyWebsite(url) {
-  const u = (url ?? '').trim()
-  if (!u) return 'none'
-  if (SOCIAL_RE.test(u)) return 'social'
-  return 'real'
-}
+// websiteKind classification is shared with scrape-places.mjs (lib/website-kind.mjs) — one definition.
+import { classifyWebsite } from './lib/website-kind.mjs'
+export { classifyWebsite }
 
 async function api(pathname, init = {}) {
   const sep = pathname.includes('?') ? '&' : '?'

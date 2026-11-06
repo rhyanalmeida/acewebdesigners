@@ -16,8 +16,10 @@
 // generation stages run in separate isolates but each resolves the same style, and
 // retries reproduce it exactly.
 //
-// Pure Deno-compatible TS (no imports, no Deno.* / npm:*) so it bundles into the
-// Edge Function AND can be exercised by a plain Node/tsx sanity check.
+// Pure Deno-compatible TS (no Deno.* / npm:*) so it bundles into the Edge Function
+// AND can be exercised by vitest (designSystems.test.ts).
+
+import { isFoodBusiness } from './niche.ts'
 
 export interface DesignSystem {
   /** stable kebab-case id (used for overrides + logging). */
@@ -229,7 +231,7 @@ export const DEFAULT_DESIGN_SYSTEMS: DesignSystem[] = [
   {
     id: 'appetite-market',
     name: 'Appetite Market',
-    trades: ['restaurant', 'catering', 'cafe', 'food', 'grocery', 'bakery', 'kitchen', 'bar', 'juice'],
+    trades: ['restaurant', 'catering', 'cafe', 'food', 'grocery', 'bakery', 'kitchen', 'bar', 'juice', 'steak', 'diner', 'pub', 'grill', 'inn', 'tavern', 'eatery'],
     mood: 'Fresh and appetizing — makes you hungry, warm and inviting.',
     palette:
       'Warm tomato/paprika red (#c8462f) or mustard (#e0a52e) with cream (#f6efe2) and leafy green (#3f6b3f). Appetizing, warm, energetic-but-cozy.',
@@ -316,6 +318,85 @@ export const DEFAULT_DESIGN_SYSTEMS: DesignSystem[] = [
       'Sharp and slow: elegant clip-path wipes, a single accent line draw, slow image fade, restrained hover. Precision over playfulness.',
     photo: 'Black-and-white / grayscale photos; full-bleed or gallery-grid; the ONE accent color reserved for type only.',
   },
+  // ── Food & drink (added 2026-11-04 for the restaurant outbound funnel) ──────
+  // Every restaurant category matches at least two of these, so selectDesignSystem's
+  // "2+ trade-fit styles → trade-fit only" rule keeps corporate/contractor looks away
+  // from food businesses. Tags are Google Maps category words.
+  {
+    id: 'candlelit-bistro',
+    name: 'Candlelit Bistro',
+    trades: ['restaurant', 'bistro', 'steak', 'steakhouse', 'chophouse', 'sushi', 'japanese', 'wine', 'fine dining', 'tavern', 'oyster', 'new american', 'bar', 'pub', 'inn'],
+    mood: 'Dinner-date dark — candlelight, linen, a hush of luxury that makes the food glow.',
+    palette:
+      'Deep charcoal-aubergine base (#17141a) or espresso (#1b140f) with warm candle gold (#d4a657) and a soft cream (#f3e9dc) for light sections. Sparse, warm, expensive.',
+    typography:
+      'Elegant high-contrast serif (Cormorant Garamond or Playfair Display) at large sizes, one italic accent word; refined sans (Jost or Manrope) for menu text. Dish names in serif, descriptions small and quiet.',
+    layout:
+      'Full-viewport food-photo hero under a dark vignette; a restrained chip (cuisine · city); centered serif headline; two CTAs (Call to order / Get directions). Menu highlights as a two-column menu-card list with hairline dividers and dotted leaders. Three-photo ambiance strip, photo+text story split, a Visit card with map link + \'Call for today\'s hours\', quote-style reviews, photo-backed CTA band, dark footer.',
+    motion:
+      'Slow and candlelit: 16–20s Ken Burns hero, soft fade-and-rise reveals with gentle stagger, gold shimmer across the accent word, images brighten subtly on hover. No bounce, no ticker rush.',
+    photo: 'Rich plated-dish and dim-interior photos under warm dark gradients; thin gold hairline frames on splits; the hero is always a food or dining-room shot.',
+  },
+  {
+    id: 'trattoria-rustic',
+    name: 'Trattoria Rustic',
+    trades: ['italian', 'pizza', 'pizzeria', 'trattoria', 'ristorante', 'mediterranean', 'greek', 'portuguese', 'brazilian', 'family restaurant', 'restaurant'],
+    mood: 'Red-sauce warmth — brick oven, flour on the counter, a family table that never ends.',
+    palette:
+      'Warm cream (#f6efe3) with tomato red (#b5362b), basil green (#3d6b45) and oven-char brown (#2b1d16). Light, warm and appetizing; red used decisively on CTAs and the accent word.',
+    typography:
+      'Characterful display serif (Fraunces or Lora at heavy weight) for headlines; friendly sans (Nunito Sans or Work Sans) for body; small tracked caps for menu section labels.',
+    layout:
+      'Hero: oversized food photo (pizza/pasta) with a soft cream gradient from the left so the headline sits on cream; cuisine chip; CTAs Call to order / Get directions. Menu highlights as paper-card grid grouped Starters / Mains / Desserts. Ambiance strip of 3 rounded photos; photo+text story split; Visit card; reviews; CTA band on a dark-red photo wash; cream footer.',
+    motion:
+      'Warm and lively: soft rise reveals, gentle 1.03 image zoom on hover, the accent word underlines itself, a slow steam SVG flourish in the hero. Inviting, never frantic.',
+    photo: 'Warm, saturated food photos in generously rounded frames; cream overlays only; hero always a dish.',
+  },
+  {
+    id: 'fiesta-color',
+    name: 'Fiesta Color',
+    trades: ['mexican', 'taqueria', 'latin', 'puerto rican', 'dominican', 'caribbean', 'cuban', 'peruvian', 'guatemalan', 'central american', 'tex-mex', 'cantina', 'restaurant'],
+    mood: 'Bright street-food energy — papel picado color, lime and chili, music in the kitchen.',
+    palette:
+      'Warm white (#fff8ef) with hot coral (#e4572e), marigold (#f4b73f), deep teal (#135c6b) and a touch of lime (#9bc53d). Colorful but disciplined: one dominant accent per section.',
+    typography:
+      'Bold condensed display (Bebas Neue or Oswald) for headlines with a rounded accent word (Fraunces italic); clean rounded sans (Nunito or Poppins) for body.',
+    layout:
+      'Hero: full-bleed tacos/plated-food photo with a teal-to-transparent overlay, a color-block headline card, chips (cuisine · city), CTAs Call to order / Get directions. A colorful marquee of dish words. Menu highlights as bright tiles with a tiny SVG icon each. Ambiance strip, story split on a marigold panel, Visit card, reviews on colored cards, CTA band, teal footer.',
+    motion:
+      'Energetic but tasteful: staggered pop-in reveals, tiles lift on hover, the marquee scrolls at a brisk pace, a papel-picado SVG border gently sways. Respect reduced motion.',
+    photo: 'Vivid, saturated food photos with light teal/coral tints on overlays; chunky rounded frames; the hero is always food.',
+  },
+  {
+    id: 'harbor-seafood',
+    name: 'Harbor Seafood',
+    trades: ['seafood', 'oyster', 'fish', 'clam', 'lobster', 'waterfront', 'harbor', 'marina', 'crab', 'chowder', 'restaurant', 'bar & grill'],
+    mood: 'New England waterfront — weathered boards, navy and sea-salt white, a sunset on the deck.',
+    palette:
+      'Sea-salt white (#f5f7f6) with deep navy (#122a3a), driftwood (#b9a68a) and a coral-sunset accent (#e2724f). Fresh, breezy, trustworthy.',
+    typography:
+      'Classic nautical serif (Libre Baskerville or Playfair Display) for headlines, condensed caps (Oswald) for small labels, clean sans (Source Sans 3 or Work Sans) for body.',
+    layout:
+      'Hero: waterfront-terrace or seafood-platter photo under a navy gradient; chip (cuisine · city); CTAs Call to order / Get directions. Menu highlights as a two-column \'from the dock\' list with rope-line SVG dividers. Ambiance strip, story split with a driftwood-toned panel, Visit card, reviews, CTA band over a sunset-terrace photo, navy footer.',
+    motion:
+      'Easy like a tide: slow hero drift, soft reveals, a wave-line SVG that draws across section breaks, gentle hover lifts. Calm, no bounce.',
+    photo: 'Bright coastal and seafood photos with cool navy overlays; hairline frames; the hero is a terrace or a platter.',
+  },
+  {
+    id: 'morning-light-cafe',
+    name: 'Morning Light Cafe',
+    trades: ['cafe', 'café', 'coffee', 'espresso', 'bakery', 'brunch', 'breakfast', 'diner', 'pastry', 'donut', 'bagel', 'tea', 'juice', 'sandwich', 'deli'],
+    mood: 'Soft morning sun through a cafe window — milk foam, warm wood, a quiet table.',
+    palette:
+      'Warm white (#fbf8f3) with latte (#c9a27e), oat (#efe6d8), espresso brown (#3b2a21) and a leafy green accent (#5f7f5a). Airy, soft, lots of breathing room.',
+    typography:
+      'Rounded friendly serif (Fraunces or DM Serif Display) for headlines; soft geometric sans (Nunito or Mulish) for body; generous line-height.',
+    layout:
+      'Hero: bright cafe-interior or breakfast photo with no dark overlay (headline sits on a warm-white panel beside it); chip (cuisine · city); CTAs Call / Get directions. Menu highlights as soft cards grouped Coffee / Food / Sweets. Ambiance strip of 3 light photos, story split, Visit card (\'Call for today\'s hours\'), reviews, soft CTA band, light footer.',
+    motion:
+      'Gentle: soft fade-up reveals, a slow sunlight gradient drift in the hero, cards float up 4px on hover, the accent word fades in last. Calm and warm.',
+    photo: 'Bright, airy photos with lots of natural light; soft rounded frames; light oat overlays only; never dark.',
+  },
 ]
 
 // ── Selection ────────────────────────────────────────────────────────────────
@@ -357,7 +438,8 @@ export function designSystemById(
 /**
  * Pick a design system for a booking from `systems`. Trade-aware + deterministic:
  * - build a pool of styles that fit the trade (word/phrase match) PLUS all
- *   universal styles (trades: []); if nothing matches, the pool is everything;
+ *   universal styles (trades: []) — unless 2+ styles match, then trade-fit only;
+ *   if nothing matches, the pool is everything;
  * - choose deterministically from the pool via a hash of `seed` (the appointment
  *   id), so all 3 stages and any retry resolve to the exact same style.
  */
@@ -369,10 +451,14 @@ export function selectDesignSystem(
   const pool0 = systems.length ? systems : DEFAULT_DESIGN_SYSTEMS
   const universal = pool0.filter((d) => d.trades.length === 0)
   const matched = pool0.filter((d) => matchesTrade(d.trades, trade))
-  // dedup while preserving order: matched (trade-fit) first, then universal
-  const pool = matched.length
-    ? [...new Map([...matched, ...universal].map((d) => [d.id, d])).values()]
-    : pool0
+  // 2+ trade-fit styles → stay on-trade; a FOOD business stays on-trade with even one match
+  // (a restaurant must never get a corporate/contractor look — 2026-11-04);
+  // otherwise exactly 1 → add the universals for variety; 0 → everything is eligible.
+  const pool = matched.length >= 2 || (matched.length && isFoodBusiness(trade))
+    ? matched
+    : matched.length
+      ? [...new Map([...matched, ...universal].map((d) => [d.id, d])).values()]
+      : pool0
   return pool[hash(seed) % pool.length]
 }
 
@@ -385,7 +471,7 @@ export function selectDesignSystem(
  */
 export function renderArtDirection(ds: DesignSystem): string {
   return `ART DIRECTION — "${ds.name}": ${ds.mood}
-This style is the identity of the site. Build the full page structure the request asks for (hero, marquee ticker, stat band, service cards, photo splits, CTA band, footer) but execute EVERY choice — color, type, spacing, shape, motion, imagery — in THIS style. Do not drift toward a generic look.
+This style is the identity of the site. Build the full page structure the request asks for (every section it lists, in order) but execute EVERY choice — color, type, spacing, shape, motion, imagery — in THIS style. Do not drift toward a generic look.
 - PALETTE: ${ds.palette} Define these as CSS custom properties once and reference them everywhere.
 - TYPOGRAPHY: ${ds.typography} Load exactly two Google Font families. NEVER Inter/Roboto/Arial/system unless this style names them.
 - LAYOUT & COMPOSITION: ${ds.layout}

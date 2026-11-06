@@ -21,7 +21,7 @@ const prospect = (o: Partial<ProspectCtx> = {}): ProspectCtx => ({
   suppressed: false, is_test: false, ai_turns: 0, handoff_at: null, site_status: 'none', demo_url: DEMO, ...o,
 })
 const model = (o: Partial<ClassifierOutput> = {}): ClassifierOutput => ({
-  intent: 'question', confidence: 0.95, needs_human: false, reason: 'asks price', reply_text: `It's $49 a month, domain and hosting included, cancel anytime. The preview is at ${DEMO} if you want another look.\n\nRhyan`, followup_days: null, ...o,
+  intent: 'question', confidence: 0.95, needs_human: false, reason: 'asks price', reply_text: `It's $37 a month, domain and hosting included, cancel anytime. The preview is at ${DEMO} if you want another look.\n\nRhyan`, followup_days: null, ...o,
 })
 
 describe('facts stay in sync with the display plan', () => {

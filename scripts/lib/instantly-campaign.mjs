@@ -5,14 +5,21 @@ export const SENDING_ACCOUNTS = ['rhyan@getacewebdesigners.com', 'rhyan@acewebde
 
 // Instantly's timezone enum has no America/New_York; America/Detroit is the same US Eastern zone.
 const WEEKDAYS = { 0: false, 1: true, 2: true, 3: true, 4: true, 5: true, 6: false }
+// Minutes between sends from one inbox: 6 + up to 8 random ≈ 10 avg ≈ 6 sends/hour (set 2026-11-04;
+// was 10 + 15 ≈ 17.5 avg ≈ 3.4/hour, which with 3.5 h of windows starved the restaurant campaign).
+export const EMAIL_GAP_MINUTES = 6
+export const RANDOM_WAIT_MAX_MINUTES = 8
+
 export const SCHEDULES = {
   // 06–16 ET (owner, 2026-11-02): wide enough for two inboxes to clear 60/day; Instantly fills from the start.
   default: [{ name: 'Weekdays 6am–4pm ET', timing: { from: '06:00', to: '16:00' }, days: WEEKDAYS, timezone: 'America/Detroit' }],
-  // Restaurants (2026-11-03): between breakfast and lunch, and between lunch and dinner — operators
-  // don't read email during service (hospitality cold-email benchmarks, see RESTAURANT_OUTBOUND_PLAN).
+  // Restaurants: outside lunch and dinner service — operators don't read email during service
+  // (RESTAURANT_OUTBOUND_PLAN §3). Widened 2026-11-04: the original 09:30–11 + 14–16 (3.5 h) at a
+  // 10–25 min gap capped each inbox at ~12 sends/day, so the campaign never reached its 60/day limit.
+  // Capacity rule: window hours × sends/hour (60 ÷ average gap) must exceed the per-inbox daily cap.
   restaurant: [
-    { name: 'Weekdays 9:30–11am ET', timing: { from: '09:30', to: '11:00' }, days: WEEKDAYS, timezone: 'America/Detroit' },
-    { name: 'Weekdays 2–4pm ET', timing: { from: '14:00', to: '16:00' }, days: WEEKDAYS, timezone: 'America/Detroit' },
+    { name: 'Weekdays 7–11:30am ET', timing: { from: '07:00', to: '11:30' }, days: WEEKDAYS, timezone: 'America/Detroit' },
+    { name: 'Weekdays 1:30–4:30pm ET', timing: { from: '13:30', to: '16:30' }, days: WEEKDAYS, timezone: 'America/Detroit' },
   ],
 }
 
@@ -84,8 +91,8 @@ export function buildPayload(steps, { name = DEFAULT_NAME, daily = 60, accounts 
     sequences: [{ steps: apiSteps }],
     email_list: accounts,
     daily_limit: daily,
-    email_gap: 10,
-    random_wait_max: 15,
+    email_gap: EMAIL_GAP_MINUTES,
+    random_wait_max: RANDOM_WAIT_MAX_MINUTES,
     text_only: true,
     stop_on_reply: true,
     stop_for_company: true,

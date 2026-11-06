@@ -124,7 +124,7 @@ describe('demoLinkReply', () => {
   it('tells them what the page offers and what the plan covers', () => {
     const r = demoLinkReply({ first_name: 'Sam', business_name: 'X', demo_url: 'https://acewebdesigners.com/demo/abc' })
     expect(r.text.startsWith('Hi Sam,')).toBe(true)
-    expect(r.text).toContain('$49/month')
+    expect(r.text).toContain('$37/month')
     expect(r.text).toMatch(/cancel anytime/i)
     expect(r.text).toMatch(/every update/i)
     expect(r.text.match(/https:\/\//g)).toHaveLength(1)

@@ -25,7 +25,7 @@ export interface OutboundPlan {
 export const OUTBOUND_PLAN: OutboundPlan = {
   key: 'demo_monthly',
   name: 'Your Website, Live',
-  monthly: 49,
+  monthly: 37, // owner decision 2026-11-04 (was 49) — matches the live Stripe Price
   tagline: 'The site you just previewed — on your own domain, handled for you.',
   features: [
     'The exact website from your preview, taken live',

@@ -27,6 +27,7 @@ import Stripe from 'npm:stripe@17.0.0'
 import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
 import { checkDomain, porkbunConfigured } from '../_shared/porkbun.ts'
+import { ghlOutboundEvent } from '../_shared/ghl.ts'
 
 const PLAN_PRICE_ENV: Record<string, string> = {
   starter: 'STRIPE_PRICE_STARTER',
@@ -85,11 +86,11 @@ Deno.serve(async (req: Request) => {
     const supa = admin()
     const { data } = await supa
       .from('prospects')
-      .select('id, email, is_test, site_status, purchased_at')
+      .select('id, email, phone, first_name, last_name, business_name, business_type, city, state, is_test, site_status, purchased_at')
       .eq('token', token)
       .maybeSingle()
     const prospect = data as
-      | { id: string; email: string | null; is_test: boolean; site_status: string; purchased_at: string | null }
+      | { id: string; email: string | null; phone: string | null; first_name: string | null; last_name: string | null; business_name: string; business_type: string | null; city: string | null; state: string | null; is_test: boolean; site_status: string; purchased_at: string | null }
       | null
     if (!prospect) return json({ error: 'not found' }, 404)
     if (prospect.purchased_at) return json({ error: 'already purchased' }, 409)
@@ -125,6 +126,22 @@ Deno.serve(async (req: Request) => {
         success_url: b.successUrl || `${origin}/demo/${token}?purchased=1`,
         cancel_url: b.cancelUrl || `${origin}/demo/${token}`,
       })
+      // Staff text "at checkout" (tag outbound-checkout) — the purchase text follows from stripe-webhook
+      // if they complete; silence after this one means they stopped at the card.
+      if (!prospect.is_test && (prospect.email || prospect.phone)) {
+        const alert = ghlOutboundEvent('checkout', {
+          email: prospect.email ?? undefined,
+          phone: prospect.phone ?? undefined,
+          firstName: prospect.first_name ?? undefined,
+          lastName: prospect.last_name ?? undefined,
+          businessName: prospect.business_name,
+          city: prospect.city ?? undefined,
+          state: prospect.state ?? undefined,
+          qualifiers: { business_type: prospect.business_type ?? undefined, preview_url: `${origin}/demo/${token}` },
+        }, { checkout_domain: domain }).catch((err) => console.error('[create-subscription] checkout alert failed', err))
+        if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(alert)
+        else await alert
+      }
       return json({ url: session.url })
     } catch (err) {
       console.error('[create-subscription] stripe error (demo_site)', err)

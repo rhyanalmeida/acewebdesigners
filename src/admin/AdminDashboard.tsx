@@ -20,8 +20,9 @@ import {
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import {
   fetchAdminData, fetchOutreach, submitResult, retryCapiEvent, createPaymentLink, discardTestData, retrySiteGeneration, regenerateBrief,
-  retryProspectSite, retryProvisioning, replyDeskUpdate, resolveHandoff,
+  retryProspectSite, retryProvisioning, replyDeskUpdate, resolveHandoff, fetchLeadPipeline, requestWave, cancelWave, markCalled, dismissViews,
   type AdminData, type OutreachData, type AdminContact, type Appt, type CapiOutcome, type Prospect, type OutboundReply, type ResultKind, type ResultResponse, type ServerEventStat,
+  type LeadPipeline, type CallListEntry, type CallReason,
 } from './adminApi'
 
 // ── formatting helpers ────────────────────────────────────────────────────────
@@ -945,7 +946,7 @@ const ReplyDeskPanel: React.FC<{ replies: OutboundReply[]; prospects: Prospect[]
   const when = (iso?: string | null) => (iso ? new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—')
   return (
     <section>
-      <h2 className={`${sectionTitle} mb-2`}>Reply desk</h2>
+      <h2 className={`${sectionTitle} mb-2`}>Reply center — waiting on a person</h2>
       <div className={`${card} p-3`}>
         {err && <p className="mb-2 text-xs text-rose-600">{err}</p>}
         {open.length === 0 ? (
@@ -1139,6 +1140,203 @@ const OutboundTab: React.FC<{ prospects: Prospect[]; replies: OutboundReply[]; o
   )
 }
 
+// ── lead pipeline: pool, credits, waves, "Scrape a new list" ───────────────────
+const WAVE_CHIP: Record<string, string> = {
+  requested: 'bg-amber-50 text-amber-700',
+  running: 'bg-sky-50 text-sky-700',
+  done: 'bg-emerald-50 text-emerald-700',
+  skipped: 'bg-slate-100 text-slate-500',
+  failed: 'bg-rose-50 text-rose-700',
+  cancelled: 'bg-slate-100 text-slate-400',
+}
+const CAMPAIGN_STATUS: Record<number, { label: string; cls: string }> = {
+  0: { label: 'draft', cls: 'bg-slate-100 text-slate-500' },
+  1: { label: 'active', cls: 'bg-emerald-50 text-emerald-700' },
+  2: { label: 'paused', cls: 'bg-amber-50 text-amber-700' },
+  3: { label: 'completed — needs re-activation', cls: 'bg-rose-50 text-rose-700' },
+  4: { label: 'running subsequences', cls: 'bg-sky-50 text-sky-700' },
+}
+const n0 = (v: number | null | undefined) => (typeof v === 'number' ? v.toLocaleString() : '—')
+
+const LeadPipelinePanel: React.FC<{ lp: LeadPipeline; onChanged: () => void }> = ({ lp, onChanged }) => {
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+  const st = lp.state
+  const open = lp.waves.find((w) => w.status === 'requested' || w.status === 'running')
+  const perDay = st?.new_leads_per_day ?? 20
+  const uncontacted = lp.instantly?.uncontacted ?? null
+  const runway = uncontacted == null ? null : Math.floor((uncontacted + lp.pool.restaurants) / perDay)
+  const bounceWeek = lp.instantly?.week && lp.instantly.week.sent >= 50 ? Math.round((lp.instantly.week.bounced / lp.instantly.week.sent) * 1000) / 10 : null
+  const request = async () => {
+    setBusy(true); setMsg('')
+    try {
+      const r = await requestWave()
+      setMsg(r.existing ? 'A list is already queued — the office PC picks it up on its next check.' : 'Queued. The office PC scrapes, enriches, verifies and uploads it on its next check (within ~2 hours while the PC is on).')
+      onChanged()
+    } catch (e) { setMsg(e instanceof Error ? e.message : 'Could not request a list') }
+    finally { setBusy(false) }
+  }
+  const cancel = async (id: string) => {
+    setBusy(true); setMsg('')
+    try { await cancelWave(id); onChanged() } catch (e) { setMsg(e instanceof Error ? e.message : 'Could not cancel') } finally { setBusy(false) }
+  }
+  const when = (iso?: string | null) => (iso ? timeAgo(iso) : 'never')
+  const resets = st?.instantly_cap_resets_on ? new Date(st.instantly_cap_resets_on).toLocaleDateString([], { month: 'short', day: 'numeric' }) : null
+  const credits = st?.millionverifier_credits
+  return (
+    <section>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h2 className={sectionTitle}>Lead pipeline</h2>
+        <div className="flex items-center gap-2">
+          {open ? (
+            <>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${WAVE_CHIP[open.status]}`}>{open.status === 'running' ? 'Scraping now…' : 'List queued'}</span>
+              {open.status === 'requested' && <button onClick={() => void cancel(open.id)} disabled={busy} className="text-xs font-medium text-rose-600 hover:underline disabled:opacity-50">Cancel</button>}
+            </>
+          ) : (
+            <button onClick={() => void request()} disabled={busy || lp.unavailable} className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50">
+              <Sparkles size={14} /> {busy ? 'Queuing…' : 'Scrape a new list'}
+            </button>
+          )}
+        </div>
+      </div>
+      {msg && <p className="mb-2 text-xs text-slate-600">{msg}</p>}
+      {lp.unavailable && <p className="mb-2 text-xs text-amber-700">Lead-wave tables are not deployed yet (migration 0019) — run <code className="rounded bg-amber-100 px-1">node scripts/go-live-waves.mjs</code>.</p>}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <Kpi icon={Users} label="Leads ready to send" value={n0(lp.pool.restaurants)} sub="restaurants, verified, not yet emailed" accent="indigo" />
+        <Kpi icon={Send} label="In Instantly, not yet contacted" value={n0(uncontacted)} sub={lp.instantly ? `${lp.instantly.name}` : 'Instantly unavailable'} accent="sky" />
+        <Kpi icon={Clock} label="Send-days left" value={runway == null ? '—' : runway} sub={`at ~${perDay} new leads/day${runway != null && runway < 7 ? ' · running low' : ''}`} accent={runway != null && runway < 7 ? 'rose' : 'emerald'} />
+        <Kpi icon={CheckCircle2} label="MillionVerifier credits" value={n0(credits)} sub={credits == null ? 'reported by the office PC' : `${credits < 150 ? 'low — top up · ' : ''}checked ${when(st?.millionverifier_checked_at)}`} accent={credits != null && credits < 150 ? 'rose' : 'violet'} />
+        <Kpi icon={Repeat} label="Instantly contacts left" value={n0(st?.instantly_remaining_in_plan)} sub={resets ? `this month · resets ${resets}` : 'Growth plan, 1,000/month'} accent={typeof st?.instantly_remaining_in_plan === 'number' && st.instantly_remaining_in_plan < 100 ? 'rose' : 'amber'} />
+        <Kpi icon={CircleDollarSign} label="Haiku spend" value={typeof st?.haiku_spend_usd_month === 'number' ? `$${st.haiku_spend_usd_month.toFixed(2)}` : '—'} sub={st?.haiku_spend_month ? `enrichment, ${st.haiku_spend_month}` : 'enrichment this month'} accent="slate" />
+      </div>
+      <div className={`${card} mt-3 grid gap-3 p-4 text-xs text-slate-600 sm:grid-cols-3`}>
+        <div>
+          <div className={sectionTitle}>Campaign</div>
+          {lp.instantly ? (
+            <div className="mt-1 space-y-0.5">
+              <div><span className={`rounded-full px-2 py-0.5 font-semibold ${CAMPAIGN_STATUS[lp.instantly.status]?.cls ?? ''}`}>{CAMPAIGN_STATUS[lp.instantly.status]?.label ?? `status ${lp.instantly.status}`}</span></div>
+              <div>{n0(lp.instantly.leads)} leads · {n0(lp.instantly.contacted)} contacted · {n0(lp.instantly.replies)} replies · {n0(lp.instantly.bounced)} bounced</div>
+              {lp.instantly.week && <div>Last 7 days: {n0(lp.instantly.week.sent)} sent · {n0(lp.instantly.week.newLeads)} new leads · bounce {bounceWeek == null ? 'n/a (<50 sends)' : `${bounceWeek}%`}{bounceWeek != null && bounceWeek > 2 ? <span className="ml-1 font-semibold text-rose-600">· uploads paused by the 2% rule</span> : ''}</div>}
+            </div>
+          ) : <div className="mt-1 text-slate-400">Live numbers unavailable (INSTANTLY_API_KEY or campaign id missing).</div>}
+        </div>
+        <div>
+          <div className={sectionTitle}>Next cities</div>
+          <div className="mt-1">{st?.next_cities?.length ? st.next_cities.join(' · ') : 'decided by the runner on its next check'}</div>
+          <div className="mt-1 text-slate-400">Done: {st?.done_cities?.length ? `${st.done_cities.length} cities` : '—'}</div>
+        </div>
+        <div>
+          <div className={sectionTitle}>Office PC runner</div>
+          <div className="mt-1">Last check {when(st?.last_tick_at)} · last wave {when(st?.last_wave_at)}</div>
+          {st?.trigger && <div className={`mt-1 ${st.trigger.low ? 'font-semibold text-amber-700' : 'text-slate-400'}`}>{st.trigger.reason}</div>}
+          {!st && <div className="mt-1 text-slate-400">No check yet — the Windows task "Ace Auto Wave" has not run.</div>}
+        </div>
+      </div>
+      {lp.waves.length > 0 && (
+        <details className="mt-3" open={Boolean(open)}>
+          <summary className="cursor-pointer text-xs font-medium text-slate-500">Recent lists ({lp.waves.length})</summary>
+          <div className={`${card} mt-2 overflow-x-auto p-1.5`}>
+            <table className="w-full min-w-[720px] text-xs">
+              <thead><tr className="text-left text-slate-400"><th className="px-3 py-2 font-medium">When</th><th className="px-3 py-2 font-medium">Status</th><th className="px-3 py-2 font-medium">Cities</th><th className="px-3 py-2 font-medium">Scraped → emails → verified ok → uploaded</th><th className="px-3 py-2 font-medium">Cost</th><th className="px-3 py-2 font-medium">Note</th></tr></thead>
+              <tbody>
+                {lp.waves.map((w) => (
+                  <tr key={w.id} className="border-t border-slate-100 align-top">
+                    <td className="px-3 py-2 whitespace-nowrap text-slate-600">{timeAgo(w.finished_at ?? w.started_at ?? w.requested_at)}<div className="text-slate-400">{w.requested_by}</div></td>
+                    <td className="px-3 py-2"><span className={`rounded-full px-2 py-0.5 font-semibold ${WAVE_CHIP[w.status] ?? ''}`}>{w.status}</span></td>
+                    <td className="px-3 py-2 text-slate-600">{w.cities?.join(', ') || '—'}{w.batch && <div className="text-slate-400">{w.batch}</div>}</td>
+                    <td className="px-3 py-2 text-slate-600">{[w.counts.scraped, w.counts.emails, w.counts.verified_ok, w.counts.uploaded].map((v) => v ?? '—').join(' → ')}</td>
+                    <td className="px-3 py-2 text-slate-600">{typeof w.cost.haiku_usd === 'number' ? `$${w.cost.haiku_usd.toFixed(2)}` : '—'}{typeof w.cost.verify_credits === 'number' ? ` · ${w.cost.verify_credits} cr` : ''}</td>
+                    <td className="max-w-[260px] px-3 py-2 text-slate-500" title={w.log_tail ?? undefined}>{w.note ?? ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+    </section>
+  )
+}
+
+// ── follow-up / call list ────────────────────────────────────────────────────────
+const REASON_CHIP: Record<CallReason, { label: string; cls: string }> = {
+  replied: { label: 'Replied', cls: 'bg-emerald-50 text-emerald-700' },
+  viewed: { label: 'Viewed demo', cls: 'bg-violet-50 text-violet-700' },
+  finished: { label: 'No luck by email', cls: 'bg-slate-100 text-slate-600' },
+}
+type CallFilter = CallReason | 'all' | 'warm'
+const CallListPanel: React.FC<{ entries: CallListEntry[]; onChanged: () => void; title?: string; defaultShow?: CallFilter }> = ({ entries, onChanged, title = 'Follow up or call', defaultShow = 'all' }) => {
+  const [busy, setBusy] = useState<string | null>(null)
+  const [err, setErr] = useState('')
+  const [show, setShow] = useState<CallFilter>(defaultShow)
+  const rows = show === 'all' ? entries : show === 'warm' ? entries.filter((e) => e.reason !== 'finished') : entries.filter((e) => e.reason === show)
+  const counts = { replied: entries.filter((e) => e.reason === 'replied').length, viewed: entries.filter((e) => e.reason === 'viewed').length, finished: entries.filter((e) => e.reason === 'finished').length }
+  const notWarm = async (e: CallListEntry) => {
+    if (!window.confirm(`Clear ${e.prospect.business_name}'s demo views? Use this when the clicks were yours, not theirs.`)) return
+    setBusy(e.prospect.id); setErr('')
+    try { await dismissViews(e.prospect.id); onChanged() }
+    catch (x) { setErr(x instanceof Error ? x.message : 'Could not clear') } finally { setBusy(null) }
+  }
+  const done = async (e: CallListEntry) => {
+    const note = window.prompt(`What happened on the call with ${e.prospect.business_name}? (optional — hides them from this list for two weeks)`, '')
+    if (note === null) return
+    setBusy(e.prospect.id); setErr('')
+    try { await markCalled(e.prospect.id, note.trim() || undefined); onChanged() }
+    catch (x) { setErr(x instanceof Error ? x.message : 'Could not save') } finally { setBusy(null) }
+  }
+  return (
+    <section>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <h2 className={sectionTitle}>{title}</h2>
+        <div className="flex gap-1.5">
+          {(['warm', 'replied', 'viewed', 'finished', 'all'] as const).map((k) => (
+            <button key={k} onClick={() => setShow(k)} className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition ${show === k ? 'bg-indigo-600 text-white ring-indigo-600' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'}`}>
+              {k === 'all' ? 'All' : k === 'warm' ? 'Warm' : REASON_CHIP[k].label} <span className={show === k ? 'text-indigo-100' : 'text-slate-400'}>{k === 'all' ? entries.length : k === 'warm' ? counts.replied + counts.viewed : counts[k]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      {err && <p className="mb-2 text-xs text-rose-600">{err}</p>}
+      <div className={`${card} p-1.5`}>
+        {rows.length === 0 ? (
+          <p className="p-4 text-sm text-slate-400">Nobody to call right now. Prospects land here when they reply, open their demo without replying, or finish all three emails in silence.</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {rows.map((e) => {
+              const p = e.prospect
+              return (
+                <li key={p.id} className="flex flex-col gap-1 px-3 py-2.5 sm:flex-row sm:items-start sm:gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 text-sm">
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${REASON_CHIP[e.reason].cls}`}>{REASON_CHIP[e.reason].label}</span>
+                      <span className="font-medium text-slate-800">{p.business_name}</span>
+                      <span className="text-xs text-slate-400">{[p.city, p.state].filter(Boolean).join(', ')}{p.business_type ? ` · ${p.business_type}` : ''}</span>
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-600">{e.why}</div>
+                    <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs">
+                      {p.phone && <a href={`tel:${p.phone.replace(/[^\d+]/g, '')}`} className="font-semibold text-indigo-600 hover:underline">{p.phone}</a>}
+                      {p.email && <a href={`mailto:${p.email}`} className="text-slate-500 hover:underline">{p.email}</a>}
+                      {p.preview_url && <a href={p.preview_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-slate-500 hover:underline"><ExternalLink size={11} /> demo</a>}
+                      {p.emailed_at && <span className="text-slate-400">emailed {timeAgo(p.emailed_at)}</span>}
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <button onClick={() => void done(e)} disabled={busy === p.id} className="text-xs font-medium text-emerald-600 hover:underline disabled:opacity-50">{busy === p.id ? 'Saving…' : 'Called ✓'}</button>
+                    {e.reason === 'viewed' && (
+                      <button onClick={() => void notWarm(e)} disabled={busy === p.id} className="text-[11px] text-slate-400 hover:text-rose-600 hover:underline disabled:opacity-50" title="The views were my own clicks — clear them">Not warm (my clicks)</button>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </div>
+    </section>
+  )
+}
+
 // ── cold-email outreach ─────────────────────────────────────────────────────────
 type OutreachFilter = 'today' | 'opened' | 'replied'
 
@@ -1149,7 +1347,7 @@ const SENTIMENT_PILL: Record<string, string> = {
   negative: 'bg-rose-50 text-rose-700 ring-rose-200',
 }
 
-const OutreachView: React.FC<{ o: OutreachData }> = ({ o }) => {
+const OutreachView: React.FC<{ o: OutreachData; lp: LeadPipeline | null; replies: OutboundReply[]; prospects: Prospect[]; onChanged: () => void }> = ({ o, lp, replies, prospects, onChanged }) => {
   const [filter, setFilter] = useState<OutreachFilter>(o.totals.openedToday > 0 ? 'today' : 'opened')
   const rows = useMemo(
     () =>
@@ -1166,6 +1364,10 @@ const OutreachView: React.FC<{ o: OutreachData }> = ({ o }) => {
   ]
   return (
     <>
+      {/* Owner (2026-11-06): warm leads come FIRST — anyone who clicked the link or wrote back, and the replies waiting on a person. */}
+      <ReplyDeskPanel replies={replies} prospects={prospects} onChanged={onChanged} />
+      {lp && !lp.unavailable && <CallListPanel entries={lp.callList} onChanged={onChanged} title="Warm leads — clicked the link or replied" defaultShow="warm" />}
+
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <Kpi icon={Send} label="Emailed" value={t.emailed.toLocaleString()} sub={`${t.prospects.toLocaleString()} prospects`} accent="slate" />
         <Kpi icon={MousePointerClick} label="Opened demo" value={t.opened} sub={`${t.openRate}% of emailed`} accent="indigo" />
@@ -1173,6 +1375,8 @@ const OutreachView: React.FC<{ o: OutreachData }> = ({ o }) => {
         <Kpi icon={MessageSquare} label="Replied" value={t.replied} sub={`${t.replyRate}% reply rate${t.repliedToday ? ` · ${t.repliedToday} today` : ''}`} accent="violet" />
         <Kpi icon={Target} label="Purchased" value={t.purchased} accent="emerald" />
       </section>
+
+      {lp && <LeadPipelinePanel lp={lp} onChanged={onChanged} />}
 
       <section>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -1292,6 +1496,7 @@ const AdminDashboard: React.FC = () => {
   const [loadedAt, setLoadedAt] = useState<number | null>(null)
   const [tab, setTab] = useState<Tab>('outreach')
   const [outreach, setOutreach] = useState<OutreachData | null>(null)
+  const [leadPipeline, setLeadPipeline] = useState<LeadPipeline | null>(null)
   const [resulting, setResulting] = useState<Appt | null>(null)
   const [payLinking, setPayLinking] = useState<Appt | null>(null)
   const [briefing, setBriefing] = useState<Appt | null>(null)
@@ -1307,8 +1512,9 @@ const AdminDashboard: React.FC = () => {
   const load = useCallback(async () => {
     setLoading(true); setLoadErr('')
     try {
-      const [o, d] = await Promise.all([fetchOutreach(), SHOW_FUNNEL_TABS ? fetchAdminData() : Promise.resolve(null)])
-      setOutreach(o); if (d) setData(d); setLoadedAt(Date.now())
+      // The lead pipeline is best-effort: an older admin-data deploy (no `leadPipeline` action) must not blank the page.
+      const [o, d, lp] = await Promise.all([fetchOutreach(), SHOW_FUNNEL_TABS ? fetchAdminData() : Promise.resolve(null), fetchLeadPipeline().catch(() => null)])
+      setOutreach(o); if (d) setData(d); setLeadPipeline(lp); setLoadedAt(Date.now())
     }
     catch (e) { setLoadErr(e instanceof Error ? e.message : 'Failed to load') } finally { setLoading(false) }
   }, [])
@@ -1394,7 +1600,7 @@ const AdminDashboard: React.FC = () => {
         ) : loadErr ? (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-700">{loadErr}</div>
         ) : tab === 'outreach' ? (
-          outreach ? <OutreachView o={outreach} /> : <div className="grid gap-3 sm:grid-cols-3">{[...Array(6)].map((_, i) => <div key={i} className={`${card} h-24 animate-pulse`} />)}</div>
+          outreach ? <OutreachView o={outreach} lp={leadPipeline} replies={data?.outboundReplies ?? []} prospects={data?.prospects ?? []} onChanged={load} /> : <div className="grid gap-3 sm:grid-cols-3">{[...Array(6)].map((_, i) => <div key={i} className={`${card} h-24 animate-pulse`} />)}</div>
         ) : !data ? (
           <div className="grid gap-3 sm:grid-cols-3">{[...Array(6)].map((_, i) => <div key={i} className={`${card} h-24 animate-pulse`} />)}</div>
         ) : tab === 'overview' ? (

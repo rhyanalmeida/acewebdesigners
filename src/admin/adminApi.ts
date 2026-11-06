@@ -456,3 +456,120 @@ export async function retryCapiEvent(eventId: string): Promise<CapiOutcome> {
   }
   return data as CapiOutcome
 }
+
+// ── lead pipeline (scripts/auto-wave.mjs ↔ admin-data `leadPipeline`) ─────────
+/** One scrape→enrich→verify→import→upload run (migration 0019 `lead_waves`). */
+export interface LeadWave {
+  id: string
+  status: 'requested' | 'running' | 'done' | 'skipped' | 'failed' | 'cancelled'
+  requested_by: 'admin' | 'trigger' | 'manual' | string
+  requested_at: string
+  started_at?: string | null
+  finished_at?: string | null
+  search?: string | null
+  cities?: string[] | null
+  batch?: string | null
+  counts: Partial<Record<'scraped' | 'real_sites' | 'emails' | 'verified' | 'verified_ok' | 'catch_all' | 'imported' | 'uploaded' | 'remaining_in_plan', number>>
+  cost: Partial<Record<'haiku_usd' | 'verify_credits', number>>
+  note?: string | null
+  log_tail?: string | null
+}
+/** What the office-PC runner last reported (poll_state key 'lead-pipeline'). Local-only API keys
+ *  (MillionVerifier, Anthropic) never reach Edge, so their balances arrive through this row. */
+export interface LeadPipelineState {
+  campaign_id?: string | null
+  millionverifier_credits?: number | null
+  millionverifier_checked_at?: string | null
+  instantly_remaining_in_plan?: number | null
+  instantly_remaining_checked_at?: string | null
+  instantly_cap_resets_on?: string | null
+  haiku_spend_usd_month?: number | null
+  haiku_spend_month?: string | null
+  new_leads_per_day?: number | null
+  runway_days?: number | null
+  next_cities?: string[] | null
+  done_cities?: string[] | null
+  last_tick_at?: string | null
+  last_wave_at?: string | null
+  runner_host?: string | null
+  trigger?: { low: boolean; reason: string } | null
+  updated_at?: string | null
+}
+export interface InstantlyCampaignStats {
+  campaignId: string
+  name: string
+  /** 1 active · 2 paused · 3 completed (needs re-activation after an upload) */
+  status: number
+  leads: number
+  contacted: number
+  uncontacted: number
+  sent: number
+  replies: number
+  bounced: number
+  unsubscribed: number
+  week: { sent: number; bounced: number; replies: number; newLeads: number } | null
+}
+export type CallReason = 'replied' | 'viewed' | 'finished'
+export interface CallListEntry {
+  prospect: Pick<Prospect, 'id' | 'business_name' | 'phone' | 'email' | 'city' | 'state' | 'business_type' | 'preview_url' | 'emailed_at' | 'replied_at' | 'reply_sentiment' | 'last_reply' | 'handoff_at' | 'demo_first_viewed_at' | 'demo_view_count'> & { token?: string | null; called_at?: string | null; call_note?: string | null }
+  reason: CallReason
+  why: string
+  rank: number
+}
+export interface LeadPipeline {
+  pool: { restaurants: number; contractors: number; byBatch: Record<string, number> }
+  state: LeadPipelineState | null
+  waves: LeadWave[]
+  instantly: InstantlyCampaignStats | null
+  callList: CallListEntry[]
+  /** migration 0019 not applied yet */
+  unavailable: boolean
+}
+
+export async function fetchLeadPipeline(): Promise<LeadPipeline> {
+  const { data, error } = await supabase.functions.invoke('admin-data', { body: { action: 'leadPipeline' } })
+  if (error) {
+    const { status, message } = await errorMessage(error, 'Failed to load the lead pipeline')
+    throw new Error(status === 401 ? 'not-admin' : message)
+  }
+  return data as LeadPipeline
+}
+
+/** "Scrape a new list": queue a wave for the office-PC runner. Returns the open request if one already exists. */
+export async function requestWave(note?: string): Promise<{ ok: boolean; existing: boolean; wave: { id: string; status: string; requested_at: string } }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', { body: { action: 'requestWave', ...(note ? { note } : {}) } })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not request a new list')
+    throw new Error(message)
+  }
+  return data as { ok: boolean; existing: boolean; wave: { id: string; status: string; requested_at: string } }
+}
+
+export async function cancelWave(waveId: string): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', { body: { action: 'cancelWave', waveId } })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not cancel the request')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}
+
+/** Follow-up / call list: a person called this prospect (or undo). */
+export async function markCalled(prospectId: string, note?: string, undo = false): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', { body: { action: 'markCalled', prospectId, ...(note ? { note } : {}), ...(undo ? { undo: true } : {}) } })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not update the call list')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}
+
+/** Warm list: those demo views were our own clicks — clear them so the prospect stops looking warm. */
+export async function dismissViews(prospectId: string): Promise<{ ok: boolean }> {
+  const { data, error } = await supabase.functions.invoke('admin-data', { body: { action: 'dismissViews', prospectId } })
+  if (error) {
+    const { message } = await errorMessage(error, 'Could not clear the views')
+    throw new Error(message)
+  }
+  return data as { ok: boolean }
+}

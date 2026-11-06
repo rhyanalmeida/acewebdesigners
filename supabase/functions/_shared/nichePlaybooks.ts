@@ -14,6 +14,7 @@
 // AND is exercised by vitest (nichePlaybooks.test.ts).
 
 import { matchesTrade } from './designSystems.ts'
+import { isFoodBusiness } from './niche.ts'
 
 export interface PricingRange {
   item: string
@@ -76,6 +77,37 @@ export const FALLBACK_PLAYBOOK: NichePlaybook = {
 }
 
 /**
+ * Restaurant fallback — what a hungry person on a phone needs from a restaurant site. Used for
+ * every food business (isFoodBusiness) when no researched row matches; the generic local-service
+ * playbook talks about quote forms and licensing, which is wrong for food. No pricing, deliberately.
+ */
+export const RESTAURANT_FALLBACK_PLAYBOOK: NichePlaybook = {
+  id: 'generic-restaurant',
+  display_name: 'Local Restaurant (generic)',
+  trades: [],
+  how_customers_buy:
+    'Diners decide on a phone, usually already hungry and within a few miles: they search a cuisine or a name, glance at photos and the Google rating, then want the menu, whether it is open, and one tap to call or get directions. The decision takes under a minute; a site that hides the menu or loads slowly loses them to the next listing.',
+  must_have_site_features:
+    'Appetizing food photography above the fold; the menu (or menu highlights) one scroll down; a tap-to-call button always visible on mobile; a Get-directions link to the Google Maps listing; the real Google rating; a clear Visit section with where to find them and how to check hours; the whole page fast and legible on a phone.',
+  credibility_levers:
+    'The real Google rating and review count; photos that look like THIS kind of restaurant (cuisine-matched); a short, honest story about the place; consistent name/phone/location; a design that feels as considered as the food.',
+  pitch_angles:
+    'Lead with how the preview already makes the food look worth the drive; the status quo cost is diners picking the competitor whose menu was easier to find. The close is a decision on something already built.',
+  upsell_ladder:
+    'Website → unlimited menu/hours updates by email → Google Business Profile upkeep → social media content from kitchen photos.',
+  common_objections:
+    '"We get enough walk-ins" → the phone decides where walk-ins go. "We use a third-party ordering page" → that page is theirs, not yours, and it looks like everyone else.',
+  pricing: [],
+  sources: [],
+  researched_at: null,
+}
+
+/** The no-research fallback for a business type: restaurant for food, generic local service otherwise. */
+export function fallbackPlaybookFor(trade: string | null | undefined): NichePlaybook {
+  return isFoodBusiness(trade) ? RESTAURANT_FALLBACK_PLAYBOOK : FALLBACK_PLAYBOOK
+}
+
+/**
  * Pick the playbook for a booking's trade. Returns the first active row whose
  * trade tags match (rows are ordered by sort), or undefined — the caller decides
  * whether to research or fall back.
@@ -89,7 +121,7 @@ export function selectNichePlaybook(
 
 /** Compact prompt block for generate-site: what this trade's site must accomplish. */
 export function renderPlaybookForPrompt(pb: NichePlaybook): string {
-  return `TRADE INSIGHT — what ${pb.display_name} customers need this site to do (fold these into the copy and structure; never invent facts about THIS business):
+  return `NICHE INSIGHT — what ${pb.display_name} customers need this site to do (fold these into the copy and structure; never invent facts about THIS business):
 - HOW CUSTOMERS BUY: ${pb.how_customers_buy}
 - MUST-HAVE FEATURES: ${pb.must_have_site_features}
 - CREDIBILITY: ${pb.credibility_levers}`

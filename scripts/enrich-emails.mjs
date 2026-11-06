@@ -8,11 +8,17 @@
  *
  * Only rows whose `websiteKind` is `real` (or that have a non-social `website`) are
  * crawled. Rows that already have an email are left alone with --only-missing (default).
- * Emails that are obviously not a business inbox (sentry/wixpress/example/placeholder
- * images, etc.) are dropped; the importer applies its own JUNK_EMAIL filter afterwards.
+ *
+ * Extraction + ranking live in lib/email-quality.mjs (vitest-covered). Only `mailto:` links and
+ * VISIBLE text count — never <script>/<style>/attribute values, which is where the 2026-11-04
+ * bounces came from (form placeholders, font-licence credits in CSS, JSON-LD blobs, "\\n"
+ * leaks) — and junk (placeholder / builder / font / platform / chain domains) is dropped there.
+ * `rankEmails` prefers the site's own domain → business-like free-mail → generic role inboxes.
+ * The importer re-applies isJunkEmail plus the shared-email (agency) filter afterwards.
  */
 
 import fs from 'node:fs'
+import { extractEmailsFromHtml, rankEmails } from './lib/email-quality.mjs'
 
 const args = process.argv.slice(2)
 const opt = (n, d) => { const i = args.indexOf(`--${n}`); return i >= 0 && i + 1 < args.length ? args[i + 1] : d }
@@ -38,27 +44,7 @@ function parseCsv(text) {
 }
 const esc = (v) => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s }
 
-// ── email extraction ───────────────────────────────────────────────────────
-const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi
-const BAD_DOMAIN = /(sentry|wixpress|wix\.com|squarespace|godaddy|example\.|domain\.com|email\.com|yourdomain|sentry\.io|w3\.org|schema\.org|\.png$|\.jpg$|\.jpeg$|\.gif$|\.svg$|\.webp$|\.js$|\.css$)/i
-const BAD_LOCAL = /^(noreply|no-reply|donotreply|mailer-daemon|postmaster|abuse|webmaster|privacy|legal|dmca|support@(?:wix|squarespace|godaddy))/i
-function extract(html) {
-  const out = new Set()
-  for (const m of html.matchAll(/mailto:([^"'?\s>]+)/gi)) out.add(decodeURIComponent(m[1]).toLowerCase())
-  for (const m of html.matchAll(EMAIL_RE)) out.add(m[0].toLowerCase())
-  return [...out].filter((e) => !BAD_DOMAIN.test(e) && !BAD_LOCAL.test(e) && e.length < 80)
-}
-function rank(emails, siteHost) {
-  // prefer an address on the business's own domain, then info@/office@ style generic inboxes
-  const host = siteHost.replace(/^www\./, '')
-  return [...emails].sort((a, b) => {
-    const ad = a.endsWith('@' + host) ? 0 : 1, bd = b.endsWith('@' + host) ? 0 : 1
-    if (ad !== bd) return ad - bd
-    const gen = /^(info|office|contact|hello|sales|admin|service)@/
-    return (gen.test(a) ? 0 : 1) - (gen.test(b) ? 0 : 1)
-  })
-}
-
+// ── fetch + crawl ──────────────────────────────────────────────────────────
 async function get(url, ms = 12000) {
   const ac = new AbortController(); const t = setTimeout(() => ac.abort(), ms)
   try {
@@ -71,24 +57,24 @@ async function get(url, ms = 12000) {
 }
 
 const CONTACT_PATHS = ['/contact', '/contact-us', '/contactus', '/contact.html', '/about', '/about-us']
-async function crawl(website) {
+async function crawl(website, businessName) {
   let base
   try { base = new URL(website.startsWith('http') ? website : `https://${website}`) } catch { return [] }
   const home = await get(base.href)
-  let found = extract(home)
+  let found = extractEmailsFromHtml(home)
   if (!found.length && home) {
     // follow on-site links that look like contact pages first, then guess common paths
     const links = [...home.matchAll(/href=["']([^"'#]+)["']/gi)].map((m) => m[1])
       .filter((h) => /contact|about/i.test(h)).slice(0, 4)
     const tries = new Set()
-    for (const h of links) { try { const u = new URL(h, base); if (u.host === base.host) tries.add(u.href) } catch {} }
+    for (const h of links) { try { const u = new URL(h, base); if (u.host === base.host) tries.add(u.href) } catch { /* unparseable href */ } }
     for (const p of CONTACT_PATHS) tries.add(new URL(p, base).href)
     for (const u of [...tries].slice(0, 6)) {
-      found = extract(await get(u, 8000))
+      found = extractEmailsFromHtml(await get(u, 8000))
       if (found.length) break
     }
   }
-  return rank(found, base.host)
+  return rankEmails(found, base.host, { businessName })
 }
 
 // ── main ───────────────────────────────────────────────────────────────────
@@ -96,6 +82,7 @@ const rows = parseCsv(fs.readFileSync(IN, 'utf8'))
 const H = rows[0].map((h) => h.trim())
 const ix = (n) => H.indexOf(n)
 const iEmail = ix('emails/0'), iSite = ix('website'), iKind = ix('websiteKind')
+const iName = ix('title') >= 0 ? ix('title') : ix('name')
 if (iEmail < 0 || iSite < 0) { console.error('CSV needs emails/0 and website columns'); process.exit(1) }
 
 const todo = []
@@ -112,7 +99,7 @@ let done = 0, hits = 0
 async function worker() {
   while (todo.length) {
     const r = todo.shift()
-    const emails = await crawl(rows[r][iSite])
+    const emails = await crawl(rows[r][iSite], iName >= 0 ? rows[r][iName] : '')
     if (emails.length) { rows[r][iEmail] = emails[0]; hits++ }
     done++
     if (done % 10 === 0) process.stdout.write(`  ${done} crawled · ${hits} emails found\r`)

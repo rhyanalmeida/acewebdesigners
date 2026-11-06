@@ -33,7 +33,7 @@ Two structural problems, not a copy problem:
   directions at the top and links out to whatever ordering they already use.
 - **Price is a non-issue against the market.** Restaurant-specific platforms start at $179/mo
   (Popmenu Starter), $249–$499/mo (Owner.com), $229–$449/mo (ChowNow); DIY builders are $16–$17/mo
-  but the owner does the work. **$49/mo stays.** It is a quarter of the cheapest restaurant platform
+  but the owner does the work. **$49/mo stays.** (Superseded 2026-11-04: owner cut the price to **$37/mo**.) It is a quarter of the cheapest restaurant platform
   and still "hosting + unlimited menu/hours changes handled for you". We revisit price only if demos
   get viewed and nobody buys (§6), not before — nobody has reached the price yet.
 - **Caution we respect in the copy:** the James Beard / Deloitte 2026 report found 40% of
@@ -47,8 +47,9 @@ Hospitality cold-email benchmarks (vendor data, directional): 30–40% opens, **
 - **No open tracking** (+68% replies without pixels — Hunter 2026), custom sending domains, plain
   text, 75–100 words, **3-step sequence**. ✔ (`instantly-campaign.mjs`: tracking off, text_only)
 - **Send outside service hours.** Operators read email before 10am and mid-afternoon; nobody reads
-  during lunch or dinner. → campaign windows **Mon–Fri 09:30–11:00 and 14:00–16:00 ET**
-  (`SCHEDULES.restaurant`). Monday is many restaurants' closed day, so it stays on.
+  during lunch or dinner. → campaign windows were set to Mon–Fri 09:30–11:00 and 14:00–16:00 ET
+  (`SCHEDULES.restaurant`). **Superseded 2026-11-04:** 3.5 h of windows capped each inbox at ~12 sends/day; now
+  **07:00–11:30 and 13:30–16:30 ET** (still outside lunch and dinner service) so the 30/inbox cap is reachable. Monday is many restaurants' closed day, so it stays on.
 - **Reply within hours.** → the reply desk answers in 20–90 min, business hours, same inbox.
 - Decision maker: the owner, not a manager. Google-listed emails are mostly `info@`/`owner@`, which
   is the best we can do without paid enrichment; the first name is usually missing, so the copy's

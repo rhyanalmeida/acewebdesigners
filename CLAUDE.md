@@ -297,6 +297,12 @@ secrets. Local `GHL_API_TOKEN` is stale; the deployed one works. Volume lever = 
 warm-up, score ≥90, ramp 5→30/day), not a bigger list; Growth plan caps 1,000 active contacts/month.
 Health check: `net._http_response` rows for `instantly-poll` / `reply-desk` 200 every tick; `/admin` →
 Email Outreach. Playbook: `docs/COLD_EMAIL_SALES_PLAYBOOK_2026-11-04.md`. Hand-built upgrade sites: `ace-site` skill.
+**Lead waves are automated:** `scripts/auto-wave.mjs` (`--dry` / `--live --yes` / `--auto` = Windows task "Ace Auto Wave",
+every 2 h on weekdays, PC must be on) runs the whole chain and writes `lead_waves` + `poll_state.lead-pipeline`; rules and
+the city rotation are in `scripts/lib/wave-plan.mjs`. Trigger = runway < 7 send-days OR the /admin **Scrape a new list**
+button (`admin-data requestWave`). /admin → Email Outreach shows credits (MillionVerifier via the runner, Instantly live),
+runway, waves, and **Follow up or call** (`_shared/callList.ts`, "Called ✓" → `prospects.called_at`). Admin logins:
+hello@ + valerieereyy@gmail.com (ADMIN_EMAILS). Go-live: `node scripts/go-live-waves.mjs` (owner-run).
 
 **Audit 2026-11-06 — FIXED + verified same day** (`scripts/go-live-outbound-fix.mjs`): /demo route restored on prod
 (a push to `master` had auto-built July code with no demo page from 11-05 19:46 UTC until 11-06 ~05:00 UTC — every demo link

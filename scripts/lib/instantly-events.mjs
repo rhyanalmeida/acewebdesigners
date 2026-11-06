@@ -60,7 +60,7 @@ Here it is: ${demo_url}
 
 It's a draft — tell me what to change and I'll turn it around.
 
-If you like it as-is, there's a button on that page that takes it live on your own .com for $49/month. The domain, hosting and every update you ever want are included, and you can cancel anytime. It's usually live within an hour of signing up, and we handle all of it.
+If you like it as-is, there's a button on that page that takes it live on your own .com for $37/month. The domain, hosting and every update you ever want are included, and you can cancel anytime. It's usually live within an hour of signing up, and we handle all of it.
 
 Happy to go over it on a quick 15-minute call too — just say when works.
 

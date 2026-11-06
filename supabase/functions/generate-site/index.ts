@@ -52,7 +52,7 @@ import {
   selectDesignSystem,
 } from '../_shared/designSystems.ts'
 import {
-  FALLBACK_PLAYBOOK,
+  fallbackPlaybookFor,
   type NichePlaybook,
   renderPlaybookForPrompt,
   selectNichePlaybook,
@@ -63,12 +63,14 @@ declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | unde
 const MODEL = 'claude-opus-4-8' // strongest designer; owner accepted ~$0.60-1.10/site for King-Repairs-tier quality
 /**
  * FAST path (outbound prospects, 2026-11-02): the demo link in the cold email starts the
- * build on click, so the prospect is WAITING — a single Haiku 5.5 call writes one
- * self-contained index.html (inline CSS/JS, ~8k tokens) and deploys in the same isolate.
- * ~$0.005/site, target ≤90s click → live. Owner accepted the smaller model for speed.
+ * build on click, so the prospect is WAITING — a single call writes one self-contained
+ * index.html (inline CSS/JS, ~8-10k tokens) and deploys in the same isolate.
+ * 2026-11-04: moved Haiku 5.5 → Sonnet 5.5 (owner: the preview must look enterprise-grade,
+ * "they'd be wrong not to want it"; the first two restaurant demos were judged not good enough).
+ * ~$0.05/site, ~90-150s click → live; the /demo page's building state covers the wait.
  * Appointments (booking funnel) keep the 3-stage Opus chain — nobody is waiting on those.
  */
-const FAST_MODEL = 'claude-haiku-5-5'
+const FAST_MODEL = 'claude-sonnet-5-5'
 
 
 // Verified-live Unsplash photos (all curl-checked 200 on 2026-07-13). The model
@@ -154,10 +156,18 @@ URL pattern: https://images.unsplash.com/photo-<id>?auto=format&fit=crop&w=1600&
 // page ingredients (hero, marquee, stat band, service cards, splits, CTA band,
 // footer) stay required in the STAGES instructions; the art direction restyles them.
 function buildSystemPrompt(ds: DesignSystem, pb: NichePlaybook, singleFile = false, businessType: string | null = null): string {
+  const food = isFoodBusiness(businessType)
   const pagesRule = singleFile
     ? `- The site is ONE self-contained file, index.html: put ALL CSS in one <style> block in <head> and ALL JS in one <script> at the end of <body>. No external stylesheet/script. Nav links are in-page anchors (#services, #about, #contact).`
     : `- The site is multi-page: / (index.html), /services.html, /about.html, /contact.html. Every page links the shared stylesheet (<link rel="stylesheet" href="/styles.css">) and script (<script src="/main.js" defer></script>) and shares the same nav + footer with working links between pages.`
-  return `You are an elite web designer and front-end developer producing a preview website that will be shown to a small local business owner in a sales meeting to win their business. Quality bar: the owner should think "this looks better than sites I'd pay thousands for" and find it hard to say no. The benchmark is a $10k agency build: rich, confident, deliberate — never a flat template.
+  const ingredients = food
+    ? `- REQUIRED page ingredients for a RESTAURANT (style them in the art direction below): a full-bleed APPETITE hero — a cuisine-matched food or dining-room photo, a small chip (cuisine · city), a display headline where ONE word is emphasized (accent color), a one-line subline, primary CTA "Call to order" (tel:) + secondary "Get directions" (Google Maps), and the REAL Google rating as a small chip ONLY if the brief provides one; a slim scrolling MARQUEE of 5-6 dish/cuisine words; a MENU HIGHLIGHTS section; a 3-photo AMBIANCE strip; a photo-and-text story split; a VISIT card (map link, tel:, "Call for today's hours"); example-labeled reviews; a photo-backed CTA band ("Hungry? Call …"); a footer with tel: link, city, and a small "Website preview by Ace Web Designers" line. NAV = business-name wordmark + small inline SVG mark + links (Menu / About / Visit) + accent "Call" CTA, solid/blurred on scroll.
+- This is a RESTAURANT, not a trade: NO stat counters, NO "licensed/insured/estimate/service area/quote" language, NO contact form. Every photo must be food or dining — never construction, offices or tools. Write like a restaurant: warm, sensory, short.`
+    : `- REQUIRED page ingredients (style them in the art direction below): a hero with a small badge/eyebrow chip + a display headline where ONE key word is emphasized (accent color) + subline + primary CTA (call) + secondary CTA + a row of small trust chips with inline SVG ticks; a slim scrolling MARQUEE ticker of 4-6 short trade promises after the hero; an animated STAT COUNTER band (3-4 process-fact stats); photo-and-text split sections; service cards with inline SVG icons; a photo-backed CTA band near the footer; a rich multi-column footer with tel: link and a small "Website preview by Ace Web Designers" line. NAV = business-name wordmark + small inline SVG mark + links + phone + accent CTA, solid/blurred on scroll.`
+  const audience = food
+    ? 'a restaurant owner who opens the link on their phone between services'
+    : 'a small local business owner in a sales meeting'
+  return `You are an elite web designer and front-end developer producing a preview website that will be shown to ${audience} to win their business. Quality bar: enterprise-grade — the owner should think "this looks better than sites I'd pay thousands for" and feel they would be wrong NOT to want it. The benchmark is a $10k agency build: rich, confident, deliberate, typographically precise — never a flat template, never a generic bootstrap look.
 
 OUTPUT CONTRACT — follow exactly:
 - Output ONLY the files this request asks for, in the order asked. Before each file, print exactly one marker line:
@@ -168,9 +178,9 @@ ${pagesRule}
 - Fully responsive, mobile-first (sound at 360px, 768px, 1200px), with a working hamburger nav on mobile. Semantic HTML; every page gets its own <title> and meta description.
 - HARD CODE BUDGET — each file must respect the line caps given in the request. This is a generation-time limit; exceeding it kills the build. Terse selectors, no comments, no dead CSS. Compact beats sprawling.
 - DRY — single source of truth everywhere: design tokens (colors, spacing, radii, shadows, timing) defined ONCE as CSS custom properties and referenced everywhere; one .btn / .card / .section / .reveal system reused across all pages; the shared nav + footer markup identical byte-for-byte on every page; one IntersectionObserver in main.js drives all reveals. Never restate a style or script two ways.
-- REQUIRED page ingredients (style them in the art direction below): a hero with a small badge/eyebrow chip + a display headline where ONE key word is emphasized (accent color) + subline + primary CTA (call) + secondary CTA + a row of small trust chips with inline SVG ticks; a slim scrolling MARQUEE ticker of 4-6 short trade promises after the hero; an animated STAT COUNTER band (3-4 process-fact stats); photo-and-text split sections; service cards with inline SVG icons; a photo-backed CTA band near the footer; a rich multi-column footer with tel: link and a small "Website preview by Ace Web Designers" line. NAV = business-name wordmark + small inline SVG mark + links + phone + accent CTA, solid/blurred on scroll.
+${ingredients}
 
-${isFoodBusiness(businessType) ? FOOD_PHOTO_LIBRARY : PHOTO_LIBRARY}
+${food ? FOOD_PHOTO_LIBRARY : PHOTO_LIBRARY}
 
 ${renderArtDirection(ds)}
 
@@ -178,7 +188,7 @@ ${renderPlaybookForPrompt(pb)}
 
 MOTION CRAFT — motion is part of the quality bar (vanilla only, GPU-friendly transform/opacity, ALWAYS respect prefers-reduced-motion):
 - Execute this style's MOTION SIGNATURE above as the memorable moments; keep everything smooth and intentional, never janky or gratuitous.
-- One IntersectionObserver in main.js drives all scroll reveals with per-child stagger; a thin accent scroll-progress bar sits at the top of every page; stat counters count up on reveal; buttons and cards get tasteful hover feedback; the emphasized headline word gets its own reveal on load; the marquee scrolls via CSS and pauses on hover.
+- One IntersectionObserver in main.js drives all scroll reveals with per-child stagger; a thin accent scroll-progress bar sits at the top of every page; ${food ? '' : 'stat counters count up on reveal; '}buttons and cards get tasteful hover feedback; the emphasized headline word gets its own reveal on load; the marquee scrolls via CSS and pauses on hover.
 - Under prefers-reduced-motion: disable transforms/auto-scroll/Ken-Burns and simply show content.
 
 TRUTHFULNESS — hard rules:
@@ -231,10 +241,10 @@ async function resolveNichePlaybook(
       .eq('active', true)
       .order('sort', { ascending: true })
       .order('id', { ascending: true })
-    if (error || !data) return FALLBACK_PLAYBOOK
-    return selectNichePlaybook(data as unknown as NichePlaybook[], trade) ?? FALLBACK_PLAYBOOK
+    if (error || !data) return fallbackPlaybookFor(trade)
+    return selectNichePlaybook(data as unknown as NichePlaybook[], trade) ?? fallbackPlaybookFor(trade)
   } catch {
-    return FALLBACK_PLAYBOOK
+    return fallbackPlaybookFor(trade)
   }
 }
 
@@ -299,6 +309,8 @@ const FAST_STAGE: StageSpec = {
 ` +
     `  css: .menu{display:none} .menu.open{display:flex;flex-direction:column} .burger{display:none} @media(max-width:900px){.links,.nav-call{display:none} .burger{display:block} .nav-in{display:flex;align-items:center;justify-content:space-between;gap:12px} .mark{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}}
 ` +
+    `  LEGIBILITY AT REST — the nav sits over the hero photo before any scroll, and photos are dark on one side: give .nav a translucent backdrop in the page background color from the start (e.g. background:rgba(<bg-rgb>,.78);backdrop-filter:blur(10px)) and go solid on scroll. Never rely on the photo being light behind the links; every nav link and the wordmark must pass contrast at scroll 0 at 1440px AND 390px wide.
+` +
     `  js: burger toggles menu.classList "open" + aria-expanded; any .menu a click closes it. The menu MUST be hidden on first paint at 360-900px wide and the header row MUST fit without overflow at 360px.`,
 }
 
@@ -311,15 +323,37 @@ const FAST_STAGE: StageSpec = {
  */
 const FAST_STAGE_RESTAURANT: StageSpec = {
   files: ['index.html'],
-  maxTokens: 12000,
+  maxTokens: 14000,
   instruction:
     `For THIS request, output exactly ONE file: index.html — the complete homepage for a RESTAURANT with ALL CSS inline in one <style> block and ALL JS inline in one <script> block.
 ` +
-    `Line cap (HARD — the stream is cut off if you run long, destroying the build): index.html ≤ 420 lines total. Terse CSS, no comments.
+    `Line cap (HARD — the stream is cut off if you run long, destroying the build): index.html ≤ 460 lines total. Terse CSS, no comments.
 ` +
-    `This is a restaurant, not a trade: wherever the contract says "service cards" build MENU cards; the marquee carries cuisine words (dishes, "fresh", "takeout", "family dinners") stated as flavor, never as facts about this business; SKIP the stat counter band entirely (restaurants have no process stats).
+    `This is a restaurant. The page is built around what a hungry person on a phone needs: how good the food looks, what's on the menu, and one tap to call or get directions. NO stat counters, NO contact form, NO trade language.
 ` +
-    `Sections in order: nav (wordmark + anchors Menu / About / Visit + tel: "Call" CTA) → photographic hero matched to the cuisine (badge chip = cuisine, headline with ONE accent word, subline naming the city, CTAs: "Call to order" tel: + "Get directions" linking to https://www.google.com/maps/search/?api=1&query=<URL-encoded business name, city, state>; trust chips: cuisine · city · "Call for today's hours" · the REAL Google rating ONLY if the brief provides one, formatted "4.6 ★ on Google (120 reviews)") → marquee ticker of 5-6 cuisine words → #menu "Menu highlights": 6 cards of dishes TYPICAL of this cuisine, NO prices, each one line, a small caption under the heading reading "Sample menu — your real menu, prices and photos go here", and a "Call for the full menu" tel: button → photo+text split (#about: honest generic story about a neighborhood restaurant — no invented history, no "family owned since") → #visit "Visit us": left column city/state + "Get directions" button (same maps URL) + phone tel:; right column an "Hours" card whose only line is "Call for today's hours" with the tel: link (NEVER list hours) → 2 example-labeled reviews → photo-backed CTA band ("Hungry? Call …" tel:) → footer with tel: link, city, and "Website preview by Ace Web Designers".
+    `Sections in order:
+` +
+    `1. nav (wordmark + anchors Menu / About / Visit + tel: "Call" CTA).
+` +
+    `2. #top APPETITE HERO: full-bleed cuisine-matched food photo (min-height 92vh on desktop, 80vh mobile) under the art direction's overlay; chip = cuisine · city; display headline (clamp 2.6rem–5.5rem) with ONE accent word; one-line subline naming the city; CTAs "Call to order" tel: + "Get directions" → https://www.google.com/maps/search/?api=1&query=<URL-encoded business name, city, state>; a small rating chip "4.6 ★ on Google · 120 reviews" ONLY if the brief provides the REAL rating. Chips otherwise: cuisine · city · "Call for today's hours".
+` +
+    `3. marquee ticker: 5-6 cuisine/dish words stated as flavor ("wood-fired", "fresh daily", "family dinners", "takeout"), never as facts about this business.
+` +
+    `4. #menu MENU HIGHLIGHTS: eyebrow + headline; 6-8 dishes TYPICAL of this cuisine, grouped under 2-3 small labels (e.g. Starters / Mains / Desserts or Coffee / Food / Sweets), each dish = name + one sensory line, NO prices; a small caption under the heading: "Sample menu — your real menu, prices and photos go here"; a "Call for the full menu" tel: button.
+` +
+    `5. AMBIANCE strip: 3 photos (interior / dish / detail) in the art direction's frames, with a one-line caption each (generic: "The dining room", "From the kitchen", "At the table").
+` +
+    `6. #about story split: photo + 2 short paragraphs about a neighborhood restaurant — honest and generic, NO invented history, NO "family owned since", NO awards.
+` +
+    `7. #visit VISIT US: left = city/state, "Get directions" button (same maps URL), phone as tel:; right = an "Hours" card whose only line is "Call for today's hours" with the tel: link (NEVER list hours).
+` +
+    `8. two reviews, each clearly labeled "Example review" in small text.
+` +
+    `9. photo-backed CTA band: "Hungry? Call <business>" tel: + "Get directions".
+` +
+    `10. footer: wordmark, city, tel: link, anchors, "Website preview by Ace Web Designers".
+` +
+    `Typography and spacing are the quality signal: generous section padding (clamp 4rem–7rem), a real type scale, tight letter-spacing on display text, max-width 1200px containers, consistent radii and shadows from tokens. Every image loading="lazy" except the hero; meaningful alt text.
 ` +
     `JS: nav toggle + scrolled-nav class, one IntersectionObserver for reveals. Vanilla, defensive.
 ` +
@@ -328,6 +362,8 @@ const FAST_STAGE_RESTAURANT: StageSpec = {
     `  markup: <nav class="nav"><div class="nav-in"><a class="mark" href="#top">…</a><div class="links">…anchors…</div><a class="btn btn-primary nav-call" href="tel:…">Call</a><button class="burger" id="burger" aria-label="Menu" aria-expanded="false">…svg…</button></div><div class="menu" id="menu">…anchors + tel link…</div></nav>
 ` +
     `  css: .menu{display:none} .menu.open{display:flex;flex-direction:column} .burger{display:none} @media(max-width:900px){.links,.nav-call{display:none} .burger{display:block} .nav-in{display:flex;align-items:center;justify-content:space-between;gap:12px} .mark{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}}
+` +
+    `  LEGIBILITY AT REST — the nav sits over the hero photo before any scroll, and photos are dark on one side: give .nav a translucent backdrop in the page background color from the start (e.g. background:rgba(<bg-rgb>,.78);backdrop-filter:blur(10px)) and go solid on scroll. Never rely on the photo being light behind the links; every nav link and the wordmark must pass contrast at scroll 0 at 1440px AND 390px wide.
 ` +
     `  js: burger toggles menu.classList "open" + aria-expanded; any .menu a click closes it. The menu MUST be hidden on first paint at 360-900px wide and the header row MUST fit without overflow at 360px.`,
 }
@@ -439,7 +475,7 @@ async function loadSubject(supa: ReturnType<typeof admin>, b: Body): Promise<Sub
 function businessBrief(subject: Subject): string {
   const c = subject.brief
   const businessName = c?.business_name?.trim() || `${c?.first_name ?? 'Local'}'s Business`
-  const trade = c?.business_type?.trim() || 'general contracting'
+  const trade = c?.business_type?.trim() || (subject.kind === 'prospect' ? 'local business' : 'general contracting')
   const rating = c?.rating && c?.review_count && Number(c.rating) >= 4 && Number(c.review_count) >= 10
     ? `- Google rating (REAL, from their listing — the only rating you may show): ${Number(c.rating).toFixed(1)} stars from ${c.review_count} reviews\n`
     : ''
@@ -447,7 +483,7 @@ function businessBrief(subject: Subject): string {
   return (
     `The business:\n` +
     `- Business name: ${businessName}\n` +
-    `- Trade / type of business: ${trade}\n` +
+    `- Type of business: ${trade}\n` +
     (place ? `- Location: ${place}\n` : `- Location: not provided (use "your area" phrasing)\n`) +
     (c?.phone ? `- Phone: ${c.phone}\n` : `- Phone: not provided (make CTAs link to /contact.html instead of tel:)\n`) +
     (c?.first_name ? `- Owner first name: ${c.first_name}\n` : '') +
@@ -475,14 +511,18 @@ async function generateStage(
   }
 
   const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY')! })
-  const stream = anthropic.messages.stream({
+  const params: Parameters<typeof anthropic.messages.stream>[0] = {
     model: fast ? FAST_MODEL : MODEL,
     max_tokens: spec.maxTokens,
-    // Haiku 5.5 thinks by default; off for speed (allowed at its default effort).
-    ...(fast ? { thinking: { type: 'disabled' as const } } : {}),
     system: buildSystemPrompt(ds, pb, fast, subject.brief.business_type),
     messages: [{ role: 'user', content: userMsg }],
-  })
+  }
+  // Sonnet 5.5 (fast path): thinking is adaptive by default and `{type:'disabled'}` is a 400
+  // (it wants `between_tools`, verified 2026-11-04 — both restaurant rebuilds died on it). Leave
+  // thinking on and cap depth with effort=medium: a few hundred planning tokens, ~2 min total.
+  // The pinned SDK (0.40.1) predates `output_config`, so it is attached untyped.
+  if (fast) (params as unknown as Record<string, unknown>).output_config = { effort: 'medium' }
+  const stream = anthropic.messages.stream(params)
   const msg = await stream.finalMessage()
   const text = msg.content.find((b) => b.type === 'text') as { text?: string } | undefined
   const files = parseFiles(stripFences(text?.text ?? ''))

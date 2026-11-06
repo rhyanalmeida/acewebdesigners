@@ -12,6 +12,46 @@ import { requireAdmin } from '../_shared/adminAuth.ts'
 import { ghlConfigured } from '../_shared/ghl.ts'
 import { googleConfigured } from '../_shared/google.ts'
 import { netlifyConfigured } from '../_shared/netlify.ts'
+import { isFoodBusiness } from '../_shared/niche.ts'
+import { buildCallList, type CallListProspect } from '../_shared/callList.ts'
+
+/** Live Instantly campaign analytics (INSTANTLY_API_KEY is already an Edge secret for the poller).
+ *  Best-effort: any failure → null, the dashboard shows "unavailable" instead of breaking. */
+async function instantlyAnalytics(campaignId: string | null) {
+  const key = Deno.env.get('INSTANTLY_API_KEY')
+  if (!key || !campaignId) return null
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  const get = async (q: string) => {
+    const ac = new AbortController()
+    const t = setTimeout(() => ac.abort(), 8000)
+    try {
+      const r = await fetch(`https://api.instantly.ai/api/v2/campaigns/analytics?id=${campaignId}${q}`, { headers: { authorization: `Bearer ${key}` }, signal: ac.signal })
+      if (!r.ok) return null
+      const arr = (await r.json()) as Record<string, number>[]
+      return Array.isArray(arr) ? arr[0] ?? null : null
+    } catch {
+      return null
+    } finally {
+      clearTimeout(t)
+    }
+  }
+  const [all, week] = await Promise.all([get(''), get(`&start_date=${since}`)])
+  if (!all) return null
+  const n = (k: string, src = all) => Number(src?.[k] ?? 0) || 0
+  return {
+    campaignId,
+    name: String(all.campaign_name ?? ''),
+    status: n('campaign_status'), // 1 active · 2 paused · 3 completed (must be re-activated after an upload)
+    leads: n('leads_count'),
+    contacted: n('contacted_count'),
+    uncontacted: Math.max(0, n('leads_count') - n('contacted_count')),
+    sent: n('emails_sent_count'),
+    replies: n('reply_count_unique'),
+    bounced: n('bounced_count'),
+    unsubscribed: n('unsubscribed_count'),
+    week: week ? { sent: n('emails_sent_count', week), bounced: n('bounced_count', week), replies: n('reply_count_unique', week), newLeads: n('new_leads_contacted_count', week) } : null,
+  }
+}
 
 interface ContactEmbed {
   email?: string
@@ -209,6 +249,43 @@ async function loadOutreach(supa: ReturnType<typeof admin>) {
   }
 }
 
+// ── lead pipeline (scripts/auto-wave.mjs ↔ /admin) ────────────────────────────
+// Pool, runner state (poll_state 'lead-pipeline'), recent waves, live Instantly numbers and the
+// follow-up / call list. Own action ('leadPipeline') so the Email Outreach tab can refresh it alone.
+async function loadLeadPipeline(supa: ReturnType<typeof admin>) {
+  // Pool = prospects a wave has not yet used (un-emailed, sendable). Food vs trade split so the
+  // restaurant campaign's runway is what the dashboard reads (contractors are paused).
+  const [poolRes, stateRes, wavesRes, campaignRes, callRes] = await Promise.all([
+    supa.from('prospects').select('business_type, batch').is('emailed_at', null).eq('suppressed', false).eq('is_test', false).not('email', 'is', null).limit(5000),
+    supa.from('poll_state').select('value, updated_at').eq('key', 'lead-pipeline').maybeSingle(),
+    supa.from('lead_waves').select('*').order('requested_at', { ascending: false }).limit(20),
+    supa.from('prospects').select('instantly_campaign_id').not('instantly_campaign_id', 'is', null).not('emailed_at', 'is', null).order('emailed_at', { ascending: false }).limit(1).maybeSingle(),
+    supa
+      .from('prospects')
+      .select('id, business_name, phone, email, city, state, business_type, token, preview_url, emailed_at, replied_at, reply_sentiment, last_reply, handoff_at, demo_first_viewed_at, demo_view_count, purchased_at, suppressed, is_test, called_at, call_note')
+      .is('purchased_at', null).eq('suppressed', false).eq('is_test', false).not('phone', 'is', null).not('emailed_at', 'is', null)
+      .order('emailed_at', { ascending: false }).limit(2000),
+  ])
+  const poolRows = (poolRes.data ?? []) as { business_type: string | null; batch: string | null }[]
+  const pool = { restaurants: 0, contractors: 0, byBatch: {} as Record<string, number> }
+  for (const r of poolRows) {
+    if (isFoodBusiness(r.business_type)) pool.restaurants += 1
+    else pool.contractors += 1
+    const b = r.batch ?? '—'
+    pool.byBatch[b] = (pool.byBatch[b] ?? 0) + 1
+  }
+  const campaignId = (campaignRes.data as { instantly_campaign_id?: string } | null)?.instantly_campaign_id ?? null
+  return {
+    pool,
+    state: stateRes.data ? { ...(stateRes.data.value as Record<string, unknown>), updated_at: stateRes.data.updated_at } : null,
+    waves: wavesRes.data ?? [],
+    instantly: await instantlyAnalytics(campaignId),
+    callList: buildCallList((callRes.data ?? []) as CallListProspect[]),
+    // tables from migration 0019 missing → the panel says so instead of showing zeros
+    unavailable: Boolean(wavesRes.error || callRes.error),
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const pre = handlePreflight(req)
   if (pre) return pre
@@ -218,7 +295,7 @@ Deno.serve(async (req: Request) => {
   const supa = admin()
 
   // ── maintenance action: purge all test data (capi rows first — FK on appointments)
-  let body: { action?: string; appointmentId?: string; prospectId?: string; chosenDomain?: string; replyId?: string; status?: string; body?: string; releaseAfter?: string } = {}
+  let body: { action?: string; appointmentId?: string; prospectId?: string; chosenDomain?: string; replyId?: string; status?: string; body?: string; releaseAfter?: string; note?: string; waveId?: string; undo?: boolean } = {}
   try {
     body = await req.json()
   } catch {
@@ -329,6 +406,43 @@ Deno.serve(async (req: Request) => {
     await supa.from('outbound_replies').update({ status: 'ignored', reason: 'resolved by a person' }).eq('prospect_id', body.prospectId).eq('direction', 'in').eq('status', 'needs_human')
     return json({ ok: true })
   }
+  // ── lead pipeline (lead_waves) ─────────────────────────────────────────────
+  // "Scrape a new list": queue a wave for the office-PC runner (scripts/auto-wave.mjs --auto picks
+  // 'requested' rows up on its next tick — the scrape needs a real browser, so it can't run here).
+  // One open request at a time: a second click returns the existing row instead of stacking waves.
+  if (body.action === 'requestWave') {
+    const open = await supa.from('lead_waves').select('id, status, requested_at').in('status', ['requested', 'running']).order('requested_at', { ascending: false }).limit(1)
+    if (open.error) return json({ error: open.error.message }, 500)
+    if (open.data?.length) return json({ ok: true, wave: open.data[0], existing: true })
+    const ins = await supa
+      .from('lead_waves')
+      .insert({ status: 'requested', requested_by: 'admin', note: typeof body.note === 'string' ? body.note.trim().slice(0, 300) || null : `requested by ${adminUser.email}` })
+      .select('id, status, requested_at')
+      .single()
+    if (ins.error) return json({ error: ins.error.message }, 500)
+    return json({ ok: true, wave: ins.data, existing: false })
+  }
+  if (body.action === 'cancelWave') {
+    if (!body.waveId) return json({ error: 'waveId required' }, 400)
+    const { error } = await supa.from('lead_waves').update({ status: 'cancelled', finished_at: new Date().toISOString(), note: `cancelled by ${adminUser.email}` }).eq('id', body.waveId).eq('status', 'requested')
+    return error ? json({ error: error.message }, 500) : json({ ok: true })
+  }
+  // Follow-up / call list: a person called (or deliberately skipped) this prospect.
+  if (body.action === 'markCalled') {
+    if (!body.prospectId) return json({ error: 'prospectId required' }, 400)
+    const patch = body.undo
+      ? { called_at: null, call_note: null }
+      : { called_at: new Date().toISOString(), call_note: typeof body.note === 'string' ? `${body.note.trim().slice(0, 500)} — ${adminUser.email}` : adminUser.email }
+    const { error } = await supa.from('prospects').update(patch).eq('id', body.prospectId)
+    return error ? json({ error: error.message }, 500) : json({ ok: true })
+  }
+  // Warm list: the views were our own clicks (a rebuild check, a forwarded link) — clear them so the
+  // prospect leaves the warm list; a real open later re-registers as a first view.
+  if (body.action === 'dismissViews') {
+    if (!body.prospectId) return json({ error: 'prospectId required' }, 400)
+    const { error } = await supa.from('prospects').update({ demo_first_viewed_at: null, demo_view_count: 0, call_note: `views cleared as our own clicks — ${adminUser.email}` }).eq('id', body.prospectId).is('purchased_at', null)
+    return error ? json({ error: error.message }, 500) : json({ ok: true })
+  }
   if (body.action === 'discardTests') {
     const capiDel = await supa.from('capi_events').delete({ count: 'exact' }).eq('is_test', true)
     if (capiDel.error) return json({ error: capiDel.error.message }, 500)
@@ -336,6 +450,7 @@ Deno.serve(async (req: Request) => {
     if (apptDel.error) return json({ error: apptDel.error.message }, 500)
     return json({ ok: true, deletedCapiEvents: capiDel.count ?? 0, deletedAppointments: apptDel.count ?? 0 })
   }
+  if (body.action === 'leadPipeline') return json(await loadLeadPipeline(supa))
   if (body.action === 'outreach') {
     const { data, error } = await loadOutreach(supa)
     return error ? json({ error }, 500) : json(data)
@@ -382,6 +497,8 @@ Deno.serve(async (req: Request) => {
     .select('id, prospect_id, direction, kind, intent, confidence, needs_human, reason, status, body, subject, release_after, sent_at, error, created_at')
     .order('created_at', { ascending: false })
     .limit(200)
+
+  const leadPipeline = await loadLeadPipeline(supa)
 
   const leads = leadsRes.count ?? 0
   const availabilityRows = availRes.count ?? 0
@@ -454,5 +571,6 @@ Deno.serve(async (req: Request) => {
     contactsList: contactsRes.data ?? [],
     prospects: prospectsRes.data ?? [],
     outboundReplies: repliesRes.data ?? [],
+    leadPipeline,
   })
 })

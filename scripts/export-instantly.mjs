@@ -65,7 +65,7 @@ const rest = (path, init = {}) =>
   })
 
 const q =
-  `prospects?select=id,token,email,first_name,business_name,city,state` +
+  `prospects?select=id,token,email,first_name,business_name,city,state,first_line,hook,cuisine` +
   `&batch=eq.${encodeURIComponent(batch)}&suppressed=is.false&is_test=is.false` +
   `&emailed_at=is.null&email=not.is.null&order=created_at.asc` +
   (limit > 0 ? `&limit=${limit}` : '')
@@ -86,21 +86,33 @@ const esc = (v) => {
 // the Apify lists carry no first names and "Hi there," reads like a mail merge.
 const NAMES = loadNames(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), 'data', 'first-names.txt'), 'utf8'))
 const FALLBACK_CITY = 'your area'
-const lines = ['email,first_name,company_name,city,state,demo_url']
+// Personalization (enrich-haiku.mjs → migration 0018). {{first_line}} is the opener of Email 1; when Haiku
+// found nothing page-specific the export falls back to the generic opener the v2 copy used, so the
+// template can reference {{first_line}} unconditionally. {{hook}} / {{cuisine}} are available for A/B lines.
+const fallbackFirstLine = (city) => `I design websites for restaurants around ${city}.`
+const lines = ['email,first_name,company_name,city,state,demo_url,first_line,hook,cuisine']
+let personalized = 0
 for (const p of rows) {
+  const city = (p.city ?? '').trim() || FALLBACK_CITY
+  const firstLine = (p.first_line ?? '').trim()
+  if (firstLine) personalized++
   lines.push(
     [
       p.email,
       (p.first_name ?? '').trim() || greetingName({ email: p.email, businessName: p.business_name, names: NAMES }),
       p.business_name,
-      (p.city ?? '').trim() || FALLBACK_CITY,
+      city,
       p.state ?? '',
       `${SITE}/demo/${p.token}`,
+      firstLine || fallbackFirstLine(city),
+      (p.hook ?? '').trim(),
+      (p.cuisine ?? '').trim(),
     ]
       .map(esc)
       .join(','),
   )
 }
+console.log(`${personalized}/${rows.length} leads carry a Haiku-written first_line (the rest use the generic opener)`)
 const out = `instantly-${batch}.csv`
 fs.writeFileSync(out, lines.join('\n') + '\n')
 console.log(`Wrote ${rows.length} leads → ${out}`)

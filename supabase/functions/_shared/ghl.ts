@@ -313,6 +313,43 @@ export async function ghlAddTags(contactId: string, tags: string[]): Promise<boo
   }
 }
 
+/**
+ * OUTBOUND EVENT ALERTS (owner, 2026-11-05: "I need the text messages to be more specific — the customer
+ * replied, or they opened the link, or they want to check out — not just interested"). One tag per
+ * event, removed-then-added so the matching GHL workflow (re-entry ON) texts staff EVERY time, with the
+ * specifics in custom fields the SMS can merge: last_event · last_reply_text · reply_sentiment ·
+ * demo_view_count · checkout_domain · preview_url. Workflow copy: docs/GHL_OUTBOUND_ALERTS_2026-11-05.md.
+ * Also upserts the contact + the legacy `outbound-lead` stage tag, so nothing that exists breaks.
+ */
+export type OutboundEvent = 'replied' | 'viewed' | 'checkout'
+export const OUTBOUND_EVENT_TAGS: Record<OutboundEvent, string> = {
+  replied: 'outbound-replied',
+  viewed: 'outbound-viewed',
+  checkout: 'outbound-checkout',
+}
+export async function ghlOutboundEvent(
+  event: OutboundEvent,
+  contact: Omit<GhlStageInput, 'stage' | 'funnel'>,
+  details: Record<string, string | undefined> = {},
+): Promise<string | null> {
+  const summary: Record<OutboundEvent, string> = {
+    replied: `Replied (${details.reply_sentiment ?? 'unknown'}): ${(details.last_reply_text ?? '').slice(0, 160)}`,
+    viewed: `Opened the demo (view #${details.demo_view_count ?? '1'})`,
+    checkout: `Started checkout for ${details.checkout_domain ?? 'a domain'}`,
+  }
+  const id = await ghlSyncStage({
+    stage: 'lead',
+    funnel: 'outbound',
+    ...contact,
+    qualifiers: { ...(contact.qualifiers ?? {}), ...details, last_event: `${new Date().toISOString().slice(0, 16).replace('T', ' ')} — ${summary[event]}`.slice(0, 250) },
+  })
+  if (!id) return null
+  const tag = OUTBOUND_EVENT_TAGS[event]
+  await ghlRemoveTags(id, [tag])
+  await ghlAddTags(id, [tag])
+  return id
+}
+
 /** REMOVE tags from a contact. Remove-then-add makes GHL's "tag added" trigger fire again. */
 export async function ghlRemoveTags(contactId: string, tags: string[]): Promise<boolean> {
   if (!ghlConfigured() || !contactId || !tags.length) return false

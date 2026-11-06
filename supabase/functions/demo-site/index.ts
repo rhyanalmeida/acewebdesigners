@@ -20,7 +20,7 @@
 
 import { handlePreflight, json } from '../_shared/cors.ts'
 import { admin } from '../_shared/supabaseAdmin.ts'
-import { ghlSyncStage } from '../_shared/ghl.ts'
+import { ghlOutboundEvent } from '../_shared/ghl.ts'
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
@@ -156,10 +156,9 @@ Deno.serve(async (req: Request) => {
     })
     .eq('id', p.id)
 
+  // First open → `outbound-viewed` (staff SMS "opened the demo"); later opens only bump the counter.
   if (firstView && !p.is_test && !p.suppressed && (p.email || p.phone)) {
-    const sync = ghlSyncStage({
-      stage: 'lead',
-      funnel: 'outbound',
+    const sync = ghlOutboundEvent('viewed', {
       email: p.email ?? undefined,
       phone: p.phone ?? undefined,
       firstName: p.first_name ?? undefined,
@@ -171,7 +170,7 @@ Deno.serve(async (req: Request) => {
         business_type: p.business_type ?? undefined,
         preview_url: `https://acewebdesigners.com/demo/${token}`,
       },
-    }).then(async (ghlId) => {
+    }, { demo_view_count: String(p.demo_view_count + 1) }).then(async (ghlId) => {
       if (ghlId) await supa.from('prospects').update({ ghl_contact_id: ghlId }).eq('id', p.id)
     })
     if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime) EdgeRuntime.waitUntil(sync)

@@ -1,4 +1,8 @@
-# Outbound cold sequence — Restaurants v1 (preview-first, 3 steps) — LIVE copy source
+# Outbound cold sequence — Restaurants v2 (preview-first, 3 steps) — LIVE copy source
+
+> v2 2026-11-04: each email cut to ~40 words (owner: v1 read "long and weird"); the Day-0 email no longer
+> promises "hours" (the demo never lists hours — it says "Call for today's hours"). Pushed to the live
+> campaign by `node scripts/go-live-restaurant-sites.mjs` (step 3; bodies only).
 
 **Status:** written 2026-11-03 when the owner moved the outbound funnel from contractors to local
 restaurants ("stop the contractor ones, whole new plan with restaurants"). Same engine as the
@@ -32,6 +36,32 @@ long single lines on purpose (see `unwrapSoftBreaks`).
 
 Cadence: **Day 0 → Day 3 → Day 7.** Stop on reply; replies go to the reply desk.
 
+## v3 (2026-11-05, pending push) — Haiku-written opener
+
+`scripts/enrich-haiku.mjs` reads each restaurant's own site and writes ONE opening sentence for it
+(`prospects.first_line`, migration 0018) — a named dish, the cuisine, the neighborhood, their story — plain,
+no flattery, no critique. `export-instantly.mjs` sends it as `{{first_line}}` and falls back to the v2
+generic opener ("I design websites for restaurants around {{city}}.") when Haiku found nothing specific, so
+the template can use it unconditionally. Email 1 v3 differs from v2 by its first sentence only:
+
+```
+Hi {{first_name}},
+
+{{first_line}} I put together a new homepage for {{company_name}} — your menu, a tap-to-call button and directions right at the top, built for phones.
+
+Take a look: {{demo_url}}
+
+If anything's off, reply and I'll change it. No call, no charge to look.
+
+Rhyan
+Ace Web Designers
+```
+Push: `node scripts/instantly-create-campaign.mjs --doc docs/OUTBOUND_COLD_SEQUENCE_RESTAURANTS.md --schedule restaurant --update 94ab9d2a-faac-46da-8470-7ade9c9fd55c`
+after replacing the Email 1 body below with the v3 body (the parser reads the `## Email N` sections only).
+Prerequisites: `npx supabase db push` (0018), then import a Haiku-enriched CSV; leads uploaded before v3 have
+no `first_line` variable → Instantly renders it empty, so push v3 only for new waves (new campaign or after
+re-uploading with the variable).
+
 ---
 
 ## Email 1 — Day 0 (the preview, no price)
@@ -40,11 +70,11 @@ Cadence: **Day 0 → Day 3 → Day 7.** Stop on reply; replies go to the reply d
 
 Hi {{first_name}},
 
-I came across {{company_name}} while looking at restaurants in {{city}}. I design websites for local restaurants, and I mocked up a new homepage for you — menu, hours and directions right up top, built to load fast on a phone.
+I design websites for restaurants around {{city}}. I put together a new homepage for {{company_name}} — your menu, a tap-to-call button and directions right at the top, built for phones.
 
-It's here: {{demo_url}}
+Take a look: {{demo_url}}
 
-Looking is free and there's no call. If anything on it is wrong, or you'd want something changed, just reply and tell me.
+If anything's off, reply and I'll change it. No call, no charge to look.
 
 Rhyan
 Ace Web Designers
@@ -60,11 +90,11 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 Hi {{first_name}},
 
-Adding to my last note. Most people find a restaurant on their phone, usually when they're already hungry. The page I put together for {{company_name}} puts the menu, a tap-to-call button and directions at the top, so nobody has to hunt for them.
+Quick follow-up. Most people find a restaurant on their phone when they're already hungry — the page I made for {{company_name}} gets them to your menu and your phone number in one tap.
 
-Have a look when the rush is over: {{demo_url}}
+{{demo_url}}
 
-Tell me what you'd change and I'll take care of it.
+Tell me what you'd change and I'll do it.
 
 Rhyan
 Ace Web Designers
@@ -80,9 +110,9 @@ Ace Web Designers · 30 North Main St, Leominster, MA 01453
 
 Hi {{first_name}},
 
-In case cost is the question: looking is free. If you like it and want it live, it's $49 a month — the domain you already have or a new one, hosting, and menu or hours changes whenever you need them. Cancel anytime. If it's not for you, you're out nothing.
+If cost is the question: $37 a month, all in — your domain or a new one, hosting, and any menu or hours change whenever you need it. Cancel anytime.
 
-The preview is still here: {{demo_url}}
+The preview's still here: {{demo_url}}
 
 Rhyan
 Ace Web Designers

@@ -97,7 +97,7 @@ describe('buildPayload', () => {
   it('restaurant schedule = two weekday windows outside service hours', () => {
     const r = buildPayload(steps, { schedule: 'restaurant' })
     expect(r.campaign_schedule.schedules).toEqual(SCHEDULES.restaurant)
-    expect(r.campaign_schedule.schedules.map((x) => x.timing)).toEqual([{ from: '09:30', to: '11:00' }, { from: '14:00', to: '16:00' }])
+    expect(r.campaign_schedule.schedules.map((x) => x.timing)).toEqual([{ from: '07:00', to: '11:30' }, { from: '13:30', to: '16:30' }])
     expect(() => buildPayload(steps, { schedule: 'nope' })).toThrow()
   })
   it('rejects a non-increasing day schedule', () => {

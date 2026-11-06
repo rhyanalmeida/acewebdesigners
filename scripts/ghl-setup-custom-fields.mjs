@@ -48,6 +48,11 @@ const FIELDS = [
   // reply desk hand-off (reply-desk fn → tag outbound-needs-human → staff SMS reads these)
   { key: 'last_reply_text', name: 'Last Reply Text', dataType: 'LARGE_TEXT' },
   { key: 'last_reply_intent', name: 'Last Reply Intent', dataType: 'TEXT' },
+  // outbound event alerts (2026-11-05) — merged into the staff SMS by the three event workflows
+  { key: 'last_event', name: 'Last Event', dataType: 'TEXT' },
+  { key: 'reply_sentiment', name: 'Reply Sentiment', dataType: 'TEXT' },
+  { key: 'demo_view_count', name: 'Demo View Count', dataType: 'TEXT' },
+  { key: 'checkout_domain', name: 'Checkout Domain', dataType: 'TEXT' },
 ]
 
 function readEnv(file) {

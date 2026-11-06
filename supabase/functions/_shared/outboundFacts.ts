@@ -7,7 +7,7 @@
  * social proof, no promises the provisioning chain doesn't keep.
  */
 
-export const OUTBOUND_PRICE = 49
+export const OUTBOUND_PRICE = 37 // owner decision 2026-11-04 (was 49); Stripe price + STRIPE_PRICE_DEMO_MONTHLY changed the same day
 export const SUPPORT_EMAIL = 'hello@acewebdesigners.com'
 
 export const OUTBOUND_FACTS: readonly string[] = [

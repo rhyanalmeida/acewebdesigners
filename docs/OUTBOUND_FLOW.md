@@ -111,6 +111,22 @@ CAN-SPAM source of truth and both import + export enforce it. One Opus build EVE
 - **Campaign status codes:** 0 draft · 1 active · 2 paused · 3 completed. After every lead
   finishes the 3 steps the campaign flips to **3 = COMPLETED and must be re-activated**
   (`POST /campaigns/<id>/activate`) or newly added leads never send.
+- **Waves are automated (2026-11-06): `scripts/auto-wave.mjs`.** One run = scrape-places → enrich-emails →
+  enrich-haiku → verify-emails → `import-prospects --verify` (ok only) → export → upload → re-activate if status 3 →
+  a dated line at the top of §9 → `lead_waves` row + `poll_state` key `lead-pipeline` (what /admin shows).
+  `--dry` = plan + counts + cost, no writes · `--live [--yes]` = run now · `--auto` = the Windows task
+  "Ace Auto Wave" (`scripts/install-auto-wave-task.ps1`, weekdays every 2 h 06–20, hidden via run-hidden.vbs):
+  refreshes the state row and runs a wave ONLY when /admin queued one ("Scrape a new list" → `requestWave`)
+  or runway < 7 send-days (DB un-emailed restaurant leads + Instantly uncontacted, ÷ 20 new leads/day).
+  Stops with nothing uploaded on: CAPTCHA (scraper exit 2 → re-run `--live --resume --city …`), email yield
+  < 40 %, MillionVerifier credits short, 7-day bounce ≥ 2 % on ≥ 50 sends, month cap at 0 before the 14th,
+  `business_type` NULL after import. Rules + the city rotation live in `scripts/lib/wave-plan.mjs` (vitest).
+  Default wave = next 4 rotation cities × 80 places (`--cities`/`--max`/`--city` override). The runner needs
+  this PC on (real browser) and the local keys in `supabase/.env`; nothing new became an Edge secret.
+  **/admin → Email Outreach** shows the pipeline (leads ready, Instantly uncontacted, send-days left, MillionVerifier
+  credits, Instantly contacts left + reset date, Haiku spend, next cities, recent lists) and **Follow up or call**
+  (`_shared/callList.ts`: replied-not-closed → viewed-but-silent → sequence finished with no reply, phone
+  required; "Called ✓" hides a row 14 days via `prospects.called_at`). Go-live = `node scripts/go-live-waves.mjs`.
 
 ## 4. Instantly (sending)
 
@@ -300,6 +316,17 @@ reply-desk followups  pg_cron daily 13:00 UTC — the one "later" re-touch (foll
 
 ## 9. Current status (update in place)
 
+- **2026-11-06 — lead waves automated + admin pipeline panel (PENDING owner-run `node scripts/go-live-waves.mjs`:
+  db push 0019 → ADMIN_EMAILS secret (+ Valerie) → deploy admin-data → Netlify → first tick → Windows task).**
+  Proven tonight on a 12-place Lynn smoke run: scrape 12 (11 real sites) → crawler 6 emails → Haiku 9 hooks /
+  1 owner named, $0.007 → MillionVerifier ok 5 / catch_all 1 → `import --verify` of a Haiku CSV lands
+  `first_line/hook/cuisine` (batch `2026-11-05-ma-restaurants-smoke`, 2 new prospects; 3 were already in
+  `2026-11-ma-restaurants`). `auto-wave --dry`: 18 DB + 250 uncontacted = 13 send-days → not due; next cities
+  Newton · Waltham · Malden · Medford; MillionVerifier **168 credits** (not 316 — re-read live). Valerie's /admin
+  login (valerieereyy@gmail.com) exists in Supabase Auth, creds in `~/.secrets/admin-valerie-credentials.txt`;
+  she is authorized only after step 2. Still open: push the v3 Email 1 (`{{first_line}}`) — new uploads carry the
+  variable but the live campaign still renders v2 (fine, just unused); Instantly `remaining_in_plan` is unknown
+  until the first upload after the 14th reports it.
 - **2026-11-06 audit — FIXED ~05:00 UTC via `node scripts/go-live-outbound-fix.mjs` (verify: DemoPage chunk ✓, /demo route ✓, $37 secret ✓, Email 3 $37 ✓, $49 price archived, Netlify git builds stopped). Original note:** (1) Netlify
   auto-built production from `master` (commit `132d313` pushed 2026-11-05) = July code with no `/demo` route, so every
   demo link opens the homepage since 19:46 UTC that day; cherry-picked to `redesign/marketing-site`, script redeploys
