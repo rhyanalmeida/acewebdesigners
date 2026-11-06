@@ -1369,7 +1369,8 @@ const OutreachView: React.FC<{ o: OutreachData; lp: LeadPipeline | null; replies
       {lp && !lp.unavailable && <CallListPanel entries={lp.callList} onChanged={onChanged} title="Warm leads — clicked the link or replied" defaultShow="warm" />}
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <Kpi icon={Send} label="Emailed" value={t.emailed.toLocaleString()} sub={`${t.prospects.toLocaleString()} prospects`} accent="slate" />
+        {/* emailed_at is stamped at UPLOAD (export-instantly) — Instantly then sends ~20 new leads/day, so "contacted" is the honest number (owner, 2026-11-06). */}
+        <Kpi icon={Send} label="Uploaded to Instantly" value={t.emailed.toLocaleString()} sub={lp?.instantly ? `${lp.instantly.contacted.toLocaleString()} restaurants actually contacted so far · ${t.prospects.toLocaleString()} prospects` : `queued in Instantly · ${t.prospects.toLocaleString()} prospects`} accent="slate" />
         <Kpi icon={MousePointerClick} label="Opened demo" value={t.opened} sub={`${t.openRate}% of emailed`} accent="indigo" />
         <Kpi icon={Zap} label="Opened today" value={t.openedToday} sub="clicked the link today" accent="amber" />
         <Kpi icon={MessageSquare} label="Replied" value={t.replied} sub={`${t.replyRate}% reply rate${t.repliedToday ? ` · ${t.repliedToday} today` : ''}`} accent="violet" />
